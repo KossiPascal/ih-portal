@@ -1,0 +1,28 @@
+.info {
+  color:blue;
+  font-weight: bolder;
+}
+
+.warning {
+  color:orange;
+  font-size: large;
+  font-weight: bolder;
+}
+
+.primary {
+  color: purple;
+  font-size: large;
+  font-weight: bolder;
+}
+
+.final {
+  color:green;
+  font-size: large;
+  font-weight: bolder;
+}
+
+.line {
+  color:black;
+  font-size: large;
+  font-weight: bolder;
+}

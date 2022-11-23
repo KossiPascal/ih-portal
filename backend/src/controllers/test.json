@@ -1,0 +1,804 @@
+[
+    {
+        "_id": "d1a1ab15-d49f-4dbd-902f-7a9439e39f9f",
+        "_rev": "2-8db714ee4d3c9aba5dcb8015d62caa91",
+        "form": "pcime_c_asc",
+        "from": "00228 93 22 32 66",
+        "type": "data_record",
+        "fields": {
+            "MAM": "false",
+            "meta": {
+                "instanceID": "uuid:0f9f00e8-ea59-4dce-91fe-53ad5ea9b681"
+            },
+            "inputs": {
+                "meta": {
+                    "location": {
+                        "lat": "",
+                        "long": "",
+                        "error": "",
+                        "message": ""
+                    },
+                    "deprecatedID": ""
+                },
+                "source": "contact",
+                "contact": {
+                    "_id": "412133d8-88fa-4fca-af79-c4ba264d9ebf",
+                    "sex": "male",
+                    "name": "Kezeri abourasakou",
+                    "date_of_birth": "2018-05-25"
+                },
+                "source_id": ""
+            },
+            "s_fever": {
+                "n_congrats": "",
+                "n_conduct_mrdt": "",
+                "s_frequent_fever": "yes",
+                "s_fever_warm_body": "yes",
+                "s_fever_child_since": "3",
+                "n_fever_evaluation_note": "",
+                "s_fever_child_sleep_net": "yes",
+                "s_fever_child_TDR_result": "positive"
+            },
+            "referral": "true",
+            "has_fever": "true",
+            "beyond_72h": "false",
+            "high_fever": "false",
+            "next_visit": "30856607",
+            "patient_id": "412133d8-88fa-4fca-af79-c4ba264d9ebf",
+            "s_constant": {
+                "s_use_scale": "",
+                "s_constant_child_weight": "15",
+                "s_note_child_temparature": "",
+                "s_constant_child_temperature": "39.4",
+                "s_constant_child_brachial_perimeter": "172"
+            },
+            "s_diarrhea": {
+                "s_diarrhea_child_has": "no",
+                "n_diarrhea_evaluation_note": ""
+            },
+            "within_24h": "false",
+            "within_48h": "true",
+            "within_72h": "false",
+            "group_review": {
+                "fever": {
+                    "r_fever": "",
+                    "r_uncomplicated_give_advices": ""
+                },
+                "submit": "",
+                "followup": "",
+                "r_summary": "",
+                "r_symptoms": "",
+                "r_refer_USP": "",
+                "r_patient_id": "",
+                "r_danger_signs": "",
+                "r_malaria_sign": "",
+                "r_patient_info": "",
+                "r_accompany_USP": "",
+                "r_malaria_fever": "",
+                "r_no_malnutrition": "",
+                "r_diagnosis_treatment": "",
+                "s_have_you_refer_child": "yes",
+                "r_pre_tranfer_treatement": {
+                    "r_drink_water": "",
+                    "r_continue_suckle": "",
+                    "r_lumartemcoartem": "",
+                    "r_dose_paracetamol": "",
+                    "r_no_oral_ingestion": "",
+                    "r_refer_USP_immediatly": "",
+                    "r_pre_tranfer_treatement_1": ""
+                },
+                "r_refer_USP_danger_signs": "",
+                "r_paludial_fever_treatment": {
+                    "r_paludial_paracetamol": "",
+                    "r_paludial_paracetamol_one": "",
+                    "r_paludial_fever_treatment_1": "",
+                    "r_paludial_fever_treatment_lumartem_coartem": "",
+                    "r_paludial_fever_treatment_lumartem_coartem_2": ""
+                },
+                "r_accompany_USP_danger_signs": "",
+                "r_danger_signs_child_throwup": "",
+                "r_danger_signs_urine_cocacola": "",
+                "r_danger_signs_child_cannot_drink": "",
+                "r_followup_next_visit_any_referral": ""
+            },
+            "has_diarrhea": "false",
+            "patient_name": "Kezeri abourasakou",
+            "s_cough_cold": {
+                "s_cough_cold_has_cough_cold": "no",
+                "n_cough_cold_evaluation_note": ""
+            },
+            "accompaniment": "true",
+            "has_pneumonia": "false",
+            "has_cough_cold": "false",
+            "patient_sex_en": "Male",
+            "patient_sex_fr": "Homme",
+            "referral_fever": "true",
+            "referral_mucus": "false",
+            "s_danger_signs": {
+                "has_danger_sign": "true",
+                "s_danger_signs_note": {
+                    "s_danger_signs_note_child": "",
+                    "s_danger_signs_blood_stools": "no",
+                    "s_danger_signs_child_throwup": "yes",
+                    "s_danger_signs_urine_cocacola": "yes",
+                    "s_danger_signs_child_convulsion": "no",
+                    "s_danger_signs_child_often_sick": "no",
+                    "s_danger_signs_diarrhea_more_14": "no",
+                    "s_danger_signs_child_cannot_drink": "yes"
+                },
+                "has_accompaniment_ds": "true",
+                "s_danger_signs_observe": {
+                    "n_danger_signs_exist": "",
+                    "s_danger_signs_child_anemia": "no",
+                    "s_danger_signs_child_slimming": "no",
+                    "s_danger_signs_child_convulsing": "no",
+                    "s_danger_signs_child_unconscious": "no",
+                    "s_danger_signs_child_difficulty_breathing": "no"
+                },
+                "s_danger_signs_child_research": {
+                    "s_danger_signs_edema": "no",
+                    "s_danger_signs_rashes": "no",
+                    "s_danger_signs_fontanelle": "no",
+                    "s_danger_signs_dehydration": "no",
+                    "n_danger_signs_child_present": "",
+                    "s_danger_signs_neck_stiffness": "no"
+                },
+                "s_danger_signs_continue_survey": "yes"
+            },
+            "MAS_complicated": "false",
+            "assessment_time": {
+                "s_assessment_time": "c_assessment_time_1"
+            },
+            "no_malnutrition": "true",
+            "has_malnutrition": "false",
+            "show_car_advices": "true",
+            "MAS_uncomplicated": "false",
+            "beginning_illness": {
+                "s_begining_illness": "morning_day_before_yesterday"
+            },
+            "non_malaria_fever": "false",
+            "referral_diarrhea": "false",
+            "s_vaccinal_status": {
+                "s_one_day": {
+                    "s_vaccinal_status_BCG": "yes",
+                    "s_vaccinal_status_VPO_0": "yes"
+                },
+                "s_six_weeks": {
+                    "s_vaccinal_status_VPO_1": "yes",
+                    "s_vaccinal_status_DTC_B1": "yes",
+                    "s_vaccinal_status_rota_1": "yes",
+                    "s_vaccinal_status_pneumo_1": "yes"
+                },
+                "s_ten_weeks": {
+                    "s_vaccinal_status_VPO_2": "yes",
+                    "s_vaccinal_status_DTC_B2": "yes",
+                    "s_vaccinal_status_rota_2": "yes",
+                    "s_vaccinal_status_pneumo_2": "yes"
+                },
+                "s_nine_months": {
+                    "s_vaccinal_status_VAA": "yes",
+                    "s_vaccinal_status_VAR": "yes",
+                    "s_vaccinal_status_vit_A": "yes"
+                },
+                "s_forteen_weeks": {
+                    "s_vaccinal_status_VPO_3": "yes",
+                    "s_vaccinal_status_DTC_B3": "yes",
+                    "s_vaccinal_status_rota_3": "yes",
+                    "s_vaccinal_status_pneumo_3": "yes"
+                },
+                "s_health_issues": {
+                    "s_other_health_issues": "no"
+                }
+            },
+            "fever_with_malaria": "true",
+            "has_simple_malaria": "true",
+            "fever_with_diarrhea": "false",
+            "patient_age_display": "4 years and 1 month old",
+            "patient_age_in_days": "1507",
+            "referral_cough_cold": "false",
+            "s_drug_administered": {
+                "s_para": "paracetamol_500",
+                "other_drug": "",
+                "s_lumartem": "yes",
+                "n_drug_administered_tablet_type": ""
+            },
+            "s_nutritional_state": {
+                "n_nutritional_state_branchial_perimeter": ""
+            },
+            "patient_age_in_years": "4",
+            "diarrhea_with_malaria": "false",
+            "patient_age_in_months": "49",
+            "referral_danger_signs": "true",
+            "patient_age_display_fr": "4 ans et 1 mois",
+            "referral_missed_vaccine": "false",
+            "referral_MAS_complicated": "false",
+            "show_nutritional_advices": "true"
+        },
+        "contact": {
+            "_id": "4e6fb542-a057-489d-86da-b19f062e0da3",
+            "parent": {
+                "_id": "60867fb9-1202-4c43-9a44-a314ac1009a1",
+                "parent": {
+                    "_id": "5827654a-1c65-4aa3-a917-c83f294d965e"
+                }
+            }
+        },
+        "sent_by": "Skon Toba",
+        "geolocation": {
+            "speed": 0.7175227999687195,
+            "heading": 167,
+            "accuracy": 6.699999809265137,
+            "altitude": 232.07999959647987,
+            "latitude": 9.6057433,
+            "longitude": 1.0205783,
+            "altitudeAccuracy": null
+        },
+        "_attachments": {
+            "content": {
+                "stub": true,
+                "digest": "md5-q/AHW2DGudmdiQlHXlPdSw==",
+                "length": 10945,
+                "revpos": 1,
+                "content_type": "application/xml"
+            }
+        },
+        "content_type": "xml",
+        "hidden_fields": [
+            "meta"
+        ],
+        "reported_date": 1657434950915,
+        "geolocation_log": [
+            {
+                "recording": {
+                    "speed": 0.7175227999687195,
+                    "heading": 167,
+                    "accuracy": 6.699999809265137,
+                    "altitude": 232.07999959647987,
+                    "latitude": 9.6057433,
+                    "longitude": 1.0205783,
+                    "altitudeAccuracy": null
+                },
+                "timestamp": 1657434953883
+            }
+        ]
+    },
+
+
+
+
+
+
+
+
+
+    
+    {
+        "_id": "8216d5eb-1bb7-4d7c-812c-a1fa6875f650",
+        "_rev": "2-3845dd32321af3641f690732ff4e812f",
+        "form": "pcime_c_asc",
+        "from": "00228 90 40 98 92",
+        "type": "data_record",
+        "fields": {
+            "MAM": "false",
+            "meta": {
+                "instanceID": "uuid:fe154535-b93c-4cc0-8ced-43b0b2df338d"
+            },
+            "inputs": {
+                "meta": {
+                    "location": {
+                        "lat": "",
+                        "long": "",
+                        "error": "",
+                        "message": ""
+                    },
+                    "deprecatedID": ""
+                },
+                "source": "contact",
+                "contact": {
+                    "_id": "ecb2c814-71a0-4f4b-be6d-9ae2f9cf2708",
+                    "sex": "female",
+                    "name": "MOUSSA BEBE",
+                    "date_of_birth": "2019-05-21"
+                },
+                "source_id": ""
+            },
+            "s_fever": {
+                "n_congrats": "",
+                "n_conduct_mrdt": "",
+                "s_frequent_fever": "no",
+                "s_fever_warm_body": "yes",
+                "s_fever_child_since": "1",
+                "n_fever_evaluation_note": "",
+                "s_fever_child_sleep_net": "yes",
+                "s_fever_child_TDR_result": "positive"
+            },
+            "referral": "false",
+            "has_fever": "true",
+            "beyond_72h": "false",
+            "high_fever": "false",
+            "next_visit": "30856607",
+            "patient_id": "ecb2c814-71a0-4f4b-be6d-9ae2f9cf2708",
+            "s_constant": {
+                "s_use_scale": "",
+                "s_constant_child_weight": "14",
+                "s_note_child_temparature": "",
+                "s_constant_child_temperature": "38.3",
+                "s_constant_child_brachial_perimeter": "156"
+            },
+            "s_diarrhea": {
+                "s_diarrhea_child_has": "no",
+                "n_diarrhea_evaluation_note": ""
+            },
+            "within_24h": "false",
+            "within_48h": "true",
+            "within_72h": "false",
+            "group_review": {
+                "fever": {
+                    "r_fever": "",
+                    "r_uncomplicated_give_advices": ""
+                },
+                "submit": "",
+                "followup": "",
+                "r_summary": "",
+                "s_why_not": "Pas de signes de danger",
+                "r_symptoms": "",
+                "car_advices": {
+                    "r_car_advices": "",
+                    "r_uncomplicated_sicker": "",
+                    "r_uncomplicated_contact_ASC": "",
+                    "r_uncomplicated_unable_to_drink": "",
+                    "r_uncomplicated_continue_breastfeed": "",
+                    "r_uncomplicated_increase_drinking_food": ""
+                },
+                "r_patient_id": "",
+                "r_malaria_sign": "",
+                "r_patient_info": "",
+                "r_malaria_fever": "",
+                "r_no_malnutrition": "",
+                "r_diagnosis_treatment": "",
+                "s_have_you_refer_child": "no",
+                "r_paludial_fever_treatment": {
+                    "r_paludial_paracetamol": "",
+                    "r_paludial_paracetamol_half": "",
+                    "r_paludial_fever_treatment_1": "",
+                    "r_paludial_fever_treatment_lumartem_coartem": "",
+                    "r_paludial_fever_treatment_lumartem_coartem_1": ""
+                },
+                "r_followup_next_visit_no_referral": ""
+            },
+            "has_diarrhea": "false",
+            "patient_name": "MOUSSA BEBE",
+            "s_cough_cold": {
+                "s_cough_cold_has_cough_cold": "no",
+                "n_cough_cold_evaluation_note": ""
+            },
+            "accompaniment": "false",
+            "has_pneumonia": "false",
+            "has_cough_cold": "false",
+            "patient_sex_en": "Female",
+            "patient_sex_fr": "Femme",
+            "referral_fever": "false",
+            "referral_mucus": "false",
+            "s_danger_signs": {
+                "has_danger_sign": "false",
+                "s_danger_signs_note": {
+                    "s_danger_signs_note_child": "",
+                    "s_danger_signs_blood_stools": "no",
+                    "s_danger_signs_child_throwup": "no",
+                    "s_danger_signs_urine_cocacola": "no",
+                    "s_danger_signs_child_convulsion": "no",
+                    "s_danger_signs_child_often_sick": "no",
+                    "s_danger_signs_diarrhea_more_14": "no",
+                    "s_danger_signs_child_cannot_drink": "no"
+                },
+                "has_accompaniment_ds": "false",
+                "s_danger_signs_observe": {
+                    "n_danger_signs_exist": "",
+                    "s_danger_signs_child_anemia": "no",
+                    "s_danger_signs_child_slimming": "no",
+                    "s_danger_signs_child_convulsing": "no",
+                    "s_danger_signs_child_unconscious": "no",
+                    "s_danger_signs_child_difficulty_breathing": "no"
+                },
+                "s_danger_signs_child_research": {
+                    "s_danger_signs_edema": "no",
+                    "s_danger_signs_rashes": "no",
+                    "s_danger_signs_fontanelle": "no",
+                    "s_danger_signs_dehydration": "no",
+                    "n_danger_signs_child_present": "",
+                    "s_danger_signs_neck_stiffness": "no"
+                }
+            },
+            "MAS_complicated": "false",
+            "assessment_time": {
+                "s_assessment_time": "c_assessment_time_2"
+            },
+            "no_malnutrition": "true",
+            "has_malnutrition": "false",
+            "show_car_advices": "true",
+            "MAS_uncomplicated": "false",
+            "beginning_illness": {
+                "s_begining_illness": "yesterday_morning"
+            },
+            "non_malaria_fever": "false",
+            "referral_diarrhea": "false",
+            "s_vaccinal_status": {
+                "s_one_day": {
+                    "s_vaccinal_status_BCG": "yes",
+                    "s_vaccinal_status_VPO_0": "yes"
+                },
+                "s_six_weeks": {
+                    "s_vaccinal_status_VPO_1": "yes",
+                    "s_vaccinal_status_DTC_B1": "yes",
+                    "s_vaccinal_status_rota_1": "yes",
+                    "s_vaccinal_status_pneumo_1": "yes"
+                },
+                "s_ten_weeks": {
+                    "s_vaccinal_status_VPO_2": "yes",
+                    "s_vaccinal_status_DTC_B2": "yes",
+                    "s_vaccinal_status_rota_2": "yes",
+                    "s_vaccinal_status_pneumo_2": "yes"
+                },
+                "s_nine_months": {
+                    "s_vaccinal_status_VAA": "yes",
+                    "s_vaccinal_status_VAR": "yes",
+                    "s_vaccinal_status_vit_A": "yes"
+                },
+                "s_forteen_weeks": {
+                    "s_vaccinal_status_VPO_3": "yes",
+                    "s_vaccinal_status_DTC_B3": "yes",
+                    "s_vaccinal_status_rota_3": "yes",
+                    "s_vaccinal_status_pneumo_3": "yes"
+                },
+                "s_health_issues": {
+                    "s_other_health_issues": "no"
+                }
+            },
+            "fever_with_malaria": "true",
+            "has_simple_malaria": "true",
+            "fever_with_diarrhea": "false",
+            "patient_age_display": "3 years and 1 month old",
+            "patient_age_in_days": "1146",
+            "referral_cough_cold": "false",
+            "s_drug_administered": {
+                "s_para": "paracetamol_500",
+                "other_drug": "",
+                "s_lumartem": "yes",
+                "n_drug_administered_tablet_type": ""
+            },
+            "s_nutritional_state": {
+                "n_nutritional_state_branchial_perimeter": ""
+            },
+            "patient_age_in_years": "3",
+            "diarrhea_with_malaria": "false",
+            "patient_age_in_months": "37",
+            "referral_danger_signs": "false",
+            "patient_age_display_fr": "3 ans et 1 mois",
+            "referral_missed_vaccine": "false",
+            "referral_MAS_complicated": "false",
+            "show_nutritional_advices": "true"
+        },
+        "contact": {
+            "_id": "047d066a-6c2a-436e-ae19-c9b926620740",
+            "parent": {
+                "_id": "622237c9-2eeb-494b-b0f3-a599c771df7f",
+                "parent": {
+                    "_id": "da388770-c361-40e0-ba60-e106781184d1"
+                }
+            }
+        },
+        "sent_by": "Kola Lioudou Kossiwa",
+        "geolocation": {
+            "speed": 0,
+            "heading": null,
+            "accuracy": 13.399999618530273,
+            "altitude": 250.68602718021612,
+            "latitude": 9.4825067,
+            "longitude": 1.0584667,
+            "altitudeAccuracy": null
+        },
+        "_attachments": {
+            "content": {
+                "stub": true,
+                "digest": "md5-pjzLxALAqh1vP7Mt2mJE1w==",
+                "length": 10567,
+                "revpos": 1,
+                "content_type": "application/xml"
+            }
+        },
+        "content_type": "xml",
+        "hidden_fields": [
+            "meta"
+        ],
+        "reported_date": 1657457933413,
+        "geolocation_log": [
+            {
+                "recording": {
+                    "speed": 0,
+                    "heading": null,
+                    "accuracy": 13.399999618530273,
+                    "altitude": 250.68602718021612,
+                    "latitude": 9.4825067,
+                    "longitude": 1.0584667,
+                    "altitudeAccuracy": null
+                },
+                "timestamp": 1657457936559
+            }
+        ]
+    },
+    {
+        "_id": "16e2ee8a-884d-4f10-817b-b71c57277c49",
+        "_rev": "2-c613e2a58586fd57ed0e215dd1545ede",
+        "form": "pcime_c_asc",
+        "from": "00228 90 97 52 87",
+        "type": "data_record",
+        "fields": {
+            "MAM": "false",
+            "meta": {
+                "instanceID": "uuid:9c78c993-a93e-4bda-842e-797cd72817fd"
+            },
+            "inputs": {
+                "meta": {
+                    "location": {
+                        "lat": "",
+                        "long": "",
+                        "error": "",
+                        "message": ""
+                    },
+                    "deprecatedID": ""
+                },
+                "source": "contact",
+                "contact": {
+                    "_id": "190290e4-b020-4236-bb27-9b27d4a427ef",
+                    "sex": "male",
+                    "name": "EPIPHAN. AKALA",
+                    "date_of_birth": "2022-01-02"
+                },
+                "source_id": ""
+            },
+            "s_fever": {
+                "n_congrats": "",
+                "n_conduct_mrdt": "",
+                "s_frequent_fever": "yes",
+                "s_fever_warm_body": "no",
+                "s_fever_child_since": "2",
+                "n_fever_evaluation_note": "",
+                "s_fever_child_sleep_net": "yes",
+                "s_fever_child_TDR_result": "positive"
+            },
+            "referral": "true",
+            "has_fever": "true",
+            "beyond_72h": "false",
+            "high_fever": "false",
+            "next_visit": "30856607",
+            "patient_id": "190290e4-b020-4236-bb27-9b27d4a427ef",
+            "s_constant": {
+                "s_use_scale": "",
+                "s_constant_child_weight": "9",
+                "s_note_child_temparature": "",
+                "s_constant_child_temperature": "37.9",
+                "s_constant_child_brachial_perimeter": "166"
+            },
+            "s_diarrhea": {
+                "s_diarrhea_child_has": "yes",
+                "s_diarrhea_child_mucus": "yes",
+                "s_diarrhea_child_since": "2",
+                "n_diarrhea_child_palpate": "",
+                "n_diarrhea_evaluation_note": "",
+                "s_diarrhea_child_skin_folds": "no",
+                "n_diarrhea_child_drink_water": "",
+                "s_diarrhea_child_water_observe": "yes"
+            },
+            "within_24h": "false",
+            "within_48h": "true",
+            "within_72h": "false",
+            "group_review": {
+                "fever": {
+                    "r_fever": "",
+                    "r_uncomplicated_give_advices": "",
+                    "r_uncomplicated_develop_fever": "",
+                    "r_uncomplicated_fever_persist": "",
+                    "r_uncomplicated_breathing_quickly": "",
+                    "r_uncomplicated_breathing_diffilcuties": ""
+                },
+                "submit": "",
+                "followup": "",
+                "r_summary": "",
+                "r_diarrhea": {
+                    "r_diarrhea_1": "",
+                    "r_diarrhea_SRO": "",
+                    "r_diarrhea_zinc": "",
+                    "r_diarrhea_SRO_quantity": "",
+                    "r_diarrhea_zinc_one_per_day": ""
+                },
+                "r_symptoms": "",
+                "car_advices": {
+                    "r_car_advices": "",
+                    "r_uncomplicated_sicker": "",
+                    "r_uncomplicated_contact_ASC": "",
+                    "r_uncomplicated_unable_to_drink": "",
+                    "r_uncomplicated_continue_breastfeed": "",
+                    "r_uncomplicated_increase_drinking_food": ""
+                },
+                "r_dysentery": "",
+                "r_pneumonia": {
+                    "r_pneumonia_treatment_amoxicillin_500": {
+                        "r_pneumonia_treatment_amoxicillin_2": "",
+                        "r_pneumonia_treatment_amoxicillin_half_quarter": ""
+                    }
+                },
+                "r_refer_USP": "",
+                "r_patient_id": "",
+                "r_malaria_sign": "",
+                "r_patient_info": "",
+                "r_has_pneumonia": "",
+                "r_malaria_fever": "",
+                "r_no_malnutrition": "",
+                "r_refer_USP_mucus": "",
+                "r_diagnosis_treatment": "",
+                "r_other_health_issues": "",
+                "r_refer_health_issues": "",
+                "r_diarrhea_dehydration": "",
+                "s_have_you_refer_child": "yes",
+                "r_paludial_fever_treatment": {
+                    "r_paludial_paracetamol": "",
+                    "r_paludial_paracetamol_half": "",
+                    "r_paludial_fever_treatment_1": "",
+                    "r_paludial_fever_treatment_lumartem_coartem": "",
+                    "r_paludial_fever_treatment_lumartem_coartem_1": ""
+                },
+                "r_followup_next_visit_any_referral": ""
+            },
+            "has_diarrhea": "true",
+            "patient_name": "EPIPHAN. AKALA",
+            "s_cough_cold": {
+                "breath_timer": "",
+                "s_cough_cold_since": "2",
+                "s_cough_cold_breathing_freq": "53",
+                "s_cough_cold_has_cough_cold": "yes",
+                "n_cough_cold_evaluation_note": ""
+            },
+            "accompaniment": "false",
+            "has_pneumonia": "true",
+            "has_cough_cold": "true",
+            "patient_sex_en": "Male",
+            "patient_sex_fr": "Homme",
+            "referral_fever": "false",
+            "referral_mucus": "true",
+            "s_danger_signs": {
+                "has_danger_sign": "false",
+                "s_danger_signs_note": {
+                    "s_danger_signs_note_child": "",
+                    "s_danger_signs_blood_stools": "no",
+                    "s_danger_signs_child_throwup": "no",
+                    "s_danger_signs_urine_cocacola": "no",
+                    "s_danger_signs_child_convulsion": "no",
+                    "s_danger_signs_child_often_sick": "no",
+                    "s_danger_signs_diarrhea_more_14": "no",
+                    "s_danger_signs_child_cannot_drink": "no"
+                },
+                "has_accompaniment_ds": "false",
+                "s_danger_signs_observe": {
+                    "n_danger_signs_exist": "",
+                    "s_danger_signs_child_anemia": "no",
+                    "s_danger_signs_child_slimming": "no",
+                    "s_danger_signs_child_convulsing": "no",
+                    "s_danger_signs_child_unconscious": "no",
+                    "s_danger_signs_child_difficulty_breathing": "no"
+                },
+                "s_danger_signs_child_research": {
+                    "s_danger_signs_edema": "no",
+                    "s_danger_signs_rashes": "no",
+                    "s_danger_signs_fontanelle": "no",
+                    "s_danger_signs_dehydration": "no",
+                    "n_danger_signs_child_present": "",
+                    "s_danger_signs_neck_stiffness": "no"
+                }
+            },
+            "MAS_complicated": "false",
+            "assessment_time": {
+                "s_assessment_time": "c_assessment_time_2"
+            },
+            "no_malnutrition": "true",
+            "has_malnutrition": "false",
+            "show_car_advices": "true",
+            "MAS_uncomplicated": "false",
+            "beginning_illness": {
+                "s_begining_illness": "evening_day_before_yesterday"
+            },
+            "non_malaria_fever": "false",
+            "referral_diarrhea": "false",
+            "s_vaccinal_status": {
+                "s_one_day": {
+                    "s_vaccinal_status_BCG": "yes",
+                    "s_vaccinal_status_VPO_0": "yes"
+                },
+                "s_six_weeks": {
+                    "s_vaccinal_status_VPO_1": "yes",
+                    "s_vaccinal_status_DTC_B1": "yes",
+                    "s_vaccinal_status_rota_1": "yes",
+                    "s_vaccinal_status_pneumo_1": "yes"
+                },
+                "s_ten_weeks": {
+                    "s_vaccinal_status_VPO_2": "yes",
+                    "s_vaccinal_status_DTC_B2": "yes",
+                    "s_vaccinal_status_rota_2": "yes",
+                    "s_vaccinal_status_pneumo_2": "yes"
+                },
+                "s_forteen_weeks": {
+                    "s_vaccinal_status_VPO_3": "yes",
+                    "s_vaccinal_status_DTC_B3": "yes",
+                    "s_vaccinal_status_rota_3": "yes",
+                    "s_vaccinal_status_pneumo_3": "yes"
+                },
+                "s_health_issues": {
+                    "s_other_health_issues": "yes",
+                    "s_specify_other_issue": "selles verdâtre  et les pleurs"
+                }
+            },
+            "fever_with_malaria": "true",
+            "has_simple_malaria": "true",
+            "fever_with_diarrhea": "true",
+            "patient_age_display": "0 years and 6 months old",
+            "patient_age_in_days": "189",
+            "referral_cough_cold": "false",
+            "s_drug_administered": {
+                "s_ors": "yes",
+                "s_amox": "amoxicilline_500",
+                "s_para": "paracetamol_500",
+                "s_zinc": "yes",
+                "other_drug": "",
+                "s_lumartem": "yes",
+                "n_drug_administered_tablet_type": ""
+            },
+            "s_nutritional_state": {
+                "n_nutritional_state_branchial_perimeter": ""
+            },
+            "patient_age_in_years": "0",
+            "diarrhea_with_malaria": "true",
+            "patient_age_in_months": "6",
+            "referral_danger_signs": "false",
+            "patient_age_display_fr": "0 ans et 6 mois",
+            "referral_missed_vaccine": "false",
+            "referral_MAS_complicated": "false",
+            "show_nutritional_advices": "true"
+        },
+        "contact": {
+            "_id": "0b146f09-aeff-4325-9eaa-28f0826b9d81",
+            "parent": {
+                "_id": "b4784400-a4b4-4d7e-86a3-25ddd595f486",
+                "parent": {
+                    "_id": "904158c2-5920-4003-9c15-9bf1e18b093d"
+                }
+            }
+        },
+        "sent_by": "Latta Véronique",
+        "geolocation": {
+            "code": -1,
+            "message": "Geolocation timeout exceeded"
+        },
+        "_attachments": {
+            "content": {
+                "stub": true,
+                "digest": "md5-b1iDyP6/lbsiu+DTONwoQg==",
+                "length": 11693,
+                "revpos": 1,
+                "content_type": "application/xml"
+            }
+        },
+        "content_type": "xml",
+        "hidden_fields": [
+            "meta"
+        ],
+        "reported_date": 1657466925984,
+        "geolocation_log": [
+            {
+                "recording": {
+                    "code": -1,
+                    "message": "Geolocation timeout exceeded"
+                },
+                "timestamp": 1657466928424
+            }
+        ]
+    }
+]

@@ -1,0 +1,34 @@
+uid-dhis2,Name in DHIS2,# active case finding (IH)
+oeDKJi4BICh,MT-Total Visite A Domicile,# all encounters (exclude newborn)
+lsBS60uQPtc,MT-Total recherche active,# active case finding (IH)
+lvW5Kj1cisa,MT-Nombre d'enfant 0 à 5 ans pris en charge à domicile,# of Under 5 Encounters (All)
+DicYcTqr9xT,MT-Total de référence pcime,# of Children Referred (include newborn)
+NUpARMZ383s,MT-promptitude paludisme 24h,# Malaria IH  24h
+qNxNXSwDAaI,MT-promptitude diarrhée 24h,# Diarrhea IH 24h
+AA2We0Ao5sv,MT-promptitude pneumonie 24h,# Respir. distress IH 24h
+yQa48SF9bua,MT-promptitude paludisme 48h,# Malaria IH  48h
+S1zPDVOIVLZ,MT-promptitude diarrhee 48h,# Diarrhea IH 48h
+PYwikai4k2J,MT-promptitude pneumonie 48h,# Respir. distress IH 48h
+NzKjJuAniNx,MT-promptitude paludisme 72h,# Malaria IH  72h
+nW3O5ULr75J,MT-promptitude diarrhée 72h,# Diarrhea IH 72h
+rgjFO0bDVUL,MT-promptitude pneumonie 72h,# Respir. distress IH 72h
+caef2rf638P,MT-total diarrhee pcime,# Diarrhea IH  (new calcul)
+LZ3R8fj9CGG,MT-total pneumonie pcime,# Respir. distress IH
+jp2i3vN3VJk,MT-total paludisme pcime,# Malaria IH  (RDT+ new)
+dLYksBMOqST,MT-total malnutrition pcime,Malnutrition IH (MUAC red and new)
+wdg7jjP9ZRg,MT-Nombre de femmes référée pour plannification familiale,# of Women Referred for FP
+Pl6qRNgjd3a,MT-total de femmes référées par les asc,# of Women Referred  enceinte et postpartum
+PrN89trdUGm,MT-Nombre de femme enceinte nouveau cas,Pregnant women unique (new case) - [not capture]
+O9EZVn3C3pF,MT-Total postpartum nouveau cas,Postnatal women unique (new case) - [not capture]
+WR9u3cGJn9W,MT-total consultation femme enceinte,# of Pregnant Women Encounters
+Q0BQtUdJOCy,MT-Total femmes en postpartum,# of Postnatal Women Encounters
+lopdYxQrgyj,MT-Total test de grossesse administrée,# of Pregnancy Tests
+,,# Diarrhea IH avec promptitude
+,,# Malaria IH  avec promptitude
+,,# Respir. distress IH avec promptitude
+AzwUzgh0nd7,MT-Total Vad En Plannification Familiale,# of Family Planning Encounters
+JC752xYegbJ,admin_org_unit_district,District
+FW6z2Ha2GNr,MT-source de données,Source
+JkMyqI3e6or,ASC_Liste des ASC,CHW-ID
+lbHrQBTbY1d,MT-Reporting Date,report_date
+M6WRPsREqsZ,MT-Nombre d'enfant 0 à 5 ans visite de suivi,# of Under 5 Encounter (Follow Up)

@@ -1,0 +1,212 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "ih-portal": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "inlineTemplate": true,
+          "inlineStyle": true,
+          "skipTests": true
+        },
+        "@schematics/angular:class": {
+          "skipTests": true
+        },
+        "@schematics/angular:directive": {
+          "skipTests": true
+        },
+        "@schematics/angular:guard": {
+          "skipTests": true
+        },
+        "@schematics/angular:interceptor": {
+          "skipTests": true
+        },
+        "@schematics/angular:pipe": {
+          "skipTests": true
+        },
+        "@schematics/angular:resolver": {
+          "skipTests": true
+        },
+        "@schematics/angular:service": {
+          "skipTests": true
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "../views",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "tsconfig.app.json",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              "src/manifest.json"
+            ],
+            "styles": [
+              "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+              "src/styles.css",
+              "src/assets/plugins/fontawesome-free/css/all.min.css",
+              "src/assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css",
+              "src/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css",
+              "src/assets/plugins/jqvmap/jqvmap.min.css",
+              "src/assets/css/adminlte.min.css",
+              "src/assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css",
+              "src/assets/plugins/daterangepicker/daterangepicker.css",
+              "src/assets/plugins/summernote/summernote-bs4.min.css",
+              "src/assets/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css",
+              "src/assets/plugins/select2/css/select2.min.css",
+              "src/assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css",
+              "src/assets/plugins/bootstrap4-duallistbox/bootstrap-duallistbox.min.css",
+              "src/assets/plugins/bs-stepper/css/bs-stepper.min.css",
+              "src/assets/plugins/dropzone/min/dropzone.min.css",
+              "src/assets/plugins/jsgrid/jsgrid.min.css",
+              "src/assets/plugins/jsgrid/jsgrid-theme.min.css",
+              "src/assets/css/app.css"
+            ],
+            "scripts": [
+              "src/assets/plugins/jquery/jquery.min.js",
+              "src/assets/plugins/jquery-ui/jquery-ui.min.js",
+              "src/assets/js/app.js",
+              
+              "src/assets/plugins/bootstrap/js/bootstrap.bundle.min.js",
+              "src/assets/plugins/chart.js/Chart.min.js",
+              "src/assets/plugins/sparklines/sparkline.js",
+              "src/assets/plugins/jqvmap/jquery.vmap.min.js",
+              "src/assets/plugins/jqvmap/maps/jquery.vmap.usa.js",
+              "src/assets/plugins/jquery-knob/jquery.knob.min.js",
+              "src/assets/plugins/moment/moment.min.js",
+              "src/assets/plugins/daterangepicker/daterangepicker.js",
+              "src/assets/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js",
+              "src/assets/plugins/summernote/summernote-bs4.min.js",
+              "src/assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js",
+
+              "src/assets/plugins/datatables/jquery.dataTables.min.js",
+              "src/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js",
+              "src/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js",
+              "src/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js",
+              "src/assets/plugins/datatables-buttons/js/dataTables.buttons.min.js",
+              "src/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js",
+              "src/assets/plugins/jszip/jszip.min.js",
+              "src/assets/plugins/pdfmake/pdfmake.min.js",
+              "src/assets/plugins/pdfmake/vfs_fonts.js",
+              "src/assets/plugins/datatables-buttons/js/buttons.html5.min.js",
+              "src/assets/plugins/datatables-buttons/js/buttons.print.min.js",
+              "src/assets/plugins/datatables-buttons/js/buttons.colVis.min.js",
+
+              "src/assets/plugins/select2/js/select2.full.min.js",
+              "src/assets/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js",
+              "src/assets/plugins/inputmask/jquery.inputmask.min.js",
+              "src/assets/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js",
+              "src/assets/plugins/bootstrap-switch/js/bootstrap-switch.min.js",
+              "src/assets/plugins/bs-stepper/js/bs-stepper.min.js",
+              "src/assets/plugins/dropzone/min/dropzone.min.js",
+              "src/assets/plugins/jsgrid/jsgrid.min.js",
+
+              "src/assets/js/adminlte.min.js",
+              "src/assets/js/bootstrap-multiselect.js",
+              "src/assets/js/settings.js"
+            ],
+            "allowedCommonJsDependencies": [
+                "lodash"
+            ],
+            "serviceWorker": true,
+            "ngswConfigPath": "ngsw-config.json"
+          },
+          "configurations": {
+            "development": {
+              "deleteOutputPath": false,
+              "outputHashing": "none",
+              "buildOptimizer": true,
+              "optimization": false,
+              "vendorChunk": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "serviceWorker": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.dev.ts"
+                }
+              ]
+            },
+
+            "production": {
+
+              "deleteOutputPath": false,
+              "optimization": {
+                "fonts": true,
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                }
+              },
+              "outputHashing": "none",
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "5mb",
+                  "maximumError": "10mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ],
+              "serviceWorker": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "app:build",
+            "ssl": true,
+            "sslKey": "../../ssl/server.key",
+            "sslCert": "../../ssl/server.crt"
+        },
+        "configurations": {
+            "production": {
+              "browserTarget": "ih-portal:build:production"
+            },
+            "development": {
+              "browserTarget": "ih-portal:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "ih-portal:build"
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": "6255aa98-b597-4ba9-97e1-758550709b80"
+  }
+}

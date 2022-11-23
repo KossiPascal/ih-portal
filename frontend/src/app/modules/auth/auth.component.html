@@ -1,0 +1,113 @@
+<style>
+    label {
+        display: block;
+    }
+</style>
+
+<div class="login-page register-page">
+
+<div class="login-box register-box">
+
+<div class="card card-outline card-primary">
+    <div class="card-header text-center">
+        <img src="assets/logo/logo.png" alt="" srcset="">
+        <!-- <a href="" class="h1"><b>Admin</b>LTE</a> -->
+    </div>
+    <div class="card-body">
+        <p class="login-box-msg"><strong>{{ message }}</strong></p>
+        <form [formGroup]="authForm" (ngSubmit)="authenticate()" novalidate class="form-horizontal">
+            <!-- <label for="username">Username</label> -->
+            <div class="input-group mb-3">
+                <input id="username" type="text" class="form-control" placeholder="Username" formControlName="username" />
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-user"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- <label for="fullname">Full Name</label> -->
+            <div *ngIf="!isLoginForm" class="input-group mb-3">
+                <input id="fullname" type="text" class="form-control" placeholder="Full Name" formControlName="fullname" />
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-user"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <label for="email">Email</label> -->
+            <div *ngIf="!isLoginForm" class="input-group mb-3">
+                <input id="email" type="email" class="form-control" placeholder="Email" formControlName="email" />
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-envelope"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <label for="password">Password</label> -->
+            <div class="input-group mb-3">
+                <input id="password" type="password" class="form-control" placeholder="Password" formControlName="password" />
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-lock"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <label for="passwordConfirm">Password COnfirm</label> -->
+            <div *ngIf="!isLoginForm" class="input-group mb-3">
+                <input id="passwordConfirm" type="password" class="form-control" placeholder="Retype password" formControlName="passwordConfirm" />
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-lock"></span>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="passwordMatchError()" class="btn btn-danger">
+                Password does not match
+            </div>
+
+            <div class="row">
+                <div class="col-8">
+                    <div class="icheck-primary">
+                        <input type="checkbox" id="agreeTerms" name="terms" formControlName="agreeTermsOrRemenberMe">
+                        <label *ngIf="isLoginForm" for="agreeTerms">Remember me</label>
+                        <label *ngIf="!isLoginForm" for="agreeTerms">I agree to the <a href="#">terms</a></label>
+                    </div>
+                </div>
+                <!-- /.col -->
+                <div class="col-md-4">
+                    <button *ngIf="isLoginForm" color="accent" [disabled]="!authForm.valid && isLoading" type="submit"
+                        class="btn btn-primary btn-block">logIn</button>
+                    <button *ngIf="!isLoginForm" color="accent" [disabled]="!authForm.valid" type="submit"
+                        class="btn btn-success btn-block">register</button>
+                </div>
+                <!-- /.col -->
+            </div>
+        </form>
+
+        <div class="social-auth-links text-center">
+            <a href="#" class="btn btn-block btn-primary">
+                <i class="fab fa-facebook mr-2"></i>
+                {{isLoginForm ? 'Sign In using Facebook' : 'Sign up using Facebook'}}
+            </a>
+            <a href="#" class="btn btn-block btn-danger">
+                <i class="fab fa-google-plus mr-2"></i>
+                {{isLoginForm ? 'Sign In using Google+' : 'Sign up using Google+'}}
+            </a>
+        </div>
+
+        <a *ngIf="!isLoginForm" routerLink="/auths/login" class="text-center">I already have a membership</a>
+        <a *ngIf="isLoginForm" routerLink="/auths/register" class="text-center">Register a new membership</a>
+        <p *ngIf="isLoginForm" class="mb-1"><a href="forgot-password.html">I forgot my password</a></p>
+
+        <!-- <p *ngIf="isLoginForm" class="mb-0">
+        </p> -->
+    </div>
+    <!-- /.form-box -->
+</div>
+</div>
+
+</div>

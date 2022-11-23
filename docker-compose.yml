@@ -1,0 +1,141 @@
+# docker-compose.yml
+# sudo docker-compose --env-file ../ssl/.env  up
+
+version: "3.3"
+services:
+
+  db:
+    container_name: "postgres"
+    restart: unless-stopped
+    image: postgres
+    labels:
+      - "traefik.enable=false"
+    command: postgres
+    # env_file: ./backend/.env
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_DB_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_DB_PASS}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      # - POSTGRES_HOST_AUTH_METHOD=trust
+      - PGDATA=./app_data/postgres/data
+      - POSTGRES_MULTIPLE_EXTENSIONS=postgis,pgrouting
+      # - ALLOW_IP_RANGE=0.0.0.0/0
+    ports:
+      - ${POSTGRES_DB_PORT}:5432
+    volumes:
+      - ./app_data/postgres_data:/var/lib/postgresql/data
+    # expose:
+    #   - 5432
+    networks:
+      - app-net
+    # healthcheck:
+    #   #CHANGE 1: this command checks if the database is ready, right on the source db server
+    #   test: [ "CMD-SHELL", "pg_isready" ]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 5
+
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    ports:
+      - ${PGADMIN_LISTEN_PORT}:5050
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_LISTEN_PORT: ${PGADMIN_LISTEN_PORT}
+      PGADMIN_LISTEN_ADDRESS: ${PGADMIN_LISTEN_ADDRESS}
+      # PGADMIN_CONFIG_SERVER_MODE: True
+      # PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: True
+      # PGADMIN_CONFIG_LOGIN_BANNER: "Authorised users only!"
+      # PGADMIN_CONFIG_CONSOLE_LOG_LEVEL: 10
+      # PGADMIN_ENABLE_TLS: True
+      # SCRIPT_NAME: /pgadmin4
+    volumes:
+      - ./app_data/pgadmin_data:/var/lib/pgadmin
+      - ./app_data/pgadmin_data/servers.json:/pgadmin4/servers.json
+      - ./app_data/pgadmin_data/root:/root/.pgadmin
+      - ../ssl/path/to/server.crt:/certs/server.cert
+      - ../ssl/path/to/server.key:/certs/server.key
+    # env_file: ./db/pgadmin/.env
+    links:
+      # - db
+      - db:pgsql-server
+    depends_on:
+      - db
+    networks:
+      - app-net
+
+
+  dbeaver:
+    container_name: "dbeaver"
+    restart: always
+    image: dbeaver/cloudbeaver
+    # env_file:
+    #   - env/.env
+    ports:
+      - ${DBEAVER_PORT}:8978
+    depends_on:
+      - db
+    links:
+      - db
+    volumes: 
+      - ./app_data/cloudbeaver_data:/opt/cloudbeaver/workspace  
+    networks:
+      - app-net
+          # ipv4_address: "192.168.67.38"
+
+
+  # ihportal:
+  #   container_name: "ih-portal"
+  #   restart: unless-stopped
+  #   build:
+  #     context: ./
+  #   image: ihportal
+  #   # env_file: ./backend/.env
+  #   ports:
+  #     - ${APP_PORT}:80
+  #     - ${APP_PORT_SECURED}:443
+  #   environment:
+  #     - PORT=${APP_PORT}
+  #     - PORT_SECURED=${APP_PORT_SECURED}
+  #     - DB_HOST=${POSTGRES_DB_HOST}
+  #     - DB_PORT=${POSTGRES_DB_PORT}
+  #     - DB_NAME=${POSTGRES_DB_NAME}
+  #     - DB_USER=${POSTGRES_DB_USER}
+  #     - DB_PASS=${POSTGRES_DB_PASS}
+  #     - ACCESS_ALL_AVAILABE_PORT=${ACCESS_ALL_AVAILABE_PORT}
+  #   depends_on:
+  #     - db
+  #   links:
+  #     - db
+  #   volumes:
+  #     - ./app_data/ih_portal_data:/srv
+  #   networks:
+  #     - app-net
+
+
+
+volumes:
+  app_data:
+    driver: local
+
+
+networks:
+  app-net:
+    name: app-net
+    driver: bridge
+    # ipam:
+    #     driver: default
+    #     config:
+    #         -   subnet: "192.168.67.176/24"
+
+

@@ -1,0 +1,64 @@
+<div class="container">
+  <div class="row">
+    <div class="col-6">
+      <br>
+      <form [formGroup]="listForm" (ngSubmit)="addNewOrUpdateList()" novalidate class="form-horizontal">
+        <div class="input-group mb-3">
+          <input id="listId" type="hidden" name="id" formControlName="id">
+          <label>
+            Add/Update list:
+            <input autocomplete="off" id="listName" type="text" class="form-control" placeholder="listName"
+              formControlName="listName" />
+          </label>
+        </div>
+        <div class="col-md-5">
+          <button *ngIf="!isExist(listForm.value.id)" color="accent" [disabled]="!listForm.valid" type="submit" class="btn btn-primary btn-block">Add new list</button>
+          <button *ngIf="isExist(listForm.value.id)" color="accent" [disabled]="!listForm.valid" type="submit" class="btn btn-primary btn-block">Update list</button>
+        </div>
+      </form>
+      <br>
+      <br>
+
+      <h5>List</h5>
+
+        <li *ngFor="let list of todoLists$ | async; trackBy: identifyList">
+          {{ list.title }} <button (click)="editList(list)">Edit</button><button (click)="deleteList(list)">Delete</button>
+          <a href=""></a>
+        </li>
+    </div>
+
+
+
+    <div class="col-6">
+      <br>
+      <form [formGroup]="itemsForm" (ngSubmit)="addNewOrUpdateItem()" novalidate class="form-horizontal">
+        <div class="input-group mb-3">
+          <input id="listId" type="hidden" formControlName="id">
+          <label>
+            Add/Update item:
+            <input autocomplete="off" id="itemName" type="text" class="form-control" placeholder="itemName"
+              formControlName="itemName" />
+              <select id="todoListId" class="form-control" placeholder="todo List" formControlName="todoListId">
+                <option *ngFor="let list of todoLists$ | async; trackBy: identifyList" value="{{list.id}}">{{list.title}}</option>
+              </select>
+          </label>
+        </div>
+        <div class="col-md-5">
+          <button *ngIf="!isExist(itemsForm.value.id)" color="accent" [disabled]="!itemsForm.valid" type="submit" class="btn btn-primary btn-block">Add New Item</button>
+          <button *ngIf="isExist(itemsForm.value.id)" color="accent" [disabled]="!itemsForm.valid" type="submit" class="btn btn-primary btn-block">Update Item</button>
+        </div>
+      </form>
+      <br>
+      <br>
+
+      <h5>Items</h5>
+
+      <ul>
+        <li *ngFor="let item of todoItems$ | async">
+          {{ item.title }}({{ item.todoListId }}) <button (click)="editItem(item)">Edit</button><button (click)="deleteItem(item)">Delete</button>
+        </li>
+      </ul>
+
+    </div>
+  </div>
+</div>

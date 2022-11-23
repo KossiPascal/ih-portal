@@ -1,0 +1,170 @@
+import "reflect-metadata"
+import express from 'express';
+import * as bodyParser from 'body-parser';
+import bearerToken = require('express-bearer-token');
+import authRouter = require("./routes/auth");
+import userRouter = require("./routes/auth");
+import syncRouter = require('./routes/sync');
+import pyRouter = require('./routes/run_python');
+import * as errorController from './controllers/error';
+import https = require("https");
+import http = require("http");
+import fs = require("fs");
+import cors = require('cors');
+const createError = require("http-errors");
+ 
+import { Functions, mailService } from './utils/functions';
+
+// require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
+require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
+
+import { AppDataSource } from './data-source';
+import { MailConfig } from "./utils/appInterface";
+// import { getTableauData } from "../../test-tableau";
+const path = require('path');
+const cron = require("node-cron");
+const shell = require('shelljs');
+
+const accessAllAvailablePort = process.env.ACCESS_ALL_AVAILABE_PORT == 'true';
+const hostnames = Functions.getIPAddress(accessAllAvailablePort);
+
+var session = require('express-session');
+// var session = require('cookie-session');
+
+// var os = require('os');
+// var networkInterfaces = os.networkInterfaces();
+// console.log(networkInterfaces);
+
+const port = Functions.normalizePort(process.env.PORT || '3000');
+const portSecured = Functions.normalizePort(process.env.PORT_SECURED || '8000'); // defining port secured
+// var appdirname = path.dirname(process.cwd());
+
+AppDataSource
+  .initialize()
+  .then(async () => console.log("initialize success !"))
+  .catch(error => console.log(`${error}`));
+
+const app = express()
+  .use(cors())
+  .use(bodyParser.json())
+  .use(bodyParser.urlencoded({ extended: false }))
+  .enable('trust proxy')
+  .set('trust proxy', 1)
+  .set("view engine", "ejs")
+  .set('json spaces', 2)
+  .use(session({
+    secret: 'foo',
+    cookie: {
+      secure: true,
+      maxAge: 60000
+    },
+    // store: new RedisStore(),
+    saveUninitialized: true,
+    resave: true
+  }))
+  // .use((req, res) => {
+  //   console.log("kookkokoko: Your IP Addresss is: " + req.socket.localAddress);
+  // res.setHeader('Access-Control-Allow-Origin', '*');
+  // res.setHeader('Content-Type', 'application/json');
+  // res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, X-Custom-Header, Authorization,X-Requested-With');
+  // res.writeHead(200, {'Content-Type': 'application/json'});
+  // res.writeHead(200, {'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'});
+  // res.writeHead(200, {'Access-Control-Allow-Headers': 'Content-Type, Accept, X-Custom-Header, Authorization,X-Requested-With'});
+  // })
+  .use(bearerToken())
+  .use('/api/auth', authRouter)
+  .use('/api/sync', syncRouter)
+  .use('/api/python', pyRouter)
+  .get('/api/users', userRouter)
+  .use(express.static(`${Functions.projectFolder()}/views`, {maxAge: `1y`}))
+  .use('/', (req,res) => res.sendFile(`${Functions.projectFolder()}/views/index.html`))
+  .all('*', (req, res) => res.status(200).redirect("/"))
+  // .use((req, res, next) => next(createError(404, "Not found")))
+  .use(errorController.Errors.get404)
+  .use(errorController.Errors.get500);
+
+const appSecured = app;
+const credentials = {
+  key: fs.readFileSync(`${Functions.sslFolder('server.key')}`, 'utf8'),
+  ca: fs.readFileSync(`${Functions.sslFolder('server-ca.crt')}`, 'utf8'),
+  cert: fs.readFileSync(`${Functions.sslFolder('server.crt')}`, 'utf8')
+};
+
+app.set('port', port);
+appSecured.set('port', portSecured); // appSecured listen to 8000 port
+
+/* Redirect http to https */
+appSecured.use((req, res, next) => {
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.secure) next();
+  if (!req.secure) res.redirect(`https://${req.headers.host}${req.url}`);
+})
+
+// Backup a database at 11:59 PM every day.
+cron.schedule('59 23 * * *', function () {
+  // console.log('---------------------');
+  // console.log('Running Cron Job');
+  // if (shell.exec('sqlite3 database.sqlite .dump > data_dump.sql').code !== 0) {
+  //   shell.exit(1);
+  // }
+  // else {
+  //   shell.echo('Database backup complete');
+  // }
+});
+
+
+//  ┌────────────── second (0 - 59) (optional)
+//  │ ┌──────────── minute (0 - 59) 
+//  │ │ ┌────────── hour (0 - 23)
+//  │ │ │ ┌──────── day of the month (1 - 31)
+//  │ │ │ │ ┌────── month (1 - 12)
+//  │ │ │ │ │ ┌──── day of the week (0 - 6) (0 and 7 both represent Sunday)
+//  │ │ │ │ │ │
+//  │ │ │ │ │ │
+//  * * * * * * 
+
+cron.schedule("0 59 */23 * * *", function () {
+  console.log("running a task every 23h 59 min 0 seconds");
+
+  // const data: MailConfig = {
+  //   admin: {
+  //     from: "kossi.tsolegnagbo@aiesec.net",
+  //     pass: "PasKos@2631989"
+  //   },
+  //   user: {
+  //     to: "kossi.tsolegnagbo@gmail.com",
+  //     subject: 'test nodejs mailler',
+  //     text: 'Hi Kossi \n Juste te dire que ca marche !'
+  //   }
+  // }
+  // mailService(data)
+});
+
+if (process.env.CAN_ACCESS_INSECURE == 'true') {
+  /**
+  * Create HTTP server.
+  */
+  const server = http.createServer(app);
+  // var io = require('socket.io')(server, {});
+  // server.listen(port, '0.0.0.0', () => Functions.onProcess)
+  if (accessAllAvailablePort) server.listen(port, '0.0.0.0', () => Functions.onProcess);
+  if (!accessAllAvailablePort) server.listen(port, hostnames[0], () => Functions.onProcess);
+  server.on('error', (err) => Functions.onError(err, port));
+  server.on('listening', () => Functions.onListening(server, hostnames));
+  server.on('connection', (stream) => console.log('someone connected!'));
+
+}
+
+
+/**
+* Create HTTPS server.
+*/
+const serverSecured = https.createServer(credentials, appSecured);
+// var io = require('socket.io')(serverSecured, {});
+// serverSecured.listen(portSecured, '0.0.0.0', () => Functions.onProcess)
+if (accessAllAvailablePort) serverSecured.listen(portSecured, '0.0.0.0', () => Functions.onProcess);
+if (!accessAllAvailablePort) serverSecured.listen(portSecured, hostnames[0], () => Functions.onProcess);
+serverSecured.on('error', (err) => Functions.onError(err, portSecured));
+serverSecured.on('listening', () => Functions.onListening(serverSecured, hostnames, 'https'));
+serverSecured.on('connection', (stream) => console.log('someone connected!'));

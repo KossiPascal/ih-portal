@@ -1,0 +1,30 @@
+/* messages */
+.onlinemsg,
+.offlinemsg {
+    position: absolute;
+    top: -40px;
+}
+
+.movedown {
+    animation: slideup 3.4s ease;
+}
+
+@keyframes slideup {
+    50% {
+        top: 0
+    }
+
+    100% {
+        top: -40px;
+    }
+}
+
+.syncSuccess {
+    color: green;
+    font-weight: lighter;
+}
+
+.syncError {
+    color: red;
+    font-weight: bolder;
+}

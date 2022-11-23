@@ -1,0 +1,65 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "es2020",
+    "module": "es2020",
+    "lib": [
+      "es2020",
+      "dom"
+    ],
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "paths": {
+      "@ih-app/*": ["src/app/*"],
+      "@ih-components/*": ["src/app/components/*"],
+      "@ih-directives/*": ["src/app/directives/*"],
+      "@ih-environments/*": ["src/environments/*"],
+      "@ih-modules/*": ["src/app/modules/*"],
+      "@ih-pipes/*": ["src/app/pipes/*"],
+      "@ih-providers/*": ["src/app/providers/*"],
+      "@ih-actions/*": ["src/app/actions/*"],
+      "@ih-effects/*": ["src/app/effects/*"],
+      "@ih-modals/*": ["src/app/modals/*"],
+      "@ih-reducers/*": ["src/app/reducers/*"],
+      "@ih-selectors/*": ["src/app/selectors/*"],
+      "@ih-services/*": ["src/app/services/*"],
+      "@ih-assets/*": ["src/assets/*"],
+      "@ih-models/*": ["src/app/models/*"],
+      "@ih-shared/*": ["src/app/shared/*"],
+      "@ih-backendEnv/*": ["../backend/src/env/*"],
+
+      "types": ["node"],
+      "rxjs": ["node_modules/rxjs"],
+      "rxjs/*": ["node_modules/rxjs/*"]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

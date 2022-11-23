@@ -1,0 +1,1044 @@
+<!-- PAGE CONTENT WRAPPER -->
+<div class="page-content-wrap">
+
+    <div class="col-12 col-sm-12">
+        <div class="card card-warning card-tabs">
+            <div class="card-header p-0 pt-1">
+                <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="custom-tabs-one-thinkmd-tab" data-toggle="pill"
+                            href="#custom-tabs-one-thinkmd" role="tab" aria-controls="custom-tabs-one-thinkmd"
+                            aria-selected="true">ThinkMd To DHIS2
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-medic-tab" data-toggle="pill"
+                            href="#custom-tabs-one-medic" role="tab" aria-controls="custom-tabs-one-medic"
+                            aria-selected="false">Medic To DHIS2
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-chws-week-data-tab" data-toggle="pill"
+                            href="#custom-tabs-chws-week-data" role="tab" aria-controls="custom-tabs-chws-week-data"
+                            aria-selected="false">Chws Week Data
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-sync-orgunits-tab" data-toggle="pill"
+                            href="#custom-tabs-one-sync-orgunits" role="tab"
+                            aria-controls="custom-tabs-one-sync-orgunits" aria-selected="false">Sync OrgUnit
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-sync-chws-tab" data-toggle="pill"
+                            href="#custom-tabs-one-sync-chws" role="tab" aria-controls="custom-tabs-one-sync-chws"
+                            aria-selected="false">Sync Chws Data
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-sync-dhis2-chws-tab" data-toggle="pill"
+                            href="#custom-tabs-one-sync-dhis2-chws" role="tab"
+                            aria-controls="custom-tabs-one-sync-dhis2-chws" aria-selected="false">Sync DHIS2 Chws Data
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="card-body">
+                <div class="tab-content" id="custom-tabs-one-tabContent">
+
+                    <!-- start tab 1 -->
+                    <div class="tab-pane fade show active" id="custom-tabs-one-thinkmd" role="tabpanel"
+                        aria-labelledby="custom-tabs-one-thinkmd-tab">
+
+                        <div class="row">
+                            <div class="col-sm-7">
+                                <div class="overlay-wrapper">
+                                    <div *ngIf="loading1" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                                        <div class="text-bold pt-2">{{LoadingMsg}}</div>
+                                    </div>
+
+                                    <!-- general form elements disabled -->
+                                    <div class="card card-success">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Get ThinkMd Aggragate Data From Tableau</h3>
+                                        </div>
+                                        
+                                        <!-- /.card-header -->
+                                        <form [formGroup]="thinkmdToDhis2Form" (ngSubmit)="runThinkmdToDhis2()"
+                                            novalidate>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Date de fin</label>
+                                                            <input type="date" class="form-control {{endDateError()}}" (change)="cleanError()"
+                                                                formControlName="end_date" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Host</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="thinkmd_host" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Site</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="thinkmd_site" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Token</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    formControlName="useToken">
+                                                                <label class="form-check-label">Use Token</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div *ngIf="!thinkmdToDhis2Form.value.useToken" class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Username</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="thinkmd_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Password</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="thinkmd_password" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div *ngIf="thinkmdToDhis2Form.value.useToken" class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Token User</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="thinkmd_token_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Token</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="thinkmd_token" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Use Dhis2</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    formControlName="InsertIntoDhis2">
+                                                                <label class="form-check-label">Insert Into
+                                                                    Dhis2</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div *ngIf="thinkmdToDhis2Form.value.InsertIntoDhis2"
+                                                        class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 HOST</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="dhis2_host" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+
+                                                <div *ngIf="thinkmdToDhis2Form.value.InsertIntoDhis2" class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 USERNAME</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="dhis2_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 PASSWORD</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="dhis2_password" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <!-- /.card-body -->
+                                            <div class="card-footer">
+                                                <button [disabled]="!thinkmdToDhis2Form.valid" type="submit"
+                                                    class="btn btn-success float-right"> Save Changes <span
+                                                        class="fa fa-floppy-o fa-right"></span></button>
+                                            </div>
+                                            <!-- /.card-footer -->
+                                        </form>
+                                        <!-- /.card-body -->
+                                    </div>
+                                    <!-- /.card -->
+                                </div>
+                            </div>
+                            <div class="col-sm-5">
+                                <div *ngFor="let item of tab1_messages?.dataToSend?.Dhis2Import| keyvalue">
+                                    {{item.key}}:{{item.value}} <br>
+                                </div>
+
+                                <!-- {{ tab1_messages?.dataToSend?.Error }}<br> -->
+                                <div *ngFor="let item of tab1_messages?.dataToSend?.ErrorMsg| keyvalue">
+                                    {{item.key}}:{{item.value}} <br>
+                                </div>
+
+                                <!-- {{ tab1_messages?.errorToSend?.ErrorCount }}<br> -->
+                                {{ tab1_messages?.errorToSend?.ConsoleError }}<br>
+
+                                <div *ngFor="let item of tab1_messages?.errorToSend?.ErrorData">
+                                    Error Found: {{item}}<br>
+                                </div>
+                                <div *ngIf="tab1_messages?.dataToSend?.success == 'true'">
+                                    Pas d'erreur rencontré lors de la récupération des données sur le serveur!
+                                </div>
+
+
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <!-- /.card -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">DataTable with default features</h3>
+                                        <button type="button" (click)="initTable('thinkmd_datatable')">Generate
+                                            Table</button>
+                                    </div>
+                                    <!-- /.card-header -->
+                                    <div class="card-body">
+                                        <table id="thinkmd_datatable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th *ngFor="let data of tab1_messages?.dataToSend?.Data?.head">
+                                                        {{ capitaliseData(data, '_') }}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    *ngFor="let data of tab1_messages?.dataToSend?.Data?.body | keyvalue">
+                                                    <td *ngFor="let item of getItemAsArray(data)">
+                                                        {{ item }}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+                                    <!-- /.card-body -->
+                                </div>
+                                <!-- /.card -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- start tab 2 -->
+                    <div class="tab-pane fade" id="custom-tabs-one-medic" role="tabpanel"
+                        aria-labelledby="custom-tabs-one-medic-tab">
+
+                        <div class="row">
+                            <div class="col-sm-7">
+                                <div class="overlay-wrapper">
+                                    <div *ngIf="loading2" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                                        <div class="text-bold pt-2">{{LoadingMsg}}</div>
+                                    </div>
+
+                                    <!-- general form elements disabled -->
+                                    <div class="card card-info">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Get Aggregate Data From Medic mebile</h3>
+                                        </div>
+                                        <!-- /.card-header -->
+                                        <form [formGroup]="medicToDhis2Form" (ngSubmit)="runMedicToDhis2()" novalidate>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Date de début</label>
+                                                            <input type="date" class="form-control {{startDateError()}}" (change)="cleanError()"
+                                                                formControlName="start_date" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Date de fin</label>
+                                                            <input type="date" class="form-control {{endDateError()}}" (change)="cleanError()"
+                                                                formControlName="end_date" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Host Name</label>
+                                                            <select class="form-control" formControlName="medic_host">
+                                                                <option *ngFor="let item of medicUrl$ | keyvalue"
+                                                                    value="{{item.key}}">
+                                                                    {{item.key}}
+                                                                </option>
+                                                            </select>
+
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Medic Database</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="medic_database" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div *ngIf="!medicToDhis2Form.value.useToken" class="row">
+
+                                                    <div *ngIf="!medicToDhis2Form.value.useToken" class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Medic Username</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="medic_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Medic Password</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="medic_password" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Use Dhis2</label>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    formControlName="InsertIntoDhis2">
+                                                                <label class="form-check-label">Insert Into
+                                                                    Dhis2</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div *ngIf="medicToDhis2Form.value.InsertIntoDhis2"
+                                                        class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 HOST</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="dhis2_host" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div *ngIf="medicToDhis2Form.value.InsertIntoDhis2" class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 USERNAME</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="dhis2_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 PASSWORD</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="dhis2_password" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- /.card-body -->
+                                            <div class="card-footer">
+                                                <button [disabled]="!medicToDhis2Form.valid" type="submit"
+                                                    class="btn btn-info float-right"> Save Changes <span
+                                                        class="fa fa-floppy-o fa-right"></span></button>
+                                            </div>
+                                            <!-- /.card-footer -->
+                                        </form>
+                                        <!-- /.card-body -->
+                                    </div>
+                                    <!-- /.card -->
+                                </div>
+                            </div>
+
+                            <div class="col-sm-5">
+                                <div *ngFor="let item of tab2_messages?.dataToSend?.Dhis2Import| keyvalue">
+                                    {{item.key}}:{{item.value}} <br>
+                                </div>
+
+                                <!-- {{ tab2_messages?.dataToSend?.Error }}<br> -->
+                                <div *ngFor="let item of tab2_messages?.dataToSend?.ErrorMsg| keyvalue">
+                                    {{item.key}}:{{item.value}} <br>
+                                </div>
+
+                                <!-- {{ tab2_messages?.errorToSend?.ErrorCount }}<br> -->
+                                {{ tab2_messages?.errorToSend?.ConsoleError }}<br>
+
+                                <div *ngFor="let item of tab2_messages?.errorToSend?.ErrorData">
+                                    Error Found: {{item}}<br>
+                                </div>
+                                <div *ngIf="tab2_messages?.dataToSend?.success == 'true'">
+                                    Pas d'erreur rencontré lors de la récupération des données sur le serveur!
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <!-- /.card -->
+                                <div class="card"
+                                    *ngIf="tab2_messages?.dataToSend?.Data != null && tab2_messages?.dataToSend?.Data != undefined">
+                                    <div class="card-header">
+                                        <h3 class="card-title">DataTable with default features</h3>
+                                        <button type="button" (click)="initTable('medic_datatable')">Generate
+                                            Table</button>
+                                    </div>
+                                    <!-- /.card-header -->
+                                    <div class="card-body">
+                                        <table id="medic_datatable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th *ngFor="let data of tab2_messages?.dataToSend?.Data?.head">
+                                                        {{ capitaliseData(data, '_') }}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    *ngFor="let data of tab2_messages?.dataToSend?.Data?.body | keyvalue">
+                                                    <td *ngFor="let item of getItemAsArray(data)">
+                                                        {{ item }}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <!-- <tfoot>
+                                                <tr *ngFor="let data of tab2_messages?.dataToSend?.Data | keyvalue">
+                                                    <td>{{capitaliseData(item.key, '_')}}</td>
+                                                    <th *ngFor="let item of getItemAsArray(data,true)">
+                                                        <td>{{capitaliseData(item.key, '_')}}</td>
+                                                        {{ item }}
+                                                    </th>
+                                                </tr>
+                                            </tfoot> -->
+                                        </table>
+                                    </div>
+                                    <!-- /.card-body -->
+                                </div>
+                                <!-- /.card -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- start tab 3 -->
+                    <div class="tab-pane fade" id="custom-tabs-chws-week-data" role="tabpanel"
+                        aria-labelledby="custom-tabs-chws-week-data-tab">
+
+                        <div class="row">
+                            <div class="col-sm-7">
+                                <div class="overlay-wrapper">
+                                    <div *ngIf="loading3" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                                        <div class="text-bold pt-2">{{LoadingMsg}}</div>
+                                    </div>
+
+                                    <div class="card card-primary">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Get Chws Weekly Data from ThinkMd and Medic</h3>
+                                        </div>
+                                        <!-- <div class="results">
+                                            <div *ngFor="let date of dates">
+                                                {{ date.zone("+00:00").format('DD/MM/YYYY') }}
+                                            </div>
+                                            </div>
+                                            <div (click)="$event.stopPropagation()" class="drop-calendar">
+                                                <mat-calendar #calendar (selectedChange)="select($event,calendar)" [dateClass]="isSelected"></mat-calendar>
+                                            </div> -->
+                                        <!-- /.card-header -->
+                                        <form [formGroup]="medicThinkMdWeeklyForm" (ngSubmit)="runMedicThinkMdWeekly()"
+                                            novalidate>
+                                            <div class="card-body">
+
+                                                <div class="row">
+                                                    <div class="col-sm-3" *ngFor="let item of weekly_Choosen_Dates" (click)="removeWeekDate(item)">
+                                                        <div class="form-group">
+                                                            <strong>
+                                                                {{ item }}
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div *ngIf="is_weekly_date_error" style="color:red;"> <strong>{{weekly_date_error_Msg}}</strong> </div>
+
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Date de début</label>
+                                                            <input type="date" class="form-control" (change)="addToDateList()"
+                                                                formControlName="start_date" />
+                                                        </div>
+                                                    </div>
+                                                    <!-- <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Add Date</label><br>
+                                                            <button (click)="addToDateList();" type="button"
+                                                                class="btn btn-success"> ADD To Date List<span
+                                                                    class="fa fa-floppy-o fa-right"></span></button>
+
+                                                        </div>
+                                                    </div> -->
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Host</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="thinkmd_host" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Site</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="thinkmd_site" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <!-- <label>Tableau Token</label> -->
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    formControlName="useToken">
+                                                                <label class="form-check-label">Use Tableau
+                                                                    Token</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div *ngIf="!medicThinkMdWeeklyForm.value.useToken" class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Username</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="thinkmd_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Password</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="thinkmd_password" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div *ngIf="medicThinkMdWeeklyForm.value.useToken" class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Token User</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="thinkmd_token_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tableau Token</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="thinkmd_token" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Medic Hostname</label>
+                                                            <select class="form-control" formControlName="medic_host">
+                                                                <option *ngFor="let item of medicUrl$ | keyvalue"
+                                                                    value="{{item.key}}">
+                                                                    {{item.key}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Medic Username</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="medic_username" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Medic Password</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="medic_password" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Medic Database</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="medic_database" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <!-- <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>Use Dhis2</label>
+                                                    <div class="form-check">
+                                                        <input [disabled]="true" class="form-check-input" type="checkbox" formControlName="InsertIntoDhis2">
+                                                        <label class="form-check-label">Insert Into Dhis2</label>
+                                                    </div>
+                                                </div>
+                                            </div> -->
+
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 HOST</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="dhis2_host" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 USERNAME</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="dhis2_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 PASSWORD</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="dhis2_password" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- /.card-body -->
+                                            <div class="card-footer">
+                                                <button [disabled]="!medicThinkMdWeeklyForm.valid" type="submit"
+                                                    class="btn btn-primary float-right"> Save Changes <span
+                                                        class="fa fa-floppy-o fa-right"></span></button>
+
+                                                <!-- <button (click)="testJson();" class="btn btn-default float-right"> JSON TEST OUT<span class="fa fa-floppy-o fa-right"></span></button> -->
+
+                                            </div>
+                                            <!-- /.card-footer -->
+                                        </form>
+                                        <!-- /.card-body -->
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-5">
+                                <div *ngFor="let item of tab3_messages?.dataToSend?.Dhis2Import| keyvalue">
+                                    {{item.key}}:{{item.value}} <br>
+                                </div>
+
+                                <!-- {{ tab3_messages?.dataToSend?.Error }}<br> -->
+                                <div *ngFor="let item of tab3_messages?.dataToSend?.ErrorMsg| keyvalue">
+                                    {{item.key}}:{{item.value}} <br>
+                                </div>
+
+                                <!-- {{ tab3_messages?.errorToSend?.ErrorCount }}<br> -->
+                                {{ tab3_messages?.errorToSend?.ConsoleError }}<br>
+
+                                <div *ngFor="let item of tab3_messages?.errorToSend?.ErrorData">
+                                    Error Found: {{item}}<br>
+                                </div>
+                                <div *ngIf="tab3_messages?.dataToSend?.success == 'true'">
+                                    Pas d'erreur rencontré lors de la récupération des données sur le serveur!
+                                </div>
+
+
+                            </div>
+
+
+                            <div class="col-sm-12">
+                                <!-- /.card -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">DataTable with default features</h3>
+                                        <button type="button" (click)="initTable('medic_thinkMd_datatable')">Generate
+                                            Table</button>
+                                    </div>
+                                    <!-- /.card-header -->
+                                    <div class="card-body">
+                                        <table id="medic_thinkMd_datatable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th *ngFor="let data of tab3_messages?.dataToSend?.Data?.head">
+                                                        {{ capitaliseData(data, '_') }}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let data of tab3_messages?.dataToSend?.Data?.body | keyvalue">
+                                                    <td *ngFor="let item of getItemAsArray(data)" class="{{ genarateColor(item) }}">
+                                                      {{ item }}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- /.card-body -->
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- start tab 4 -->
+                    <div class="tab-pane fade" id="custom-tabs-one-sync-orgunits" role="tabpanel"
+                        aria-labelledby="custom-tabs-one-sync-orgunits-tab">
+
+                        <div class="row">
+                            <div class="col-sm-7">
+                                <div class="overlay-wrapper">
+                                    <div *ngIf="loading4" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                                        <div class="text-bold pt-2">{{LoadingMsg}}</div>
+                                    </div>
+
+                                    <!-- general form elements disabled -->
+                                    <div class="card card-danger">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Synchroniser OrgUnit && Personnes</h3>
+                                        </div>
+                                        <!-- /.card-header -->
+                                        <form [formGroup]="orgUnitAndPersonForm"
+                                            (ngSubmit)="syncAllSiteZoneFamilyPersonFromDb()" novalidate>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Hostname</label>
+                                                            <select class="form-control" formControlName="medic_host">
+                                                                <option *ngFor="let item of medicUrl$ | keyvalue"
+                                                                    value="{{item.key}}">
+                                                                    {{item.key}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Username</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="medic_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Password</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="medic_password" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <!-- /.card-body -->
+                                            <div class="card-footer">
+                                                <button [disabled]="!orgUnitAndPersonForm.valid" type="submit"
+                                                    class="btn btn-danger float-right"> Save Changes <span
+                                                        class="fa fa-floppy-o fa-right"></span></button>
+                                            </div>
+                                            <!-- /.card-footer -->
+                                        </form>
+                                        <!-- /.card-body -->
+                                    </div>
+                                    <!-- /.card -->
+                                </div>
+                            </div>
+
+                            <div class="col-sm-5">
+                                <div *ngIf="tab4_messages != null" class="card-body">
+                                    <table id="sync_chws_datatable" class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Elément
+                                                <th>Success</th>
+                                                <th>Errors</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let data of tab4_messages | keyvalue">
+                                                <td>{{ data.key }}</td>
+                                                <td class="org-unit-success">{{ data.value.success }}</td>
+                                                <td class="org-unit-error">{{ data.value.error }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- start tab 5 -->
+                    <div class="tab-pane fade" id="custom-tabs-one-sync-chws" role="tabpanel"
+                        aria-labelledby="custom-tabs-one-sync-chws-tab">
+
+                        <div class="row">
+                            <div class="col-sm-7">
+                                <div class="overlay-wrapper">
+                                    <div *ngIf="loading5" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                                        <div class="text-bold pt-2">{{LoadingMsg}}</div>
+                                    </div>
+
+                                    <!-- general form elements disabled -->
+                                    <div class="card card-warning">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Syncroniser les données de tous les ASC</h3>
+                                        </div>
+                                        <!-- /.card-header -->
+                                        <form [formGroup]="chwsDataForm" (ngSubmit)="syncAllChwsDataFromDb()"
+                                            novalidate>
+                                            <div class="card-body">
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Hostname</label>
+                                                            <select class="form-control" formControlName="medic_host">
+                                                                <option *ngFor="let item of medicUrl$ | keyvalue"
+                                                                    value="{{item.key}}">
+                                                                    {{item.key}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Username</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="medic_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Password</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="medic_password" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Date de début</label>
+                                                            <input type="date" class="form-control"
+                                                                formControlName="start_date" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Date de fin</label>
+                                                            <input type="date" class="form-control"
+                                                                formControlName="end_date" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <!-- /.card-body -->
+                                            <div class="card-footer">
+                                                <button [disabled]="!chwsDataForm.valid" type="submit"
+                                                    class="btn btn-warning float-right"> Save Changes <span
+                                                        class="fa fa-floppy-o fa-right"></span></button>
+                                            </div>
+                                            <!-- /.card-footer -->
+                                        </form>
+                                        <!-- /.card-body -->
+                                    </div>
+                                    <!-- /.card -->
+                                </div>
+                            </div>
+
+
+                            <div class="col-sm-5">
+                                <div *ngIf="tab5_messages != null" class="card-body">
+                                    <table id="sync_chws_datatable" class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Elément
+                                                <th>Success</th>
+                                                <th>Errors</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let data of tab5_messages | keyvalue">
+                                                <td>{{ data.key }}</td>
+                                                <td class="org-unit-success">{{ data.value.success }}</td>
+                                                <td class="org-unit-error">{{ data.value.error }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- start tab 6 -->
+                    <div class="tab-pane fade" id="custom-tabs-one-sync-dhis2-chws" role="tabpanel"
+                        aria-labelledby="custom-tabs-one-sync-dhis2-chws-tab">
+
+                        <div class="row">
+                            <div class="col-sm-7">
+                                <div class="overlay-wrapper">
+                                    <div *ngIf="loading6" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                                        <div class="text-bold pt-2">{{LoadingMsg}}</div>
+                                    </div>
+
+                                    <!-- general form elements disabled -->
+                                    <div class="card card-warning">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Syncroniser les données de tous les ASC</h3>
+                                        </div>
+                                        <!-- /.card-header -->
+                                        <form [formGroup]="dhis2ChwsDataForm" (ngSubmit)="syncAllChwsDataFromDhis2()"
+                                            novalidate>
+                                            <div class="card-body">
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Date de début</label>
+                                                            <input type="date" class="form-control"
+                                                                formControlName="start_date" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Date de fin</label>
+                                                            <input type="date" class="form-control"
+                                                                formControlName="end_date" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+
+
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Site</label>
+                                                            <select class="form-control" formControlName="sites">
+                                                                <option value="">Select All</option>
+                                                                <option *ngFor="let site of sitesList"
+                                                                    value="{{site.external_id}}">
+                                                                    {{ site.name }}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <!-- /.card-body -->
+                                            <div class="card-footer">
+                                                <button [disabled]="!dhis2ChwsDataForm.valid" type="submit"
+                                                    class="btn btn-warning float-right"> Save Changes <span
+                                                        class="fa fa-floppy-o fa-right"></span></button>
+                                            </div>
+                                            <!-- /.card-footer -->
+                                        </form>
+                                        <!-- /.card-body -->
+                                    </div>
+                                    <!-- /.card -->
+                                </div>
+                            </div>
+
+
+                            <div class="col-sm-5">
+                                <div *ngIf="tab6_messages != null" class="card-body">
+                                    <table id="sync_chws_datatable" class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Elément
+                                                <th>Success</th>
+                                                <th>Errors</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let data of tab6_messages | keyvalue">
+                                                <td>{{ data.key }}</td>
+                                                <td class="org-unit-success">{{ data.value.success }}</td>
+                                                <td class="org-unit-error">{{ data.value.error }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+<!-- END PAGE CONTENT WRAPPER -->
