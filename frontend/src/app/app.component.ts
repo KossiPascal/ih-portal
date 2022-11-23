@@ -35,7 +35,7 @@ export class AppComponent implements OnInit {
   constructor(private sw: UpdateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
-    this.modalVersion = true;
+    this.modalVersion = false;
     this.sw.checkForUpdates();
 
     interval(6000)
@@ -141,7 +141,7 @@ export class AppComponent implements OnInit {
       })
     }, 4000);
   }
-}
+} 
 
 // 
 // warningMsg
