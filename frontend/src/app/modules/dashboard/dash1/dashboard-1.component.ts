@@ -196,9 +196,9 @@ export class DashboardOneComponent implements OnInit {
         const Did = this.allSitesList[s].source;
         if (Did != null && Did != '') if (!this.sourcesList.includes(Did)) this.sourcesList.push(Did);
       }
-      this.initMsg = 'Chargement des Zones ...';
-      this.sync.getZoneList().subscribe((zonesList: any) => {
-        this.allZonesList = zonesList;
+      // this.initMsg = 'Chargement des Zones ...';
+      // this.sync.getZoneList().subscribe((zonesList: any) => {
+      //   this.allZonesList = zonesList;
         this.initMsg = 'Chargement des ASC ...';
         this.sync.getChwsList().subscribe(async (chwsList: any) => {
           this.allChwsList = chwsList;
@@ -221,10 +221,10 @@ export class DashboardOneComponent implements OnInit {
           this.isLoading = false;
           console.log(err.error);
         });
-      }, (err: any) =>  {
-        this.isLoading = false;
-        console.log(err.error);
-      });
+      // }, (err: any) =>  {
+      //   this.isLoading = false;
+      //   console.log(err.error);
+      // });
     }, (err: any) =>  {
       this.isLoading = false;
       console.log(err.error);
@@ -546,64 +546,64 @@ export class DashboardOneComponent implements OnInit {
         chwsData.total_test_de_grossesse_domicile += allDatasFound.total_test_de_grossesse_domicile[ascId]["count"];
       }
 
-      this.sitesChwsCount = 0;
-      this.familiesChwsCount = 0;
-      this.patientsChwsCount = 0;
+      // this.sitesChwsCount = 0;
+      // this.familiesChwsCount = 0;
+      // this.patientsChwsCount = 0;
       // this.zonesChwsCount = 0;
-      this.chwsCount = 0;
+      // this.chwsCount = 0;
       this.allAggragateData = [];
 
-      for (let i = 0; i < this.allSitesList!.length; i++) {
-        const site = this.allSitesList![i];
-        if (Functions.isNotNull(sources)) {
-          if (sources?.includes(site.source)) this.sitesChwsCount++;
-        } else {
-          this.sitesChwsCount++;
-        }
-      }
+      // for (let i = 0; i < this.allSitesList!.length; i++) {
+      //   const site = this.allSitesList![i];
+      //   if (Functions.isNotNull(sources)) {
+      //     if (sources?.includes(site.source)) this.sitesChwsCount++;
+      //   } else {
+      //     this.sitesChwsCount++;
+      //   }
+      // }
 
-      for (let i = 0; i < this.allFamiliesList!.length; i++) {
-        const family = this.allFamiliesList![i];
-        if (Functions.isNotNull(sites) && Functions.isNotNull(chws)) {
-          if (Functions.isNotNull(sources)) {
-            if (sites?.includes(family.site.id) && chws?.includes(family.zone.chw_id) && sources?.includes(family.site.source)) this.familiesChwsCount++;
-          } else {
-            if (sites?.includes(family.site.id) && chws?.includes(family.zone.chw_id)) this.familiesChwsCount++;
-          }
-        } else if (Functions.isNotNull(sites) && !Functions.isNotNull(chws)) {
+      // for (let i = 0; i < this.allFamiliesList!.length; i++) {
+      //   const family = this.allFamiliesList![i];
+      //   if (Functions.isNotNull(sites) && Functions.isNotNull(chws)) {
+      //     if (Functions.isNotNull(sources)) {
+      //       if (sites?.includes(family.site.id) && chws?.includes(family.zone.chw_id) && sources?.includes(family.site.source)) this.familiesChwsCount++;
+      //     } else {
+      //       if (sites?.includes(family.site.id) && chws?.includes(family.zone.chw_id)) this.familiesChwsCount++;
+      //     }
+      //   } else if (Functions.isNotNull(sites) && !Functions.isNotNull(chws)) {
 
-          if (Functions.isNotNull(sources)) {
-            if (sites?.includes(family.site.id) && sources?.includes(family.site.source)) this.familiesChwsCount++;
-          } else {
-            if (sites?.includes(family.site.id)) this.familiesChwsCount++;
-          }
-        } else if (Functions.isNotNull(sources)) {
-          if (sources?.includes(family.site.source)) this.familiesChwsCount++;
-        } else {
-          this.familiesChwsCount++;
-        }
-      }
+      //     if (Functions.isNotNull(sources)) {
+      //       if (sites?.includes(family.site.id) && sources?.includes(family.site.source)) this.familiesChwsCount++;
+      //     } else {
+      //       if (sites?.includes(family.site.id)) this.familiesChwsCount++;
+      //     }
+      //   } else if (Functions.isNotNull(sources)) {
+      //     if (sources?.includes(family.site.source)) this.familiesChwsCount++;
+      //   } else {
+      //     this.familiesChwsCount++;
+      //   }
+      // }
 
-      for (let i = 0; i < this.allPatientsList!.length; i++) {
-        const patient = this.allPatientsList![i];
-        if (Functions.isNotNull(sites) && Functions.isNotNull(chws)) {
-          if (Functions.isNotNull(sources)) {
-            if (sites?.includes(patient.site.id) && chws?.includes(patient.zone.chw_id) && sources?.includes(patient.site.source)) this.patientsChwsCount++;
-          } else {
-            if (sites?.includes(patient.site.id) && chws?.includes(patient.zone.chw_id)) this.patientsChwsCount++;
-          }
-        } else if (Functions.isNotNull(sites) && !Functions.isNotNull(chws)) {
-          if (Functions.isNotNull(sources)) {
-            if (sites?.includes(patient.site.id) && sources?.includes(patient.site.source)) this.patientsChwsCount++;
-          } else {
-            if (sites?.includes(patient.site.id)) this.patientsChwsCount++;
-          }
-        } else if (Functions.isNotNull(sources)) {
-          if (sources?.includes(patient.site.source)) this.patientsChwsCount++;
-        } else {
-          this.patientsChwsCount++;
-        }
-      }
+      // for (let i = 0; i < this.allPatientsList!.length; i++) {
+      //   const patient = this.allPatientsList![i];
+      //   if (Functions.isNotNull(sites) && Functions.isNotNull(chws)) {
+      //     if (Functions.isNotNull(sources)) {
+      //       if (sites?.includes(patient.site.id) && chws?.includes(patient.zone.chw_id) && sources?.includes(patient.site.source)) this.patientsChwsCount++;
+      //     } else {
+      //       if (sites?.includes(patient.site.id) && chws?.includes(patient.zone.chw_id)) this.patientsChwsCount++;
+      //     }
+      //   } else if (Functions.isNotNull(sites) && !Functions.isNotNull(chws)) {
+      //     if (Functions.isNotNull(sources)) {
+      //       if (sites?.includes(patient.site.id) && sources?.includes(patient.site.source)) this.patientsChwsCount++;
+      //     } else {
+      //       if (sites?.includes(patient.site.id)) this.patientsChwsCount++;
+      //     }
+      //   } else if (Functions.isNotNull(sources)) {
+      //     if (sources?.includes(patient.site.source)) this.patientsChwsCount++;
+      //   } else {
+      //     this.patientsChwsCount++;
+      //   }
+      // }
 
       // for (let i = 0; i < this.allZonesList!.length; i++) {
       //   const zone = this.allZonesList![i];
@@ -626,39 +626,39 @@ export class DashboardOneComponent implements OnInit {
       //   }
       // }
 
-      for (let i = 0; i < this.allChwsList!.length; i++) {
-        const asc = this.allChwsList![i];
-        if (Functions.isNotNull(sites) && Functions.isNotNull(chws)) {
-          if (Functions.isNotNull(sources)) {
-            if (sites?.includes(asc.site.id) && chws?.includes(asc.zone.chw_id) && sources?.includes(asc.site.source)) this.chwsCount++;
-          } else {
-            if (sites?.includes(asc.site.id) && chws?.includes(asc.zone.chw_id)) this.chwsCount++;
-          }
-        } else if (Functions.isNotNull(sites) && !Functions.isNotNull(chws)) {
-          if (Functions.isNotNull(sources)) {
-            if (sites?.includes(asc.site.id) && sources?.includes(asc.site.source)) this.chwsCount++;
-          } else {
-            if (sites?.includes(asc.site.id)) this.chwsCount++;
-          }
-        } else if (Functions.isNotNull(sources)) {
-          if (sources?.includes(asc.site.source)) this.chwsCount++;
-        } else {
-          this.chwsCount++;
-        }
-      }
+      // for (let i = 0; i < this.allChwsList!.length; i++) {
+      //   const asc = this.allChwsList![i];
+      //   if (Functions.isNotNull(sites) && Functions.isNotNull(chws)) {
+      //     if (Functions.isNotNull(sources)) {
+      //       if (sites?.includes(asc.site.id) && chws?.includes(asc.zone.chw_id) && sources?.includes(asc.site.source)) this.chwsCount++;
+      //     } else {
+      //       if (sites?.includes(asc.site.id) && chws?.includes(asc.zone.chw_id)) this.chwsCount++;
+      //     }
+      //   } else if (Functions.isNotNull(sites) && !Functions.isNotNull(chws)) {
+      //     if (Functions.isNotNull(sources)) {
+      //       if (sites?.includes(asc.site.id) && sources?.includes(asc.site.source)) this.chwsCount++;
+      //     } else {
+      //       if (sites?.includes(asc.site.id)) this.chwsCount++;
+      //     }
+      //   } else if (Functions.isNotNull(sources)) {
+      //     if (sources?.includes(asc.site.source)) this.chwsCount++;
+      //   } else {
+      //     this.chwsCount++;
+      //   }
+      // }
 
 
 
-      let total_site: AggragateData = { label: Functions.capitaliseDataGiven('total_site_enregistre', '_', ' '), count: this.sitesChwsCount, icon: "ion-stats-bars", color: "bg-success", detailUrl: "/dashboards/dash1" };
-      let total_ASC: AggragateData = { label: Functions.capitaliseDataGiven('total_ASC_enregistre', '_', ' '), count: this.chwsCount, icon: "ion-person-add", color: "bg-warning", detailUrl: "/dashboards/dash1" };
-      let total_famille: AggragateData = { label: Functions.capitaliseDataGiven('total_famille_enregistre', '_', ' '), count: this.familiesChwsCount, icon: "ion-pie-graph", color: "bg-danger", detailUrl: "/dashboards/dash1" };
-      let total_patient: AggragateData = { label: Functions.capitaliseDataGiven('total_patient_enregistre', '_', ' '), count: this.patientsChwsCount, icon: "ion-bag", color: "bg-primary", detailUrl: "/dashboards/dash1" };
+      // let total_site: AggragateData = { label: Functions.capitaliseDataGiven('total_site_enregistre', '_', ' '), count: this.sitesChwsCount, icon: "ion-stats-bars", color: "bg-success", detailUrl: "/dashboards/dash1" };
+      // let total_ASC: AggragateData = { label: Functions.capitaliseDataGiven('total_ASC_enregistre', '_', ' '), count: this.chwsCount, icon: "ion-person-add", color: "bg-warning", detailUrl: "/dashboards/dash1" };
+      // let total_famille: AggragateData = { label: Functions.capitaliseDataGiven('total_famille_enregistre', '_', ' '), count: this.familiesChwsCount, icon: "ion-pie-graph", color: "bg-danger", detailUrl: "/dashboards/dash1" };
+      // let total_patient: AggragateData = { label: Functions.capitaliseDataGiven('total_patient_enregistre', '_', ' '), count: this.patientsChwsCount, icon: "ion-bag", color: "bg-primary", detailUrl: "/dashboards/dash1" };
       // let total_zone: AggragateData = { label: Functions.capitaliseDataGiven('total_zone_enregistre', '_', ' '), count: this.zonesChwsCount, icon: "ion-bag", color: "bg-success", detailUrl: "/dashboards/dash1" };
 
-      this.allAggragateData.push(total_site);
-      this.allAggragateData.push(total_ASC);
-      this.allAggragateData.push(total_famille);
-      this.allAggragateData.push(total_patient);
+      // this.allAggragateData.push(total_site);
+      // this.allAggragateData.push(total_ASC);
+      // this.allAggragateData.push(total_famille);
+      // this.allAggragateData.push(total_patient);
       // this.allAggragateData.push(total_zone);
 
 
