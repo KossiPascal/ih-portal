@@ -14,6 +14,7 @@ export class RegisterComponent implements OnInit {
   isLoginForm: boolean = false;
   message: string = 'Vous voulez vous enrégistrer';
   isLoading:boolean = false;
+  LoadingMsg: string = "Loading..."
 
   constructor(private authService: AuthService, private router: Router, private http: HttpClient) { }
 

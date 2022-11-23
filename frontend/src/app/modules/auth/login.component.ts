@@ -14,6 +14,7 @@ export class LoginComponent implements OnInit {
   isLoginForm: boolean = true;
   message: string = 'Vous êtes déconnecté !';
   isLoading:boolean = false;
+  LoadingMsg: string = "Loading..."
 
   constructor(private authService: AuthService, private router: Router, private http: HttpClient) { }
 
