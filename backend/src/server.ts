@@ -3,7 +3,7 @@ import express from 'express';
 import * as bodyParser from 'body-parser';
 import bearerToken = require('express-bearer-token');
 import authRouter = require("./routes/auth");
-import userRouter = require("./routes/auth");
+import userRouter = require("./routes/user");
 import syncRouter = require('./routes/sync');
 import pyRouter = require('./routes/run_python');
 import * as errorController from './controllers/error';
@@ -76,7 +76,8 @@ const app = express()
   .use('/api/auth', authRouter)
   .use('/api/sync', syncRouter)
   .use('/api/python', pyRouter)
-  .get('/api/users', userRouter)
+  .use('/api/user', userRouter)
+  .use('/api/assets', express.static(__dirname+'/assets'))
   .use(express.static(`${Functions.projectFolder()}/views`, {maxAge: `1y`}))
   .use('/', (req,res) => res.sendFile(`${Functions.projectFolder()}/views/index.html`))
   .all('*', (req, res) => res.status(200).redirect("/"))

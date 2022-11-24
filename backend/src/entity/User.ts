@@ -29,6 +29,9 @@ export class User {
     @Column({ nullable: true })
     roles!: string
 
+    // @Column('json', { nullable: true })
+    // roles!: object
+
     @BeforeInsert()
     async hashPassword() {
       this.password = await bcrypt.hash(this.password, 12);

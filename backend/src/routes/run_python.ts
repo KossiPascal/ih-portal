@@ -59,7 +59,6 @@ function dataToReturn(data:any){
 
 
 pyRouter.post('/thinkmdToDhis2', Middelware.authMiddleware, (req: Request, res: Response) => {
-
     var dataToSend: string = '{}';
     req.body['type'] = 'thinkMd_only'
     const user = req.body['user'];

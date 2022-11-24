@@ -8,6 +8,14 @@
     "watch": "ng build --watch --configuration development",
     "precache": "sw-precache --verbose --config=sw-precache-config.js"
   },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 100,
+    "semi": true,
+    "bracketSpacing": true,
+    "arrowParens": "always",
+    "parser": "typescript"
+  },
   "private": true,
   "dependencies": {
     "@angular/animations": "^14.0.0",
@@ -21,12 +29,14 @@
     "@angular/material-moment-adapter": "^14.1.3",
     "@angular/platform-browser": "^14.0.0",
     "@angular/platform-browser-dynamic": "^14.0.0",
-    "@angular/pwa": "^14.1.3",
+    "@angular/pwa": "^15.1.0-next.0",
     "@angular/router": "^14.0.0",
     "@angular/service-worker": "^14.1.3",
     "@fortawesome/angular-fontawesome": "^0.10.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@ngx-translate/core": "^14.0.0",
+    "@ngx-translate/http-loader": "^7.0.0",
     "concurrently": "^7.3.0",
     "core-js": "^3.24.1",
     "dexie": "^3.2.2",

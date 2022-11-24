@@ -19,10 +19,9 @@ export class UserComponent implements OnInit {
   }
 
   getUsers() {
-      this.authService.getAllUsers()
-      .then((userfound:User[]) => {
+      this.authService.getAllUsers().subscribe((userfound:User[]) => {
         this.users$ = userfound;
-      });
+      }, (err: any) => { console.log(err.error) });
       // const user: User[] = Array.isArray(usersDb) ? usersDb : [];
   }
 

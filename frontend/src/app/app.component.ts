@@ -1,16 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router, ActivatedRoute } from '@angular/router';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
-import { filter, map, takeWhile } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { AuthService } from '@ih-services/auth.service';
 import { Platform } from '@angular/cdk/platform';
-import { Title } from '@angular/platform-browser';
 import { TitleService } from '@ih-services/title.service';
-import { interval, Observable } from 'rxjs';
+import { interval } from 'rxjs';
 import { SyncService } from './services/sync.service';
-import { Chws, Sites } from './models/Sync';
-import { IndexDbService } from './services/index-db.service';
-import { UpdateService } from './services/update.service';
+// import { UpdateService } from '../../../zfor_delete/update.service';
+
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
@@ -25,18 +24,25 @@ export class AppComponent implements OnInit {
   updateCheckText = '';
   isOnline!: boolean;
   modalVersion!: boolean;
-  modalPwaEvent: any;
-  modalPwaPlatform: string | undefined;
+  modalPwaEvent!: any;
+  modalPwaPlatform: 'ios' | 'android' | undefined;
   isAdmin: boolean = false;
   time: number = 0;
   localSync: string = '';
 
-
-  constructor(private sw: UpdateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
-    this.sw.checkForUpdates();
+
+    translate.addLangs(['en', 'fr']);
+    translate.setDefaultLang('en');
+    const browserLang = translate.getBrowserLang();
+    translate.use(browserLang?.match(/en|fr/) ? browserLang : 'en'); //this enabled setting lang automatically
+    // translate.use('en');
+
+
+    // this.updateService.checkForUpdates();
 
     interval(6000)
       // .pipe(takeWhile(() => this.isOnline))
@@ -79,6 +85,14 @@ export class AppComponent implements OnInit {
     this.loadModalPwa();
   }
 
+  // updateCheck(): void {
+  //   this.swUpdate
+  //     .checkForUpdate()
+  //     .then(() => { this.updateCheckText = 'resolved'; console.log('resolved') })
+  //     .catch(err => { this.updateCheckText = `rejected: ${err.message}` })
+  //     .finally(() => { console.log('finally') });
+  // }
+
   private updateOnlineStatus(): void {
     this.isOnline = window.navigator.onLine;
     console.info(`isOnline=[${this.isOnline}]`);
@@ -86,34 +100,58 @@ export class AppComponent implements OnInit {
 
   public updateVersion(): void {
     this.modalVersion = false;
+    this.updateCheckText = '';
     window.location.reload();
+    document.location.reload();
   }
 
   public closeVersion(): void {
     this.modalVersion = false;
+    this.updateCheckText = '';
     this.getMsg('offlinemsg');
   }
 
+
   private loadModalPwa(): void {
+    if (!this.swUpdate.isEnabled) {
+      this.swUpdate.versionUpdates.pipe(filter((evt: any): evt is VersionReadyEvent => evt.type === 'VERSION_READY'))
+        .subscribe(evt => {
+          this.modalVersion = true;
+          this.updateCheckText = `${evt.currentVersion}`;
+          // this.updateVersion(); 
+          // console.info(`currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
+          this.getMsg('onlinemsg');
+        });
+      // map((evt: any) => {
+      //   console.info(`currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
+      //   this.getMsg('onlinemsg');
+      // });
+      interval(6000).subscribe(() => this.swUpdate.checkForUpdate()
+        .then(() => { window.location.reload(); console.log('checking for updates') }));
+    } else {
+      console.log('Nope 🙁');
+    }
+
     if (this.platform.ANDROID) {
-      window.addEventListener('beforeinstallprompt', (event: any) => {
+      window.addEventListener('beforeinstallprompt', (event:any) => {
         event.preventDefault();
         this.modalPwaEvent = event;
-        this.modalPwaPlatform = 'ANDROID';
+        this.modalPwaPlatform = 'android';
       });
     }
 
     if (this.platform.IOS && this.platform.SAFARI) {
       const isInStandaloneMode = ('standalone' in window.navigator) && ((<any>window.navigator)['standalone']);
       if (!isInStandaloneMode) {
-        this.modalPwaPlatform = 'IOS';
+        this.modalPwaPlatform = 'ios';
       }
     }
   }
 
   public addToHomeScreen(): void {
-    this.modalPwaEvent.prompt();
+    this.modalPwaEvent?.prompt();
     this.modalPwaPlatform = undefined;
+    this.updateVersion();
   }
 
   public closePwa(): void {
@@ -124,12 +162,6 @@ export class AppComponent implements OnInit {
     this.auth.logout();
   }
 
-  updateCheck(): void {
-    this.swUpdate
-      .checkForUpdate()
-      .then(() => this.updateCheckText = 'resolved')
-      .catch(err => this.updateCheckText = `rejected: ${err.message}`);
-  }
 
   // function msg
   getMsg(msgClass: string) {
@@ -141,7 +173,7 @@ export class AppComponent implements OnInit {
       })
     }, 4000);
   }
-} 
+}
 
 // 
 // warningMsg

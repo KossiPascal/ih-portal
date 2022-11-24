@@ -11,21 +11,18 @@
                     <!-- START DEFAULT DATATABLE -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <!-- <h3 class="panel-title">Default</h3> -->
-                            <ul class="panel-controls">
-                                <li><a href="#" class="panel-collapse"><span class="fa fa-angle-down"></span></a></li>
-                                <li><a href="#" class="panel-refresh"><span class="fa fa-refresh"></span></a></li>
-                                <li><a href="#" class="panel-remove"><span class="fa fa-times"></span></a></li>
-                            </ul>
+                            
                         </div>
                         <div class="panel-body">
                             <table class="table datatable">
                                 <thead>
                                     <tr>
                                         <th>N°</th>
+                                        <th>id</th>
                                         <th>Username</th>
                                         <th>Full name</th>
                                         <th>Email</th>
+                                        <th>Role</th>
                                         <th>isFirst</th>
                                         <th>isOdd</th>
                                     </tr>
@@ -35,9 +32,11 @@
                                     *ngFor="let user of users$; let index = index; let isFirst = first; let isOdd = odd;">
                                     <tr>
                                         <td>{{ index+1 }}</td>
+                                        <td>{{ user.id }}</td>
                                         <td>{{ user.username }}</td>
                                         <td>{{ user.fullname }}</td>
                                         <td>{{ user.email }}</td>
+                                        <td>{{ user.roles }}</td>
                                         <td>{{ isFirst }}</td>
                                         <td>{{ isOdd }}</td>
                                     </tr>

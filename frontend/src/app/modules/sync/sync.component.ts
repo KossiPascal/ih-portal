@@ -213,7 +213,7 @@ export class SyncComponent implements OnInit {
     }
     return '';
   }
-
+ 
   removeWeekDate(date:string):void {
     const index = this.weekly_Choosen_Dates.indexOf(date);
     this.weekly_Choosen_Dates.splice(index, 1);

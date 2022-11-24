@@ -1,6 +1,6 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -9,9 +9,9 @@ import { AuthInterceptorService } from '@ih-services/auth-interceptor.service';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '@ih-environments/environment';
-import { CheckForUpdateService } from '@ih-services/check-for-update.service';
-import { LogUpdateService } from '@ih-services/log-update.service';
-import { PromptUpdateService } from '@ih-services/prompt-update.service';
+// import { CheckForUpdateService } from '@ih-services/check-for-update.service';
+// import { LogUpdateService } from '@ih-services/log-update.service';
+// import { PromptUpdateService } from '@ih-services/prompt-update.service';
 import { OnlineService } from '@ih-services/detecting-online.service';
 import { IndexDbItemListComponent } from './modules/index_db/indexdb_items.component';
 
@@ -25,6 +25,11 @@ import { DateAdapter, MatDateFormats, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '
 import { MAT_MOMENT_DATE_FORMATS, MomentDateAdapter } from '@angular/material-moment-adapter';
 import { NgMultiSelectDropDownModule } from "ng-multiselect-dropdown";
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { Functions } from './shared/functions';
+
 
 MAT_MOMENT_DATE_FORMATS.parse = {
   dateInput: { month: 'short', year: 'numeric', day: 'numeric', date: 'long' },
@@ -53,7 +58,13 @@ MAT_MOMENT_DATE_FORMATS.display.monthYearA11yLabel = 'long';
 // }
 export const APP_DATE_FORMATS: MatDateFormats = MAT_MOMENT_DATE_FORMATS;
 
-
+export function HttpLoaderFactory(httpClient: HttpClient) {
+  return new TranslateHttpLoader(
+    httpClient,
+    Functions.backenUrl()+'/assets/i18n/',
+    '-lang.json'
+  );
+}
 
 @NgModule({
   declarations: [
@@ -75,6 +86,13 @@ export const APP_DATE_FORMATS: MatDateFormats = MAT_MOMENT_DATE_FORMATS;
     MatButtonToggleModule,
     NgMultiSelectDropDownModule.forRoot(),
 
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: HttpLoaderFactory,
+        deps: [HttpClient]
+      }
+    }),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: true
       // enabled: environment.production,
@@ -87,9 +105,9 @@ export const APP_DATE_FORMATS: MatDateFormats = MAT_MOMENT_DATE_FORMATS;
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true },
-    CheckForUpdateService,
-    LogUpdateService,
-    PromptUpdateService,
+    // CheckForUpdateService,
+    // LogUpdateService,
+    // PromptUpdateService,
     OnlineService,
     { provide: MAT_DATE_LOCALE, useValue: 'fr-FR' },
     { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE] },

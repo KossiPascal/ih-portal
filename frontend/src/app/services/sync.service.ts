@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { ErrorHandlerService } from "./error-handler.service";
+import { ErrorHandlerService } from "../../../../zfor_delete/error-handler.service";
 import { Chws, Dhis2Sync, Families, FilterParams, MedicMobileData, Patients, Sites, Sync, Zones } from "@ih-app/models/Sync";
 import { Router } from "@angular/router";
 import { DateUtils, Functions } from '@ih-app/shared/functions';
@@ -168,12 +168,6 @@ export class SyncService {
     params.user = this.auth.userId()
     return this.http.post(`${Functions.backenUrl()}/python/medicToDhis2`, params, Functions.customHttpHeaders(this.auth));
   }
-
-
-
-
-
-
 
 
   getDataByReportsDateView(syncData: Sync) {

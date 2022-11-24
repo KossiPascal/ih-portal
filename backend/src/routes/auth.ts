@@ -31,6 +31,5 @@ authRouter.post(
 );
 
 authRouter.post('/login', AuthController.login);
-authRouter.get('/user', AuthController.user);
 
 export = authRouter;

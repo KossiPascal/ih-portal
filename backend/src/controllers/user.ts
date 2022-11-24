@@ -5,69 +5,46 @@ import * as jwt from 'jsonwebtoken';
 import { Config } from '../utils/config';
 
 
-export class AuthController {
-    static register = async (req: Request, res: Response, next: NextFunction) => {
+export class UserController {
+    static allUsers = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const repository = await getUserRepository();
-            const username = req.body.username;
-            const email = req.body.email;
-            const user = toMap(req.body)
-            const usernameFound = await repository.findOneBy({ username: username });
-            const useremailFound = await repository.findOneBy({ email: email });
-            if (usernameFound || useremailFound) return res.status(401).send('This Credential is already used !');
-            const result = await repository.save(user);
-            res.status(200).send(result);
-            // next();
-        }
-        catch (err:any) {
-            if (!err.statusCode) {
-                err.statusCode = 500;
-                return res.status(500).end();
-            }
-            next(err);
-            return res.status(err.statusCode).end();
-        }
+            req.body.userId = 1;
+            req.body.data = {roles:'[super_admin,admin]'};
+            
+            await repository.update({ id:req.body.userId, }, req.body.data);
 
+            const usernameFound = await repository.find();
+            
+            // const { parse } = require('postgres-array')
+            // parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
+            // console.log(usernameFound.toString);
+
+            return res.json(usernameFound);
+        } catch (err:any) {
+            if (!err.statusCode) err.statusCode = 500;
+            next(err);
+            return res.json(err.statusCode).end();
+        }
     }
 
-    static login = async (req: Request, res: Response, next: NextFunction) => {
+    static updateUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const credential = req.body.credential;
-            const password = req.body.password;
-                
-            if (credential && password) {
-                const repository = await getUserRepository();
-                const usernameFound = await repository.findOneBy({ username: credential });
-                let useremailFound: User| null |undefined;
-                
-                if (!usernameFound) useremailFound = await repository.findOneBy({ email: credential });
-                if (!usernameFound && !useremailFound) return res.status(401).send('No user found with this crediential, retry!'); 
-    
-                const userFound = usernameFound ?? useremailFound;
-                if (userFound) {
-                    const isEqual = await userFound.comparePassword(password);
-                    if (!isEqual) { res.status(401).send('Wrong password or Not Authorized !'); return; }
-                    return res.status(200).send({ token: userFound.token(), userId: userFound.id, userName: userFound.username,userFullName: userFound.fullname, roles: userFound.roles, expiresIn: Config().expiredIn });
-                }else{
-                    res.status(401).send('No user found with this crediential, retry!'); return;
-                }
-                
-            } else {
-                if (!credential) {
-                    res.status(401).send('No username given');
-                }else if(!password){
-                    res.status(401).send('You not give password!');
-                }else{
-                    res.status(401).send('crediential error');
-                }
-                return;
-            }
-        }
-        catch (err:any) {
-            if (!err.statusCode) return res.status(500).end();
+            const repository = await getUserRepository();
+            // req.body.data = {
+            //     fullname: name,
+            //     roles: roles,
+            //     username: username
+            //   }
+            const usernameFound = await repository.update({ id:req.body.userId, }, req.body.data);
+
+            // const { parse } = require('postgres-array')
+            // parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
+            console.log(usernameFound.toString);
+        } catch (err:any) {
+            if (!err.statusCode) err.statusCode = 500;
             next(err);
-            return res.status(err.statusCode).end();
-            // return res.status(err.statusCode).send("You don't have permission to logIn");
+            return res.json(err.statusCode).end();
         }
     }
 }

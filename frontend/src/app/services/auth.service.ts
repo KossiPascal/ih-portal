@@ -32,16 +32,22 @@ export class AuthService {
   }
 
   private getRoles(): string[] {
-    let roles:string[] = `${sessionStorage.getItem("roles")}`.split(',');
-    return roles;
+    let roles:any = sessionStorage.getItem("roles");
+    return roles as string[];
   }
 
   public isSuperAdmin(): boolean {
-    return this.getRoles().includes('is_super_admin');
+    if (Functions.isNotNull(this.getRoles())) {
+      return this.getRoles().includes('super_admin');
+    }
+    return false;
   }
 
   public isAdmin(): boolean {
-    return this.getRoles().includes('is_admin') || this.getRoles().includes('is_super_admin');
+    if (Functions.isNotNull(this.getRoles())) {
+      return this.getRoles().includes('admin') || this.getRoles().includes('super_admin');
+    }
+    return false;
   }
 
   public userId(): string {
@@ -85,7 +91,8 @@ export class AuthService {
 
   getAllUsers(): any {
     if (this.isLoggedIn()) {
-      return this.http.get(`${Functions.backenUrl()}/user/all/users`, Functions.customHttpHeaders(this));
+      console.log(`${Functions.backenUrl()}/user/all`)
+      return this.http.get(`${Functions.backenUrl()}/user/all`, Functions.customHttpHeaders(this));
     } else {
       this.logout();
     }
