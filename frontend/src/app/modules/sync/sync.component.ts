@@ -195,11 +195,12 @@ export class SyncComponent implements OnInit {
   }
 
   WeeklyDateIsValid(): boolean {
+    var t:number = 0;
     for (let i = 0; i < this.weekly_Choosen_Dates.length; i++) {
       const dt = this.weekly_Choosen_Dates[i];
-      return DateUtils.getMondays(dt).includes(dt);
+      if(!DateUtils.getMondays(dt).includes(dt)) t++;
     }
-    return true;
+    return t == 0;
   }
 
   genarateColor(data:any):string {
