@@ -1,3 +1,5 @@
+# _*_ coding:utf-8 _*_
+
 import json
 import sys
 import tableauserverclient as TSC
@@ -331,7 +333,7 @@ def generateDataFromFinalFile(KWARG):
                 outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
         except:
             pass
-        print(str(outPutData).replace("'", '"'))
+        print((str(outPutData).replace("'", '"')).encode("utf8"))
 
 
 

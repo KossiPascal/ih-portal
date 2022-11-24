@@ -1,3 +1,5 @@
+# _*_ coding:utf-8 _*_
+
 import csv
 from functions import chwRemplacante, convertDate, createFile, deleteFile, extractFolder, extractPath, getChwsFromDhis2, getNexSundayDate, getOutPutData, getOutPutDataFromFile, getReportData, getReportOrgUnit, pathExist, signIn
 from fetch_medic_data import flushMedicDataToDhis2
@@ -207,13 +209,10 @@ def getMedicWeeklyData(ARGS, data_type="TotalVad"):
             for r in row:
                 rowData.append(str(r).replace("'", '’'))
             outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
-    print(str(outPutData).replace("'", '"'))
-
+    print((str(outPutData).replace("'", '"')).encode("utf8"))
 
 
 KWARGS = json.loads(sys.argv[1])
-
-# KWARGS ={"start_date":"", "end_date": "", "weekly_Choosen_Dates": ['2022-10-31', '2022-11-07'], "thinkmd_host": "10az.online.tableau.com", "thinkmd_site": "datasincbeta", "useToken": False, "thinkmd_token_username": "", "thinkmd_token": "", "thinkmd_username": "seaq@santeintegree.org", "thinkmd_password": "si@Kara0", "medic_host": "hth-togo.app.medicmobile.org", "medic_username": "admin", "medic_password": "0c2e4d44ef80408b850a207f7bab6e0c", "medic_database": "medic", "InsertIntoDhis2": False, "dhis2_host": "dhis2.integratehealth.org/dhis", "dhis2_username": "admin", "dhis2_password": "IH@-@admin$_$2021-@IH", "ssl_verification": False, "user": "1", "type": "thinkMd_and_medic"}
 
 if KWARGS['type'] == 'thinkMd_and_medic':
     getThinkMdMedicWeeklyDataFromDhis2(KWARGS)

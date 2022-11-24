@@ -1,3 +1,5 @@
+# _*_ coding:utf-8 _*_
+
 import json
 from operator import indexOf
 import sys
@@ -702,7 +704,7 @@ def flushMedicDataToDhis2(KWARG,fileName = "medic_output",data_type = "Consultat
             for r in row:
                 rowData.append(str(r).replace("'", '’'))
             outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
-        print(str(outPutData).replace("'", '"'))
+        print((str(outPutData).replace("'", '"')).encode("utf8"))
 
 
 KWARGS = json.loads(sys.argv[1])
