@@ -7,6 +7,7 @@
 </div> -->
 
 <div *ngIf="isAdmin">
+  
   <div>
     <h2>{{ 'HOME.TITLE' | translate }}</h2>
     <label>
@@ -21,11 +22,10 @@
   <div class="w-100 btn btn-success onlinemsg">
     <span class="badge bg-success" *ngIf="isOnline">Ok</span> You are Online
   </div>
+
   <div class="w-100 btn btn-danger offlinemsg">
     <span class="badge bg-danger" *ngIf="!isOnline">Ooops!</span> You are Offline
   </div>
-
-
 
   <div class="" *ngIf="modalVersion">
     <div class="alert alert-secondary m-2">
