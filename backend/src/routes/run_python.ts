@@ -113,7 +113,7 @@ pyRouter.post('/medicThinkmdWeekly', Middelware.authMiddleware, (req: Request, r
     if (req.body['medic_password'] === '' || req.body['medic_password'] === null) req.body['medic_password'] = process.env.COUCH_PASS;
     const python = spawn('python3', [basename + '/pythons/thinkmd_medic_weekly_data.py', JSON.stringify(req.body),]);
 
-    python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data); console.log(dataToSend)});
+    python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data);});
     python.stderr.on('data', (data) => { 
         errorToSend[`${user}`]['ErrorCount'] += 1; 
         errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
