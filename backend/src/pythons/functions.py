@@ -7,6 +7,9 @@ from datetime import datetime, timedelta
 import io
 import tableauserverclient as TSC
 
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 def pythonFolder():
      #pythons
     return os.path.dirname(__file__) or '.'

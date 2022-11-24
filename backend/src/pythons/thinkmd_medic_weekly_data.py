@@ -7,6 +7,7 @@ import tableauserverclient as TSC
 from operator import indexOf
 import json
 import sys
+sys.stdout.reconfigure(encoding='utf-8')
 
 
 outPutData = getOutPutData()
@@ -209,7 +210,7 @@ def getMedicWeeklyData(ARGS, data_type="TotalVad"):
             for r in row:
                 rowData.append(str(r).replace("'", '’'))
             outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
-    print((str(outPutData).replace("'", '"')).encode("utf8"))
+    print(str(outPutData).replace("'", '"'))
 
 
 KWARGS = json.loads(sys.argv[1])

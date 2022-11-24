@@ -1,7 +1,6 @@
 # _*_ coding:utf-8 _*_
 
 import json
-import sys
 import tableauserverclient as TSC
 from datetime import datetime
 from operator import indexOf
@@ -9,6 +8,8 @@ import pandas as pd
 import csv
 from functions import createFile, deleteFile, dhisApi, extractFolder, extractPath, getData, getDhis2OrgUnit, getMatchDataElementUid, getOtherData, getOutPutData, getOutPutDataFromFile, getVal, getValue, matchDhis2Data, signIn
 
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
 
 outPutData = getOutPutData()
 
@@ -333,7 +334,7 @@ def generateDataFromFinalFile(KWARG):
                 outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
         except:
             pass
-        print((str(outPutData).replace("'", '"')).encode("utf8"))
+        print(str(outPutData).replace("'", '"'))
 
 
 

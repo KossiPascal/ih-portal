@@ -2,11 +2,10 @@
 
 import json
 from operator import indexOf
-import sys
 import couchdb
-
 from functions import between, chwsFound, convert_milisecond_to_date, createFile, date_to_milisecond, dhisApi, districtFound, extractFolder, formView, getOutPutData, getOutPutDataFromFile, getValue, matchDhis2Data, medicDataType, record
-
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
 
 outPutData = getOutPutData()
 
@@ -704,7 +703,7 @@ def flushMedicDataToDhis2(KWARG,fileName = "medic_output",data_type = "Consultat
             for r in row:
                 rowData.append(str(r).replace("'", '’'))
             outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
-        print((str(outPutData).replace("'", '"')).encode("utf8"))
+        print(str(outPutData).replace("'", '"'))
 
 
 KWARGS = json.loads(sys.argv[1])

@@ -5,6 +5,7 @@ import { Middelware } from "../middleware/auth";
 import { Functions, isNotNull } from "../utils/functions";
 var path = require('path');
 const pyRouter = express.Router();
+// const utf8 = require('utf8');
 
 require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
 
@@ -16,6 +17,7 @@ var errorToSend: any = {};
 
 
 function formatData(data:any){
+    // utf8.decode(utf8.encode(`${data}`));
     return `${data}`.replace(regex, '"')
                     .replace('======================','')
                     .replace('=====================','')
