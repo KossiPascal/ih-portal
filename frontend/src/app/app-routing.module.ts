@@ -21,7 +21,7 @@ const routes: Routes = [
     FormsModule, 
     SharedModule,
     // RouterModule.forRoot(routes)
-    RouterModule.forRoot(routes, { useHash: true, relativeLinkResolution: 'legacy' })
+    RouterModule.forRoot(routes, { useHash: false, relativeLinkResolution: 'legacy' })
   ],
   exports: [RouterModule],
   providers: []
