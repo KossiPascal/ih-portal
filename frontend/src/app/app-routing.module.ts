@@ -10,7 +10,7 @@ const routes: Routes = [
   { path: 'users', loadChildren: () => import('./modules/user/users.module').then(m => m.UsersModule)},
   { path: 'dashboards', loadChildren: () => import('./modules/dashboard/dashboards.module').then(m => m.DashboardsModule)},
   { path: 'docs', loadChildren: () => import('./modules/documentation/documentations.module').then(m => m.DocumentationsModule)},
-  { path: 'syncs', loadChildren: () => import('./modules/sync/syncs.module').then(m => m.SyncsModule)},
+  { path: 'fetch', loadChildren: () => import('./modules/sync/syncs.module').then(m => m.SyncsModule)},
   { path: 'errors', loadChildren: () => import('./modules/error/errors.module').then(m => m.ErrorsModule)},
   { path: '', redirectTo: 'auths', pathMatch: 'full' }
 ];

@@ -78,12 +78,21 @@ const app = express()
   .use('/api/python', pyRouter)
   .use('/api/user', userRouter)
   .use('/api/assets', express.static(__dirname+'/assets'))
-  .use(express.static(`${Functions.projectFolder()}/views`, {maxAge: `1y`}))
-  .use('/', (req,res) => res.sendFile(`${Functions.projectFolder()}/views/index.html`))
+  // .use(express.static(`${Functions.projectFolder()}/views`, {maxAge: `1y`}))
+  // .use('/', (req,res) => res.sendFile(`${Functions.projectFolder()}/views/index.html`))
+  .use(express.static(path.join(Functions.projectFolder(), "views")))
+  .use("/", (req, res) => res.sendFile(path.join(Functions.projectFolder(), "views/index.html")))
   .all('*', (req, res) => res.status(200).redirect("/"))
   // .use((req, res, next) => next(createError(404, "Not found")))
   .use(errorController.Errors.get404)
   .use(errorController.Errors.get500);
+
+
+
+
+
+
+
 
 const appSecured = app;
 const credentials = {

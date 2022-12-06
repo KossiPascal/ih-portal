@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthsRoutingModule } from './auths-routing.module';
 import { LoginComponent } from './login.component';
-import { RegisterComponent } from './register.component';
+import { RegisterRequestComponent } from './register-request.component';
 import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
@@ -11,7 +11,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule,
     AuthsRoutingModule
   ],
-  declarations: [LoginComponent, RegisterComponent]
+  declarations: [LoginComponent, RegisterRequestComponent]
 })
 export class AuthsModule { }
 

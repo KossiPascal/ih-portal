@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SyncsRoutingModule } from './syncs-routing.module';
 import { SyncComponent } from './sync.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { SyncOrgUnitDataComponent } from './sync-orgunit-data.component';
 
 @NgModule({
   imports: [
@@ -10,6 +11,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule,
     SyncsRoutingModule
   ],
-  declarations: [SyncComponent]
+  declarations: [SyncComponent,SyncOrgUnitDataComponent]
 })
 export class SyncsModule { }
+

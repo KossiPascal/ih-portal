@@ -22,18 +22,12 @@ declare var initDataTable: any;
 })
 export class SyncComponent implements OnInit {
 
-  chwsDataForm!: FormGroup;
-  dhis2ChwsDataForm!: FormGroup;
-  orgUnitAndPersonForm!: FormGroup;
   thinkmdToDhis2Form!: FormGroup;
   medicToDhis2Form!: FormGroup;
   medicThinkMdWeeklyForm!: FormGroup;
   tab1_messages: DataFromPython | null = null;
   tab2_messages: DataFromPython | null = null;
   tab3_messages: DataFromPython | null = null;
-  tab4_messages: OrgUnitImport | null = null;
-  tab5_messages: OrgUnitImport | null = null;
-  tab6_messages: OrgUnitImport | null = null;
   dates: moment.Moment[] = [];
   weekly_Choosen_Dates: string[] = [];
   is_weekly_date_error: boolean = false;
@@ -42,9 +36,6 @@ export class SyncComponent implements OnInit {
   loading1!: boolean;
   loading2!: boolean;
   loading3!: boolean;
-  loading4!: boolean;
-  loading5!: boolean;
-  loading6!: boolean;
 
   start_date_error: boolean = false;
   end_date_error: boolean = false;
@@ -75,14 +66,7 @@ export class SyncComponent implements OnInit {
     this.loading1 = false;
     this.loading2 = false;
     this.loading3 = false;
-    this.loading4 = false;
-    this.loading5 = false;
-    this.loading6 = false;
-
-    this.chwsDataForm = this.createChwsDataFormGroup();
-    this.dhis2ChwsDataForm = this.createDhis2ChwsDataFormGroup();
-
-    this.orgUnitAndPersonForm = this.createOrgUnitAndPersonFormGroup();
+    
     this.thinkmdToDhis2Form = this.createThinkmdFormGroup();
     this.medicToDhis2Form = this.createMedicFormGroup();
     this.medicThinkMdWeeklyForm = this.createMedicThinkmdFormGroup();
@@ -272,61 +256,7 @@ export class SyncComponent implements OnInit {
     }
   }
 
-  syncAllSiteZoneFamilyPersonFromDb(): void {
-    this.loading4 = true;
-    this.tab4_messages = null;
-    const port = this.medicUrl$[this.orgUnitAndPersonForm.value['medic_host']];
-    this.orgUnitAndPersonForm.value['port'] = port;
-    this.orgUnitAndPersonForm.value['ssl_verification'] = `${port}` == '444' ? true : false;
-    this.syncService.syncSiteZoneFamilyPerson(this.orgUnitAndPersonForm.value).subscribe((response: OrgUnitImport) => {
-      this.loading4 = false;
-      this.tab4_messages = response;
-      // console.log(response);
-    }, (err: any) => {
-      this.loading4 = false;
-      this.tab4_messages = err.error as OrgUnitImport;
-    });
-  }
 
-  syncAllChwsDataFromDb(): void {
-    this.loading5 = true;
-    this.tab5_messages = null;
-    const port = this.medicUrl$[this.chwsDataForm.value['medic_host']];
-    this.chwsDataForm.value['port'] = port;
-    this.chwsDataForm.value['ssl_verification'] = `${port}` == '444' ? true : false;
-    this.syncService.syncChwsData(this.chwsDataForm.value).subscribe((response: OrgUnitImport) => {
-      this.loading5 = false;
-      this.tab5_messages = response;
-      // console.log(response);
-    }, (err: any) => {
-      this.loading5 = false;
-      this.tab5_messages = err.error as OrgUnitImport;
-    });
-  }
-
-  syncAllChwsDataFromDhis2(): void {
-    this.loading6 = true;
-    this.tab6_messages = null;
-    const startDate: string = this.dhis2ChwsDataForm.value['start_date'];
-    const endDate: string = this.dhis2ChwsDataForm.value['end_date'];
-    const site: string = this.dhis2ChwsDataForm.value["sites"];
-    const dhis2Params: Dhis2Sync = {
-      orgUnitFilter: site,
-      // orgUnitFilter: 'orgUnit:in:k52TtOanhCc',
-      filter: [`RlquY86kI66:GE:${startDate}:LE:${endDate}`],
-      // filter: [`RlquY86kI66:GE:2022-06-21:LE:2022-06-31`],
-      fields: ['event', 'orgUnit', 'orgUnitName', 'dataValues[dataElement,value]']
-    }
-
-    this.syncService.syncDhis2ChwsData(dhis2Params).subscribe((response: OrgUnitImport) => {
-      this.loading6 = false;
-      this.tab6_messages = response;
-      // console.log(response);
-    }, (err: any) => {
-      this.loading6 = false;
-      this.tab6_messages = err.error as OrgUnitImport;
-    });
-  }
 
   remove(arr: any, what: any) {
     var found = arr.indexOf(what);

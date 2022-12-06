@@ -25,4 +25,12 @@ export class UserComponent implements OnInit {
       // const user: User[] = Array.isArray(usersDb) ? usersDb : [];
   }
 
+  EditUser(){
+
+  }
+  
+  DeleteUser(){
+    
+  }
+
 }

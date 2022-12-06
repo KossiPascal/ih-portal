@@ -9,7 +9,7 @@ import { AuthService } from "@ih-services/auth.service";
   selector: "app-register",
   templateUrl: "./auth.component.html",
 })
-export class RegisterComponent implements OnInit {
+export class RegisterRequestComponent implements OnInit {
   authForm!: FormGroup;
   isLoginForm: boolean = false;
   message: string = 'Vous voulez vous enrégistrer';
@@ -40,6 +40,7 @@ export class RegisterComponent implements OnInit {
       agreeTermsOrRemenberMe: new FormControl(false, [
         Validators.required
       ]),
+      isActive:new FormControl(false)
 
       
     },[this.MatchValidator('password', 'passwordConfirm'),this.AcceptThermeValidator('agreeTermsOrRemenberMe') ]);
@@ -82,13 +83,13 @@ export class RegisterComponent implements OnInit {
         .subscribe((res: any) => {
           this.message = 'Registed successfully !'
           console.log(`Registed successfully !`);
-          this.isLoading = false;
           this.router.navigate(["auths/login"]);
+          this.isLoading = false;
           // location.href = 'auths/login'
           // console.log(val);
         }, (err: any) => {
-          this.isLoading = false;
           this.message = err.error;
+          this.isLoading = false;
           console.log(this.message);
         });
       // console.log('Register User ' + JSON.stringify(user));

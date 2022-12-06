@@ -93,7 +93,7 @@
             </div>
         </form>
 
-        <div class="social-auth-links text-center">
+        <!-- <div class="social-auth-links text-center">
             <a href="#" class="btn btn-block btn-primary">
                 <i class="fab fa-facebook mr-2"></i>
                 {{isLoginForm ? 'Sign In using Facebook' : 'Sign up using Facebook'}}
@@ -102,7 +102,7 @@
                 <i class="fab fa-google-plus mr-2"></i>
                 {{isLoginForm ? 'Sign In using Google+' : 'Sign up using Google+'}}
             </a>
-        </div>
+        </div> -->
 
         <a *ngIf="!isLoginForm" routerLink="/auths/login" class="text-center">I already have a membership</a>
         <a *ngIf="isLoginForm" routerLink="/auths/register" class="text-center">Register a new membership</a>

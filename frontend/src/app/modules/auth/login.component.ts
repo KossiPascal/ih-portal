@@ -58,11 +58,11 @@ export class LoginComponent implements OnInit {
           this.authService.setClientSession(res);
           this.message = 'Login successfully !'
           console.log(`Login successfully !`);
-          this.isLoading = false;
           const redirectUrl = sessionStorage.getItem("redirect_url");
           // this.router.navigate([redirectUrl || this.authService.defaultRedirectUrl]);
           location.href = redirectUrl || this.authService.defaultRedirectUrl;
           sessionStorage.removeItem("redirect_url");
+          this.isLoading = false;
         }, (err: any) => {
           this.isLoading = false;
           this.message = err.error;
