@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1670317536801,
+  "timestamp": 1670327104729,
   "index": "/index.html",
   "assetGroups": [
     {
@@ -18,28 +18,6 @@
         "/610.js",
         "/976.js",
         "/988.js",
-        "/common.js",
-        "/favicon.ico",
-        "/index.html",
-        "/main.js",
-        "/ngsw-worker.js",
-        "/polyfills.js",
-        "/runtime.js",
-        "/safety-worker.js",
-        "/scripts.js",
-        "/styles.css",
-        "/worker-basic.min.js"
-      ],
-      "patterns": []
-    },
-    {
-      "name": "assets",
-      "installMode": "lazy",
-      "updateMode": "prefetch",
-      "cacheQueryOptions": {
-        "ignoreVary": true
-      },
-      "urls": [
         "/assets/audio/alert.mp3",
         "/assets/audio/fail.mp3",
         "/assets/css/adminlte.min.css",
@@ -1760,6 +1738,28 @@
         "/assets/plugins/uplot/uPlot.esm.js",
         "/assets/plugins/uplot/uPlot.iife.min.js",
         "/assets/plugins/uplot/uPlot.min.css",
+        "/common.js",
+        "/favicon.ico",
+        "/index.html",
+        "/main.js",
+        "/ngsw-worker.js",
+        "/polyfills.js",
+        "/runtime.js",
+        "/safety-worker.js",
+        "/scripts.js",
+        "/styles.css",
+        "/worker-basic.min.js"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
         "/bootstrap-icons.woff",
         "/bootstrap-icons.woff2",
         "/fa-brands-400.svg",
@@ -1783,13 +1783,13 @@
   ],
   "dataGroups": [],
   "hashTable": {
-    "/275.js": "6ac0920018a9e959ab5f11cd7f5b259d4d95a3b7",
-    "/404.js": "cf00583ab0bfb8750f19e4249780c8fc41d1c963",
-    "/460.js": "0adc0af9f63541e4cf965556d4cf7d68933f0088",
-    "/486.js": "fe57c976230283725f8aa462a84d822f769b1755",
-    "/610.js": "d84b83eb9c85fd7690b0858e969a967a6f1d97a9",
+    "/275.js": "91f880d4820720718c04ad9ae730cc858aebc47b",
+    "/404.js": "86af17f8a0d1b47e645e1ca47a92ffc9644d3113",
+    "/460.js": "8f44cd84fac4dae80b7aafdcc4b210ab8d7f428b",
+    "/486.js": "ce2df627b29eb3c4be6fd164d4baa669a23d8f67",
+    "/610.js": "09443fe807d1c6d7487e6b84c81dbfe38b455416",
     "/976.js": "8311706bdbfb4e7df43de816aff905e52c07819f",
-    "/988.js": "62061c30174df74e97a227b3bedb22826ebc160e",
+    "/988.js": "63084f4700f133a0163bd2057632ac01b927cce8",
     "/assets/audio/alert.mp3": "1dd841f5e3588cb2b2ba4a1443b5f2b9e2119d54",
     "/assets/audio/fail.mp3": "440535d84e39330a4d1a069d0c42b75ef4dfa515",
     "/assets/css/adminlte.min.css": "8866105f0a067dbc7db3610b9f76f782d10addc1",
@@ -3512,7 +3512,7 @@
     "/assets/plugins/uplot/uPlot.min.css": "534fd0aff8141c18e7cae32fe902495ff49fe8c5",
     "/bootstrap-icons.woff": "75919c717ce5c5bc716bc51705c0cd0b60f4bffc",
     "/bootstrap-icons.woff2": "17dad0776899ad1beadabd061c34e2a22b2cde74",
-    "/common.js": "ff8be137400ca3f66d63a214eaa5a9b4deb6789a",
+    "/common.js": "d401b5fc668b726d05821aa67010d04a3232b121",
     "/fa-brands-400.svg": "907bfbbe295332750575900984a00136de0f0e90",
     "/fa-brands-400.ttf": "8ab907083fecaaa2a9ec93b27f884ad74573705c",
     "/fa-brands-400.woff": "1e1f02bfa89e179fe2dd1383273b8812aa873418",
@@ -3526,11 +3526,11 @@
     "/fa-solid-900.woff": "a22acd7697f36e7d4cc31a853c70e776eac54bb1",
     "/fa-solid-900.woff2": "0ccb2c814a7e4ca12c4778821633809cb0361eaa",
     "/favicon.ico": "b3ad0e1c2a97826d3acc2bf019f78cf73576cc11",
-    "/index.html": "1599dca3a2575597e1f4ae766c2ca6d7c840fd4d",
-    "/main.js": "054a580a01d89c9a1a54f2db2336ef63cd9e2d12",
+    "/index.html": "dc8b6dcabb8f75acd0e5b51d9c346765a2c6eeef",
+    "/main.js": "520ef2c5efeb618c484d5ec97e1958183ceb635c",
     "/ngsw-worker.js": "30eaca2ce1ab52ea140bc24e7b9ba25ee0884907",
     "/polyfills.js": "38373725676865bafb38d1941c208a7f81c041fb",
-    "/runtime.js": "81180b14c43e814606b19f44c886504dd77c2924",
+    "/runtime.js": "05ad63d27fb97bd9ccac6cf8344f0e98ba13c27c",
     "/safety-worker.js": "30eaca2ce1ab52ea140bc24e7b9ba25ee0884907",
     "/scripts.js": "e4f41a1ab415ac08a8da16a87fba948844f6b57d",
     "/styles.css": "b1433b72a00e95c30434a61d04bb709d7a550fc9",

@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "concurrently \"npm run ng serve\" \"cd ../backend && npm run nodemonserver\"",
-    "build": "ng build --build-optimizer --optimization --service-worker --configuration production --aot",
+    "build": "ng build --service-worker --build-optimizer --optimization --configuration production --aot --deploy-url=https://portal-integratehealth.org:9999/",
     "watch": "ng build --watch --configuration development",
     "precache": "sw-precache --verbose --config=sw-precache-config.js"
   },

@@ -9,7 +9,11 @@
           "/favicon.ico",
           "/index.html",
           "/*.css",
-          "/*.js"
+          "/*.js",
+          "/*.bundle.css",
+          "/*.bundle.js",
+          "/*.chunk.js",
+          "/assets/**"
         ],
         "urls": []
       }

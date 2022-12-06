@@ -9,6 +9,7 @@ import { interval } from 'rxjs';
 import { SyncService } from './services/sync.service';
 // import { UpdateService } from '../../../zfor_delete/update.service';
 import { TranslateService } from '@ngx-translate/core';
+import { CheckForUpdateService } from './services/check-for-update.service';
 
 @Component({
   selector: 'app-root',
@@ -29,7 +30,7 @@ export class AppComponent implements OnInit {
   time: number = 0;
   localSync: string = '';
 
-  constructor(public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(private sw:CheckForUpdateService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
@@ -51,6 +52,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.sw.SwUpdate();
     this.isAdmin = this.auth.isAdmin();
     const appTitle = this.titleService.getTitle();
     this.localSync = this.sync.isLocalSyncSuccess() ? 'syncSuccess' : 'syncError'

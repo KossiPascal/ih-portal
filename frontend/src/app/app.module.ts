@@ -9,9 +9,7 @@ import { AuthInterceptorService } from '@ih-services/auth-interceptor.service';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '@ih-environments/environment';
-// import { CheckForUpdateService } from '@ih-services/check-for-update.service';
-// import { LogUpdateService } from '@ih-services/log-update.service';
-// import { PromptUpdateService } from '@ih-services/prompt-update.service';
+import { CheckForUpdateService } from '@ih-services/check-for-update.service';
 import { OnlineService } from '@ih-services/detecting-online.service';
 import { IndexDbItemListComponent } from './modules/index_db/indexdb_items.component';
 
@@ -85,7 +83,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     MatButtonModule,
     MatButtonToggleModule,
     NgMultiSelectDropDownModule.forRoot(),
-
+    
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
@@ -93,9 +91,9 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
         deps: [HttpClient]
       }
     }),
-    ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: true
-      // enabled: environment.production,
+    ServiceWorkerModule.register('/ngsw-worker.js', {
+      // enabled: true
+      enabled: environment.production,
       // Register the ServiceWorker as soon as the application is stable
       // or after 30 seconds (whichever comes first).
       // registrationStrategy: 'registerWhenStable:30000'
@@ -105,9 +103,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true },
-    // CheckForUpdateService,
-    // LogUpdateService,
-    // PromptUpdateService,
+    CheckForUpdateService,
     OnlineService,
     { provide: MAT_DATE_LOCALE, useValue: 'fr-FR' },
     { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE] },

@@ -96,7 +96,6 @@ const app = express()
 
 
 
-
 const appSecured = app;
 const credentials = {
   key: fs.readFileSync(`${Functions.sslFolder('server.key')}`, 'utf8'),
