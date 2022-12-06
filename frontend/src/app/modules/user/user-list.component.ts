@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '@ih-app/services/auth.service';
+import { Functions } from '@ih-app/shared/functions';
 import { User } from '@ih-models/User';
 // import usersDb from '@ih-databases/users.json'; 
 
@@ -9,9 +11,19 @@ import { User } from '@ih-models/User';
 
 }) 
 export class UserComponent implements OnInit {
+activeSave() {
+throw new Error('Method not implemented.');
+}
   users$!: User[];
 
-  constructor(private authService:AuthService) { 
+  roles$:string[] = [
+    'super_admin',
+    'can_manage_user',
+    'admin',
+    'super_admin'
+  ]
+
+  constructor(private authService:AuthService, private router: Router) { 
   }
 
   ngOnInit(): void {
@@ -31,6 +43,11 @@ export class UserComponent implements OnInit {
   
   DeleteUser(){
     
+  }
+
+  CreateUser() {
+    Functions.saveCurrentUrl(this.router);
+    location.href = 'auths/register';
   }
 
 }

@@ -1,8 +1,6 @@
-import fs = require("fs");
 import path = require("path");
 import https = require("https");
 import http = require("http");
-import { AppDataSource } from "../data-source";
 import { Dhis2Sync, MailConfig, Sync } from "./appInterface";
 
 const nodemailer = require("nodemailer");

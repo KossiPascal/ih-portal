@@ -1,12 +1,13 @@
 import "reflect-metadata"
 import express from 'express';
-import * as bodyParser from 'body-parser';
+import {json, urlencoded} from 'body-parser';
 import bearerToken = require('express-bearer-token');
 import authRouter = require("./routes/auth");
 import userRouter = require("./routes/user");
+import configRouter = require("./routes/config");
 import syncRouter = require('./routes/sync');
 import pyRouter = require('./routes/run_python');
-import * as errorController from './controllers/error';
+import { Errors }  from './controllers/error';
 import https = require("https");
 import http = require("http");
 import fs = require("fs");
@@ -46,8 +47,8 @@ AppDataSource
 
 const app = express()
   .use(cors())
-  .use(bodyParser.json())
-  .use(bodyParser.urlencoded({ extended: false }))
+  .use(json())
+  .use(urlencoded({ extended: false }))
   .enable('trust proxy')
   .set('trust proxy', 1)
   .set("view engine", "ejs")
@@ -77,6 +78,8 @@ const app = express()
   .use('/api/sync', syncRouter)
   .use('/api/python', pyRouter)
   .use('/api/user', userRouter)
+  .use('/api/configs', configRouter)
+  
   .use('/api/assets', express.static(__dirname+'/assets'))
   // .use(express.static(`${Functions.projectFolder()}/views`, {maxAge: `1y`}))
   // .use('/', (req,res) => res.sendFile(`${Functions.projectFolder()}/views/index.html`))
@@ -84,8 +87,8 @@ const app = express()
   .use("/", (req, res) => res.sendFile(path.join(Functions.projectFolder(), "views/index.html")))
   .all('*', (req, res) => res.status(200).redirect("/"))
   // .use((req, res, next) => next(createError(404, "Not found")))
-  .use(errorController.Errors.get404)
-  .use(errorController.Errors.get500);
+  .use(Errors.get404)
+  .use(Errors.get500);
 
 
 

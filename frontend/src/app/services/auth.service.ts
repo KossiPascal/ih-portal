@@ -36,9 +36,17 @@ export class AuthService {
     return roles as string[];
   }
 
-  public isSuperAdmin(): boolean {
+  public isSuperAdminn(): boolean {
     if (Functions.isNotNull(this.getRoles())) {
       return this.getRoles().includes('super_admin');
+    }
+    return false;
+  }
+
+  public canManageUser(): boolean {
+    if (Functions.isNotNull(this.getRoles())) {
+      // return this.getRoles().includes('super_admin');
+      return this.getRoles().includes('can_manage_user');
     }
     return false;
   }
@@ -91,7 +99,6 @@ export class AuthService {
 
   getAllUsers(): any {
     if (this.isLoggedIn()) {
-      console.log(`${Functions.backenUrl()}/user/all`)
       return this.http.get(`${Functions.backenUrl()}/user/all`, Functions.customHttpHeaders(this));
     } else {
       this.logout();
@@ -134,7 +141,7 @@ export class AuthService {
   // window.location.pathname
 
   register(user: User): any {
-    if (!this.isLoggedIn()) {
+    if (!this.isLoggedIn() || this.canManageUser()) {
       return this.http.post(`${Functions.backenUrl()}/auth/register`, user, Functions.customHttpHeaders(this));
     } else {
       this.alreadyAuthenticate();
@@ -160,6 +167,12 @@ export class AuthService {
     localStorage.removeItem("expires_at");
     // this.router.navigate(["auths/login"]);
     location.href = 'auths/login';
+  }
+
+  
+
+  getConfigs(): any {
+    return this.http.get(`${Functions.backenUrl()}/configs`, Functions.customHttpHeaders(this));
   }
 }
   

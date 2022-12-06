@@ -9,6 +9,11 @@
     animation: slideup 3.4s ease;
 }
 
+.ios-menu {
+    width: 14px;
+}
+
+
 @keyframes slideup {
     50% {
         top: 0
@@ -28,3 +33,4 @@
     color: red;
     font-weight: bolder;
 }
+

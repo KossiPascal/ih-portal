@@ -7,3 +7,11 @@ export interface User {
   roles:string[]
   isActive: boolean
 }
+
+
+
+export interface Configs {
+  id:any
+  showRegisterPage:boolean
+}
+

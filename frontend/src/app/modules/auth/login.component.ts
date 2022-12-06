@@ -3,6 +3,8 @@ import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from '@angular/router';
 import { AuthService } from '@ih-services/auth.service';
 import { HttpClient } from "@angular/common/http";
+import { Configs } from '@ih-app/models/User';
+import { Functions } from '@ih-app/shared/functions';
 
 
 @Component({
@@ -14,13 +16,24 @@ export class LoginComponent implements OnInit {
   isLoginForm: boolean = true;
   message: string = 'Vous êtes déconnecté !';
   isLoading:boolean = false;
-  LoadingMsg: string = "Loading..."
+  LoadingMsg: string = "Loading...";
+  showRegisterPage:boolean = false;
 
   constructor(private authService: AuthService, private router: Router, private http: HttpClient) { }
 
   ngOnInit(): void {
+    this.getConfigs;
     this.authService.alreadyAuthenticate();
     this.authForm = this.createFormGroup();
+  }
+
+  getConfigs(){
+    return this.authService.getConfigs()
+    .subscribe((res: Configs) => {
+      this.showRegisterPage = res.showRegisterPage ?? false;
+    }, (err: any) => {
+      this.showRegisterPage = false;
+    });
   }
 
   setMessage(msg: string) {
@@ -58,10 +71,9 @@ export class LoginComponent implements OnInit {
           this.authService.setClientSession(res);
           this.message = 'Login successfully !'
           console.log(`Login successfully !`);
-          const redirectUrl = sessionStorage.getItem("redirect_url");
+          const redirectUrl = Functions.getSavedUrl();
           // this.router.navigate([redirectUrl || this.authService.defaultRedirectUrl]);
           location.href = redirectUrl || this.authService.defaultRedirectUrl;
-          sessionStorage.removeItem("redirect_url");
           this.isLoading = false;
         }, (err: any) => {
           this.isLoading = false;

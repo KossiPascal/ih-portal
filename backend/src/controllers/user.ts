@@ -1,32 +1,54 @@
 import { Request, Response, NextFunction, Router } from 'express';
 import { getUserRepository, toMap, User } from '../entity/User';
-import * as bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
-import { Config } from '../utils/config';
-
 
 export class UserController {
     static allUsers = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const repository = await getUserRepository();
             req.body.userId = 1;
-            req.body.data = {roles:'[super_admin,admin]'};
-            
-            await repository.update({ id:req.body.userId, }, req.body.data);
-
-            const usernameFound = await repository.find();
-            
+            // req.body.data = {roles:'[super_admin,admin]'};
+            // await repository.update({ id:req.body.userId, }, req.body.data);
+            const usernameFound = await repository.find(
+                {
+                    order: {
+                        username: "DESC",
+                        id: "ASC"
+                    }
+                }
+                // {
+                //     order: {
+                //         singer: {
+                //             name: "ASC"
+                //         }
+                //     }
+                // }
+            );
             // const { parse } = require('postgres-array')
             // parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
             // console.log(usernameFound.toString);
 
+            // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+            // let res = await repository.findAndCount({
+            //     where: [{ username : Like(`%${searchValue}%`) }, { action : Like(`%${searchValue}%`) }, { ip : Like(`%${searchValue}%`) }],
+            //     order: { [sortField]: sortOrder === "descend" ? 'DESC' : 'ASC', },
+            //     skip: (current - 1) * pageSize,
+            //     take: pageSize,
+            //   });
+
+            // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
             return res.json(usernameFound);
-        } catch (err:any) {
+        } catch (err: any) {
             if (!err.statusCode) err.statusCode = 500;
             next(err);
             return res.json(err.statusCode).end();
         }
     }
+
+
 
     static updateUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -36,12 +58,12 @@ export class UserController {
             //     roles: roles,
             //     username: username
             //   }
-            const usernameFound = await repository.update({ id:req.body.userId, }, req.body.data);
+            const usernameFound = await repository.update({ id: req.body.userId, }, req.body.data);
 
             // const { parse } = require('postgres-array')
             // parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
             console.log(usernameFound.toString);
-        } catch (err:any) {
+        } catch (err: any) {
             if (!err.statusCode) err.statusCode = 500;
             next(err);
             return res.json(err.statusCode).end();

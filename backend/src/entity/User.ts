@@ -3,12 +3,17 @@ import { AppDataSource } from "../data-source"
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { response } from 'express';
-import { Config } from "../utils/config";
+import { Utils } from "../utils/utils";
 
 // https://dev.to/brunoblaise/postgresql-how-to-add-array-data-type-and-quiz-api-in-nodejs-1kel
 
 
-@Entity()
+@Entity("user", {
+  orderBy: {
+      username: "ASC",
+      id: "DESC"
+  }
+})
 export class User {
     constructor(){};
     @PrimaryGeneratedColumn()
@@ -28,6 +33,9 @@ export class User {
 
     @Column({ nullable: true })
     roles!: string
+
+    @Column({ nullable: false, default: false })
+    isActive!: boolean
 
     // @Column('json', { nullable: true })
     // roles!: object
@@ -49,7 +57,7 @@ export class User {
     }
   
     token() {
-      return jwt.sign({ username: this.username, userId: this.id}, Config().secretOrPrivateKey, { expiresIn: `${Config().expiredIn}s` });
+      return jwt.sign({ username: this.username, userId: this.id}, Utils().secretOrPrivateKey, { expiresIn: `${Utils().expiredIn}s` });
     }
 
 
@@ -58,9 +66,7 @@ export class User {
 let connection:DataSource;
 
 export async function getUserRepository(): Promise<Repository<User>> {
-  if (connection===undefined) {
-    connection =  AppDataSource.manager.connection;
-  }
+  if (connection===undefined) connection =  AppDataSource.manager.connection;
   return connection.getRepository(User);
 }
 
@@ -71,7 +77,8 @@ export function toMap(data:any):User{
       user.fullname = data.fullname??'';
       user.email = data.email??'';
       user.password = data.password??'';
-      user.roles = data.roles??[]
+      user.roles = data.roles??[];
+      user.isActive = data.isActive??false;
     return user;
 }
 

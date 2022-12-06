@@ -1,10 +1,25 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { Router } from "@angular/router";
 import { AuthService } from "@ih-services/auth.service";
 // import { envs } from '@ih-backendEnv/env';
 // const httpOptions: { headers: HttpHeaders } = {headers: new HttpHeaders({ "Content-Type": "application/json" }),};
 
-
 export class Functions {
+
+  static saveCurrentUrl(router: Router):void{
+    const link = router.url.split(Functions.backenUrl(''))[0];
+    // const link = location.href;
+    // const link = window.location.href;
+    console.log(link)
+      sessionStorage.setItem("redirect_url", link);
+  }
+
+  static getSavedUrl():string{
+    const link = sessionStorage.getItem('redirect_url') ?? '';
+    sessionStorage.removeItem("redirect_url");
+    return link;
+  }
+
   static loadCssScripts(dynamicCssScripts: string[]) {
     for (let i = 0; i < dynamicCssScripts.length; i++) {
       const src = dynamicCssScripts[i];
@@ -48,11 +63,11 @@ export class Functions {
 
   }
 
-  static backenUrl(): string {
+  static backenUrl(cible:string = 'api'): string {
     // const port = location.protocol === 'https:' ? envs.PORT_SECURED : envs.PORT;
     const port = location.protocol === 'https:' ? 9999 : 7777;
 
-    return `${location.protocol}//${location.hostname}:${port}/api`;
+    return `${location.protocol}//${location.hostname}:${port}/${cible}`;
     // return environment.apiURL;
 
   }
@@ -89,6 +104,7 @@ export class Functions {
     return /^-?[\d.]+(?:e-?\d+)?$/.test(n); 
   }
 }
+
 
 
 

@@ -8,7 +8,6 @@ import { TitleService } from '@ih-services/title.service';
 import { interval } from 'rxjs';
 import { SyncService } from './services/sync.service';
 // import { UpdateService } from '../../../zfor_delete/update.service';
-
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -40,8 +39,6 @@ export class AppComponent implements OnInit {
     const browserLang = translate.getBrowserLang();
     translate.use(browserLang?.match(/en|fr/) ? browserLang : 'en'); //this enabled setting lang automatically
     // translate.use('en');
-
-
     // this.updateService.checkForUpdates();
 
     interval(6000)
@@ -49,7 +46,6 @@ export class AppComponent implements OnInit {
       .subscribe(res => {
         if (this.isOnline) this.time++;
       })
-
     // if(this.auth.isLoggedIn()) this.sync.syncAllToLocalStorage();
 
   }
@@ -82,16 +78,10 @@ export class AppComponent implements OnInit {
     this.updateOnlineStatus();
     window.addEventListener('online', this.updateOnlineStatus.bind(this));
     window.addEventListener('offline', this.updateOnlineStatus.bind(this));
+    this.loadPwaVersion();
     this.loadModalPwa();
   }
 
-  // updateCheck(): void {
-  //   this.swUpdate
-  //     .checkForUpdate()
-  //     .then(() => { this.updateCheckText = 'resolved'; console.log('resolved') })
-  //     .catch(err => { this.updateCheckText = `rejected: ${err.message}` })
-  //     .finally(() => { console.log('finally') });
-  // }
 
   private updateOnlineStatus(): void {
     this.isOnline = window.navigator.onLine;
@@ -100,40 +90,24 @@ export class AppComponent implements OnInit {
 
   public updateVersion(): void {
     this.modalVersion = false;
-    this.updateCheckText = '';
     window.location.reload();
-    document.location.reload();
   }
 
-  public closeVersion(): void {
-    this.modalVersion = false;
-    this.updateCheckText = '';
-    this.getMsg('offlinemsg');
+  private loadPwaVersion(){
+    if (this.swUpdate.isEnabled) {
+      this.swUpdate.versionUpdates.pipe(
+        filter((evt: any): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
+        map((evt: any) => {
+          console.info(`currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
+          this.modalVersion = true;
+        }),
+      );
+    }
   }
-
 
   private loadModalPwa(): void {
-    if (!this.swUpdate.isEnabled) {
-      this.swUpdate.versionUpdates.pipe(filter((evt: any): evt is VersionReadyEvent => evt.type === 'VERSION_READY'))
-        .subscribe(evt => {
-          this.modalVersion = true;
-          this.updateCheckText = `${evt.currentVersion}`;
-          // this.updateVersion(); 
-          // console.info(`currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
-          this.getMsg('onlinemsg');
-        });
-      // map((evt: any) => {
-      //   console.info(`currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
-      //   this.getMsg('onlinemsg');
-      // });
-      interval(6000).subscribe(() => this.swUpdate.checkForUpdate()
-        .then(() => { window.location.reload(); console.log('checking for updates') }));
-    } else {
-      console.log('Nope 🙁');
-    }
-
     if (this.platform.ANDROID) {
-      window.addEventListener('beforeinstallprompt', (event:any) => {
+      window.addEventListener('beforeinstallprompt', (event: any) => {
         event.preventDefault();
         this.modalPwaEvent = event;
         this.modalPwaPlatform = 'android';
@@ -148,10 +122,15 @@ export class AppComponent implements OnInit {
     }
   }
 
+  public closeVersion(): void {
+    this.modalVersion = false;
+  }
+
+
+
   public addToHomeScreen(): void {
-    this.modalPwaEvent?.prompt();
+    this.modalPwaEvent.prompt();
     this.modalPwaPlatform = undefined;
-    this.updateVersion();
   }
 
   public closePwa(): void {
@@ -166,18 +145,14 @@ export class AppComponent implements OnInit {
   // function msg
   getMsg(msgClass: string) {
     let element = document.querySelector('.' + msgClass)!;
-    element.className += " movedown";
-    setTimeout(() => {
-      element.classList.forEach(classname => {
-        classname == "movedown" ? undefined : element.classList.remove('movedown');
-      })
-    }, 4000);
+    if (element != null) {
+      element.className += " movedown";
+      setTimeout(() => {
+        element.classList.forEach(classname => {
+          classname == "movedown" ? undefined : element.classList.remove('movedown');
+        })
+      }, 4000);
+    }
   }
 }
 
-// 
-// warningMsg
-// 
-
-
-// this.getMsg('offlineMsg');

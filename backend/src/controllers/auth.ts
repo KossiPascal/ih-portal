@@ -2,29 +2,24 @@ import { Request, Response, NextFunction, Router } from 'express';
 import { getUserRepository, toMap, User } from '../entity/User';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { Config } from '../utils/config';
+import { Utils } from '../utils/utils';
 
 
 export class AuthController {
     static register = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const repository = await getUserRepository();
-            const username = req.body.username;
-            const email = req.body.email;
-            const user = toMap(req.body)
-            const usernameFound = await repository.findOneBy({ username: username });
-            const useremailFound = await repository.findOneBy({ email: email });
+            const user: User = toMap(req.body)
+            const usernameFound = await repository.findOneBy({ username: user.username });
+            const useremailFound = await repository.findOneBy({ email: user.email });
             if (usernameFound || useremailFound) return res.status(401).send('This Credential is already used !');
             const result = await repository.save(user);
             res.status(200).send(result);
             // next();
         }
         catch (err:any) {
-            if (!err.statusCode) {
-                err.statusCode = 500;
-                return res.status(500).end();
-            }
-            next(err);
+            if (!err.statusCode) err.statusCode = 500;
+            // next(err);
             return res.status(err.statusCode).end();
         }
 
@@ -45,9 +40,23 @@ export class AuthController {
     
                 const userFound = usernameFound ?? useremailFound;
                 if (userFound) {
+                    if (userFound.isActive !== true && userFound.id != "1") { 
+                        res.status(401).send("You don't have permission to login!"); 
+                        return; 
+                    }
                     const isEqual = await userFound.comparePassword(password);
-                    if (!isEqual) { res.status(401).send('Wrong password or Not Authorized !'); return; }
-                    return res.status(200).send({ token: userFound.token(), userId: userFound.id, userName: userFound.username,userFullName: userFound.fullname, roles: userFound.roles, expiresIn: Config().expiredIn });
+                    if (!isEqual) { 
+                        res.status(401).send('Wrong password or Not Authorized !'); 
+                        return; 
+                    }
+                    return res.status(200).send({ 
+                        token: userFound.token(), 
+                        userId: userFound.id, 
+                        userName: userFound.username,
+                        userFullName: userFound.fullname, 
+                        roles: userFound.roles, 
+                        isActive: userFound.isActive, 
+                        expiresIn: Utils().expiredIn });
                 }else{
                     res.status(401).send('No user found with this crediential, retry!'); return;
                 }
@@ -64,8 +73,8 @@ export class AuthController {
             }
         }
         catch (err:any) {
-            if (!err.statusCode) return res.status(500).end();
-            next(err);
+            if (!err.statusCode) err.statusCode = 500;
+            // next(err);
             return res.status(err.statusCode).end();
             // return res.status(err.statusCode).send("You don't have permission to logIn");
         }
@@ -131,7 +140,7 @@ export class AuthController {
 //                 username: userFound.username,
 //                 userId: userFound.id,
 //             },
-//             Config().secretOrPrivateKey,
+//             Utils().secretOrPrivateKey,
 //             { expiresIn: '1h' }
 //         );
 //         res.status(200).send({ token: token, userId: userFound.id });

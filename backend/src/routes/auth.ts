@@ -1,9 +1,10 @@
-import * as express from 'express';
 import { body } from 'express-validator';
 import { getUserRepository, User } from "../entity/User";
 import { AuthController } from "../controllers/auth";
+import { NextFunction, Request, Response, Router} from 'express';
+import { getConfigRepository } from '../entity/Configs';
 
-const authRouter = express.Router();
+const authRouter = Router();
 
 authRouter.post(
   '/register',

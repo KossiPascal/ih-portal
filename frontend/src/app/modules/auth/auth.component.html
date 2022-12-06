@@ -105,7 +105,7 @@
         </div> -->
 
         <a *ngIf="!isLoginForm" routerLink="/auths/login" class="text-center">I already have a membership</a>
-        <a *ngIf="isLoginForm" routerLink="/auths/register" class="text-center">Register a new membership</a>
+        <a *ngIf="isLoginForm && showRegisterPage" routerLink="/auths/register" class="text-center">Register a new membership</a>
         <p *ngIf="isLoginForm" class="mb-1"><a href="forgot-password.html">I forgot my password</a></p>
 
         <!-- <p *ngIf="isLoginForm" class="mb-0">
