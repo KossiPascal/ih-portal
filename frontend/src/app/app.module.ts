@@ -27,6 +27,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { Functions } from './shared/functions';
+import { JwtInterceptor } from './_helpers/jwt.interceptor';
+import { ErrorInterceptor } from './_helpers/error.interceptor';
 
 
 MAT_MOMENT_DATE_FORMATS.parse = {
@@ -103,6 +105,8 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     CheckForUpdateService,
     OnlineService,
     { provide: MAT_DATE_LOCALE, useValue: 'fr-FR' },

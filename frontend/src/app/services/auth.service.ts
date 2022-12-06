@@ -1,9 +1,11 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
-import { User } from "@ih-models/User";
+import { User, UserValueData } from "@ih-models/User";
 import moment from "moment";
 import { Functions } from "@ih-app/shared/functions";
+import { BehaviorSubject, map, Observable } from "rxjs";
+import { ConversionUtils } from 'turbocommons-ts';
 
 Functions
 @Injectable({
@@ -13,15 +15,22 @@ export class AuthService {
 
   public defaultRedirectUrl = 'dashboards';
 
-  constructor(private router: Router, private http: HttpClient,) { }
+  constructor(private router: Router, private http: HttpClient,) { 
 
-  public getToken(): string | null {
-    return localStorage.getItem('token');
+  }
+
+  public userValue(): UserValueData|null {
+    if (Functions.isNotNull(localStorage.getItem('user'))) return JSON.parse(localStorage.getItem('user')??'');
+    return null;
   }
 
   public tokenIsNotEmpty(): boolean {
-    const token = this.getToken();
-    return token != null && token != undefined && token != "" && token.length > 0;
+    if (this.userValue()!=null) {
+      const token = this.userValue()!.token;
+      return token != null && token != undefined && token != "" && token.length > 0;
+    }
+    
+    return false;
   }
 
   public isLoggedIn(): boolean {
@@ -32,8 +41,8 @@ export class AuthService {
   }
 
   private getRoles(): string[] {
-    let roles:any = sessionStorage.getItem("roles");
-    return roles as string[];
+    if (this.userValue()!=null) return ConversionUtils.base64ToString(this.userValue()?.roles) as any;
+    return [];
   }
 
   public isSuperAdminn(): boolean {
@@ -58,41 +67,22 @@ export class AuthService {
     return false;
   }
 
-  public userId(): string {
-    const user = localStorage.getItem('user');
-    if (!Functions.isNotNull(user)) this.logout();
-    return `${localStorage.getItem('user')}`;
-  }
-
-  public userName(fullname=false): string {
-    return `${localStorage.getItem(fullname ? "user_fullname" : "username")}`;
-  }
-
   isLoggedOut() {
     return !this.isLoggedIn();
   }
-
-  private setSession(authResult: any) {
-    const expiresAt = moment().add(authResult.expiresIn, 'seconds');
-    // const expiresAt = moment(moment(), "DD-MM-YYYY hh:mm:ss").add(authResult.expiresIn, 'seconds');
-    localStorage.setItem("token", authResult.token);
-    localStorage.setItem("user", '' + authResult.userId);
-    localStorage.setItem("username", '' + authResult.userName);
-    localStorage.setItem("user_fullname", '' + authResult.userFullName);
-    sessionStorage.setItem("token", authResult.token + authResult.userId);
-    sessionStorage.setItem("roles", authResult.roles);
-    localStorage.setItem("expires_at", JSON.stringify(expiresAt.valueOf()));
+  
+  public clientSession(user: UserValueData) :void{
+      localStorage.setItem("user", JSON.stringify(user));
   }
 
-  public setClientSession(authResult: any) {
-    this.setSession(authResult);
-  }
 
   getExpiration(): moment.Moment | null {
-    const expiration = localStorage.getItem("expires_at");
-    if (expiration) {
-      const expiresAt = JSON.parse(expiration);
-      return moment(expiresAt);
+    if (this.userValue()) {
+      const expiration = this.userValue()!.expiresIn;
+      if (expiration) {
+        const expiresAt = JSON.parse(expiration);
+        return moment(expiresAt);
+      }
     }
     return null;
   }
@@ -129,7 +119,7 @@ export class AuthService {
     }
   }
 
-  alreadyAuthenticate(redirecUrl:string = this.defaultRedirectUrl) {
+  alreadyAuthenticate(redirecUrl: string = this.defaultRedirectUrl) {
     if (this.isLoggedIn()) {
       console.log(`You are already authenticated !`);
       // this.router.navigate([this.defaultRedirectUrl]);
@@ -150,29 +140,31 @@ export class AuthService {
 
   login(credential: string, password: string): any {
     if (!this.isLoggedIn()) {
-      return this.http.post(`${Functions.backenUrl()}/auth/login`, { credential, password }, Functions.customHttpHeaders(this))
+      return this.http.post(`${Functions.backenUrl()}/auth/login`, { credential, password }, Functions.customHttpHeaders(this));
+        // .pipe(map((user) => {
+          // // store user details and jwt token in local storage to keep user logged in between page refreshes
+          // localStorage.setItem('user', JSON.stringify(user));
+          // this.userSubject.next(user as User);
+          // return user;
+        // }));
     } else {
       this.alreadyAuthenticate();
     }
   }
 
   logout() {
-    // sessionStorage.clear();
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("roles");
-    localStorage.removeItem("token");
     localStorage.removeItem("user");
-    localStorage.removeItem("username");
-    localStorage.removeItem("user_fullname");
-    localStorage.removeItem("expires_at");
     // this.router.navigate(["auths/login"]);
     location.href = 'auths/login';
   }
 
-  
+
+
+
+
+
 
   getConfigs(): any {
     return this.http.get(`${Functions.backenUrl()}/configs`, Functions.customHttpHeaders(this));
   }
 }
-  

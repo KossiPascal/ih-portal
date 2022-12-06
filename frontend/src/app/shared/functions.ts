@@ -4,6 +4,7 @@ import { AuthService } from "@ih-services/auth.service";
 // import { envs } from '@ih-backendEnv/env';
 // const httpOptions: { headers: HttpHeaders } = {headers: new HttpHeaders({ "Content-Type": "application/json" }),};
 
+
 export class Functions {
 
   static saveCurrentUrl(router: Router):void{
@@ -19,7 +20,7 @@ export class Functions {
     sessionStorage.removeItem("redirect_url");
     return link;
   }
-
+ 
   static loadCssScripts(dynamicCssScripts: string[]) {
     for (let i = 0; i < dynamicCssScripts.length; i++) {
       const src = dynamicCssScripts[i];
@@ -72,7 +73,7 @@ export class Functions {
 
   }
 
-  static custumRequest(method: string, http: HttpClient, authService: AuthService, url: string, data?: any, responseType?: any) {
+  static custumRequest(method: string, http: HttpClient, auth: AuthService, url: string, data?: any, responseType?: any) {
     // console.log(`${baseUrl}/${url}`);
     // console.log('request ' + JSON.stringify(data));
     const result = http.request(method, url, {
@@ -80,7 +81,7 @@ export class Functions {
       responseType: responseType || 'json',
       observe: 'body',
       headers: {
-        Authorization: `Bearer ${authService.getToken()}`,
+        Authorization: auth.userValue()!=null ? `Bearer ${auth.userValue()!.token}` : '',
         "Content-Type": "application/json"
       }
     });
@@ -91,10 +92,10 @@ export class Functions {
   }
 
 
-  static customHttpHeaders(authService: AuthService): { headers: HttpHeaders } {
+  static customHttpHeaders(auth: AuthService): { headers: HttpHeaders } {
     return {
       headers: new HttpHeaders({
-        Authorization: `Bearer ${authService.getToken()}`
+        Authorization: auth.userValue()!=null ? `Bearer ${auth.userValue()!.token}` : ''
         // "Content-Type": "application/json" 
       }),
     };

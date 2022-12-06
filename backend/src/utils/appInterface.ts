@@ -1,3 +1,4 @@
+import { Moment } from "moment";
 
 
 
@@ -64,4 +65,15 @@ export interface MailConfig {
     subject: any
     text: any
   }
+}
+
+
+export interface UserValue {
+  token: string
+  id: string
+  username: string
+  fullname: string
+  roles:any
+  isActive:boolean
+  expiresIn:any
 }

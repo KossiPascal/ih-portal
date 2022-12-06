@@ -78,94 +78,107 @@ export class SyncService {
 
 
   getAllData(params?: FilterParams): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
-    if (Functions.isNotNull(params)) params!.user = this.auth.userId();
-    const sendParams = Functions.isNotNull(params) ? params : { user: this.auth.userId() };
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
+    if (Functions.isNotNull(params)) params!.user =userId;
+    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/all`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
 
   syncDhis2ChwsData(params: Dhis2Sync): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
-    params.user = this.auth.userId()
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
+    params.user = this.auth.userValue()!.id;
     return this.http.post(`${Functions.backenUrl()}/sync/dhis2_data`, params, Functions.customHttpHeaders(this.auth));
   }
 
 
   getDistrictsList(params?: any): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
-    if (Functions.isNotNull(params)) params.user = this.auth.userId();
-    const sendParams = Functions.isNotNull(params) ? params : { user: this.auth.userId() };
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
+    if (Functions.isNotNull(params)) params.user = userId;
+    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/districts`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   getSitesList(params?: any): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
-    if (Functions.isNotNull(params)) params.user = this.auth.userId();
-    const sendParams = Functions.isNotNull(params) ? params : { user: this.auth.userId() };
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
+    if (Functions.isNotNull(params)) params.user = userId;
+    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/sites`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   getZoneList(params?: any): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
-    if (Functions.isNotNull(params)) params.user = this.auth.userId();
-    const sendParams = Functions.isNotNull(params) ? params : { user: this.auth.userId() };
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
+    if (Functions.isNotNull(params)) params.user = userId;
+    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/zones`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   getChwsList(params?: any): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
-    if (Functions.isNotNull(params)) params.user = this.auth.userId();
-    const sendParams = Functions.isNotNull(params) ? params : { user: this.auth.userId() };
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
+    if (Functions.isNotNull(params)) params.user = userId;
+    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/chws`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   getFamilyList(params?: any): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
-    if (Functions.isNotNull(params)) params.user = this.auth.userId();
-    const sendParams = Functions.isNotNull(params) ? params : { user: this.auth.userId() };
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
+    if (Functions.isNotNull(params)) params.user = userId;
+    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/families`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   getPatientsList(params?: any): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
-    if (Functions.isNotNull(params)) params.user = this.auth.userId();
-    const sendParams = Functions.isNotNull(params) ? params : { user: this.auth.userId() };
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
+    if (Functions.isNotNull(params)) params.user = userId;
+    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/patients`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   syncChwsData(params: Sync): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
     // if (params.ssl_verification !== true) console.log(this.sslMsg);
-    params.user = this.auth.userId()
+    params.user = userId
     return this.http.post(`${Functions.backenUrl()}/sync/data`, params, Functions.customHttpHeaders(this.auth));
   }
 
   syncWeeklyChwsData(params: Sync): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
     // if (params.ssl_verification !== true) console.log(this.sslMsg);
-    params.user = this.auth.userId()
+    params.user = userId
     return this.http.post(`${Functions.backenUrl()}/python/medicThinkmdWeekly`, params, Functions.customHttpHeaders(this.auth));
   }
 
 
   syncSiteZoneFamilyPerson(params: Sync): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
     // if (params.ssl_verification !== true) console.log(this.sslMsg);
-    params.user = this.auth.userId()
+    params.user = userId
     return this.http.post(`${Functions.backenUrl()}/sync/site_family_person`, params, Functions.customHttpHeaders(this.auth));
   }
 
 
   thinkmdToDhis2Script(params: Sync): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
-    params.user = this.auth.userId()
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
+    params.user = userId
     return this.http.post(`${Functions.backenUrl()}/python/thinkmdToDhis2`, params, Functions.customHttpHeaders(this.auth));
   }
 
   medicToDhis2Script(params: Sync): any {
-    if (!this.auth.isLoggedIn()) this.auth.logout();
-    params.user = this.auth.userId()
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = this.auth.userValue()!.id;
+    params.user = userId
     return this.http.post(`${Functions.backenUrl()}/python/medicToDhis2`, params, Functions.customHttpHeaders(this.auth));
   }
 

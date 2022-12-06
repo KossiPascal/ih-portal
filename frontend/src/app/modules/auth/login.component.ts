@@ -68,7 +68,7 @@ export class LoginComponent implements OnInit {
       this.isLoading = true;
       return this.authService.login(this.authForm.value.username, this.authForm.value.password)
         .subscribe((res: any) => {
-          this.authService.setClientSession(res);
+          this.authService.clientSession(res);
           this.message = 'Login successfully !'
           console.log(`Login successfully !`);
           const redirectUrl = Functions.getSavedUrl();

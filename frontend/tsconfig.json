@@ -39,7 +39,7 @@
       "@ih-environments/*": ["src/environments/*"],
       "@ih-modules/*": ["src/app/modules/*"],
       "@ih-pipes/*": ["src/app/pipes/*"],
-      "@ih-providers/*": ["src/app/providers/*"],
+      "@ih-providers/*": ["src/app/_helpers/*"],
       "@ih-actions/*": ["src/app/actions/*"],
       "@ih-effects/*": ["src/app/effects/*"],
       "@ih-modals/*": ["src/app/modals/*"],

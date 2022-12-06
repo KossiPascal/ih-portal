@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction, Router } from 'express';
-import { getUserRepository, toMap, User } from '../entity/User';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { Utils } from '../utils/utils';
-
+import { UserValue } from '../utils/appInterface';
+import moment from "moment";
+import { ConversionUtils } from 'turbocommons-ts';
+import { getUserRepository, User, toMap } from '../entity/User';
 
 export class AuthController {
     static register = async (req: Request, res: Response, next: NextFunction) => {
@@ -17,7 +19,7 @@ export class AuthController {
             res.status(200).send(result);
             // next();
         }
-        catch (err:any) {
+        catch (err: any) {
             if (!err.statusCode) err.statusCode = 500;
             // next(err);
             return res.status(err.statusCode).end();
@@ -29,50 +31,59 @@ export class AuthController {
         try {
             const credential = req.body.credential;
             const password = req.body.password;
-                
+
             if (credential && password) {
                 const repository = await getUserRepository();
                 const usernameFound = await repository.findOneBy({ username: credential });
-                let useremailFound: User| null |undefined;
-                
+                let useremailFound: User | null | undefined;
+
                 if (!usernameFound) useremailFound = await repository.findOneBy({ email: credential });
-                if (!usernameFound && !useremailFound) return res.status(401).send('No user found with this crediential, retry!'); 
-    
+                if (!usernameFound && !useremailFound) return res.status(401).send('No user found with this crediential, retry!');
+
                 const userFound = usernameFound ?? useremailFound;
                 if (userFound) {
-                    if (userFound.isActive !== true && userFound.id != "1") { 
-                        res.status(401).send("You don't have permission to login!"); 
-                        return; 
+                    if (userFound.isActive !== true && userFound.id != "1") {
+                        res.status(401).send("You don't have permission to login!");
+                        return;
                     }
                     const isEqual = await userFound.comparePassword(password);
-                    if (!isEqual) { 
-                        res.status(401).send('Wrong password or Not Authorized !'); 
-                        return; 
+                    if (!isEqual) {
+                        res.status(401).send('Wrong password or Not Authorized !');
+                        return;
                     }
-                    return res.status(200).send({ 
-                        token: userFound.token(), 
-                        userId: userFound.id, 
-                        userName: userFound.username,
-                        userFullName: userFound.fullname, 
-                        roles: userFound.roles, 
-                        isActive: userFound.isActive, 
-                        expiresIn: Utils().expiredIn });
-                }else{
+                   
+
+                    var user: UserValue = {
+                        token: userFound.token(),
+                        id: userFound.id,
+                        username: userFound.username,
+                        fullname: userFound.fullname,
+                        roles: ConversionUtils.stringToBase64(userFound.roles),
+                        isActive: userFound.isActive,
+                        expiresIn: JSON.stringify((moment().add(Utils().expiredIn, 'seconds')).valueOf())
+                        // moment(moment(), "DD-MM-YYYY hh:mm:ss").add(Utils().expiredIn, 'seconds');
+                    };
+
+                    
+
+
+                    return res.status(200).send(user);
+                } else {
                     res.status(401).send('No user found with this crediential, retry!'); return;
                 }
-                
+
             } else {
                 if (!credential) {
                     res.status(401).send('No username given');
-                }else if(!password){
+                } else if (!password) {
                     res.status(401).send('You not give password!');
-                }else{
+                } else {
                     res.status(401).send('crediential error');
                 }
                 return;
             }
         }
-        catch (err:any) {
+        catch (err: any) {
             if (!err.statusCode) err.statusCode = 500;
             // next(err);
             return res.status(err.statusCode).end();
