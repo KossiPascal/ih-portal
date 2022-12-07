@@ -58,11 +58,11 @@ export class RegisterComponent implements OnInit {
 
   createFormGroup(): FormGroup {
     return new FormGroup({
-      username: new FormControl("", [Validators.required, Validators.minLength(2)]),
-      fullname: new FormControl("", [Validators.required, Validators.minLength(2)]),
+      username: new FormControl("", [Validators.required, Validators.minLength(4)]),
+      fullname: new FormControl("", [Validators.required, Validators.minLength(4)]),
       email: new FormControl("", [Validators.required, Validators.email]),
-      password: new FormControl("", [Validators.required, Validators.minLength(7)]),
-      passwordConfirm: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      password: new FormControl("", [Validators.required, Validators.minLength(8)]),
+      passwordConfirm: new FormControl("", [Validators.required, Validators.minLength(8)]),
       agreeTermsOrRemenberMe: new FormControl(false, [Validators.required]),
       isActive: new FormControl(this.showRegisterPage)
     }, [this.MatchValidator('password', 'passwordConfirm'), this.AcceptThermeValidator('agreeTermsOrRemenberMe')]);
@@ -96,16 +96,21 @@ export class RegisterComponent implements OnInit {
     if (!this.auth.isLoggedIn() || this.showRegisterPage) {
       this.isLoading = true;
       return this.auth.register(this.authForm.value)
-        .subscribe((res: any) => {
-          this.message = 'Registed successfully !'
-          console.log(`Registed successfully !`);
-          const redirectUrl = Functions.getSavedUrl();
-          if (redirectUrl!='') {
-            location.href = redirectUrl
+        .subscribe((res: {status:number, data:any}) => {
+
+          if (res.status === 200) {
+            this.message = 'Registed successfully !'
+            const redirectUrl = Functions.getSavedUrl();
+            if (redirectUrl!='') {
+              location.href = redirectUrl
+            } else {
+              this.router.navigate(["auths/login"]);
+              // location.href = 'auths/login'
+            }
           } else {
-            this.router.navigate(["auths/login"]);
-            // location.href = 'auths/login'
+            this.message = res.data;
           }
+          console.log(this.message);
           this.isLoading = false;
         }, (err: any) => {
           this.message = err.error;

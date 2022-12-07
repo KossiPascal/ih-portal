@@ -27,13 +27,13 @@
             <div class="col-sm-2 col-6">
               <div class="form-group">
                 <label>Source</label>
-                <select *ngIf="sourcesList.length > 0" (change)="genarateSites()" class="form-control" multiple="multiple" formControlName="sources">
+                <select *ngIf="sources$.length > 0" (change)="genarateSites()" class="form-control" multiple="multiple" formControlName="sources">
                   <!-- <option value="">Select All</option> -->
-                  <option *ngFor="let source of sourcesList" value="{{source}}">
+                  <option *ngFor="let source of sources$" value="{{source}}">
                     {{formatHostName(source)}}
                   </option>
                 </select>
-                <select *ngIf="sourcesList.length == 0"  class="form-control">
+                <select *ngIf="sources$.length == 0"  class="form-control">
 
                 </select>
               </div>
@@ -42,13 +42,13 @@
             <div class="col-sm-2 col-6">
               <div class="form-group">
                 <label>Site</label>
-                <select *ngIf="sitesList.length > 0" (change)="genarateChws()" class="form-control" multiple="multiple" formControlName="sites">
+                <select *ngIf="sites$.length > 0" (change)="genarateChws()" class="form-control" multiple="multiple" formControlName="sites">
                   <!-- <option value="">Select All</option> -->
-                  <option *ngFor="let site of sitesList" value="{{site.id}}">
+                  <option *ngFor="let site of sites$" value="{{site.id}}">
                     {{ site.name }}
                   </option>
                 </select>
-                <select *ngIf="sitesList.length == 0"  class="form-control">
+                <select *ngIf="sites$.length == 0"  class="form-control">
 
                 </select>
               </div>
@@ -57,13 +57,13 @@
             <div class="col-sm-3 col-6">
               <div class="form-group">
                 <label>ASC</label>
-                <select *ngIf="chwsList.length > 0" class="form-control" multiple="multiple" formControlName="chws">
+                <select *ngIf="chws$.length > 0" class="form-control" multiple="multiple" formControlName="chws">
                   <!-- <option value="">Select All</option> -->
-                  <option *ngFor="let chw of chwsList" value="{{chw.id}}">
+                  <option *ngFor="let chw of chws$" value="{{chw.id}}">
                     {{chw.name}}
                   </option>
                 </select>
-                <select *ngIf="chwsList.length == 0"  class="form-control">
+                <select *ngIf="chws$.length == 0"  class="form-control">
 
                 </select>
               </div>

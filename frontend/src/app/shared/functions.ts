@@ -47,7 +47,7 @@ export class Functions {
   }
 
 
-  static isNotNull(data: any): boolean {
+  static notNull(data: any): boolean {
     return data != '' && data != null && data != undefined && typeof data != undefined && data.length != 0; // && Object.keys(data).length != 0;
   }
 

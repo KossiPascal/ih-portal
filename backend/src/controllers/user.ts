@@ -1,20 +1,87 @@
 import { Request, Response, NextFunction, Router } from 'express';
 import { getUserRepository, toMap, User } from '../entity/User';
+import { isNotNull } from '../utils/functions';
 
 export class UserController {
     static allUsers = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const repository = await getUserRepository();
-            req.body.userId = 1;
-            // req.body.data = {roles:'[super_admin,admin]'};
-            // await repository.update({ id:req.body.userId, }, req.body.data);
-            const usernameFound = await repository.find(
-                {
-                    order: {
-                        username: "DESC",
-                        id: "ASC"
-                    }
+            const rep = await getUserRepository();
+            const usersFound = await rep.find({ order: { username: "ASC", id: "DESC" } });
+            var users: User[] = [];
+            for (let i = 0; i < usersFound.length; i++) {
+                const user = usersFound[i];
+                user.password = '';
+                users.push(user);
+            }
+            return res.status(res.statusCode).json({status:200, data: users});
+        } catch (err: any) {
+            if (!err.statusCode) err.statusCode = 500;
+            next(err);
+            return res.status(err.statusCode).json({status:err.statusCode, data: `${err}`});
+        }
+    }
+
+
+
+    static updateUser = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const repo = await getUserRepository();
+            const user = await repo.findOneBy({ id: req.body.id });
+            const pass = req.body.password;
+
+            if (user) {
+                if (req.body.editPassword && isNotNull(pass)) {
+                    user.password = await user.hashPassword(pass);
+                } else {
+                    delete req.body.password;
                 }
+                delete req.body.passwordConfirm;
+                delete req.body.id;
+                delete req.body.editPassword;
+
+                req.body.roles = isNotNull(req.body.roles)?`[${req.body.roles}]`:'[]'
+
+                const userUpdated = await repo.update({ id: user.id, }, req.body);
+
+                return res.status(res.statusCode).json({status:200, data:userUpdated});
+            } else {
+                return res.status(res.statusCode).json({ status:401, data: 'Not Found' });
+            }
+            // const { parse } = require('postgres-array')
+            // parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
+        } catch (err: any) {
+            if (!err.statusCode) err.statusCode = 500;
+            next(err);
+            return res.status(err.statusCode).json({status:err.statusCode, data: `${err}`});
+        }
+    }
+
+
+
+    static deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const repo = await getUserRepository();
+            if (req.body.isSuperAdmin!==true) {
+                const user = await repo.delete({ id: req.body.id });
+                return res.status(res.statusCode).json({status:200, data:user});
+            } else {
+                return res.status(res.statusCode).json({status:401, data:'Vous ne pouvez pas supprimer cet utilisateur'});
+            }
+        } catch (err: any) {
+            if (!err.statusCode) err.statusCode = 500;
+            next(err);
+            return res.status(err.statusCode).json({status:err.statusCode, data: `${err}`});
+        }
+    }
+
+
+
+
+}
+
+
+
+
                 // {
                 //     order: {
                 //         singer: {
@@ -22,10 +89,12 @@ export class UserController {
                 //         }
                 //     }
                 // }
-            );
+
+
+
             // const { parse } = require('postgres-array')
             // parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
-            // console.log(usernameFound.toString);
+            // console.log(usersFound.toString);
 
             // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
@@ -38,38 +107,6 @@ export class UserController {
             //   });
 
             // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-
-
-            return res.json(usernameFound);
-        } catch (err: any) {
-            if (!err.statusCode) err.statusCode = 500;
-            next(err);
-            return res.json(err.statusCode).end();
-        }
-    }
-
-
-
-    static updateUser = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const repository = await getUserRepository();
-            // req.body.data = {
-            //     fullname: name,
-            //     roles: roles,
-            //     username: username
-            //   }
-            const usernameFound = await repository.update({ id: req.body.userId, }, req.body.data);
-
-            // const { parse } = require('postgres-array')
-            // parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
-            console.log(usernameFound.toString);
-        } catch (err: any) {
-            if (!err.statusCode) err.statusCode = 500;
-            next(err);
-            return res.json(err.statusCode).end();
-        }
-    }
-}
 
 
 

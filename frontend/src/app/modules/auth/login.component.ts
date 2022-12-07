@@ -67,14 +67,23 @@ export class LoginComponent implements OnInit {
     if (!this.authService.isLoggedIn()) {
       this.isLoading = true;
       return this.authService.login(this.authForm.value.username, this.authForm.value.password)
-        .subscribe((res: any) => {
-          this.authService.clientSession(res);
-          this.message = 'Login successfully !'
-          console.log(`Login successfully !`);
-          const redirectUrl = Functions.getSavedUrl();
-          // this.router.navigate([redirectUrl || this.authService.defaultRedirectUrl]);
-          location.href = redirectUrl || this.authService.defaultRedirectUrl;
-          this.isLoading = false;
+        .subscribe((res: {status:number, data:any}) => {
+
+          
+          if (res.status === 200) {
+            this.message = 'Login successfully !';
+            console.log(this.message);
+            this.authService.clientSession(res.data);
+            const redirectUrl = Functions.getSavedUrl();
+            // this.router.navigate([redirectUrl || this.authService.defaultRedirectUrl]);
+            location.href = redirectUrl || this.authService.defaultRedirectUrl;
+          } else {
+            this.message = res.data;
+            this.isLoading = false;
+          }
+
+          console.log(res)
+
         }, (err: any) => {
           this.isLoading = false;
           this.message = err.error;

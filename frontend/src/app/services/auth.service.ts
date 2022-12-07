@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
-import { User, UserValueData } from "@ih-models/User";
+import { User } from "@ih-models/User";
 import moment from "moment";
 import { Functions } from "@ih-app/shared/functions";
 import { BehaviorSubject, map, Observable } from "rxjs";
@@ -19,8 +19,8 @@ export class AuthService {
 
   }
 
-  public userValue(): UserValueData|null {
-    if (Functions.isNotNull(localStorage.getItem('user'))) return JSON.parse(localStorage.getItem('user')??'');
+  public userValue(): User|null {
+    if (Functions.notNull(localStorage.getItem('user'))) return JSON.parse(localStorage.getItem('user')??'');
     return null;
   }
 
@@ -41,28 +41,27 @@ export class AuthService {
   }
 
   private getRoles(): string[] {
-    if (this.userValue()!=null) return ConversionUtils.base64ToString(this.userValue()?.roles) as any;
+    if (this.userValue()!=null) return ConversionUtils.base64ToString(`${this.userValue()?.roles}`) as any;
     return [];
   }
 
   public isSuperAdminn(): boolean {
-    if (Functions.isNotNull(this.getRoles())) {
+    if (Functions.notNull(this.getRoles())) {
       return this.getRoles().includes('super_admin');
     }
     return false;
   }
 
   public canManageUser(): boolean {
-    if (Functions.isNotNull(this.getRoles())) {
-      // return this.getRoles().includes('super_admin');
-      return this.getRoles().includes('can_manage_user');
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('can_manage_user') || this.isSuperAdminn();
     }
     return false;
   }
 
   public isAdmin(): boolean {
-    if (Functions.isNotNull(this.getRoles())) {
-      return this.getRoles().includes('admin') || this.getRoles().includes('super_admin');
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('admin') || this.isSuperAdminn();
     }
     return false;
   }
@@ -71,7 +70,7 @@ export class AuthService {
     return !this.isLoggedIn();
   }
   
-  public clientSession(user: UserValueData) :void{
+  public clientSession(user: User) :void{
       localStorage.setItem("user", JSON.stringify(user));
   }
 
@@ -103,22 +102,22 @@ export class AuthService {
     }
   }
 
-  updateUser(user: User): any {
+  updateUser(user: any): any {
     if (this.isLoggedIn()) {
-      return this.http.post(`${Functions.backenUrl()}/user/${user.id}`, user, Functions.customHttpHeaders(this));
+      return this.http.post(`${Functions.backenUrl()}/user/update`, user, Functions.customHttpHeaders(this));
     } else {
       this.logout();
     }
   }
 
-  deleteUser(id: string): any {
+  deleteUser(user:User): any {
     if (this.isLoggedIn()) {
-      return this.http.delete(`${Functions.backenUrl()}/user/${id}`, Functions.customHttpHeaders(this));
+      return this.http.post(`${Functions.backenUrl()}/user/delete`, user, Functions.customHttpHeaders(this));
     } else {
       this.logout();
     }
   }
-
+ 
   alreadyAuthenticate(redirecUrl: string = this.defaultRedirectUrl) {
     if (this.isLoggedIn()) {
       console.log(`You are already authenticated !`);
@@ -140,12 +139,9 @@ export class AuthService {
 
   login(credential: string, password: string): any {
     if (!this.isLoggedIn()) {
-      return this.http.post(`${Functions.backenUrl()}/auth/login`, { credential, password }, Functions.customHttpHeaders(this));
+      return this.http.post(`${Functions.backenUrl()}/auth/login`, { credential:credential, password:password }, Functions.customHttpHeaders(this));
         // .pipe(map((user) => {
-          // // store user details and jwt token in local storage to keep user logged in between page refreshes
-          // localStorage.setItem('user', JSON.stringify(user));
-          // this.userSubject.next(user as User);
-          // return user;
+        //   return user;
         // }));
     } else {
       this.alreadyAuthenticate();
@@ -159,11 +155,7 @@ export class AuthService {
   }
 
 
-
-
-
-
-
+  
   getConfigs(): any {
     return this.http.get(`${Functions.backenUrl()}/configs`, Functions.customHttpHeaders(this));
   }

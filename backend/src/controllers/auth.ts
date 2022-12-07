@@ -1,6 +1,4 @@
 import { Request, Response, NextFunction, Router } from 'express';
-import * as bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
 import { Utils } from '../utils/utils';
 import { UserValue } from '../utils/appInterface';
 import moment from "moment";
@@ -14,9 +12,11 @@ export class AuthController {
             const user: User = toMap(req.body)
             const usernameFound = await repository.findOneBy({ username: user.username });
             const useremailFound = await repository.findOneBy({ email: user.email });
-            if (usernameFound || useremailFound) return res.status(401).send('This Credential is already used !');
+            if (usernameFound || useremailFound) return res.status(res.statusCode).send({status: 401, data: 'This Credential is already used !'});
+
+            user.password = await user.hashPassword();
             const result = await repository.save(user);
-            res.status(200).send(result);
+            return res.status(res.statusCode).send({status: 200, data: result});
             // next();
         }
         catch (err: any) {
@@ -38,49 +38,45 @@ export class AuthController {
                 let useremailFound: User | null | undefined;
 
                 if (!usernameFound) useremailFound = await repository.findOneBy({ email: credential });
-                if (!usernameFound && !useremailFound) return res.status(401).send('No user found with this crediential, retry!');
 
-                const userFound = usernameFound ?? useremailFound;
-                if (userFound) {
-                    if (userFound.isActive !== true && userFound.id != "1") {
-                        res.status(401).send("You don't have permission to login!");
-                        return;
-                    }
-                    const isEqual = await userFound.comparePassword(password);
-                    if (!isEqual) {
-                        res.status(401).send('Wrong password or Not Authorized !');
-                        return;
-                    }
-                   
-
-                    var user: UserValue = {
-                        token: userFound.token(),
-                        id: userFound.id,
-                        username: userFound.username,
-                        fullname: userFound.fullname,
-                        roles: ConversionUtils.stringToBase64(userFound.roles),
-                        isActive: userFound.isActive,
-                        expiresIn: JSON.stringify((moment().add(Utils().expiredIn, 'seconds')).valueOf())
-                        // moment(moment(), "DD-MM-YYYY hh:mm:ss").add(Utils().expiredIn, 'seconds');
-                    };
-
-                    
-
-
-                    return res.status(200).send(user);
+                if (!usernameFound && !useremailFound) {
+                    return res.status(res.statusCode).json({status: 401, data: 'No user found with this crediential, retry!'});
                 } else {
-                    res.status(401).send('No user found with this crediential, retry!'); return;
-                }
+                    const userFound = usernameFound ?? useremailFound;
+                    if (userFound) {
+                        if (userFound.isActive !== true && userFound.isSuperAdmin !== true) {
+                            return res.status(res.statusCode).json({status: 401, data: "You don't have permission to login!"});
+                        }
+                        const isEqual = await userFound.comparePassword(password);
+                        if (!isEqual) {
+                            return res.status(res.statusCode).json({status: 401, data: 'Wrong password or Not Authorized !'});
+                        }
 
+                        var user: UserValue = {
+                            token: userFound.token(),
+                            id: userFound.id,
+                            username: userFound.username,
+                            fullname: userFound.fullname,
+                            roles: ConversionUtils.stringToBase64(userFound.roles),
+                            isActive: userFound.isActive,
+                            expiresIn: JSON.stringify((moment().add(Utils().expiredIn, 'seconds')).valueOf())
+                            // moment(moment(), "DD-MM-YYYY hh:mm:ss").add(Utils().expiredIn, 'seconds');
+                        };
+
+                        return res.status(res.statusCode).json({status: 200, data: user});
+                    } else {
+                        return res.status(res.statusCode).json({status: 401, data: 'No user found with this crediential, retry!'});
+                    }
+                }
             } else {
+
                 if (!credential) {
-                    res.status(401).send('No username given');
+                    return res.status(res.statusCode).json({status: 401, data: 'No username given'});
                 } else if (!password) {
-                    res.status(401).send('You not give password!');
+                    return res.status(res.statusCode).json({status: 401, data: 'You not give password!'});
                 } else {
-                    res.status(401).send('crediential error');
+                    return res.status(res.statusCode).json({status: 401, data: 'crediential error'});
                 }
-                return;
             }
         }
         catch (err: any) {

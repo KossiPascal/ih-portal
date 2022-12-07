@@ -25,7 +25,7 @@ export class IndexDbItemListComponent implements OnInit {
   }
 
   isExist(data: any) {
-    return Functions.isNotNull(data);
+    return Functions.notNull(data);
   }
 
   createListFormGroup(): FormGroup {

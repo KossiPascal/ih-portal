@@ -153,18 +153,18 @@ export class DashboardOneComponent implements OnInit {
     `fp_follow_up_renewal`,
   ]
 
-  AllChwsDataFromDbList: MedicMobileData[] = [];
-  sourcesList: string[] = []
+  ChwsDataFromDb$: MedicMobileData[] = [];
+  sources$: string[] = []
 
-  allChwsList: Chws[] = [];
-  allSitesList: Sites[] = [];
+  Chws$: Chws[] = [];
+  Sites$: Sites[] = [];
 
-  chwsList: Chws[] = [];
-  sitesList: Sites[] = [];
+  chws$: Chws[] = [];
+  sites$: Sites[] = [];
 
-  allZonesList: Zones[] = [];
-  allPatientsList: Patients[] = [];
-  allFamiliesList: Families[] = [];
+  Zones$: Zones[] = [];
+  Patients$: Patients[] = [];
+  Families$: Families[] = [];
 
   chwsCount: number = 0;
   sitesChwsCount: number = 0;
@@ -190,24 +190,24 @@ export class DashboardOneComponent implements OnInit {
     this.isLoading = true;
 
     this.initMsg = 'Chargement des Sites ...';
-    this.sync.getSitesList().subscribe(async (sitesList: any) => {
-      this.allSitesList = sitesList;
-      for (let s = 0; s < this.allSitesList.length; s++) {
-        const Did = this.allSitesList[s].source;
-        if (Did != null && Did != '') if (!this.sourcesList.includes(Did)) this.sourcesList.push(Did);
+    this.sync.getSitesList().subscribe(async (sites$: any) => {
+      this.Sites$ = sites$;
+      for (let s = 0; s < this.Sites$.length; s++) {
+        const Did = this.Sites$[s].source;
+        if (Did != null && Did != '') if (!this.sources$.includes(Did)) this.sources$.push(Did);
       }
       // this.initMsg = 'Chargement des Zones ...';
-      // this.sync.getZoneList().subscribe((zonesList: any) => {
-      //   this.allZonesList = zonesList;
+      // this.sync.getZone$().subscribe((zones$: any) => {
+      //   this.allZones$ = zones$;
         this.initMsg = 'Chargement des ASC ...';
-        this.sync.getChwsList().subscribe(async (chwsList: any) => {
-          this.allChwsList = chwsList;
+        this.sync.getChwsList().subscribe(async (chws$: any) => {
+          this.Chws$ = chws$;
           // this.initMsg = 'Chargement des Familles ...';
-          // this.sync.getFamilyList().subscribe((FamiliesList: any) => {
-          //   this.allFamiliesList = FamiliesList;
+          // this.sync.getFamily$().subscribe((Families$: any) => {
+          //   this.allFamilies$ = Families$;
             // this.initMsg = 'Chargement des Patients ...';
-            // this.sync.getPatientsList().subscribe((PatientsList: any) => {
-            //   this.allPatientsList = PatientsList;
+            // this.sync.getPatients$().subscribe((Patients$: any) => {
+            //   this.allPatients$ = Patients$;
               this.initDataFilted();
             // }, (err: any) =>  {
             //   this.isLoading = false;
@@ -237,36 +237,36 @@ export class DashboardOneComponent implements OnInit {
 
   genarateSites(){
     const sources:string[] = this.aggradateDataForm.value["sources"];
-    this.sitesList = [];
-    this.chwsList = [];
+    this.sites$ = [];
+    this.chws$ = [];
     this.aggradateDataForm.value["sites"] = [];
     this.aggradateDataForm.value["chws"] = [];
-    if (Functions.isNotNull(sources)) {
-      for (let d = 0; d < this.allSitesList.length; d++) {
-        const site = this.allSitesList[d];
-        if (Functions.isNotNull(site)) if(sources.includes(site.source)) this.sitesList.push(site)
+    if (Functions.notNull(sources)) {
+      for (let d = 0; d < this.Sites$.length; d++) {
+        const site = this.Sites$[d];
+        if (Functions.notNull(site)) if(sources.includes(site.source)) this.sites$.push(site)
       }
     } else {
-      this.sitesList = this.allSitesList;
+      this.sites$ = this.Sites$;
     }
   }
 
   genarateChws(){
     const sites:string[] = this.aggradateDataForm.value["sites"];
-    this.chwsList = [];
+    this.chws$ = [];
     this.aggradateDataForm.value["chws"] = [];
-    if (Functions.isNotNull(sites)) {
-      for (let d = 0; d < this.allChwsList.length; d++) {
-        const chws = this.allChwsList[d];
-        if (Functions.isNotNull(chws)) if(sites.includes(chws.site.id)) this.chwsList.push(chws)
+    if (Functions.notNull(sites)) {
+      for (let d = 0; d < this.Chws$.length; d++) {
+        const chws = this.Chws$[d];
+        if (Functions.notNull(chws)) if(sites.includes(chws.site.id)) this.chws$.push(chws)
       }
     } else {
-      this.chwsList = this.allChwsList;
+      this.chws$ = this.Chws$;
     }
   }
 
   returnEmptyArrayIfNul(data:any):string[]{
-    return Functions.isNotNull(data) ? data : [];
+    return Functions.notNull(data) ? data : [];
   }
 
   initDataFilted(): void {
@@ -287,14 +287,14 @@ export class DashboardOneComponent implements OnInit {
 
     this.isLoading = true;
 
-    if (this.initDate.start_date == startDate && this.initDate.end_date == endDate && this.AllChwsDataFromDbList?.length != 0) {
+    if (this.initDate.start_date == startDate && this.initDate.end_date == endDate && this.ChwsDataFromDb$?.length != 0) {
       this.getAllAboutData(paramsTopass);
     } else {
       this.initDate.start_date = startDate;
       this.initDate.end_date = endDate;
       this.initMsg = `Chargement des données du ${DateUtils.getDateInFormat(paramsTopass.start_date, 0, 'fr')} au ${DateUtils.getDateInFormat(paramsTopass.end_date, 0, 'fr')}`;
       this.sync.getAllData(paramsTopass).subscribe((response: MedicMobileData[]) => {
-        this.AllChwsDataFromDbList = response;
+        this.ChwsDataFromDb$ = response;
         this.getAllAboutData(paramsTopass);
       }, (err: any) => {
         this.isLoading = false;
@@ -306,7 +306,7 @@ export class DashboardOneComponent implements OnInit {
   getAllAboutData(params: FilterParams) {
     this.initMsg = 'Démarrage du calcule des indicateurs ...';
     const { start_date, end_date, chws, sites, sources } = params;
-    if (Functions.isNotNull(start_date) && Functions.isNotNull(end_date)) {
+    if (Functions.notNull(start_date) && Functions.notNull(end_date)) {
 
       var outPutData: ChtOutPutData = {
         total_home_visit: {},
@@ -351,8 +351,8 @@ export class DashboardOneComponent implements OnInit {
         total_vad_family_planning_NC: {}
       }
 
-      for (let i = 0; i < this.allChwsList!.length; i++) {
-        const ascId = this.allChwsList![i].id;
+      for (let i = 0; i < this.Chws$!.length; i++) {
+        const ascId = this.Chws$![i].id;
         if (ascId != null && ascId != '') {
           Object.entries(outPutData).map(([key, val]) => {
             const vals: any = val as any;
@@ -361,8 +361,8 @@ export class DashboardOneComponent implements OnInit {
         }
       }
 
-      for (let index = 0; index < this.AllChwsDataFromDbList!.length; index++) {
-        const data: MedicMobileData = this.AllChwsDataFromDbList[index];
+      for (let index = 0; index < this.ChwsDataFromDb$!.length; index++) {
+        const data: MedicMobileData = this.ChwsDataFromDb$[index];
 
         if (data != null) {
           const form = data.form;
@@ -371,10 +371,10 @@ export class DashboardOneComponent implements OnInit {
           const site: string = data.site != null ? data.site.id != null && data.site.id != '' ? data.site.id : '' : '';
           const source: string = data.source != null && data.source != '' ? data.source : '';
 
-          const idChwValid: boolean = Functions.isNotNull(asc) && Functions.isNotNull(chws) && chws?.includes(asc) || !Functions.isNotNull(chws);
-          const idSiteValid: boolean = Functions.isNotNull(site) && Functions.isNotNull(sites) && sites?.includes(site) || !Functions.isNotNull(sites);
-          const idHostValid: boolean = Functions.isNotNull(source) && Functions.isNotNull(sources) && sources?.includes(source) || !Functions.isNotNull(sources);
-          const isDateValid: boolean = Functions.isNotNull(start_date) && Functions.isNotNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
+          const idChwValid: boolean = Functions.notNull(asc) && Functions.notNull(chws) && chws?.includes(asc) || !Functions.notNull(chws);
+          const idSiteValid: boolean = Functions.notNull(site) && Functions.notNull(sites) && sites?.includes(site) || !Functions.notNull(sites);
+          const idHostValid: boolean = Functions.notNull(source) && Functions.notNull(sources) && sources?.includes(source) || !Functions.notNull(sources);
+          const isDateValid: boolean = Functions.notNull(start_date) && Functions.notNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
 
 
           if (idChwValid && idSiteValid && isDateValid && idHostValid) {
@@ -460,7 +460,7 @@ export class DashboardOneComponent implements OnInit {
 
             if (form === "fp_follow_up_renewal") {
               outPutData.total_family_planning_renewal_suivi[asc].count += 1
-              if (field["checklist2.s_refer_for_health_state"] == "true") outPutData.total_reference_family_planning_renewal_suivi[asc].count += 1
+              if (field["check$2.s_refer_for_health_state"] == "true") outPutData.total_reference_family_planning_renewal_suivi[asc].count += 1
             }
           }
         }
@@ -474,7 +474,7 @@ export class DashboardOneComponent implements OnInit {
   transformData(allDatasFound: ChtOutPutData, params: FilterParams) {
     const { start_date, end_date, chws, sites, sources } = params;
 
-    if (Functions.isNotNull(start_date) && Functions.isNotNull(end_date)) {
+    if (Functions.notNull(start_date) && Functions.notNull(end_date)) {
 
       var chwsData: DataIndicators = {
         total_vad: 0,
@@ -505,8 +505,8 @@ export class DashboardOneComponent implements OnInit {
         total_test_de_grossesse_domicile: 0,
       };
 
-      for (let i = 0; i < this.allChwsList!.length; i++) {
-        const chws$: Chws = this.allChwsList![i];
+      for (let i = 0; i < this.Chws$!.length; i++) {
+        const chws$: Chws = this.Chws$![i];
         const ascId = chws$.id;
         const total_vad = allDatasFound.total_home_visit[ascId]["count"] + allDatasFound.total_pcime_soins[ascId]["count"] + allDatasFound.total_pregnancy_family_planning[ascId]["count"] + allDatasFound.total_pcime_suivi[ascId]["count"] + allDatasFound.total_newborn_suivi[ascId]["count"] + allDatasFound.total_prenatal_suivi[ascId]["count"] + allDatasFound.total_postnatal_suivi[ascId]["count"] + allDatasFound.total_malnutrition_suivi[ascId]["count"] + allDatasFound.total_vad_women_emergency_suivi[ascId]["count"] + allDatasFound.total_family_planning_renewal_suivi[ascId]["count"];
         const total_vad_pcime_c = allDatasFound.total_pcime_soins[ascId]["count"] + allDatasFound.total_pcime_suivi[ascId]["count"] + allDatasFound.total_newborn_suivi[ascId]["count"] + allDatasFound.total_malnutrition_suivi[ascId]["count"];
@@ -553,94 +553,94 @@ export class DashboardOneComponent implements OnInit {
       // this.chwsCount = 0;
       this.allAggragateData = [];
 
-      // for (let i = 0; i < this.allSitesList!.length; i++) {
-      //   const site = this.allSitesList![i];
-      //   if (Functions.isNotNull(sources)) {
+      // for (let i = 0; i < this.allSites$!.length; i++) {
+      //   const site = this.allSites$![i];
+      //   if (Functions.notNull(sources)) {
       //     if (sources?.includes(site.source)) this.sitesChwsCount++;
       //   } else {
       //     this.sitesChwsCount++;
       //   }
       // }
 
-      // for (let i = 0; i < this.allFamiliesList!.length; i++) {
-      //   const family = this.allFamiliesList![i];
-      //   if (Functions.isNotNull(sites) && Functions.isNotNull(chws)) {
-      //     if (Functions.isNotNull(sources)) {
+      // for (let i = 0; i < this.allFamilies$!.length; i++) {
+      //   const family = this.allFamilies$![i];
+      //   if (Functions.notNull(sites) && Functions.notNull(chws)) {
+      //     if (Functions.notNull(sources)) {
       //       if (sites?.includes(family.site.id) && chws?.includes(family.zone.chw_id) && sources?.includes(family.site.source)) this.familiesChwsCount++;
       //     } else {
       //       if (sites?.includes(family.site.id) && chws?.includes(family.zone.chw_id)) this.familiesChwsCount++;
       //     }
-      //   } else if (Functions.isNotNull(sites) && !Functions.isNotNull(chws)) {
+      //   } else if (Functions.notNull(sites) && !Functions.notNull(chws)) {
 
-      //     if (Functions.isNotNull(sources)) {
+      //     if (Functions.notNull(sources)) {
       //       if (sites?.includes(family.site.id) && sources?.includes(family.site.source)) this.familiesChwsCount++;
       //     } else {
       //       if (sites?.includes(family.site.id)) this.familiesChwsCount++;
       //     }
-      //   } else if (Functions.isNotNull(sources)) {
+      //   } else if (Functions.notNull(sources)) {
       //     if (sources?.includes(family.site.source)) this.familiesChwsCount++;
       //   } else {
       //     this.familiesChwsCount++;
       //   }
       // }
 
-      // for (let i = 0; i < this.allPatientsList!.length; i++) {
-      //   const patient = this.allPatientsList![i];
-      //   if (Functions.isNotNull(sites) && Functions.isNotNull(chws)) {
-      //     if (Functions.isNotNull(sources)) {
+      // for (let i = 0; i < this.allPatients$!.length; i++) {
+      //   const patient = this.allPatients$![i];
+      //   if (Functions.notNull(sites) && Functions.notNull(chws)) {
+      //     if (Functions.notNull(sources)) {
       //       if (sites?.includes(patient.site.id) && chws?.includes(patient.zone.chw_id) && sources?.includes(patient.site.source)) this.patientsChwsCount++;
       //     } else {
       //       if (sites?.includes(patient.site.id) && chws?.includes(patient.zone.chw_id)) this.patientsChwsCount++;
       //     }
-      //   } else if (Functions.isNotNull(sites) && !Functions.isNotNull(chws)) {
-      //     if (Functions.isNotNull(sources)) {
+      //   } else if (Functions.notNull(sites) && !Functions.notNull(chws)) {
+      //     if (Functions.notNull(sources)) {
       //       if (sites?.includes(patient.site.id) && sources?.includes(patient.site.source)) this.patientsChwsCount++;
       //     } else {
       //       if (sites?.includes(patient.site.id)) this.patientsChwsCount++;
       //     }
-      //   } else if (Functions.isNotNull(sources)) {
+      //   } else if (Functions.notNull(sources)) {
       //     if (sources?.includes(patient.site.source)) this.patientsChwsCount++;
       //   } else {
       //     this.patientsChwsCount++;
       //   }
       // }
 
-      // for (let i = 0; i < this.allZonesList!.length; i++) {
-      //   const zone = this.allZonesList![i];
-      //   if (Functions.isNotNull(sites) && isNotNull(chws)) {
-      //     if (Functions.isNotNull(sources)) {
+      // for (let i = 0; i < this.allZones$!.length; i++) {
+      //   const zone = this.allZones$![i];
+      //   if (Functions.notNull(sites) && isNotNull(chws)) {
+      //     if (Functions.notNull(sources)) {
       //       if (sites?.includes(zone.site.id) && chws?.includes(zone.chw_id) && sources?.includes(zone.site.source)) this.zonesChwsCount++;
       //     } else {
       //       if (sites?.includes(zone.site.id) && chws?.includes(zone.chw_id)) this.zonesChwsCount++;
       //     }
-      //   } else if (Functions.isNotNull(sites) && !isNotNull(chws)) {
-      //     if (Functions.isNotNull(sources)) {
+      //   } else if (Functions.notNull(sites) && !isNotNull(chws)) {
+      //     if (Functions.notNull(sources)) {
       //       if (sites?.includes(zone.site.id) && sources?.includes(zone.site.source)) this.zonesChwsCount++;
       //     } else {
       //       if (sites?.includes(zone.site.id)) this.zonesChwsCount++;
       //     }
-      //   } else if (Functions.isNotNull(sources)) {
+      //   } else if (Functions.notNull(sources)) {
       //     if(sources?.includes(zone.site.source)) this.zonesChwsCount++;
       //   } else {
       //     this.zonesChwsCount++;
       //   }
       // }
 
-      // for (let i = 0; i < this.allChwsList!.length; i++) {
-      //   const asc = this.allChwsList![i];
-      //   if (Functions.isNotNull(sites) && Functions.isNotNull(chws)) {
-      //     if (Functions.isNotNull(sources)) {
+      // for (let i = 0; i < this.allChws$!.length; i++) {
+      //   const asc = this.allChws$![i];
+      //   if (Functions.notNull(sites) && Functions.notNull(chws)) {
+      //     if (Functions.notNull(sources)) {
       //       if (sites?.includes(asc.site.id) && chws?.includes(asc.zone.chw_id) && sources?.includes(asc.site.source)) this.chwsCount++;
       //     } else {
       //       if (sites?.includes(asc.site.id) && chws?.includes(asc.zone.chw_id)) this.chwsCount++;
       //     }
-      //   } else if (Functions.isNotNull(sites) && !Functions.isNotNull(chws)) {
-      //     if (Functions.isNotNull(sources)) {
+      //   } else if (Functions.notNull(sites) && !Functions.notNull(chws)) {
+      //     if (Functions.notNull(sources)) {
       //       if (sites?.includes(asc.site.id) && sources?.includes(asc.site.source)) this.chwsCount++;
       //     } else {
       //       if (sites?.includes(asc.site.id)) this.chwsCount++;
       //     }
-      //   } else if (Functions.isNotNull(sources)) {
+      //   } else if (Functions.notNull(sources)) {
       //     if (sources?.includes(asc.site.source)) this.chwsCount++;
       //   } else {
       //     this.chwsCount++;

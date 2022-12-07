@@ -4,6 +4,7 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { response } from 'express';
 import { Utils } from "../utils/utils";
+import { isNotNull } from "../utils/functions";
 
 // https://dev.to/brunoblaise/postgresql-how-to-add-array-data-type-and-quiz-api-in-nodejs-1kel
 
@@ -31,18 +32,22 @@ export class User {
     @Column()
     password!: string
 
-    @Column({ nullable: true })
+    @Column({ nullable: false, default:'[]' })
     roles!: string
 
     @Column({ nullable: false, default: false })
     isActive!: boolean
 
+    @Column({ nullable: false, default: false })
+    isSuperAdmin!: boolean
+
     // @Column('json', { nullable: true })
     // roles!: object
 
-    @BeforeInsert()
-    async hashPassword() {
-      this.password = await bcrypt.hash(this.password, 12);
+    // @BeforeInsert()
+    async hashPassword(newPassword?:string): Promise<string> {
+      // this.password = await bcrypt.hash(this.password, 12);
+      return await bcrypt.hash(newPassword??this.password, 12);
     }
     toResponseObject(showToken:boolean = true) {
       const { id, username,token } = this;
@@ -77,8 +82,9 @@ export function toMap(data:any):User{
       user.fullname = data.fullname??'';
       user.email = data.email??'';
       user.password = data.password??'';
-      user.roles = data.roles??[];
+      user.roles = isNotNull(data.roles)?`[${data.roles}]`:'[]';
       user.isActive = data.isActive??false;
+      user.isSuperAdmin = data.isSuperAdmin??false;
     return user;
 }
 

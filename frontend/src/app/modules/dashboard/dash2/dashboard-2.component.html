@@ -27,7 +27,7 @@
                   <label>Site</label>
                   <select class="form-control" formControlName="sites">
                     <!-- <option value="">Select All</option> -->
-                    <option *ngFor="let site of allSitesList" value="{{site.id}}">
+                    <option *ngFor="let site of Sites$" value="{{site.id}}">
                       {{ site.name }}
                     </option>
                   </select>

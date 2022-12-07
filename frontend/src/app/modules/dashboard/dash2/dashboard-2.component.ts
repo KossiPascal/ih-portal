@@ -76,9 +76,9 @@ export class DashboardTwoComponent implements OnInit {
 
   bodyData: CompareData[] = [];
   
-  AllChwsDataFromDbList: MedicMobileData[] = [];
-  allChwsList: Chws[] = [];
-  allSitesList: Sites[] = [];
+  ChwsDataFromDb$: MedicMobileData[] = [];
+  Chws$: Chws[] = [];
+  Sites$: Sites[] = [];
   source: string = 'portal-integratehealth.org.444';
   initMsg!: string;
   isLoading!: boolean;
@@ -103,18 +103,18 @@ export class DashboardTwoComponent implements OnInit {
   async initAllData() {
     this.isLoading = true;
     this.initMsg = 'Chargement des Sites ...';
-    this.syncService.getSitesList({ data_source: this.source }).subscribe((sitesList: any) => {
-      this.allSitesList = sitesList;
+    this.syncService.getSitesList({ data_source: this.source }).subscribe((sites$: any) => {
+      this.Sites$ = sites$;
       this.initMsg = 'Chargement des ASC ...';
-      this.syncService.getChwsList({ data_source: this.source }).subscribe((chwsList: any) => {
-        this.allChwsList = chwsList;
+      this.syncService.getChwsList({ data_source: this.source }).subscribe((chws$: any) => {
+        this.Chws$ = chws$;
         this.initDataFilted();
       }, (err: any) => console.log(err.error));
     }, (err: any) => console.log(err.error));
   }
 
   returnEmptyArrayIfNul(data: any): string[] {
-    return Functions.isNotNull(data) ? data : [];
+    return Functions.notNull(data) ? data : [];
   }
 
   initDataFilted(): void {
@@ -132,7 +132,7 @@ export class DashboardTwoComponent implements OnInit {
     };
 
     this.syncService.getAllData(paramsTopass).subscribe((response: any) => {
-      this.AllChwsDataFromDbList = response;
+      this.ChwsDataFromDb$ = response;
       this.getAllAboutData(paramsTopass);
     }, (err: any) => {
       this.isLoading = false;
@@ -146,9 +146,9 @@ export class DashboardTwoComponent implements OnInit {
 
     var outPutData: any = {}
 
-    for (let i = 0; i < this.allChwsList!.length; i++) {
-      const ascId = this.allChwsList![i].id;
-      if (Functions.isNotNull(ascId)) {
+    for (let i = 0; i < this.Chws$!.length; i++) {
+      const ascId = this.Chws$![i].id;
+      if (Functions.notNull(ascId)) {
         if (!outPutData.hasOwnProperty(ascId)) outPutData[ascId] = {
           chwId: ascId,
           app_total_child_followup: 0,
@@ -171,14 +171,14 @@ export class DashboardTwoComponent implements OnInit {
 
 
 
-    for (let index = 0; index < this.AllChwsDataFromDbList!.length; index++) {
-      const data: MedicMobileData = this.AllChwsDataFromDbList[index];
+    for (let index = 0; index < this.ChwsDataFromDb$!.length; index++) {
+      const data: MedicMobileData = this.ChwsDataFromDb$[index];
       if (data != null) {
         const form = data.form;
-        const asc: string = data.chw != null ? Functions.isNotNull(data.chw.id) ? data.chw.id : '' : '';
-        const site: string = data.site != null ?  Functions.isNotNull(data.site.id) ? data.site.id : '' : '';
-        const idSiteValid: boolean = Functions.isNotNull(site) && Functions.isNotNull(sites) && sites?.includes(site) || !Functions.isNotNull(sites);
-        const isDateValid: boolean = Functions.isNotNull(start_date) && Functions.isNotNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
+        const asc: string = data.chw != null ? Functions.notNull(data.chw.id) ? data.chw.id : '' : '';
+        const site: string = data.site != null ?  Functions.notNull(data.site.id) ? data.site.id : '' : '';
+        const idSiteValid: boolean = Functions.notNull(site) && Functions.notNull(sites) && sites?.includes(site) || !Functions.notNull(sites);
+        const isDateValid: boolean = Functions.notNull(start_date) && Functions.notNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
 
         if (idSiteValid && isDateValid && outPutData.hasOwnProperty(asc)) {
           if (data.source == this.dhis2Url) {
@@ -305,13 +305,13 @@ export class DashboardTwoComponent implements OnInit {
 
   getChwInfos(chwId: string, byCode: boolean = false): Chws {
     var ascs!: Chws;
-    for (let i = 0; i < this.allChwsList!.length; i++) {
-      const asc: Chws = this.allChwsList![i];
-      if (Functions.isNotNull(asc)) {
+    for (let i = 0; i < this.Chws$!.length; i++) {
+      const asc: Chws = this.Chws$![i];
+      if (Functions.notNull(asc)) {
         if (byCode == true) {
-          if (Functions.isNotNull(asc.external_id) && asc.external_id == chwId) return asc;
+          if (Functions.notNull(asc.external_id) && asc.external_id == chwId) return asc;
         } else {
-          if (Functions.isNotNull(asc.id) && asc.id == chwId) return asc;
+          if (Functions.notNull(asc.id) && asc.id == chwId) return asc;
         }
       }
     }

@@ -27,6 +27,7 @@ export class AppComponent implements OnInit {
   modalPwaEvent!: any;
   modalPwaPlatform: 'ios' | 'android' | undefined;
   isAdmin: boolean = false;
+  isSuperAdmin: boolean = false;
   time: number = 0;
   localSync: string = '';
 
@@ -54,6 +55,7 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.sw.SwUpdate();
     this.isAdmin = this.auth.isAdmin();
+    this.isSuperAdmin = this.auth.isSuperAdminn();
     const appTitle = this.titleService.getTitle();
     this.localSync = this.sync.isLocalSyncSuccess() ? 'syncSuccess' : 'syncError'
 

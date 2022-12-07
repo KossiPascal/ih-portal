@@ -3,11 +3,13 @@ export interface User {
   username: string
   fullname: string
   email: string
-  password: string
+  password?: string
   roles:string[]
   isActive: boolean
+  token?: string
+  expiresIn?:any
+  isSuperAdmin:any
 }
-
 
 
 export interface Configs {
@@ -15,17 +17,7 @@ export interface Configs {
   showRegisterPage:boolean
 }
 
-export enum Role {
-  User = 'User',
-  Admin = 'Admin'
-}
-
-export interface UserValueData {
-  token: string
-  id: string
-  username: string
-  fullname: string
-  roles:any
-  isActive:boolean
-  expiresIn:any
-}
+// export enum Role {
+//   User = 'User',
+//   Admin = 'Admin'
+// }

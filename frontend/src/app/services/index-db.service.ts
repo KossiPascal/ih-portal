@@ -145,7 +145,7 @@ export class IndexDbService extends Dexie {
     async createOrUpdate(dbtable: Table, items: any) {
         const id = items.id;
         const found = await this.getById(dbtable, id);
-        if (Functions.isNotNull(found)) {
+        if (Functions.notNull(found)) {
           this.update(dbtable, items);
         } else {
           this.create(dbtable, items);

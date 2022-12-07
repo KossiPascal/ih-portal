@@ -163,12 +163,14 @@
           <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
 
+        
+
         <li class="nav-item d-none d-sm-inline-block">
-          <a routerLink="fetch/sync" class="nav-link">Sync OrgUnit & Data</a>
+          <a routerLink="dashboards/dash1" class="nav-link">Dashboard 1</a>
         </li>
 
         <li class="nav-item d-none d-sm-inline-block">
-          <a routerLink="users" class="nav-link">Users</a>
+          <a routerLink="dashboards/dash2" class="nav-link">Dashboard 2</a>
         </li>
       </ul>
 
@@ -287,9 +289,16 @@
             <div class="dropdown-divider"></div>
             <div class="dropdown-divider"></div>
 
-            <a href="#" class="mb-control nav-link" data-box="#mb-signout" role="button">
+            <a href="#" class="mb-control nav-link" data-toggle="modal" data-target="#modal-secondary" role="button">
               <i class="fa fa-sign-out-alt"></i> Se déconnecter
             </a>
+
+
+
+
+
+
+
 
             <div class="dropdown-divider"></div>
             <div class="dropdown-divider"></div>
@@ -354,35 +363,60 @@
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-tachometer-alt"></i>
-                <p>
-                  Dashboard
-                  <i class="right fas fa-angle-left"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a routerLink="dashboards/dash1" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Dashboard v1</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a routerLink="dashboards/dash2" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Dashboard v2</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a routerLink="dashboards" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Dashboard v3</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
+        <li *ngIf="isSuperAdmin" class="nav-item">
+         <a href="#" class="nav-link">
+           <i class="nav-icon fas fa-tachometer-alt"></i>
+           <p>
+             Admin
+             <i class="right fas fa-angle-left"></i>
+           </p>
+         </a>
+         <ul class="nav nav-treeview">
+           <li class="nav-item">
+            <a routerLink="fetch/sync" class="nav-link">
+               <i class="far fa-circle nav-icon"></i>
+               <p>Sync OrgUnit & Data</p>
+             </a>
+           </li>
+           <li class="nav-item">
+            <a routerLink="users" class="nav-link">
+               <i class="far fa-circle nav-icon"></i>
+               <p>Users</p>
+             </a>
+           </li>
+         </ul>
+       </li>
+            
+       <li class="nav-item">
+        <a href="#" class="nav-link">
+          <i class="nav-icon fas fa-tachometer-alt"></i>
+          <p>
+            Dashboard
+            <i class="right fas fa-angle-left"></i>
+          </p>
+        </a>
+        <ul class="nav nav-treeview">
+          <li class="nav-item">
+            <a routerLink="dashboards/dash1" class="nav-link">
+              <i class="far fa-circle nav-icon"></i>
+              <p>Dashboard v1</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="dashboards/dash2" class="nav-link">
+              <i class="far fa-circle nav-icon"></i>
+              <p>Dashboard v2</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="dashboards" class="nav-link">
+              <i class="far fa-circle nav-icon"></i>
+              <p>Dashboard v3</p>
+            </a>
+          </li>
+        </ul>
+      </li>
+
             <li class="nav-item">
               <a routerLink="fetch/data" class="nav-link">
                 <i class="nav-icon fas fa-th"></i>
@@ -971,7 +1005,7 @@
   </div>
 
   <!-- MESSAGE BOX-->
-  <div class="message-box animated fadeIn" data-sound="alert" id="mb-signout">
+  <!-- <div class="message-box animated fadeIn" data-sound="alert" id="mb-signout">
     <div class="mb-container">
       <div class="mb-middle">
         <div class="mb-title"><span class="fa fa-sign-out"></span> Log <strong>Out</strong> ?</div>
@@ -987,8 +1021,28 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
+
+
+  <div class="modal fade" id="modal-secondary">
+    <div class="modal-dialog">
+        <div class="modal-content bg-secondary">
+            <div class="modal-body"> 
+              <p>Are you sure you want to log out?</p>
+              <p>Press No if youwant to continue work. Press Yes to logout current user.</p>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                <button (click)="logout()" type="button" class="btn btn-danger swalDefaultSuccess">Yes</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
   <!-- END MESSAGE BOX-->
+
+
 
   <!-- START PRELOADS -->
   <audio id="audio-alert" src="assets/audio/alert.mp3" preload="auto"></audio>

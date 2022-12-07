@@ -72,7 +72,7 @@ export class SyncService {
 
   isLocalSyncSuccess(): boolean {
     const sync_date = localStorage.getItem('sync_date');
-    if (Functions.isNotNull(sync_date)) return DateUtils.isGreater(sync_date, new Date())
+    if (Functions.notNull(sync_date)) return DateUtils.isGreater(sync_date, new Date())
     return false;
   }
 
@@ -80,8 +80,8 @@ export class SyncService {
   getAllData(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = this.auth.userValue()!.id;
-    if (Functions.isNotNull(params)) params!.user =userId;
-    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
+    if (Functions.notNull(params)) params!.user =userId;
+    const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/all`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
@@ -97,48 +97,48 @@ export class SyncService {
   getDistrictsList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = this.auth.userValue()!.id;
-    if (Functions.isNotNull(params)) params.user = userId;
-    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
+    if (Functions.notNull(params)) params.user = userId;
+    const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/districts`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   getSitesList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = this.auth.userValue()!.id;
-    if (Functions.isNotNull(params)) params.user = userId;
-    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
+    if (Functions.notNull(params)) params.user = userId;
+    const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/sites`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   getZoneList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = this.auth.userValue()!.id;
-    if (Functions.isNotNull(params)) params.user = userId;
-    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
+    if (Functions.notNull(params)) params.user = userId;
+    const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/zones`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   getChwsList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = this.auth.userValue()!.id;
-    if (Functions.isNotNull(params)) params.user = userId;
-    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
+    if (Functions.notNull(params)) params.user = userId;
+    const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/chws`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   getFamilyList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = this.auth.userValue()!.id;
-    if (Functions.isNotNull(params)) params.user = userId;
-    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
+    if (Functions.notNull(params)) params.user = userId;
+    const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/families`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   getPatientsList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = this.auth.userValue()!.id;
-    if (Functions.isNotNull(params)) params.user = userId;
-    const sendParams = Functions.isNotNull(params) ? params : { user: userId };
+    if (Functions.notNull(params)) params.user = userId;
+    const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/patients`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 

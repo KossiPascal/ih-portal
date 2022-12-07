@@ -84,7 +84,7 @@
                 </div>
                 <!-- /.col -->
                 <div class="col-md-4">
-                    <button *ngIf="isLoginForm" color="accent" [disabled]="!authForm.valid && isLoading" type="submit"
+                    <button *ngIf="isLoginForm" color="accent" [disabled]="!authForm.valid" type="submit"
                         class="btn btn-primary btn-block">logIn</button>
                     <button *ngIf="!isLoginForm" color="accent" [disabled]="!authForm.valid" type="submit"
                         class="btn btn-success btn-block">register</button>
