@@ -49,14 +49,14 @@ def getThinkMdMedicWeeklyDataFromDhis2(ARGS):
             csv_req_option.vf('Semaine de start string', dateFilter[:-1])
             # csv_req_option.vf('Village corrected', 'Koundoum, Manga')
             server.views.populate_csv(default_view, csv_req_option)
-            with open(f""+extractPath("/week_reports_"+ARGS['user']+".csv"), 'wb') as f:
+            with open(f""+extractPath("/week_reports_"+str(ARGS['user'])+".csv"), 'wb') as f:
                 f.write(b''.join(default_view.csv))
 
 
         ###############################################################################
 
 
-        file = open(extractPath("week_reports_"+ARGS['user']+".csv"))
+        file = open(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
         csvreader = csv.reader(file)
         header = next(csvreader)
         allData = []
@@ -79,7 +79,7 @@ def getThinkMdMedicWeeklyDataFromDhis2(ARGS):
 
 
         if len(allData)!=0 and len(chwsFounded) != 0 and len(SelectedDates) !=0:
-            with createFile(extractFolder(), "weekly_thinkmd_medic_data_"+ARGS['user']) as result:
+            with createFile(extractFolder(), "weekly_thinkmd_medic_data_"+str(ARGS['user'])) as result:
                 oldOrgUnitLine = ''
                 # new = 'Exportation des données par semaine: '+str(SelectedDates).replace(',',' ')[1:][:-1].replace("'All'",'')+'\n\n'
                 new = ''
@@ -125,8 +125,8 @@ def getThinkMdMedicWeeklyDataFromDhis2(ARGS):
 
 
 def getMedicWeeklyData(ARGS, data_type="TotalVad"):
-    if pathExist(extractPath("week_reports_"+ARGS['user']+".csv")):
-        dFile = open(extractPath("week_reports_"+ARGS['user']+".csv"))
+    if pathExist(extractPath("week_reports_"+str(ARGS['user'])+".csv")):
+        dFile = open(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
         dCsvreader = csv.reader(dFile)
         dHeader = next(dCsvreader)
         AllSelectedDates = []
@@ -136,7 +136,7 @@ def getMedicWeeklyData(ARGS, data_type="TotalVad"):
                 if dDate == row[2] and ddDate not in AllSelectedDates:
                     AllSelectedDates.append(ddDate)
 
-        deleteFile(extractPath("week_reports_"+ARGS['user']+".csv"))
+        deleteFile(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
 
 
     try:
@@ -145,11 +145,11 @@ def getMedicWeeklyData(ARGS, data_type="TotalVad"):
             ARGS['start_date'] = anyDate
             ARGS['end_date'] = getNexSundayDate(anyDate)
 
-            flushMedicDataToDhis2(ARGS,"medic_week_reports_"+str(indexOf(AllSelectedDates,anyDate))+"_"+ARGS['user'],data_type)
+            flushMedicDataToDhis2(ARGS,"medic_week_reports_"+str(indexOf(AllSelectedDates,anyDate))+"_"+str(ARGS['user']),data_type)
     
-        file = open(extractPath("medic_week_reports_0"+"_"+ARGS['user']+".csv"))
+        file = open(extractPath("medic_week_reports_0"+"_"+str(ARGS['user'])+".csv"))
         csvreader = list(csv.reader(file))
-        with open(extractPath("weekly_thinkmd_medic_data_"+ARGS['user']+".csv"), 'a', newline='') as f_object:  
+        with open(extractPath("weekly_thinkmd_medic_data_"+str(ARGS['user'])+".csv"), 'a', newline='') as f_object:  
             merge_result = []
             oldOrgUnitLine = ''
             writer_object = csv.writer(f_object)
@@ -158,7 +158,7 @@ def getMedicWeeklyData(ARGS, data_type="TotalVad"):
                 index = indexOf(AllSelectedDates,anyDate)
                 for bigrow in csvreader:
                     if index > 0:
-                        file0 = open(extractPath("medic_week_reports_"+str(index)+"_"+ARGS['user']+".csv"))
+                        file0 = open(extractPath("medic_week_reports_"+str(index)+"_"+str(ARGS['user'])+".csv"))
                         csvRead = list(csv.reader(file0))
                         for r in csvRead:
                             p = 0
@@ -194,15 +194,15 @@ def getMedicWeeklyData(ARGS, data_type="TotalVad"):
         #         result.write(f)
         file.close()
         for i in range(50):
-            deleteFile(extractPath("medic_week_reports_"+str(i)+"_"+ARGS['user']+".csv"))
+            deleteFile(extractPath("medic_week_reports_"+str(i)+"_"+str(ARGS['user'])+".csv"))
     except:
         outPutData['Error'] +=1
         if 'server_error' not in outPutData['ErrorMsg']:
             outPutData['ErrorMsg']['server_error'] = " Can not connect to Medic server to get Data. Check your Connection or informations you provided !"
 
 
-    if pathExist(extractPath("weekly_thinkmd_medic_data_"+ARGS['user']+".csv")):
-        allData = getOutPutDataFromFile("weekly_thinkmd_medic_data_"+ARGS['user'])
+    if pathExist(extractPath("weekly_thinkmd_medic_data_"+str(ARGS['user'])+".csv")):
+        allData = getOutPutDataFromFile("weekly_thinkmd_medic_data_"+str(ARGS['user']))
         outPutData["Data"]["head"] = allData['head']
         finalBody = allData['body']
         for row in finalBody:

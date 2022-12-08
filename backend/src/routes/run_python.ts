@@ -61,7 +61,7 @@ function dataToReturn(data:any){
 pyRouter.post('/thinkmdToDhis2', Middelware.authMiddleware, (req: Request, res: Response) => {
     var dataToSend: string = '{}';
     req.body['type'] = 'thinkMd_only'
-    const user = req.body['user'];
+    const user = `${req.body['user']}`;
     errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
     if (req.body['thinkmd_password'] === '' || req.body['thinkmd_password'] === null) req.body['thinkmd_password'] = process.env.TSC_PASS;
@@ -82,7 +82,8 @@ pyRouter.post('/thinkmdToDhis2', Middelware.authMiddleware, (req: Request, res: 
 pyRouter.post('/medicToDhis2', Middelware.authMiddleware, (req: Request, res: Response) => {
     var dataToSend: string = '{}';
     req.body['type'] = 'medic_only';
-    const user = req.body['user'];
+    const user = `${req.body['user']}`;
+    console.log(req.body)
     errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
     if (req.body['dhis2_password'] === '' || req.body['dhis2_password'] === null) req.body['dhis2_password'] = process.env.DHIS_PASS;
@@ -104,7 +105,7 @@ pyRouter.post('/medicToDhis2', Middelware.authMiddleware, (req: Request, res: Re
 pyRouter.post('/medicThinkmdWeekly', Middelware.authMiddleware, (req: Request, res: Response) => {
     var dataToSend: string = '{}';
     req.body['type'] = 'thinkMd_and_medic';
-    const user = req.body['user'];
+    const user = `${req.body['user']}`;
     errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
     if (req.body['thinkmd_password'] === '' || req.body['thinkmd_password'] === null) req.body['thinkmd_password'] = process.env.TSC_PASS;
