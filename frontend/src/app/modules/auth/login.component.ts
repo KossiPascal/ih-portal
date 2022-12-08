@@ -5,6 +5,7 @@ import { AuthService } from '@ih-services/auth.service';
 import { HttpClient } from "@angular/common/http";
 import { Configs } from '@ih-app/models/User';
 import { Functions } from '@ih-app/shared/functions';
+import { ConfigService } from '@ih-app/services/config.service copy';
 
 
 @Component({
@@ -19,16 +20,16 @@ export class LoginComponent implements OnInit {
   LoadingMsg: string = "Loading...";
   showRegisterPage:boolean = false;
 
-  constructor(private authService: AuthService, private router: Router, private http: HttpClient) { }
+  constructor(private auth: AuthService, private router: Router, private http: HttpClient, private conf:ConfigService) { }
 
   ngOnInit(): void {
     this.getConfigs;
-    this.authService.alreadyAuthenticate();
+    this.auth.alreadyAuthenticate();
     this.authForm = this.createFormGroup();
   }
 
   getConfigs(){
-    return this.authService.getConfigs()
+    return this.conf.getConfigs()
     .subscribe((res: Configs) => {
       this.showRegisterPage = res.showRegisterPage ?? false;
     }, (err: any) => {
@@ -38,7 +39,7 @@ export class LoginComponent implements OnInit {
 
   setMessage(msg: string) {
       this.message = msg ? msg : 'Une Erreur est survenue';
-    // this.message = this.authService.isLoggedIn$ ?
+    // this.message = this.auth.isLoggedIn$ ?
     // 'Vous êtes connecté.' : 'Identifiant ou mot de passe incorrect.';
   }
 
@@ -64,19 +65,19 @@ export class LoginComponent implements OnInit {
 
 
   login(): any {
-    if (!this.authService.isLoggedIn()) {
+    if (!this.auth.isLoggedIn()) {
       this.isLoading = true;
-      return this.authService.login(this.authForm.value.username, this.authForm.value.password)
+      return this.auth.login(this.authForm.value.username, this.authForm.value.password)
         .subscribe((res: {status:number, data:any}) => {
 
           
           if (res.status === 200) {
             this.message = 'Login successfully !';
             console.log(this.message);
-            this.authService.clientSession(res.data);
+            this.auth.clientSession(res.data);
             const redirectUrl = Functions.getSavedUrl();
-            // this.router.navigate([redirectUrl || this.authService.defaultRedirectUrl]);
-            location.href = redirectUrl || this.authService.defaultRedirectUrl;
+            // this.router.navigate([redirectUrl || this.auth.defaultRedirectUrl]);
+            location.href = redirectUrl || this.auth.defaultRedirectUrl;
           } else {
             this.message = res.data;
             this.isLoading = false;
@@ -90,7 +91,7 @@ export class LoginComponent implements OnInit {
           console.log(this.message);
         });
     } else {
-      this.authService.alreadyAuthenticate();
+      this.auth.alreadyAuthenticate();
     }
   }
 

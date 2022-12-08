@@ -3,6 +3,8 @@ import { Component, OnInit } from "@angular/core";
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { Configs } from "@ih-app/models/User";
+import { ConfigService } from "@ih-app/services/config.service copy";
+import { RoleService } from "@ih-app/services/role.service";
 import { Functions } from "@ih-app/shared/functions";
 import { AuthService } from "@ih-services/auth.service";
 
@@ -19,10 +21,10 @@ export class RegisterComponent implements OnInit {
   LoadingMsg: string = "Loading...";
   showRegisterPage:boolean = false;
 
-  constructor(private auth: AuthService, private router: Router, private http: HttpClient) { }
+  constructor(private role:RoleService, private auth: AuthService, private router: Router, private http: HttpClient, private conf:ConfigService) { }
 
   ngOnInit(): void {
-    this.showRegisterPage = this.auth.canManageUser() ?? false;
+    this.showRegisterPage = this.role.canManageUser() ?? false;
     this.getConfigs();
     if (!this.showRegisterPage) {
       this.auth.alreadyAuthenticate();
@@ -32,7 +34,7 @@ export class RegisterComponent implements OnInit {
 
   getConfigs(){
     if (!this.showRegisterPage) {
-      return this.auth.getConfigs()
+      return this.conf.getConfigs()
       .subscribe((res: Configs) => {
         if (res.showRegisterPage !== true) {
           const redirectUrl = Functions.getSavedUrl();

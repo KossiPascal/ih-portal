@@ -6,8 +6,33 @@
   </div>
 </div> -->
 
-<h1>Version: {{appVersion}}</h1>
 
+
+<div class="modal fade" id="modal-update-version">
+  <div class="modal-dialog">
+      <div class="modal-content bg-default">
+        <div class="modal-header">
+          <strong>Mise à jour disponible</strong>
+          <span id="active-update-modal" (click)="ShowUpdateVersionModal()" data-toggle="modal" data-target="#modal-update-version"></span>
+
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+          <div class="modal-body"> 
+            <p>Une version mise à jour du site est disponible. Mettez à jour pour obtenir la nouvelle version : {{availableVersion}}</p>
+          </div>
+          <div class="modal-footer justify-content-between">
+              <button id="close-update-modal"  type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+              <button (click)="UpdateVersion()" type="button" class="btn btn-info swalDefaultSuccess">Mettre à jour</button>
+          </div>
+      </div>
+      <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+ 
 <div *ngIf="isAdmin">
   
   <div>
@@ -291,7 +316,7 @@
             <div class="dropdown-divider"></div>
             <div class="dropdown-divider"></div>
 
-            <a href="#" class="mb-control nav-link" data-toggle="modal" data-target="#modal-secondary" role="button">
+            <a href="#" class="nav-link" data-toggle="modal" data-target="#modal-secondary">
               <i class="fa fa-sign-out-alt"></i> Se déconnecter
             </a>
 

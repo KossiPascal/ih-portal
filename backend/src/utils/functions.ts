@@ -220,6 +220,20 @@ export class Functions {
         return `${this.projectFolderParent()}/ssl/${file_Name_with_extension}`
     }
 
+    static appVersion() {
+        return require('../../package.json').version;
+    }
+
+    public versionAsInt(version: string): number {
+        const v = version.split('.');
+        var res = '';
+        for (let i = 0; i < v.length; i++) {
+            const e = v[i];
+            res += e
+        }
+        return parseInt(res);
+    }
+
 }
 
 

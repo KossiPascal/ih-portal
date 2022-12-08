@@ -1,18 +1,15 @@
 import { ApplicationRef, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+import { concat, first, interval } from 'rxjs';
+import { environment } from "@ih-environments/environment";
+import { Functions } from '@ih-app/shared/functions';
 import { SwUpdate } from '@angular/service-worker';
-import { concat, interval } from 'rxjs';
-import { first } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class CheckForUpdateService {
-
-    constructor(private appRef: ApplicationRef, private sw: SwUpdate) {
-
-    }
-
-    SwUpdate(){
+    constructor(private http: HttpClient, private appRef: ApplicationRef, private sw: SwUpdate) { }
+    public SwUpdate(){
         // Allow the app to stabilize first, before starting
         // polling for updates with `interval()`.
         const appIsStable$ = this.appRef.isStable.pipe(first(isStable => isStable === true));
@@ -55,8 +52,4 @@ export class CheckForUpdateService {
 
         
     }
-
-
 }
-
-

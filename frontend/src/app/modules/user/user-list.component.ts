@@ -23,8 +23,11 @@ export class UserComponent implements OnInit {
     'super_admin',
     'can_manage_user',
     'admin',
-    'super_admin'
+    'visitor',
+    'can_send_dhis2',
+    'can_only_see'
   ];
+
 
   userForm!: FormGroup;
   isLoginForm: boolean = false;

@@ -7,11 +7,12 @@ import { Platform } from '@angular/cdk/platform';
 import { TitleService } from '@ih-services/title.service';
 import { interval } from 'rxjs';
 import { SyncService } from './services/sync.service';
-// import { UpdateService } from '../../../zfor_delete/update.service';
 import { TranslateService } from '@ngx-translate/core';
 import { CheckForUpdateService } from './services/check-for-update.service';
-import { AppVersionService } from './services/app-version.service';
+import { ConfigService } from './services/config.service copy';
+import { RoleService } from './services/role.service';
 
+declare var $: any;
 @Component({
   selector: 'app-root',
   templateUrl: `./app.component.html`,
@@ -32,9 +33,12 @@ export class AppComponent implements OnInit {
   time: number = 0;
   localSync: string = '';
 
-  @HostBinding('attr.app-version') appVersion:any = this.version.currentVersion;
+  @HostBinding('attr.app-version')
+  appVersion:any = localStorage.getItem('appVersion');
+  availableVersion:any;
+  // showReloadModal:boolean = false;
 
-  constructor(private version:AppVersionService, private sw:CheckForUpdateService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(private role:RoleService, private conf:ConfigService, private sw:CheckForUpdateService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
@@ -56,9 +60,10 @@ export class AppComponent implements OnInit {
   }
   
   ngOnInit(): void {
-    this.sw.SwUpdate();
-    this.isAdmin = this.auth.isAdmin();
-    this.isSuperAdmin = this.auth.isSuperAdminn();
+    this.getVersion();
+    
+    this.isAdmin = this.role.isAdmin();
+    this.isSuperAdmin = this.role.isSuperAdmin();
     const appTitle = this.titleService.getTitle();
     this.localSync = this.sync.isLocalSyncSuccess() ? 'syncSuccess' : 'syncError'
 
@@ -89,6 +94,30 @@ export class AppComponent implements OnInit {
     this.loadModalPwa();
   }
 
+  
+  private  getVersion(){
+    this.conf.appVersion().subscribe((newVersion: any) => {
+      if (this.appVersion !== newVersion) {
+        this.ShowUpdateVersionModal()
+        this.availableVersion = newVersion;
+      }
+    }, (err: any) => { console.log(err.error) });
+  }
+
+  clickModal(btnId:string){
+    $('#'+btnId).trigger('click');
+  }
+
+  ShowUpdateVersionModal(){
+    this.clickModal('active-update-modal')
+  }
+
+  UpdateVersion(){
+    localStorage.setItem('appVersion',this.availableVersion);
+    this.clickModal('close-update-modal');
+    window.location.reload();
+    
+  }
 
   private updateOnlineStatus(): void {
     this.isOnline = window.navigator.onLine;

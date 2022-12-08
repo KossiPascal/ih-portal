@@ -42,7 +42,10 @@ const portSecured = Functions.normalizePort(process.env.PORT_SECURED || '8000');
 
 AppDataSource
   .initialize()
-  .then(async () => console.log("initialize success !"))
+  .then(async () => {
+    console.log("initialize success !");
+    console.log(`App Version: ${Functions.appVersion()}`)
+  })
   .catch(error => console.log(`${error}`));
 
 const app = express()

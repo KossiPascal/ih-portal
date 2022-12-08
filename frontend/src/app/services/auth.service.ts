@@ -4,8 +4,8 @@ import { Router } from "@angular/router";
 import { User } from "@ih-models/User";
 import moment from "moment";
 import { Functions } from "@ih-app/shared/functions";
-import { BehaviorSubject, map, Observable } from "rxjs";
 import { ConversionUtils } from 'turbocommons-ts';
+import { RoleService } from "./role.service";
 
 Functions
 @Injectable({
@@ -15,7 +15,7 @@ export class AuthService {
 
   public defaultRedirectUrl = 'dashboards';
 
-  constructor(private router: Router, private http: HttpClient,) { 
+  constructor(private router: Router, private http: HttpClient, private role:RoleService) { 
 
   }
 
@@ -36,32 +36,6 @@ export class AuthService {
   public isLoggedIn(): boolean {
     if (this.getExpiration()) {
       return moment().isBefore(this.getExpiration());
-    }
-    return false;
-  }
-
-  private getRoles(): string[] {
-    if (this.userValue()!=null) return ConversionUtils.base64ToString(`${this.userValue()?.roles}`) as any;
-    return [];
-  }
-
-  public isSuperAdminn(): boolean {
-    if (Functions.notNull(this.getRoles())) {
-      return this.getRoles().includes('super_admin');
-    }
-    return false;
-  }
-
-  public canManageUser(): boolean {
-    if (Functions.notNull(this.getRoles())) {
-      return this.getRoles().includes('can_manage_user') || this.isSuperAdminn();
-    }
-    return false;
-  }
-
-  public isAdmin(): boolean {
-    if (Functions.notNull(this.getRoles())) {
-      return this.getRoles().includes('admin') || this.isSuperAdminn();
     }
     return false;
   }
@@ -130,7 +104,7 @@ export class AuthService {
   // window.location.pathname
 
   register(user: User): any {
-    if (!this.isLoggedIn() || this.canManageUser()) {
+    if (!this.isLoggedIn() || this.role.canManageUser()) {
       return this.http.post(`${Functions.backenUrl()}/auth/register`, user, Functions.customHttpHeaders(this));
     } else {
       this.alreadyAuthenticate();
@@ -153,10 +127,5 @@ export class AuthService {
     // this.router.navigate(["auths/login"]);
     location.href = 'auths/login';
   }
-
-
   
-  getConfigs(): any {
-    return this.http.get(`${Functions.backenUrl()}/configs`, Functions.customHttpHeaders(this));
-  }
 }

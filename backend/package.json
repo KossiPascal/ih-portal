@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node src/server.ts",
-    "start": "ts-node ./dist/src/server.js",
+    "prestart": "npm --no-git-tab-version version patch -m \"Upgrade to %s for reasons\"",
+    "start": "nodemon --delay 3000ms src/server.ts",
+    "server": "ts-node ./dist/src/server.js",
     "prod": "pm2 start ./dist/src/server.js --watch",
     "runProd": "pm2-runtime ./dist/src/server.js",
     "nodemonjs": "nodemon --delay 3000ms ./dist/src/server.js",
