@@ -27,11 +27,10 @@ export class UserController {
         try {
             const repo = await getUserRepository();
             const user = await repo.findOneBy({ id: req.body.id });
-            const pass = req.body.password;
 
             if (user) {
-                if (req.body.editPassword && isNotNull(pass)) {
-                    user.password = await user.hashPassword(pass);
+                if (req.body.editPassword && isNotNull(req.body.password)) {
+                    req.body.password = await user.hashPassword(req.body.password);
                 } else {
                     delete req.body.password;
                 }

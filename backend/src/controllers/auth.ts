@@ -10,21 +10,22 @@ export class AuthController {
         try {
             const repository = await getUserRepository();
             const user: User = toMap(req.body)
+
             const usernameFound = await repository.findOneBy({ username: user.username });
             const useremailFound = await repository.findOneBy({ email: user.email });
-            if (usernameFound || useremailFound) return res.status(res.statusCode).send({status: 401, data: 'This Credential is already used !'});
+            if (usernameFound || useremailFound) return res.status(res.statusCode).send({ status: 401, data: 'This Credential is already used !' });
 
             user.password = await user.hashPassword();
             const result = await repository.save(user);
-            return res.status(res.statusCode).send({status: 200, data: result});
+            return res.status(res.statusCode).send({ status: 200, data: result });
             // next();
         }
         catch (err: any) {
             if (!err.statusCode) err.statusCode = 500;
             // next(err);
-            return res.status(err.statusCode).end();
-        }
+            return res.status(err.statusCode).send({ status: err.statusCode, data: `${err}` });
 
+        }
     }
 
     static login = async (req: Request, res: Response, next: NextFunction) => {
@@ -40,16 +41,16 @@ export class AuthController {
                 if (!usernameFound) useremailFound = await repository.findOneBy({ email: credential });
 
                 if (!usernameFound && !useremailFound) {
-                    return res.status(res.statusCode).json({status: 401, data: 'No user found with this crediential, retry!'});
+                    return res.status(res.statusCode).json({ status: 401, data: 'No user found with this crediential, retry!' });
                 } else {
                     const userFound = usernameFound ?? useremailFound;
                     if (userFound) {
                         if (userFound.isActive !== true && userFound.isSuperAdmin !== true) {
-                            return res.status(res.statusCode).json({status: 401, data: "You don't have permission to login!"});
+                            return res.status(res.statusCode).json({ status: 401, data: "You don't have permission to login!" });
                         }
                         const isEqual = await userFound.comparePassword(password);
                         if (!isEqual) {
-                            return res.status(res.statusCode).json({status: 401, data: 'Wrong password or Not Authorized !'});
+                            return res.status(res.statusCode).json({ status: 401, data: 'Wrong password or Not Authorized !' });
                         }
 
                         var user: UserValue = {
@@ -63,19 +64,19 @@ export class AuthController {
                             // moment(moment(), "DD-MM-YYYY hh:mm:ss").add(Utils().expiredIn, 'seconds');
                         };
 
-                        return res.status(res.statusCode).json({status: 200, data: user});
+                        return res.status(res.statusCode).json({ status: 200, data: user });
                     } else {
-                        return res.status(res.statusCode).json({status: 401, data: 'No user found with this crediential, retry!'});
+                        return res.status(res.statusCode).json({ status: 401, data: 'No user found with this crediential, retry!' });
                     }
                 }
             } else {
 
                 if (!credential) {
-                    return res.status(res.statusCode).json({status: 401, data: 'No username given'});
+                    return res.status(res.statusCode).json({ status: 401, data: 'No username given' });
                 } else if (!password) {
-                    return res.status(res.statusCode).json({status: 401, data: 'You not give password!'});
+                    return res.status(res.statusCode).json({ status: 401, data: 'You not give password!' });
                 } else {
-                    return res.status(res.statusCode).json({status: 401, data: 'crediential error'});
+                    return res.status(res.statusCode).json({ status: 401, data: 'crediential error' });
                 }
             }
         }
