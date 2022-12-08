@@ -10,7 +10,7 @@ import { SyncService } from './services/sync.service';
 import { TranslateService } from '@ngx-translate/core';
 import { CheckForUpdateService } from './services/check-for-update.service';
 import { ConfigService } from './services/config.service copy';
-import { RoleService } from './services/role.service';
+import { RoleService } from './shared/roles';
 
 declare var $: any;
 @Component({
@@ -38,7 +38,7 @@ export class AppComponent implements OnInit {
   availableVersion:any;
   // showReloadModal:boolean = false;
 
-  constructor(private role:RoleService, private conf:ConfigService, private sw:CheckForUpdateService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(private conf:ConfigService, private sw:CheckForUpdateService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
@@ -62,8 +62,8 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.getVersion();
     
-    this.isAdmin = this.role.isAdmin();
-    this.isSuperAdmin = this.role.isSuperAdmin();
+    this.isAdmin = RoleService.isAdmin();
+    this.isSuperAdmin = RoleService.isSuperAdmin();
     const appTitle = this.titleService.getTitle();
     this.localSync = this.sync.isLocalSyncSuccess() ? 'syncSuccess' : 'syncError'
 

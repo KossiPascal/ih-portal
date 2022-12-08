@@ -5,7 +5,7 @@ import { User } from "@ih-models/User";
 import moment from "moment";
 import { Functions } from "@ih-app/shared/functions";
 import { ConversionUtils } from 'turbocommons-ts';
-import { RoleService } from "./role.service";
+import { RoleService } from "../shared/roles";
 
 Functions
 @Injectable({
@@ -14,10 +14,8 @@ Functions
 export class AuthService {
 
   public defaultRedirectUrl = 'dashboards';
-  showRegisterPage: boolean = this.role.canManageUser() ?? false;
 
-
-  constructor(private router: Router, private http: HttpClient, private role:RoleService) { 
+  constructor(private router: Router, private http: HttpClient) { 
 
   }
 
@@ -106,7 +104,7 @@ export class AuthService {
   // window.location.pathname
 
   register(user: User): any {
-    if (!this.isLoggedIn() || this.showRegisterPage) {
+    if (!this.isLoggedIn() || RoleService.isSuperAdmin()) {
       return this.http.post(`${Functions.backenUrl()}/auth/register`, user, Functions.customHttpHeaders(this));
     } else {
       this.alreadyAuthenticate();
