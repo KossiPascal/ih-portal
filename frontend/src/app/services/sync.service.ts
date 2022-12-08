@@ -79,7 +79,7 @@ export class SyncService {
 
   getAllData(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params!.user =userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/all`, sendParams, Functions.customHttpHeaders(this.auth));
@@ -88,7 +88,7 @@ export class SyncService {
 
   syncDhis2ChwsData(params: Dhis2Sync): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/dhis2_data`, sendParams, Functions.customHttpHeaders(this.auth));
@@ -97,7 +97,7 @@ export class SyncService {
 
   getDistrictsList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/districts`, sendParams, Functions.customHttpHeaders(this.auth));
@@ -105,7 +105,7 @@ export class SyncService {
 
   getSitesList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/sites`, sendParams, Functions.customHttpHeaders(this.auth));
@@ -113,7 +113,7 @@ export class SyncService {
 
   getZoneList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/zones`, sendParams, Functions.customHttpHeaders(this.auth));
@@ -121,7 +121,7 @@ export class SyncService {
 
   getChwsList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/chws`, sendParams, Functions.customHttpHeaders(this.auth));
@@ -129,7 +129,7 @@ export class SyncService {
 
   getFamilyList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/families`, sendParams, Functions.customHttpHeaders(this.auth));
@@ -137,7 +137,7 @@ export class SyncService {
 
   getPatientsList(params?: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/patients`, sendParams, Functions.customHttpHeaders(this.auth));
@@ -145,7 +145,7 @@ export class SyncService {
 
   syncChwsData(params: Sync): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     // if (params.ssl_verification !== true) console.log(this.sslMsg);
     params.user = userId
     return this.http.post(`${Functions.backenUrl()}/sync/data`, params, Functions.customHttpHeaders(this.auth));
@@ -153,7 +153,7 @@ export class SyncService {
 
   syncWeeklyChwsData(params: Sync): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/python/medicThinkmdWeekly`, params, Functions.customHttpHeaders(this.auth));
@@ -162,7 +162,7 @@ export class SyncService {
 
   syncSiteZoneFamilyPerson(params: Sync): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/site_family_person`, params, Functions.customHttpHeaders(this.auth));
@@ -171,7 +171,7 @@ export class SyncService {
 
   thinkmdToDhis2Script(params: Sync): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/python/thinkmdToDhis2`, params, Functions.customHttpHeaders(this.auth));
@@ -179,7 +179,7 @@ export class SyncService {
 
   medicToDhis2Script(params: Sync): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-    const userId = this.auth.userValue()!.id;
+    const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/python/medicToDhis2`, params, Functions.customHttpHeaders(this.auth));
