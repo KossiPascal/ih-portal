@@ -14,6 +14,8 @@ Functions
 export class AuthService {
 
   public defaultRedirectUrl = 'dashboards';
+  showRegisterPage: boolean = this.role.canManageUser() ?? false;
+
 
   constructor(private router: Router, private http: HttpClient, private role:RoleService) { 
 
@@ -104,7 +106,7 @@ export class AuthService {
   // window.location.pathname
 
   register(user: User): any {
-    if (!this.isLoggedIn() || this.role.canManageUser()) {
+    if (!this.isLoggedIn() || this.showRegisterPage) {
       return this.http.post(`${Functions.backenUrl()}/auth/register`, user, Functions.customHttpHeaders(this));
     } else {
       this.alreadyAuthenticate();

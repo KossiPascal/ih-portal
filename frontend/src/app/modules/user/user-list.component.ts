@@ -65,9 +65,7 @@ export class UserComponent implements OnInit {
 
   EditUser(user:User) {
     this.isEditMode = true;
-
     user.roles = (user.roles.toString().replace('[','').replace(']','')).split(',')
-    
     this.userForm = this.createFormGroup(user);
     this.selectedUser(user);
   }
