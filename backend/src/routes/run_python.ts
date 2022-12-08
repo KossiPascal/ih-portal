@@ -83,7 +83,6 @@ pyRouter.post('/medicToDhis2', Middelware.authMiddleware, (req: Request, res: Re
     var dataToSend: string = '{}';
     req.body['type'] = 'medic_only';
     const user = `${req.body['user']}`;
-    console.log(req.body)
     errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
     if (req.body['dhis2_password'] === '' || req.body['dhis2_password'] === null) req.body['dhis2_password'] = process.env.DHIS_PASS;
@@ -99,7 +98,6 @@ pyRouter.post('/medicToDhis2', Middelware.authMiddleware, (req: Request, res: Re
     python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
     python.on('end', (msg) => console.log(`Finish`));
 });
-
 
 
 pyRouter.post('/medicThinkmdWeekly', Middelware.authMiddleware, (req: Request, res: Response) => {
@@ -122,7 +120,6 @@ pyRouter.post('/medicThinkmdWeekly', Middelware.authMiddleware, (req: Request, r
     python.on('close', (code) => res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`));
     python.on('end', (msg) => console.log(`Finish`));
 });
-
 
 
 
