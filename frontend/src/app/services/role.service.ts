@@ -13,42 +13,42 @@ export class RoleService {
       return [];
     }
   
-    public isSuperAdmin(): boolean {
+    isSuperAdmin(): boolean {
       if (Functions.notNull(this.getRoles())) {
         return this.getRoles().includes('super_admin');
       }
       return false;
     }
   
-    public canManageUser(): boolean {
+    canManageUser(): boolean {
       if (Functions.notNull(this.getRoles())) {
         return this.getRoles().includes('can_manage_user') || this.isSuperAdmin();
       }
       return false;
     }
   
-    public isAdmin(): boolean {
+    isAdmin(): boolean {
       if (Functions.notNull(this.getRoles())) {
         return this.getRoles().includes('admin') || this.isSuperAdmin();
       }
       return false;
     }
   
-    public visitor(): boolean {
+    visitor(): boolean {
       if (Functions.notNull(this.getRoles())) {
         return this.getRoles().includes('visitor') || this.isAdmin();
       }
       return false;
     }
   
-    public canSendToDhis2(): boolean {
+    canSendToDhis2(): boolean {
       if (Functions.notNull(this.getRoles())) {
         return this.getRoles().includes('can_send_dhis2') || this.isAdmin();
       }
       return false;
     }
   
-    public canOnlySeedata(): boolean {
+    canOnlySeedata(): boolean {
       if (Functions.notNull(this.getRoles())) {
         return this.getRoles().includes('can_only_see') || this.isAdmin();
       }
