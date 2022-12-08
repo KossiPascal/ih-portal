@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostBinding, OnInit } from '@angular/core';
 import { NavigationEnd, Router, ActivatedRoute } from '@angular/router';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { filter, map } from 'rxjs/operators';
@@ -32,7 +32,7 @@ export class AppComponent implements OnInit {
   time: number = 0;
   localSync: string = '';
 
-  appVersion:any;
+  @HostBinding('attr.app-version') appVersion:any = this.version.currentVersion;
 
   constructor(private version:AppVersionService, private sw:CheckForUpdateService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
@@ -54,9 +54,8 @@ export class AppComponent implements OnInit {
     // if(this.auth.isLoggedIn()) this.sync.syncAllToLocalStorage();
 
   }
-
+  
   ngOnInit(): void {
-    this.appVersion = this.version.currentVersion;
     this.sw.SwUpdate();
     this.isAdmin = this.auth.isAdmin();
     this.isSuperAdmin = this.auth.isSuperAdminn();

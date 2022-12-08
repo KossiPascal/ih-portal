@@ -1,10 +1,10 @@
 {
   "name": "ih-portal",
-  "version": "1.0.10",
+  "version": "1.0.12",
   "scripts": {
     "ng": "ng",
     "start": "concurrently \"npm run ng serve\" \"cd ../backend && npm run nodemonserver\"",
-    "prebuild": "npm --no-git-tab-version version patch",
+    "prebuild": "npm --no-git-tab-version version patch -m \"Upgrade to %s for reasons\"",
     "build": "ng build --service-worker --build-optimizer --optimization --configuration production --aot",
     "postbuild": "git status && git add . && git commit -m \"Initial Commit\" && git push -u origin main && git status",
     "build2": "ng build --service-worker --build-optimizer --optimization --configuration production --aot --deploy-url=https://portal-integratehealth.org:9999/",
