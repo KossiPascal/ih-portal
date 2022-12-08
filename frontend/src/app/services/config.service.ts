@@ -16,4 +16,5 @@ export class ConfigService {
     appVersion(): any {
         return this.http.get(`${Functions.backenUrl()}/configs/appVersion`, Functions.customHttpHeaders(this.auth));
     }
+      
 } 

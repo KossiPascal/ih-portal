@@ -8,7 +8,7 @@ import * as moment from 'moment';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { KeyValue } from '@angular/common';
 import { DateUtils, Functions } from '@ih-app/shared/functions';
-
+import { ActivatedRoute } from '@angular/router'
 
 declare var $: any;
 declare var initDataTable: any;
@@ -33,6 +33,8 @@ export class SyncComponent implements OnInit {
   is_weekly_date_error: boolean = false;
   weekly_date_error_Msg:string = '';
 
+  activePage:any = '';
+
   loading1!: boolean;
   loading2!: boolean;
   loading3!: boolean;
@@ -54,10 +56,14 @@ export class SyncComponent implements OnInit {
 
   sitesList: Sites[] = [];
 
-
-  constructor(private syncService: SyncService, private http: HttpClient, private authService: AuthService) { }
+  constructor(private route:ActivatedRoute, private syncService: SyncService, private http: HttpClient, private authService: AuthService) { }
 
   ngOnInit(): void {
+
+    this.route.params.subscribe(params => {
+      this.activePage = params['cible'];
+    });
+    
 
     this.syncService.getSitesList().subscribe((sitesList: any) => {
       this.sitesList = sitesList;

@@ -5,7 +5,7 @@ import { User } from "@ih-models/User";
 import moment from "moment";
 import { Functions } from "@ih-app/shared/functions";
 import { ConversionUtils } from 'turbocommons-ts';
-import { RoleService } from "../shared/roles";
+import { Roles } from "../shared/roles";
 
 Functions
 @Injectable({
@@ -20,7 +20,13 @@ export class AuthService {
   }
 
   public userValue(): User|null {
-    if (Functions.notNull(localStorage.getItem('user'))) return JSON.parse(localStorage.getItem('user')??'');
+    if (Functions.notNull(localStorage.getItem('user'))) {
+      var userData:User = JSON.parse(localStorage.getItem('user')??'');
+
+      userData.userLogo = 'assets/images/kossi.png';
+      
+      return userData;
+    };
     return null;
   }
 
@@ -47,6 +53,14 @@ export class AuthService {
   public clientSession(user: User) :void{
       localStorage.setItem("user", JSON.stringify(user));
   }
+
+
+
+  appLogoPath(){
+    return 'assets/logo/logo1.png';
+  }
+  
+  
 
 
   getExpiration(): moment.Moment | null {
@@ -104,7 +118,7 @@ export class AuthService {
   // window.location.pathname
 
   register(user: User): any {
-    if (!this.isLoggedIn() || RoleService.isSuperAdmin()) {
+    if (!this.isLoggedIn() || Roles.isSuperAdmin()) {
       return this.http.post(`${Functions.backenUrl()}/auth/register`, user, Functions.customHttpHeaders(this));
     } else {
       this.alreadyAuthenticate();

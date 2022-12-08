@@ -10,41 +10,32 @@
 
 <div class="modal fade" id="modal-update-version">
   <div class="modal-dialog">
-      <div class="modal-content bg-default">
-        <div class="modal-header">
-          <strong>Mise à jour disponible</strong>
-          <span id="active-update-modal" (click)="ShowUpdateVersionModal()" data-toggle="modal" data-target="#modal-update-version"></span>
+    <div class="modal-content bg-default">
+      <div class="modal-header">
+        <strong>Mise à jour disponible</strong>
+        <span id="active-update-modal" (click)="ShowUpdateVersionModal()" data-toggle="modal"
+          data-target="#modal-update-version"></span>
 
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
         </button>
       </div>
-          <div class="modal-body"> 
-            <p>Une version mise à jour du site est disponible. Mettez à jour pour obtenir la nouvelle version : {{availableVersion}}</p>
-          </div>
-          <div class="modal-footer justify-content-between">
-              <button id="close-update-modal"  type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
-              <button (click)="UpdateVersion()" type="button" class="btn btn-info swalDefaultSuccess">Mettre à jour</button>
-          </div>
+      <div class="modal-body">
+        <p>Une version mise à jour du site est disponible. Mettez à jour pour obtenir la nouvelle version :
+          {{availableVersion}}</p>
       </div>
-      <!-- /.modal-content -->
+      <div class="modal-footer justify-content-between">
+        <button id="close-update-modal" type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+        <button (click)="UpdateVersion()" type="button" class="btn btn-info swalDefaultSuccess">Mettre à jour</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
   </div>
   <!-- /.modal-dialog -->
 </div>
 
- 
-<div *ngIf="isAdmin">
-  
-  <div>
-    <h2>{{ 'HOME.TITLE' | translate }}</h2>
-    <label>
-      {{ 'HOME.SELECT' | translate }}
-      <select #langSelect (change)="translate.use(langSelect.value)">
-        <option *ngFor="let lang of translate.getLangs()" [value]="lang" [selected]="lang === translate.currentLang">{{
-          lang }}</option>
-      </select>
-    </label>
-  </div>
+
+<div *ngIf="isSuperAdmin">
 
   <div class="w-100 btn btn-success onlinemsg">
     <span class="badge bg-success" *ngIf="isOnline">Ok</span> You are Online
@@ -64,7 +55,8 @@
 
   <div class="w-100 position-absolute bottom-0" *ngIf="modalPwaPlatform === 'android' || modalPwaPlatform === 'ios'">
     <div class="alert alert-secondary m-2">
-      <button type="button" class="btn-close position-absolute top-0 end-0 m-1" aria-label="Close" (click)="closePwa()"></button>
+      <button type="button" class="btn-close position-absolute top-0 end-0 m-1" aria-label="Close"
+        (click)="closePwa()"></button>
       <!-- Android -->
       <div *ngIf="modalPwaPlatform === 'android'" (click)="addToHomeScreen()">
         Add this WEB app to home screen
@@ -72,7 +64,9 @@
       <!-- iOS with Safari -->
       <div *ngIf="modalPwaPlatform === 'ios'">
         To install this WEB app on your device, tap the "Menu" button
-        <img src="https://res.cloudinary.com/rodrigokamada/image/upload/v1641089482/Blog/angular-pwa/safari_action_button_38x50.png" class="ios-menu m-0" />
+        <img
+          src="https://res.cloudinary.com/rodrigokamada/image/upload/v1641089482/Blog/angular-pwa/safari_action_button_38x50.png"
+          class="ios-menu m-0" />
         and then "Add to home screen" button
         <i class="bi bi-plus-square"></i>
       </div>
@@ -181,7 +175,6 @@
       </div>
     </div>
 
-
     <!-- Navbar -->
     <nav class="main-header navbar navbar-expand navbar-white navbar-light">
       <!-- Left navbar links -->
@@ -190,7 +183,7 @@
           <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
 
-        
+
 
         <li class="nav-item d-none d-sm-inline-block">
           <a routerLink="dashboards/dash1" class="nav-link">Dashboard 1</a>
@@ -226,7 +219,7 @@
         </li>
 
         <!-- Messages Dropdown Menu -->
-        <li *ngIf="isAdmin" class="nav-item dropdown">
+        <li *ngIf="isSuperAdmin" class="nav-item dropdown">
           <a class="nav-link" data-toggle="dropdown" href="#">
             <i class="far fa-comments"></i>
             <span class="badge badge-danger navbar-badge">3</span>
@@ -307,7 +300,8 @@
             <div class="dropdown-divider"></div>
             <div class="dropdown-divider"></div>
 
-            <a *ngIf="isAdmin" class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
+            <a *ngIf="isSuperAdmin" class="nav-link" data-widget="control-sidebar" data-slide="true" href="#"
+              role="button">
               <i class="fas far fa-bell"></i> Menu de controle
             </a>
 
@@ -316,16 +310,15 @@
             <div class="dropdown-divider"></div>
             <div class="dropdown-divider"></div>
 
-            <a href="#" class="nav-link" data-toggle="modal" data-target="#modal-secondary">
+            <a href="#" class="nav-link" data-toggle="modal" data-target="#modal-logout">
               <i class="fa fa-sign-out-alt"></i> Se déconnecter
             </a>
 
-
-
-
-
-
-
+            <div *ngIf="isSuperAdmin">
+              <p>{{ 'HOME.TITLE' | translate }}</p>
+              <p>{{ 'HOME.SELECT' | translate }}</p>
+                
+            </div>
 
             <div class="dropdown-divider"></div>
             <div class="dropdown-divider"></div>
@@ -347,6 +340,18 @@
           </div>
         </li>
 
+
+        <li class="nav-item">
+          <form class="form-inline nav-link">
+            <div class="input-group input-group-sm">
+              <select #langSelect (change)="translate.use(langSelect.value)">
+                <option *ngFor="let lang of translate.getLangs()" [value]="lang"
+                  [selected]="lang === translate.currentLang">{{ lang }}</option>
+              </select>
+            </div>
+          </form>
+        </li>
+
       </ul>
     </nav>
     <!-- /.navbar -->
@@ -355,9 +360,9 @@
     <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
       <!-- Brand Logo -->
-      <a href="index3.html" class="brand-link" style="text-align: center;">
+      <a href="#" class="brand-link" style="text-align: center;">
         <span class="brand-text font-weight-light">
-          <img src="assets/logo/logo1.png" alt="Integrate Health" class="" style="opacity: .8; width: 150px!important;">
+          <img src="{{appLogo}}" alt="Integrate Health" class="" style="opacity: .8; width: 150px!important;">
         </span>
       </a>
 
@@ -366,10 +371,10 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
           <div class="image">
-            <img src="assets/images/kossi.png" class="img-circle elevation-2" alt="User Image">
+            <img src="{{ userData?.userLogo }}" class="img-circle elevation-2" alt="User Image">
           </div>
           <div class="info">
-            <a href="#" class="d-block">Kossi TSOLEGNAGBO</a>
+            <a href="#" class="d-block">{{ userData?.fullname }}</a>
           </div>
         </div>
 
@@ -390,80 +395,104 @@
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-        <li *ngIf="isSuperAdmin" class="nav-item">
-         <a href="#" class="nav-link">
-           <i class="nav-icon fas fa-tachometer-alt"></i>
-           <p>
-             Admin
-             <i class="right fas fa-angle-left"></i>
-           </p>
-         </a>
-         <ul class="nav nav-treeview">
-           <li class="nav-item">
-            <a routerLink="fetch/sync" class="nav-link">
-               <i class="far fa-circle nav-icon"></i>
-               <p>Sync OrgUnit & Data</p>
-             </a>
-           </li>
-           <li class="nav-item">
-            <a routerLink="users" class="nav-link">
-               <i class="far fa-circle nav-icon"></i>
-               <p>Users</p>
-             </a>
-           </li>
-         </ul>
-       </li>
-            
-       <li class="nav-item">
-        <a href="#" class="nav-link">
-          <i class="nav-icon fas fa-tachometer-alt"></i>
-          <p>
-            Dashboard
-            <i class="right fas fa-angle-left"></i>
-          </p>
-        </a>
-        <ul class="nav nav-treeview">
-          <li class="nav-item">
-            <a routerLink="dashboards/dash1" class="nav-link">
-              <i class="far fa-circle nav-icon"></i>
-              <p>Dashboard v1</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a routerLink="dashboards/dash2" class="nav-link">
-              <i class="far fa-circle nav-icon"></i>
-              <p>Dashboard v2</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a routerLink="dashboards" class="nav-link">
-              <i class="far fa-circle nav-icon"></i>
-              <p>Dashboard v3</p>
-            </a>
-          </li>
-        </ul>
-      </li>
-
-            <li class="nav-item">
-              <a routerLink="fetch/data" class="nav-link">
-                <i class="nav-icon fas fa-th"></i>
+            <li *ngIf="isSuperAdmin" class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon far fa-plus-square"></i>
                 <p>
-                  Synchronisation
-                  <span class="right badge badge-danger">New</span>
+                  Admin
+                  <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a routerLink="fetch/sync" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Sync OrgUnit & Data</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a routerLink="users" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Users</p>
+                  </a>
+                </li>
+              </ul>
             </li>
+
             <li class="nav-item">
-              <a routerLink="docs" class="nav-link">
+              <a routerLink="dashboards/dash1" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>Dashboard 1</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a routerLink="dashboards/dash2" class="nav-link">
+                <i class="nav-icon fas fa-chart-pie"></i>
+                <p>Dashboard 2</p>
+              </a>
+            </li>
+
+            <!-- <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                  Dashboard
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a routerLink="dashboards/dash1" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Dashboard v1</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a routerLink="dashboards/dash2" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Dashboard v2</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a routerLink="dashboards" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Dashboard v3</p>
+                  </a>
+                </li>
+              </ul>
+            </li> -->
+
+            <li class="nav-item">
+              <a [routerLink]="[ '/fetch/data','dataToDhis2']" class="nav-link">
                 <i class="nav-icon fas fa-th"></i>
                 <p>
-                  Documentation
+                  Apps To Dhis2
                   <!-- <span class="right badge badge-danger">New</span> -->
                 </p>
               </a>
             </li>
+            
+            <li class="nav-item">
+              <a [routerLink]="[ '/fetch/data','weeklyData']" class="nav-link">
+                <i class="nav-icon fas fa-book"></i>
+                <p>
+                  Chws Weekly Data
+                </p>
+              </a>
+            </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            
+            <li class="nav-item">
+              <a routerLink="docs" class="nav-link">
+                <i class="nav-icon fas fa-file"></i>
+                <p>
+                  Documentation
+                </p>
+              </a>
+            </li>
+
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-chart-pie"></i>
                 <p>
@@ -493,7 +522,7 @@
               </ul>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-tree"></i>
                 <p>
@@ -553,7 +582,7 @@
               </ul>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-edit"></i>
                 <p>
@@ -589,7 +618,7 @@
               </ul>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-table"></i>
                 <p>
@@ -619,9 +648,9 @@
               </ul>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-header">EXAMPLES</li>
+            <li *ngIf="isSuperAdmin" class="nav-header">EXAMPLES</li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="pages/calendar.html" class="nav-link">
                 <i class="nav-icon far fa-calendar-alt"></i>
                 <p>
@@ -631,7 +660,7 @@
               </a>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="pages/gallery.html" class="nav-link">
                 <i class="nav-icon far fa-image"></i>
                 <p>
@@ -640,7 +669,7 @@
               </a>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon far fa-envelope"></i>
                 <p>
@@ -670,7 +699,7 @@
               </ul>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-book"></i>
                 <p>
@@ -742,7 +771,7 @@
               </ul>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon far fa-plus-square"></i>
                 <p>
@@ -872,7 +901,7 @@
               </ul>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-search"></i>
                 <p>
@@ -896,25 +925,25 @@
               </ul>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-header">MISCELLANEOUS</li>
+            <li *ngIf="isSuperAdmin" class="nav-header">MISCELLANEOUS</li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="https://adminlte.io/docs/3.1/" class="nav-link">
                 <i class="nav-icon fas fa-file"></i>
                 <p>Documentation</p>
               </a>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-header">MULTI LEVEL EXAMPLE</li>
+            <li *ngIf="isSuperAdmin" class="nav-header">MULTI LEVEL EXAMPLE</li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="fas fa-circle nav-icon"></i>
                 <p>Level 1</p>
               </a>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-circle"></i>
                 <p>
@@ -967,30 +996,30 @@
               </ul>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="fas fa-circle nav-icon"></i>
                 <p>Level 1</p>
               </a>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-header">LABELS</li>
+            <li *ngIf="isSuperAdmin" class="nav-header">LABELS</li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon far fa-circle text-danger"></i>
                 <p class="text">Important</p>
               </a>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon far fa-circle text-warning"></i>
                 <p>Warning</p>
               </a>
             </li>
 
-            <li *ngIf="isAdmin" class="nav-item">
+            <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon far fa-circle text-info"></i>
                 <p>Informational</p>
@@ -1051,22 +1080,22 @@
   </div> -->
 
 
-  <div class="modal fade" id="modal-secondary">
+  <div class="modal fade" id="modal-logout">
     <div class="modal-dialog">
-        <div class="modal-content bg-secondary">
-            <div class="modal-body"> 
-              <p>Are you sure you want to log out?</p>
-              <p>Press No if youwant to continue work. Press Yes to logout current user.</p>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
-                <button (click)="logout()" type="button" class="btn btn-danger swalDefaultSuccess">Yes</button>
-            </div>
+      <div class="modal-content bg-secondary">
+        <div class="modal-body">
+          <p>Are you sure you want to log out?</p>
+          <p>Press No if youwant to continue work. Press Yes to logout current user.</p>
         </div>
-        <!-- /.modal-content -->
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+          <button (click)="logout()" type="button" class="btn btn-danger swalDefaultSuccess">Yes</button>
+        </div>
+      </div>
+      <!-- /.modal-content -->
     </div>
     <!-- /.modal-dialog -->
-</div>
+  </div>
   <!-- END MESSAGE BOX-->
 
 

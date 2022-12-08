@@ -3,9 +3,9 @@ import { Component, OnInit } from "@angular/core";
 import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { Configs } from "@ih-app/models/User";
-import { ConfigService } from "@ih-app/services/config.service copy";
+import { ConfigService } from "@ih-app/services/config.service";
 import { Functions } from "@ih-app/shared/functions";
-import { RoleService } from "@ih-app/shared/roles";
+import { Roles } from "@ih-app/shared/roles";
 import { AuthService } from "@ih-services/auth.service";
 
 
@@ -24,7 +24,7 @@ export class RegisterComponent implements OnInit {
   constructor(private auth: AuthService, private router: Router, private http: HttpClient, private conf:ConfigService) { }
 
   ngOnInit(): void {
-    this.showRegisterPage = RoleService.canManageUser() ?? false;
+    this.showRegisterPage = Roles.canManageUser() ?? false;
     this.getConfigs();
     if (!this.showRegisterPage) {
       this.auth.alreadyAuthenticate();

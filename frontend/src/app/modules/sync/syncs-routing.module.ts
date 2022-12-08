@@ -8,7 +8,7 @@ import { SyncOrgUnitDataComponent } from './sync-orgunit-data.component';
 
 export const routes:Routes = [
   { path: '', redirectTo: 'data', pathMatch: 'full'},
-  { path: 'data', component: SyncComponent , canActivate: [AuthGuard], data: {title: 'Sync Data'}},
+  { path: 'data/:cible', component: SyncComponent , canActivate: [AuthGuard], data: {title: 'Sync Data'}},
   { path: 'sync', component: SyncOrgUnitDataComponent , canActivate: [AuthGuard], data: {title: 'Sync OrgUnit & Data'}},
 ];
  

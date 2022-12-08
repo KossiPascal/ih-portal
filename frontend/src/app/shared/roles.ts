@@ -2,7 +2,7 @@ import { User } from '@ih-app/models/User';
 import { Functions } from '@ih-app/shared/functions';
 import { ConversionUtils } from 'turbocommons-ts';
 
-export class RoleService {
+export class Roles {
 
   private static userValue(): User|null {
     if (Functions.notNull(localStorage.getItem('user'))) return JSON.parse(localStorage.getItem('user')??'');

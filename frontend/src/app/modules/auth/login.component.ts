@@ -5,7 +5,7 @@ import { AuthService } from '@ih-services/auth.service';
 import { HttpClient } from "@angular/common/http";
 import { Configs } from '@ih-app/models/User';
 import { Functions } from '@ih-app/shared/functions';
-import { ConfigService } from '@ih-app/services/config.service copy';
+import { ConfigService } from '@ih-app/services/config.service';
 
 
 @Component({

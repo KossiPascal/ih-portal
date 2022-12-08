@@ -11,7 +11,6 @@ export class Functions {
     const link = router.url.split(Functions.backenUrl(''))[0];
     // const link = location.href;
     // const link = window.location.href;
-    console.log(link)
       sessionStorage.setItem("redirect_url", link);
   }
 

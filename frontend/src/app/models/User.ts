@@ -9,6 +9,7 @@ export interface User {
   token?: string
   expiresIn?:any
   isSuperAdmin:any
+  userLogo?:any
 }
 
 

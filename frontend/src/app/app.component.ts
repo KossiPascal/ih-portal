@@ -1,7 +1,7 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { NavigationEnd, Router, ActivatedRoute } from '@angular/router';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, takeWhile } from 'rxjs/operators';
 import { AuthService } from '@ih-services/auth.service';
 import { Platform } from '@angular/cdk/platform';
 import { TitleService } from '@ih-services/title.service';
@@ -9,8 +9,9 @@ import { interval } from 'rxjs';
 import { SyncService } from './services/sync.service';
 import { TranslateService } from '@ngx-translate/core';
 import { CheckForUpdateService } from './services/check-for-update.service';
-import { ConfigService } from './services/config.service copy';
-import { RoleService } from './shared/roles';
+import { ConfigService } from './services/config.service';
+import { Roles } from './shared/roles';
+import { User } from './models/User';
 
 declare var $: any;
 @Component({
@@ -32,6 +33,10 @@ export class AppComponent implements OnInit {
   isSuperAdmin: boolean = false;
   time: number = 0;
   localSync: string = '';
+
+  appLogo:any = this.auth.appLogoPath()
+  userData:User|null = this.auth.userValue()
+
 
   @HostBinding('attr.app-version')
   appVersion:any = localStorage.getItem('appVersion');
@@ -60,10 +65,10 @@ export class AppComponent implements OnInit {
   }
   
   ngOnInit(): void {
-    this.getVersion();
+    this.accessVersion();
     
-    this.isAdmin = RoleService.isAdmin();
-    this.isSuperAdmin = RoleService.isSuperAdmin();
+    this.isAdmin = Roles.isAdmin();
+    this.isSuperAdmin = Roles.isSuperAdmin();
     const appTitle = this.titleService.getTitle();
     this.localSync = this.sync.isLocalSyncSuccess() ? 'syncSuccess' : 'syncError'
 
@@ -84,7 +89,7 @@ export class AppComponent implements OnInit {
       });
 
     this.getMsg('offlinemsg');
-    this.errorFound = window.location.pathname.includes('errorFound/');
+    this.errorFound = window.location.pathname.includes('error/');
     this.isAuthenticated = this.auth.isLoggedIn();
 
     this.updateOnlineStatus();
@@ -102,6 +107,20 @@ export class AppComponent implements OnInit {
         this.availableVersion = newVersion;
       }
     }, (err: any) => { console.log(err.error) });
+  }
+
+
+  private accessVersion(){
+    this.getVersion();
+    const stops:boolean = false;
+    interval(10000)
+    .pipe(takeWhile(() => !stops))
+    .subscribe(() => {
+      this.getVersion();
+      // console.log('version')
+    });
+    
+
   }
 
   clickModal(btnId:string){
