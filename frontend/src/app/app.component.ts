@@ -33,7 +33,7 @@ export class AppComponent implements OnInit {
   isSuperAdmin: boolean = false;
   time: number = 0;
   localSync: string = '';
-
+  
   appLogo:any = this.auth.appLogoPath()
   userData:User|null = this.auth.userValue()
 
@@ -108,7 +108,6 @@ export class AppComponent implements OnInit {
       }
     }, (err: any) => { console.log(err.error) });
   }
-
 
   private accessVersion(){
     this.getVersion();

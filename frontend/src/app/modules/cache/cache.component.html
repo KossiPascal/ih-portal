@@ -1,0 +1,34 @@
+<!-- /.card-header -->
+<div class="card-body">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div class="custom-control custom-checkbox">
+                    <input (change)="checkAll()"
+                        class="custom-control-input custom-control-input-danger custom-control-input-outline"
+                        type="checkbox" id="check-all">
+                    <label for="check-all" class="custom-control-label"> Check All</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <button (click)="cleanCache()" type="button" class="btn btn-danger">Clean Cache</button>
+        </div>
+    </div>
+
+    <br><br>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div *ngFor="let cache of caches$," class="form-group">
+                <div class="custom-control custom-checkbox">
+                    <input (change)="checkOrNot(cache)"
+                        class="custom-control-input custom-control-input-danger custom-control-input-outline"
+                        type="checkbox" id="{{ generateId(cache) }}">
+                    <label for="{{ generateId(cache) }}" class="custom-control-label"> {{ cache }}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.card-body -->
