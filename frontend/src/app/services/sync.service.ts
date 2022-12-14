@@ -95,50 +95,50 @@ export class SyncService {
   }
 
 
-  getDistrictsList(params?: any): any {
+  getDistrictsList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = `${this.auth.userValue()!.id}`;
-    if (Functions.notNull(params)) params.user = userId;
+    if (Functions.notNull(params)) params!.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/districts`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
-  getSitesList(params?: any): any {
+  getSitesList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = `${this.auth.userValue()!.id}`;
-    if (Functions.notNull(params)) params.user = userId;
+    if (Functions.notNull(params)) params!.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/sites`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
-  getZoneList(params?: any): any {
+  getZoneList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = `${this.auth.userValue()!.id}`;
-    if (Functions.notNull(params)) params.user = userId;
+    if (Functions.notNull(params)) params!.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/zones`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
-  getChwsList(params?: any): any {
+  getChwsList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = `${this.auth.userValue()!.id}`;
-    if (Functions.notNull(params)) params.user = userId;
+    if (Functions.notNull(params)) params!.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/chws`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
-  getFamilyList(params?: any): any {
+  getFamilyList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = `${this.auth.userValue()!.id}`;
-    if (Functions.notNull(params)) params.user = userId;
+    if (Functions.notNull(params)) params!.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/families`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
-  getPatientsList(params?: any): any {
+  getPatientsList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = `${this.auth.userValue()!.id}`;
-    if (Functions.notNull(params)) params.user = userId;
+    if (Functions.notNull(params)) params!.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
     return this.http.post(`${Functions.backenUrl()}/sync/patients`, sendParams, Functions.customHttpHeaders(this.auth));
   }

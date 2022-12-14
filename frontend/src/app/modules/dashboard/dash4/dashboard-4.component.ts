@@ -206,7 +206,7 @@ export class Dashboard4Component implements OnInit {
       sources: sources,
       chws: chws,
       sites: sites,
-      district: []
+      districts: []
     }
 
     this.isLoading = true;

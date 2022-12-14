@@ -75,7 +75,7 @@ export interface OrgUnitImport {
     error: number
     success: number
   }
-  famille: {
+  familles: {
     error: number
     success: number
   }
@@ -97,9 +97,10 @@ export interface FilterParams {
   start_date?: string
   end_date?: string
   sources?: string[]
+  forms?: string[]
   chws?: string[]
   sites?: string[]
-  district?: string[]
+  districts?: string[]
   zones?: string[]
   patients?: string[]
   families?: string[]

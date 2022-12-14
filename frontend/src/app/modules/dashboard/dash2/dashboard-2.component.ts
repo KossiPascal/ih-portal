@@ -79,7 +79,7 @@ export class Dashboard2Component implements OnInit {
   ChwsDataFromDb$: MedicMobileData[] = [];
   Chws$: Chws[] = [];
   Sites$: Sites[] = [];
-  source: string = 'portal-integratehealth.org.444';
+
   initMsg!: string;
   isLoading!: boolean;
 
@@ -101,12 +101,15 @@ export class Dashboard2Component implements OnInit {
   }
 
   async initAllData() {
+    const filter:FilterParams = {
+      sources: ['portal-integratehealth.org.444']
+    }
     this.isLoading = true;
     this.initMsg = 'Chargement des Sites ...';
-    this.syncService.getSitesList({ data_source: this.source }).subscribe((sites$: any) => {
+    this.syncService.getSitesList(filter).subscribe((sites$: any) => {
       this.Sites$ = sites$;
       this.initMsg = 'Chargement des ASC ...';
-      this.syncService.getChwsList({ data_source: this.source }).subscribe((chws$: any) => {
+      this.syncService.getChwsList(filter).subscribe((chws$: any) => {
         this.Chws$ = chws$;
         this.initDataFilted();
       }, (err: any) => console.log(err.error));
@@ -128,7 +131,7 @@ export class Dashboard2Component implements OnInit {
       start_date: startDate,
       end_date: endDate,
       sites: site,
-      data_source: source
+      source: source
     };
 
     this.syncService.getAllData(paramsTopass).subscribe((response: any) => {
