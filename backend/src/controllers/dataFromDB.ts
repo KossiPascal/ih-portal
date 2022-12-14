@@ -33,10 +33,10 @@ export class DataFromDbController {
              var allSync: ChwsData[] = await repository.find({
                     where: {
                         reported_date: isNotNull(req.body.start_date) || isNotNull(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
-                        source: isNotNull(req.body.data_source) ? In(req.body.data_source) : undefined,
-                        form: isNotNull(req.body.form) ? req.body.form : undefined,
-                        site: isNotNull(req.body.site) ? req.body.site : undefined,
-                        chw: isNotNull(req.body.chw) ? req.body.chw : undefined,
+                        source: isNotNull(req.body.sources) ? In(req.body.sources) : undefined,
+                        form: isNotNull(req.body.forms) ? In(req.body.forms) : undefined,
+                        site: isNotNull(req.body.sites) ? In(req.body.sites) : undefined,
+                        chw: isNotNull(req.body.chws) ? In(req.body.chws)  : undefined,
                     }
                 });
             if (!allSync) return res.status(401).json('No Data Found !');
@@ -69,10 +69,10 @@ export class DataFromDbController {
         try {
             const repository = await getDistrictSyncRepository();
             var districts: Districts[] = [];
-            if (req.body.data_source != '' && req.body.data_source != null && req.body.data_source != undefined) {
+            if (req.body.sources != '' && req.body.sources != null && req.body.sources != undefined) {
                 districts = await repository.find({
                     where: {
-                        source: req.body.data_source
+                        source: isNotNull(req.body.sources) ? In(req.body.sources) : undefined,
                     }
                 });
             } else {
@@ -93,10 +93,11 @@ export class DataFromDbController {
         try {
             const repository = await getSiteSyncRepository();
             var sites: Sites[] = [];
-            if (req.body.data_source != '' && req.body.data_source != null && req.body.data_source != undefined) {
+            if (req.body.sources != '' && req.body.sources != null && req.body.sources != undefined) {
                 sites = await repository.find({
                     where: {
-                        source: req.body.data_source
+                        source: isNotNull(req.body.sources) ? In(req.body.sources) : undefined,
+                        district: isNotNull(req.body.districts) ? In(req.body.districts) : undefined,
                     }
                 });
             } else {
@@ -117,10 +118,11 @@ export class DataFromDbController {
         try {
             const repository = await getZoneSyncRepository();
             var zones: Zones[] = [];
-            if (req.body.data_source != '' && req.body.data_source != null && req.body.data_source != undefined) {
+            if (req.body.sources != '' && req.body.sources != null && req.body.sources != undefined) {
                 zones = await repository.find({
                     where: {
-                        source: req.body.data_source
+                        source: isNotNull(req.body.sources) ? In(req.body.sources) : undefined,
+                        site: isNotNull(req.body.sites) ? In(req.body.sites) : undefined,
                     }
                 });
             } else {
@@ -140,10 +142,11 @@ export class DataFromDbController {
         try {
             const repository = await getChwsSyncRepository();
             var chws: Chws[] = [];
-            if (req.body.data_source != '' && req.body.data_source != null && req.body.data_source != undefined) {
+            if (req.body.sources != '' && req.body.sources != null && req.body.sources != undefined) {
                 chws = await repository.find({
                     where: {
-                        source: req.body.data_source
+                        source: isNotNull(req.body.sources) ? In(req.body.sources) : undefined,
+                        site: isNotNull(req.body.sites) ? In(req.body.sites) : undefined,
                     }
                 });
             } else {
@@ -161,12 +164,14 @@ export class DataFromDbController {
         const errors = validationResult(req);
         if (!errors.isEmpty()) return res.status(500).json('Informations you provided are not valid');
         try {
+
             const repository = await getFamilySyncRepository();
             var families: Families[] = [];
-            if (req.body.data_source != '' && req.body.data_source != null && req.body.data_source != undefined) {
+            if (req.body.sources != '' && req.body.sources != null && req.body.sources != undefined) {
                 families = await repository.find({
                     where: {
-                        source: req.body.data_source
+                        source: isNotNull(req.body.sources) ? In(req.body.sources) : undefined,
+                        site: isNotNull(req.body.sites) ? In(req.body.sites) : undefined,
                     }
                 });
             } else {
@@ -186,10 +191,12 @@ export class DataFromDbController {
         try {
             const repository = await getPatientSyncRepository();
             var patients: Patients[] = [];
-            if (req.body.data_source != '' && req.body.data_source != null && req.body.data_source != undefined) {
+            if (req.body.sources != '' && req.body.sources != null && req.body.sources != undefined) {
                 patients = await repository.find({
                     where: {
-                        source: req.body.data_source
+                        source: isNotNull(req.body.sources) ? In(req.body.sources) : undefined,
+                        site: isNotNull(req.body.sites) ? In(req.body.sites) : undefined,
+                        family: isNotNull(req.body.families) ? In(req.body.families) : undefined,
                     }
                 });
             } else {
