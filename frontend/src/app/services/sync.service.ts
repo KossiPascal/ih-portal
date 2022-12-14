@@ -147,8 +147,9 @@ export class SyncService {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const userId = `${this.auth.userValue()!.id}`;
     // if (params.ssl_verification !== true) console.log(this.sslMsg);
-    params.user = userId
-    return this.http.post(`${Functions.backenUrl()}/sync/data`, params, Functions.customHttpHeaders(this.auth));
+    if (Functions.notNull(params)) params.user = userId;
+    const sendParams = Functions.notNull(params) ? params : { user: userId };
+    return this.http.post(`${Functions.backenUrl()}/sync/data`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   syncWeeklyChwsData(params: Sync): any {
@@ -156,7 +157,7 @@ export class SyncService {
     const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
-    return this.http.post(`${Functions.backenUrl()}/python/medicThinkmdWeekly`, params, Functions.customHttpHeaders(this.auth));
+    return this.http.post(`${Functions.backenUrl()}/python/medicThinkmdWeekly`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
 
@@ -165,7 +166,7 @@ export class SyncService {
     const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
-    return this.http.post(`${Functions.backenUrl()}/sync/site_family_person`, params, Functions.customHttpHeaders(this.auth));
+    return this.http.post(`${Functions.backenUrl()}/sync/site_family_person`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
 
@@ -174,7 +175,7 @@ export class SyncService {
     const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
-    return this.http.post(`${Functions.backenUrl()}/python/thinkmdToDhis2`, params, Functions.customHttpHeaders(this.auth));
+    return this.http.post(`${Functions.backenUrl()}/python/thinkmdToDhis2`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
   medicToDhis2Script(params: Sync): any {
@@ -182,8 +183,17 @@ export class SyncService {
     const userId = `${this.auth.userValue()!.id}`;
     if (Functions.notNull(params)) params.user = userId;
     const sendParams = Functions.notNull(params) ? params : { user: userId };
-    return this.http.post(`${Functions.backenUrl()}/python/medicToDhis2`, params, Functions.customHttpHeaders(this.auth));
+    return this.http.post(`${Functions.backenUrl()}/python/medicToDhis2`, sendParams, Functions.customHttpHeaders(this.auth));
   }
+
+  ihChtToDhis2Script(params: Sync): any {
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const userId = `${this.auth.userValue()!.id}`;
+    if (Functions.notNull(params)) params.user = userId;
+    const sendParams = Functions.notNull(params) ? params : { user: userId };
+    return this.http.post(`${Functions.backenUrl()}/python/ihChtToDhis2`, sendParams, Functions.customHttpHeaders(this.auth));
+  }
+
 
 
   getDataByReportsDateView(syncData: Sync) {

@@ -1,0 +1,14 @@
+.custom-badge {
+  font-size: 18px;
+  color: black;
+}
+
+.custom-action {
+  font-size: 25px;
+  color: black;
+  text-align: center!important;
+}
+
+.info {
+  text-align: center!important;
+}

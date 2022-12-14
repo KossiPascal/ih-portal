@@ -9,13 +9,13 @@ import { Functions, DateUtils } from '@ih-app/shared/functions';
 declare var initDataTable: any;
 
 @Component({
-  selector: 'app-dashboard-two',
+  selector: 'app-dashboard-2',
   templateUrl: `./dashboard-2.component.html`,
   styleUrls: [
     './dashboard-2.component.css'
   ]
 })
-export class DashboardTwoComponent implements OnInit {
+export class Dashboard2Component implements OnInit {
   constructor(private syncService: SyncService) { }
 
   aggradateDataForm!: FormGroup;

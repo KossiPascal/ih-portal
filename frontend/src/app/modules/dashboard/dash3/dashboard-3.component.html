@@ -2,7 +2,7 @@
 
 <section class="content">
   <div class="container-fluid">
-    <div class="card card-warning">
+    <div class="card card-info">
       <div class="overlay-wrapper">
         <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i> <div class="text-bold pt-2"> {{initMsg}}</div></div>
       
@@ -28,6 +28,7 @@
               <div class="form-group">
                 <label>Source</label>
                 <select *ngIf="sources$.length > 0" (change)="genarateSites()" class="form-control" multiple="multiple" formControlName="sources">
+                  <!-- <option value="">Select All</option> -->
                   <option *ngFor="let source of sources$" value="{{source}}">
                     {{formatHostName(source)}}
                   </option>
@@ -42,6 +43,7 @@
               <div class="form-group">
                 <label>Site</label>
                 <select *ngIf="sites$.length > 0" (change)="genarateChws()" class="form-control" multiple="multiple" formControlName="sites">
+                  <!-- <option value="">Select All</option> -->
                   <option *ngFor="let site of sites$" value="{{site.id}}">
                     {{ site.name }}
                   </option>
@@ -56,6 +58,7 @@
               <div class="form-group">
                 <label>ASC</label>
                 <select *ngIf="chws$.length > 0" class="form-control" multiple="multiple" formControlName="chws">
+                  <!-- <option value="">Select All</option> -->
                   <option *ngFor="let chw of chws$" value="{{chw.id}}">
                     {{chw.name}}
                   </option>
@@ -82,6 +85,19 @@
     </div>
     </div>
 
+    <!-- <br><br>
+
+    <div class="row" style="display: none;">
+      <section class="col-lg-12 connectedSortable">
+        <div id="main-head" style="text-align:center">
+          <h1>view-graph</h1>
+          <div id="container"></div>
+        </div>
+      </section>
+    </div>
+
+    <br><br> -->
+
     <div class="row card-body">
       <div class="col-sm-3 col-6" *ngFor="let data of allAggragateData; trackBy:identifyAggragateData">
         <div class="small-box {{data.color}}">
@@ -90,6 +106,7 @@
             <p><strong>{{ data.label }}</strong></p>
           </div>
           <div class="icon"> <i class="ion {{data.icon}}"></i> </div>
+          <!-- <a [routerLink]="data.detailUrl" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> -->
         </div>
       </div>
     </div>

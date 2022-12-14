@@ -24,10 +24,12 @@ export class SyncComponent implements OnInit {
 
   thinkmdToDhis2Form!: FormGroup;
   medicToDhis2Form!: FormGroup;
+  ihChtToDhis2Form!: FormGroup;
   medicThinkMdWeeklyForm!: FormGroup;
   tab1_messages: DataFromPython | null = null;
   tab2_messages: DataFromPython | null = null;
   tab3_messages: DataFromPython | null = null;
+  tab4_messages: DataFromPython | null = null;
   dates: moment.Moment[] = [];
   weekly_Choosen_Dates: string[] = [];
   is_weekly_date_error: boolean = false;
@@ -38,6 +40,7 @@ export class SyncComponent implements OnInit {
   loading1!: boolean;
   loading2!: boolean;
   loading3!: boolean;
+  loading4!: boolean;
 
   start_date_error: boolean = false;
   end_date_error: boolean = false;
@@ -45,10 +48,10 @@ export class SyncComponent implements OnInit {
 
   LoadingMsg: string = "Loading..."
 
-  medicUrl$: any = {
-    "hth-togo.app.medicmobile.org": 443,
-    "portal-integratehealth.org": 444
-  }
+  // medicUrl$: any = {
+  //   "hth-togo.app.medicmobile.org": 443,
+  //   "portal-integratehealth.org": 444
+  // }
 
   dhisUrl$: any = {
     "dhis2.integratehealth.org/dhis": 443
@@ -75,29 +78,37 @@ export class SyncComponent implements OnInit {
     
     this.thinkmdToDhis2Form = this.createThinkmdFormGroup();
     this.medicToDhis2Form = this.createMedicFormGroup();
+    this.ihChtToDhis2Form = this.createIhChtFormGroup();
+    
     this.medicThinkMdWeeklyForm = this.createMedicThinkmdFormGroup();
 
   }
 
   createFormGroup(cible: string): FormGroup {
     return new FormGroup({
-      start_date: new FormControl("", cible === 'medic' || cible === 'allChwsData' || cible === 'medic_thinkMd' ? [Validators.required, Validators.minLength(7)] : []),
-      end_date: new FormControl("", cible === 'medic' || cible === 'thinkMd' || cible === 'allChwsData' ? [Validators.required, Validators.minLength(7)] : []),
+      start_date: new FormControl("", cible === 'cht' || cible === 'medic' || cible === 'allChwsData' || cible === 'medic_thinkMd_cht' ? [Validators.required, Validators.minLength(7)] : []),
+      end_date: new FormControl("", cible === 'cht' || cible === 'medic' || cible === 'thinkMd' || cible === 'allChwsData' ? [Validators.required, Validators.minLength(7)] : []),
 
       weekly_Choosen_Dates: new FormControl(""),
 
-      thinkmd_host: new FormControl("10az.online.tableau.com", cible === 'thinkMd' || cible === 'medic_thinkMd' ? [Validators.required] : []),
-      thinkmd_site: new FormControl("datasincbeta", cible === 'thinkMd' || cible === 'medic_thinkMd' ? [Validators.required] : []),
+      thinkmd_host: new FormControl("10az.online.tableau.com", cible === 'thinkMd' || cible === 'medic_thinkMd_cht' ? [Validators.required] : []),
+      thinkmd_site: new FormControl("datasincbeta", cible === 'thinkMd' || cible === 'medic_thinkMd_cht' ? [Validators.required] : []),
       useToken: new FormControl(false),
       thinkmd_token_username: new FormControl(""),
       thinkmd_token: new FormControl(""),
       thinkmd_username: new FormControl("seaq@santeintegree.org"),
       thinkmd_password: new FormControl(""),
 
-      medic_host: new FormControl("", cible === 'medic' || cible === 'allChwsData' || cible === 'allOrgUnit' || cible === 'medic_thinkMd' ? [Validators.required, Validators.minLength(3)] : []),
-      medic_username: new FormControl("admin", cible === 'medic' || cible === 'allChwsData' || cible === 'allOrgUnit' || cible === 'medic_thinkMd' ? [Validators.required] : []),
+      medic_host: new FormControl("hth-togo.app.medicmobile.org", cible === 'medic' || cible === 'allChwsData' || cible === 'allOrgUnit' || cible === 'medic_thinkMd_cht' ? [Validators.required, Validators.minLength(3)] : []),
+      medic_username: new FormControl("admin", cible === 'medic' || cible === 'allChwsData' || cible === 'allOrgUnit' || cible === 'medic_thinkMd_cht' ? [Validators.required] : []),
       medic_password: new FormControl(""),
-      medic_database: new FormControl("medic", cible === 'medic' || cible === 'medic_thinkMd' ? [Validators.required] : []),
+      medic_database: new FormControl("medic"),
+
+
+      cht_host: new FormControl("portal-integratehealth.org", cible === 'cht' || cible === 'allChwsData' || cible === 'allOrgUnit' || cible === 'medic_thinkMd_cht' ? [Validators.required, Validators.minLength(3)] : []),
+      cht_username: new FormControl("medic", cible === 'cht' || cible === 'allChwsData' || cible === 'allOrgUnit' || cible === 'medic_thinkMd_cht' ? [Validators.required] : []),
+      cht_password: new FormControl(""),
+      cht_database: new FormControl("medic"),
 
       InsertIntoDhis2: new FormControl(false, []),
       dhis2_host: new FormControl("dhis2.integratehealth.org/dhis"),
@@ -131,8 +142,12 @@ export class SyncComponent implements OnInit {
     return this.createFormGroup('medic');
   }
 
+  createIhChtFormGroup(): FormGroup {
+    return this.createFormGroup('cht');
+  }
+
   createMedicThinkmdFormGroup(): FormGroup {
-    return this.createFormGroup('medic_thinkMd');
+    return this.createFormGroup('medic_thinkMd_cht');
   }
 
 
@@ -240,18 +255,35 @@ export class SyncComponent implements OnInit {
     }
   }
 
+  runIhChtToDhis2(): void {
+    if (this.isValidParams(this.ihChtToDhis2Form, 'medic')) {
+      this.start_date_error = false;
+      this.end_date_error = false;
+      this.loading3 = true;
+      this.tab3_messages = null;
+      this.syncService
+        .ihChtToDhis2Script(this.ihChtToDhis2Form.value).subscribe((response: any) => {
+          this.loading3 = false;
+          this.tab3_messages = JSON.parse(response);
+          // console.log(response);
+        }, (err: any) => { this.loading3 = false; this.tab3_messages = err.message; console.log(err.error) });
+    }
+  }
+
+  
+
   runMedicThinkMdWeekly(): void {
     this.addToDateList();
     if (this.weekly_Choosen_Dates.length > 1 && this.WeeklyDateIsValid()) {
       this.is_weekly_date_error = false;
       this.weekly_date_error_Msg = '';
-      this.loading3 = true;
-      this.tab3_messages = null;
+      this.loading4 = true;
+      this.tab4_messages = null;
       this.syncService.syncWeeklyChwsData(this.medicThinkMdWeeklyForm.value).subscribe((response: any) => {
-        this.loading3 = false;
-        this.tab3_messages = JSON.parse(response);
+        this.loading4 = false;
+        this.tab4_messages = JSON.parse(response);
         // console.log(response);
-      }, (err: any) => { this.loading3 = false; this.tab3_messages = err.message; console.log(err.error) });
+      }, (err: any) => { this.loading4 = false; this.tab4_messages = err.message; console.log(err.error) });
     } else {
       this.is_weekly_date_error = true;
       if (this.weekly_Choosen_Dates.length <= 1) {

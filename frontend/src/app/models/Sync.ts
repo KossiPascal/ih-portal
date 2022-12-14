@@ -26,6 +26,11 @@ export interface Sync {
   medic_password: string
   medic_database: string
 
+  cht_host: string
+  cht_username: string
+  cht_password: string
+  cht_database: string
+
   InsertIntoDhis2: boolean
   dhis2_host: string
   dhis2_username: string

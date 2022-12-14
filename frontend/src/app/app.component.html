@@ -185,13 +185,13 @@
 
 
 
-        <li class="nav-item d-none d-sm-inline-block">
-          <a routerLink="dashboards/dash1" class="nav-link">Dashboard 1</a>
-        </li>
+        <!-- <li  routerLink="dashboards/dash1" class="nav-link">Dashboard 1</a>
+        </li>class="nav-item d-none d-sm-inline-block">
+          <a
 
         <li class="nav-item d-none d-sm-inline-block">
           <a routerLink="dashboards/dash2" class="nav-link">Dashboard 2</a>
-        </li>
+        </li> -->
       </ul>
 
       <!-- Right navbar links -->
@@ -440,6 +440,20 @@
               <a routerLink="dashboards/dash2" class="nav-link">
                 <i class="nav-icon fas fa-chart-pie"></i>
                 <p>Dashboard 2</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a routerLink="dashboards/dash3" class="nav-link">
+                <i class="nav-icon fas fa-chart-line"></i>
+                <p>Dashboard 3</p>
+              </a>
+            </li>
+
+            <li *ngIf="isSuperAdmin"  class="nav-item">
+              <a routerLink="dashboards/dash4" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>Dashboard 4</p>
               </a>
             </li>
 

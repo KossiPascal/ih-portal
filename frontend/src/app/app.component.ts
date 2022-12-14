@@ -10,7 +10,7 @@ import { SyncService } from './services/sync.service';
 import { TranslateService } from '@ngx-translate/core';
 import { CheckForUpdateService } from './services/check-for-update.service';
 import { ConfigService } from './services/config.service';
-import { Roles } from './shared/roles';
+import { Roles } from './shared/roles'; 
 import { User } from './models/User';
 
 declare var $: any;
@@ -33,6 +33,7 @@ export class AppComponent implements OnInit {
   isSuperAdmin: boolean = false;
   time: number = 0;
   localSync: string = '';
+  stopVersionTchecking:boolean = false;
   
   appLogo:any = this.auth.appLogoPath()
   userData:User|null = this.auth.userValue()
@@ -54,18 +55,13 @@ export class AppComponent implements OnInit {
     translate.use(browserLang?.match(/en|fr/) ? browserLang : 'en'); //this enabled setting lang automatically
     // translate.use('en');
     // this.updateService.checkForUpdates();
-
-    interval(6000)
-      // .pipe(takeWhile(() => this.isOnline))
-      .subscribe(res => {
-        if (this.isOnline) this.time++;
-      })
     // if(this.auth.isLoggedIn()) this.sync.syncAllToLocalStorage();
 
   }
   
   ngOnInit(): void {
     this.accessVersion();
+    this.stopVersionTchecking = false;
     
     this.isAdmin = Roles.isAdmin();
     this.isSuperAdmin = Roles.isSuperAdmin();
@@ -105,20 +101,20 @@ export class AppComponent implements OnInit {
       if (this.appVersion !== newVersion) {
         this.ShowUpdateVersionModal()
         this.availableVersion = newVersion;
+        this.stopVersionTchecking = true;
       }
     }, (err: any) => { console.log(err.error) });
   }
 
   private accessVersion(){
     this.getVersion();
-    const stops:boolean = false;
+    
     interval(10000)
-    .pipe(takeWhile(() => !stops))
+    .pipe(takeWhile(() => !this.stopVersionTchecking))
     .subscribe(() => {
       this.getVersion();
       // console.log('version')
     });
-    
 
   }
 
@@ -133,8 +129,8 @@ export class AppComponent implements OnInit {
   UpdateVersion(){
     localStorage.setItem('appVersion',this.availableVersion);
     this.clickModal('close-update-modal');
+    this.stopVersionTchecking = true;
     window.location.reload();
-    
   }
 
   private updateOnlineStatus(): void {

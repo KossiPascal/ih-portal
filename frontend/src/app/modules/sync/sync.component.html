@@ -18,6 +18,11 @@
                             aria-selected="false">Medic To DHIS2
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-one-cht-tab" data-toggle="pill" href="#custom-tabs-one-cht"
+                            role="tab" aria-controls="custom-tabs-one-cht" aria-selected="false">CHT To DHIS2
+                        </a>
+                    </li>
                 </ul>
             </div>
             <div class="card-body">
@@ -38,7 +43,7 @@
                                         <div class="card-header">
                                             <h3 class="card-title">Get ThinkMd Aggragate Data From Tableau</h3>
                                         </div>
-                                        
+
                                         <!-- /.card-header -->
                                         <form [formGroup]="thinkmdToDhis2Form" (ngSubmit)="runThinkmdToDhis2()"
                                             novalidate>
@@ -47,8 +52,8 @@
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Date de fin</label>
-                                                            <input type="date" class="form-control {{endDateError()}}" (change)="cleanError()"
-                                                                formControlName="end_date" />
+                                                            <input type="date" class="form-control {{endDateError()}}"
+                                                                (change)="cleanError()" formControlName="end_date" />
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-6">
@@ -73,9 +78,10 @@
                                                         <div class="form-group">
                                                             <label>Tableau Token</label>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                    formControlName="useToken">
-                                                                <label class="form-check-label">Use Token</label>
+                                                                <input id="useToken" class="form-check-input"
+                                                                    type="checkbox" formControlName="useToken">
+                                                                <label for="useToken" class="form-check-label">Use
+                                                                    Token</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -123,10 +129,10 @@
                                                         <div class="form-group">
                                                             <label>Use Dhis2</label>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                    formControlName="InsertIntoDhis2">
-                                                                <label class="form-check-label">Insert Into
-                                                                    Dhis2</label>
+                                                                <input id="thinkmdToDhis2" class="form-check-input"
+                                                                    type="checkbox" formControlName="InsertIntoDhis2">
+                                                                <label class="form-check-label"
+                                                                    for="thinkmdToDhis2">Insert Into Dhis2</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -166,7 +172,7 @@
                                             <!-- /.card-body -->
                                             <div class="card-footer">
                                                 <button [disabled]="!thinkmdToDhis2Form.valid" type="submit"
-                                                    class="btn btn-success float-right"> Save Changes <span
+                                                    class="btn btn-success float-right"> Charger les données <span
                                                         class="fa fa-floppy-o fa-right"></span></button>
                                             </div>
                                             <!-- /.card-footer -->
@@ -260,20 +266,20 @@
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Date de début</label>
-                                                            <input type="date" class="form-control {{startDateError()}}" (change)="cleanError()"
-                                                                formControlName="start_date" />
+                                                            <input type="date" class="form-control {{startDateError()}}"
+                                                                (change)="cleanError()" formControlName="start_date" />
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Date de fin</label>
-                                                            <input type="date" class="form-control {{endDateError()}}" (change)="cleanError()"
-                                                                formControlName="end_date" />
+                                                            <input type="date" class="form-control {{endDateError()}}"
+                                                                (change)="cleanError()" formControlName="end_date" />
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div class="row">
+                                                <!-- <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Host Name</label>
@@ -294,7 +300,7 @@
                                                                 formControlName="medic_database" />
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> -->
 
                                                 <div *ngIf="!medicToDhis2Form.value.useToken" class="row">
 
@@ -319,9 +325,10 @@
                                                         <div class="form-group">
                                                             <label>Use Dhis2</label>
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                    formControlName="InsertIntoDhis2">
-                                                                <label class="form-check-label">Insert Into
+                                                                <input id="InsertIntoDhis2" class="form-check-input"
+                                                                    type="checkbox" formControlName="InsertIntoDhis2">
+                                                                <label for="InsertIntoDhis2"
+                                                                    class="form-check-label">Insert Into
                                                                     Dhis2</label>
                                                             </div>
                                                         </div>
@@ -358,7 +365,7 @@
                                             <!-- /.card-body -->
                                             <div class="card-footer">
                                                 <button [disabled]="!medicToDhis2Form.valid" type="submit"
-                                                    class="btn btn-info float-right"> Save Changes <span
+                                                    class="btn btn-info float-right"> Charger les données <span
                                                         class="fa fa-floppy-o fa-right"></span></button>
                                             </div>
                                             <!-- /.card-footer -->
@@ -438,12 +445,217 @@
                             </div>
                         </div>
                     </div>
+
+
+
+                    <!-- start tab 2 -->
+                    <div class="tab-pane fade" id="custom-tabs-one-cht" role="tabpanel"
+                        aria-labelledby="custom-tabs-one-cht-tab">
+
+                        <div class="row">
+                            <div class="col-sm-7">
+                                <div class="overlay-wrapper">
+                                    <div *ngIf="loading3" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                                        <div class="text-bold pt-2">{{LoadingMsg}}</div>
+                                    </div>
+
+                                    <!-- general form elements disabled -->
+                                    <div class="card card-info">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Get Aggregate Data From CHT mebile</h3>
+                                        </div>
+                                        <!-- /.card-header -->
+                                        <form [formGroup]="ihChtToDhis2Form" (ngSubmit)="runIhChtToDhis2()" novalidate>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Date de début</label>
+                                                            <input type="date" class="form-control {{startDateError()}}"
+                                                                (change)="cleanError()" formControlName="start_date" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Date de fin</label>
+                                                            <input type="date" class="form-control {{endDateError()}}"
+                                                                (change)="cleanError()" formControlName="end_date" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Host Name</label>
+                                                            <select class="form-control" formControlName="cht_host">
+                                                                <option *ngFor="let item of chtUrl$ | keyvalue"
+                                                                    value="{{item.key}}">
+                                                                    {{item.key}}
+                                                                </option>
+                                                            </select>
+
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Cht Database</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="cht_database" />
+                                                        </div>
+                                                    </div>
+                                                </div> -->
+
+                                                <div *ngIf="!ihChtToDhis2Form.value.useToken" class="row">
+
+                                                    <div *ngIf="!ihChtToDhis2Form.value.useToken" class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Cht Username</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="cht_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Cht Password</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="cht_password" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Use Dhis2</label>
+                                                            <div class="form-check">
+                                                                <input id="InsertIntoDhis2" class="form-check-input"
+                                                                    type="checkbox" formControlName="InsertIntoDhis2">
+                                                                <label for="InsertIntoDhis2"
+                                                                    class="form-check-label">Insert Into
+                                                                    Dhis2</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div *ngIf="ihChtToDhis2Form.value.InsertIntoDhis2"
+                                                        class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 HOST</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="dhis2_host" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div *ngIf="ihChtToDhis2Form.value.InsertIntoDhis2" class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 USERNAME</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="dhis2_username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 PASSWORD</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="dhis2_password" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- /.card-body -->
+                                            <div class="card-footer">
+                                                <button [disabled]="!ihChtToDhis2Form.valid" type="submit"
+                                                    class="btn btn-info float-right"> Charger les données <span
+                                                        class="fa fa-floppy-o fa-right"></span></button>
+                                            </div>
+                                            <!-- /.card-footer -->
+                                        </form>
+                                        <!-- /.card-body -->
+                                    </div>
+                                    <!-- /.card -->
+                                </div>
+                            </div>
+
+                            <div class="col-sm-5">
+                                <div *ngFor="let item of tab3_messages?.dataToSend?.Dhis2Import| keyvalue">
+                                    {{item.key}}:{{item.value}} <br>
+                                </div>
+
+                                <!-- {{ tab3_messages?.dataToSend?.Error }}<br> -->
+                                <div *ngFor="let item of tab3_messages?.dataToSend?.ErrorMsg| keyvalue">
+                                    {{item.key}}:{{item.value}} <br>
+                                </div>
+
+                                <!-- {{ tab3_messages?.errorToSend?.ErrorCount }}<br> -->
+                                {{ tab3_messages?.errorToSend?.ConsoleError }}<br>
+
+                                <div *ngFor="let item of tab3_messages?.errorToSend?.ErrorData">
+                                    Error Found: {{item}}<br>
+                                </div>
+                                <div *ngIf="tab3_messages?.dataToSend?.success == 'true'">
+                                    Pas d'erreur rencontré lors de la récupération des données sur le serveur!
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <!-- /.card -->
+                                <div class="card"
+                                    *ngIf="tab3_messages?.dataToSend?.Data != null && tab3_messages?.dataToSend?.Data != undefined">
+                                    <div class="card-header">
+                                        <h3 class="card-title">DataTable with default features</h3>
+                                        <button type="button" (click)="initTable('medic_datatable')">Generate
+                                            Table</button>
+                                    </div>
+                                    <!-- /.card-header -->
+                                    <div class="card-body">
+                                        <table id="medic_datatable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th *ngFor="let data of tab3_messages?.dataToSend?.Data?.head">
+                                                        {{ capitaliseData(data, '_') }}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    *ngFor="let data of tab3_messages?.dataToSend?.Data?.body | keyvalue">
+                                                    <td *ngFor="let item of getItemAsArray(data)">
+                                                        {{ item }}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <!-- <tfoot>
+                                                <tr *ngFor="let data of tab3_messages?.dataToSend?.Data | keyvalue">
+                                                    <td>{{capitaliseData(item.key, '_')}}</td>
+                                                    <th *ngFor="let item of getItemAsArray(data,true)">
+                                                        <td>{{capitaliseData(item.key, '_')}}</td>
+                                                        {{ item }}
+                                                    </th>
+                                                </tr>
+                                            </tfoot> -->
+                                        </table>
+                                    </div>
+                                    <!-- /.card-body -->
+                                </div>
+                                <!-- /.card -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- /.card -->
         </div>
 
-        
+
         <div *ngIf="activePage === 'weeklyData'" class="card card-warning card-tabs">
             <div class="card-header p-0 pt-1">
                 <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
@@ -458,14 +670,14 @@
 
             <div class="card-body">
                 <div class="tab-content" id="custom-tabs-one-tabContent">
-                    <!-- start tab 3 -->
+                    <!-- start tab 4 -->
                     <div class="tab-pane fade show active" id="custom-tabs-chws-week-data" role="tabpanel"
                         aria-labelledby="custom-tabs-chws-week-data-tab">
 
                         <div class="row">
                             <div class="col-sm-7">
                                 <div class="overlay-wrapper">
-                                    <div *ngIf="loading3" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                                    <div *ngIf="loading4" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
                                         <div class="text-bold pt-2">{{LoadingMsg}}</div>
                                     </div>
 
@@ -487,7 +699,8 @@
                                             <div class="card-body">
 
                                                 <div class="row">
-                                                    <div class="col-sm-3" *ngFor="let item of weekly_Choosen_Dates" (click)="removeWeekDate(item)">
+                                                    <div class="col-sm-3" *ngFor="let item of weekly_Choosen_Dates"
+                                                        (click)="removeWeekDate(item)">
                                                         <div class="form-group">
                                                             <strong>
                                                                 {{ item }}
@@ -495,14 +708,16 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div *ngIf="is_weekly_date_error" style="color:red;"> <strong>{{weekly_date_error_Msg}}</strong> </div>
+                                                <div *ngIf="is_weekly_date_error" style="color:red;">
+                                                    <strong>{{weekly_date_error_Msg}}</strong> </div>
 
 
                                                 <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Date de début</label>
-                                                            <input type="date" class="form-control" (change)="addToDateList()"
+                                                            <input type="date" class="form-control"
+                                                                (change)="addToDateList()"
                                                                 formControlName="start_date" />
                                                         </div>
                                                     </div>
@@ -540,9 +755,10 @@
                                                         <div class="form-group">
                                                             <!-- <label>Tableau Token</label> -->
                                                             <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                    formControlName="useToken">
-                                                                <label class="form-check-label">Use Tableau
+                                                                <input id="useToken2" class="form-check-input"
+                                                                    type="checkbox" formControlName="useToken">
+                                                                <label for="useToken2" class="form-check-label">Use
+                                                                    Tableau
                                                                     Token</label>
                                                             </div>
                                                         </div>
@@ -584,7 +800,7 @@
                                                 </div>
 
                                                 <div class="row">
-                                                    <div class="col-sm-6">
+                                                    <!-- <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Medic Hostname</label>
                                                             <select class="form-control" formControlName="medic_host">
@@ -594,7 +810,14 @@
                                                                 </option>
                                                             </select>
                                                         </div>
-                                                    </div>
+                                                        <div class="col-sm-6">
+                                                            <div class="form-group">
+                                                                <label>Medic Database</label>
+                                                                <input type="text" class="form-control"
+                                                                    formControlName="medic_database" />
+                                                            </div>
+                                                        </div>
+                                                    </div> -->
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Medic Username</label>
@@ -602,9 +825,7 @@
                                                                 formControlName="medic_username" />
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Medic Password</label>
@@ -612,13 +833,25 @@
                                                                 formControlName="medic_password" />
                                                         </div>
                                                     </div>
+                                                </div>
+
+                                                <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
-                                                            <label>Medic Database</label>
+                                                            <label>Cht Username</label>
                                                             <input type="text" class="form-control"
-                                                                formControlName="medic_database" />
+                                                                formControlName="cht_username" />
                                                         </div>
                                                     </div>
+
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Cht Password</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="cht_password" />
+                                                        </div>
+                                                    </div>
+
                                                 </div>
 
                                                 <div class="row">
@@ -662,7 +895,7 @@
                                             <!-- /.card-body -->
                                             <div class="card-footer">
                                                 <button [disabled]="!medicThinkMdWeeklyForm.valid" type="submit"
-                                                    class="btn btn-primary float-right"> Save Changes <span
+                                                    class="btn btn-primary float-right"> Charger les données <span
                                                         class="fa fa-floppy-o fa-right"></span></button>
 
                                                 <!-- <button (click)="testJson();" class="btn btn-default float-right"> JSON TEST OUT<span class="fa fa-floppy-o fa-right"></span></button> -->
@@ -679,22 +912,22 @@
                             </div>
 
                             <div class="col-sm-5">
-                                <div *ngFor="let item of tab3_messages?.dataToSend?.Dhis2Import| keyvalue">
+                                <div *ngFor="let item of tab4_messages?.dataToSend?.Dhis2Import| keyvalue">
                                     {{item.key}}:{{item.value}} <br>
                                 </div>
 
-                                <!-- {{ tab3_messages?.dataToSend?.Error }}<br> -->
-                                <div *ngFor="let item of tab3_messages?.dataToSend?.ErrorMsg| keyvalue">
+                                <!-- {{ tab4_messages?.dataToSend?.Error }}<br> -->
+                                <div *ngFor="let item of tab4_messages?.dataToSend?.ErrorMsg| keyvalue">
                                     {{item.key}}:{{item.value}} <br>
                                 </div>
 
-                                <!-- {{ tab3_messages?.errorToSend?.ErrorCount }}<br> -->
-                                {{ tab3_messages?.errorToSend?.ConsoleError }}<br>
+                                <!-- {{ tab4_messages?.errorToSend?.ErrorCount }}<br> -->
+                                {{ tab4_messages?.errorToSend?.ConsoleError }}<br>
 
-                                <div *ngFor="let item of tab3_messages?.errorToSend?.ErrorData">
+                                <div *ngFor="let item of tab4_messages?.errorToSend?.ErrorData">
                                     Error Found: {{item}}<br>
                                 </div>
-                                <div *ngIf="tab3_messages?.dataToSend?.success == 'true'">
+                                <div *ngIf="tab4_messages?.dataToSend?.success == 'true'">
                                     Pas d'erreur rencontré lors de la récupération des données sur le serveur!
                                 </div>
 
@@ -715,15 +948,17 @@
                                         <table id="medic_thinkMd_datatable" class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
-                                                    <th *ngFor="let data of tab3_messages?.dataToSend?.Data?.head">
+                                                    <th *ngFor="let data of tab4_messages?.dataToSend?.Data?.head">
                                                         {{ capitaliseData(data, '_') }}
                                                     </th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr *ngFor="let data of tab3_messages?.dataToSend?.Data?.body | keyvalue">
-                                                    <td *ngFor="let item of getItemAsArray(data)" class="{{ genarateColor(item) }}">
-                                                      {{ item }}
+                                                <tr
+                                                    *ngFor="let data of tab4_messages?.dataToSend?.Data?.body | keyvalue">
+                                                    <td *ngFor="let item of getItemAsArray(data)"
+                                                        class="{{ genarateColor(item) }}">
+                                                        {{ item }}
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -743,8 +978,3 @@
     </div>
 </div>
 <!-- END PAGE CONTENT WRAPPER -->
-
-
-
-
-

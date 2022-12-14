@@ -11,9 +11,14 @@
   }
 
   input[type="checkbox"] {
-    border-color: rgba(255, 0, 0, 0);
+    /* border-color: black; */
     height: 18px;
     width: 18px;
+  }
+
+  .form-check-label {
+    margin-top: 5px;
+    margin-left: 5px;
   }
 
 
