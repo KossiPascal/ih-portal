@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
-import https = require('https');
+// import https = require('https');
 import { Between, In } from "typeorm";
-const request = require('request');
+// const request = require('request');
 
 import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, getDistrictSyncRepository, Districts } from "../entity/Sync";
 import { Dhis2SyncConfig, Functions, isNotNull } from "../utils/functions";

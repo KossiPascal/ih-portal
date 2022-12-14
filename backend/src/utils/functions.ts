@@ -239,7 +239,7 @@ export class Functions {
 
 
 
-export class MedicSyncConfig {
+export class CouchDbSyncConfig {
 
     constructor(sync: Sync, viewName: string) {
         this.host = sync.medic_host;

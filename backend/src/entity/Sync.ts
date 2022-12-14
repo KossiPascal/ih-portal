@@ -7,8 +7,7 @@ import { AppDataSource } from "../data-source"
 //   DOMESTIC = "domestic",
 //   INTERNATIONAL = "international",
 // }
-
-let Connection: DataSource = AppDataSource.manager.connection;
+let Connection: DataSource  = AppDataSource.manager.connection;
 
 
 @Entity()
@@ -88,19 +87,11 @@ export class ChwsData {
   // geolocation_log
 
 }
-
-let DataConnection: DataSource;
-
 export async function getChwsDataSyncRepository(): Promise<Repository<ChwsData>> {
-  if (DataConnection === undefined) {
-    DataConnection = AppDataSource.manager.connection;
-  }
-  return DataConnection.getRepository(ChwsData);
+  return Connection.getRepository(ChwsData);
 }
 
-
 // ##################################################################
-
 
 @Entity()
 export class Districts {
@@ -114,14 +105,11 @@ export class Districts {
   @Column({ type: 'varchar', nullable: true })
   name?: string
 }
-
 export async function getDistrictSyncRepository(): Promise<Repository<Districts>> {
   return Connection.getRepository(Districts);
 }
 
-
 // ##################################################################
-
 
 @Entity()
 export class Sites {
@@ -157,14 +145,11 @@ export class Sites {
   // updatedAt?: Date;
 
 }
-
 export async function getSiteSyncRepository(): Promise<Repository<Sites>> {
   return Connection.getRepository(Sites);
 }
 
-
 // ##################################################################
-
 
 @Entity()
 export class Zones {
@@ -194,11 +179,9 @@ export class Zones {
   @Column({ type: 'varchar', nullable: true })
   reported_full_date?: string
 }
-
 export async function getZoneSyncRepository(): Promise<Repository<Zones>> {
   return Connection.getRepository(Zones);
 }
-
 
 // ##################################################################
 
@@ -236,10 +219,7 @@ export async function getFamilySyncRepository(): Promise<Repository<Families>> {
   return Connection.getRepository(Families);
 }
 
-
-
 // ##################################################################
-
 
 @Entity()
 export class Patients {
@@ -282,10 +262,7 @@ export async function getPatientSyncRepository(): Promise<Repository<Patients>> 
   return Connection.getRepository(Patients);
 }
 
-
 // ##################################################################
-// 
-
 
 @Entity()
 @Unique(['external_id'])
@@ -322,7 +299,6 @@ export class Chws {
   @Column({ type: 'varchar', nullable: true })
   reported_full_date?: string
 }
-
 export async function getChwsSyncRepository(): Promise<Repository<Chws>> {
   return Connection.getRepository(Chws);
 }

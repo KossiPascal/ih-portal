@@ -5,15 +5,12 @@ const request = require('request');
 
 import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository } from "../entity/Sync";
 import { Dhis2DataFormat } from "../utils/appInterface";
-import { Dhis2SyncConfig, Functions, isNotNull, MedicSyncConfig } from "../utils/functions";
+import { Dhis2SyncConfig, Functions, isNotNull, CouchDbSyncConfig } from "../utils/functions";
 
 require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
 
-
-function genarateKozahChwsCode(code: string): string {
-    const d: string[] = code.split('');
-    return `KKO${d[0]}${d[1]}${d[2]}-${d[3]}${d[4]}${d[5]}`;
-}
+// 01445bec-67d5-471f-bb49-ade68d62fc5a, 
+// 1d5c2ffc-b579-4956-ab8a-b8b12f19f197
 
 const sitesKozah = [
     { id: 'HROrwGFFFR6', name: 'Adabawéré', external_id: '904158c2-5920-4003-9c15-9bf1e18b093d' },
@@ -21,25 +18,6 @@ const sitesKozah = [
     { id: 'S99zHZFkiKU', name: 'Kpindi', external_id: 'e6b3fc59-2580-4552-93c9-a4a40cef13da' },
     { id: 'PLqoLdWlKg9', name: 'Sarakawa', external_id: '5827654a-1c65-4aa3-a917-c83f294d965e' },
 ];
-
-function getKozahSitesExternalId(id: string): string {
-    for (let i = 0; i < sitesKozah.length; i++) {
-        const el = sitesKozah[i];
-        if (el.external_id == id) {
-            return el.id;
-        }
-    }
-    return '';
-}
-
-function getAllKozahExternalIds(): string[] {
-    var res: string[] = [];
-    for (let i = 0; i < sitesKozah.length; i++) {
-        const el = sitesKozah[i];
-        res.push(el.external_id);
-    }
-    return res;
-}
 
 const sitesBassar = [
     { id: 'PgoyKuRs20z', name: 'Bangeli', external_id: '' },
@@ -86,13 +64,34 @@ const kozahHost: string = "hth-togo.app.medicmobile.org";
 const chtHost: string = "portal-integratehealth.org";
 const dhisHost: string = "dhis2.integratehealth.org/dhis"
 
+function genarateKozahChwsCode(code: string): string {
+    const d: string[] = code.split('');
+    return `KKO${d[0]}${d[1]}${d[2]}-${d[3]}${d[4]}${d[5]}`;
+}
+
+function getKozahSitesExternalId(id: string): string {
+    for (let i = 0; i < sitesKozah.length; i++) {
+        const el = sitesKozah[i];
+        if (el.external_id == id) {
+            return el.id;
+        }
+    }
+    return '';
+}
+
+function getAllKozahExternalIds(): string[] {
+    var res: string[] = [];
+    for (let i = 0; i < sitesKozah.length; i++) {
+        const el = sitesKozah[i];
+        res.push(el.external_id);
+    }
+    return res;
+}
+
 function formatDataId(host: any, id: any, port: any): string {
     const val = `${host}`.replace('.org', '').replace('.', '').replace('-', '').replace('/', '').trim();
     return `${id}_${val}.${port}`;
 }
-
-// 01445bec-67d5-471f-bb49-ade68d62fc5a, 
-// 1d5c2ffc-b579-4956-ab8a-b8b12f19f197
 
 async function getSiteByDhis2Uid(uid: string): Promise<string | undefined> {
     var res: string | undefined = undefined;
@@ -143,8 +142,6 @@ function getDataValuesAsMap(dataValues: { dataElement: string, value: any }[], e
     }
     return finalData;
 }
-
-
 
 export class SyncFromCouchDbController {
 
@@ -243,7 +240,7 @@ export class SyncFromCouchDbController {
         }
 
         try {
-            const sync = new MedicSyncConfig(req.body, 'reports_by_date');
+            const sync = new CouchDbSyncConfig(req.body, 'reports_by_date');
             if (sync.use_SSL_verification !== true) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = '0';
 
 
@@ -337,7 +334,7 @@ export class SyncFromCouchDbController {
         }
 
         try {
-            const sync = new MedicSyncConfig(req.body, 'contacts_by_type');
+            const sync = new CouchDbSyncConfig(req.body, 'contacts_by_type');
             if (sync.use_SSL_verification !== true) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = '0';
 
             https.get(sync.headerOptions(), async function (res) {
@@ -545,8 +542,9 @@ export class SyncFromCouchDbController {
             outPutInfo["Message"]["error"] = err.message;
             resp.status(err.statusCode).json(outPutInfo);
         }
-    }
+    };
 
+    
 
 }
 
