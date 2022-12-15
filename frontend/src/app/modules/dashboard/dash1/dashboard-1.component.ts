@@ -181,7 +181,7 @@ export class Dashboard1Component implements OnInit {
       sources: sources,
       chws: chws,
       sites: sites,
-      districts: []
+      districts: [],
     }
     return params;
   }

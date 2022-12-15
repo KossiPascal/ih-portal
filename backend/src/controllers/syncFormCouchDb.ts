@@ -364,17 +364,18 @@ export class SyncFromCouchDbController {
                                     try {
                                         const _syncSite = new Sites();
                                         if (isNotNull(row.doc.district_external_id)) {
+                                            if (!outPutInfo.hasOwnProperty("Districts")) outPutInfo["Districts"] = { error: 0, success: 0 };
                                             try {
                                                 const _syncDistrict = new Districts();
-                                                _syncDistrict.id = row.district_external_id;
-                                                _syncDistrict.name = row.district_external_name;
+                                                _syncDistrict.id = row.doc.district_external_id;
+                                                _syncDistrict.name = row.doc.district_external_name;
                                                 _syncDistrict.source = `${sync.host}.${sync.port}`;
                                                 await _repoDistrict.save(_syncDistrict);
                                                 outPutInfo["Districts"]["success"] += 1;
                                             } catch (error) {
                                                 outPutInfo["Districts"]["error"] += 1
                                             }
-                                            _syncSite.district = row.district_external_id;
+                                            _syncSite.district = row.doc.district_external_id;
                                         }
 
                                         _syncSite.source = `${sync.host}.${sync.port}`;

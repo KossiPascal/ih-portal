@@ -136,8 +136,6 @@ export class Sites {
   @Column({ type: 'varchar', nullable: true })
   reported_full_date?: string
 
-  
-
   // @CreateDateColumn({ name: 'created_at' })
   // createdAt?: Date;
   
