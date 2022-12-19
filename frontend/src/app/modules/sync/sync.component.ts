@@ -45,17 +45,7 @@ export class SyncComponent implements OnInit {
   start_date_error: boolean = false;
   end_date_error: boolean = false;
 
-
   LoadingMsg: string = "Loading..."
-
-  // medicUrl$: any = {
-  //   "hth-togo.app.medicmobile.org": 443,
-  //   "portal-integratehealth.org": 444
-  // }
-
-  dhisUrl$: any = {
-    "dhis2.integratehealth.org/dhis": 443
-  }
 
   sitesList: Sites[] = [];
 

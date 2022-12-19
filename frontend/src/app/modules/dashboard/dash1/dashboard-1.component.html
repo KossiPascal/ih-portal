@@ -39,6 +39,18 @@
 
             <div class="col-sm-2 col-6">
               <div class="form-group">
+                <label>District</label>
+                <select (change)="genarateSites()" class="form-control" formControlName="districts" (click)="genarateChws()">
+                  <option value=""></option>
+                  <option *ngFor="let district of Districts$" value="{{district.id}}">
+                    {{ district.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-sm-2 col-6">
+              <div class="form-group">
                 <label>Site</label>
                 <select (change)="genarateChws()" class="form-control" formControlName="sites" (click)="genarateChws()">
                   <option value=""></option>

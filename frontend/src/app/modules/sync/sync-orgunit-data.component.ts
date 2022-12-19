@@ -1,12 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { DataFromPython, Dhis2Sync, OrgUnitImport, Sites } from '@ih-app/models/Sync';
+import { Dhis2Sync, OrgUnitImport, Sites } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import * as moment from 'moment';
-import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
-import { KeyValue } from '@angular/common';
 import { DateUtils, Functions } from '@ih-app/shared/functions';
 
 
@@ -43,17 +41,16 @@ export class SyncOrgUnitDataComponent implements OnInit {
 
   LoadingMsg: string = "Loading..."
 
-  medicUrl$: any = {
-    "hth-togo.app.medicmobile.org": 443,
-    "portal-integratehealth.org": 444
-  }
-
-  dhisUrl$: any = {
-    "dhis2.integratehealth.org/dhis": 443
+  getPort(host:string){
+    return host == 'portal-integratehealth.org' ? 444 : 443;
   }
 
   sitesList: Sites[] = [];
 
+  medicUrl$: any = {
+    "hth-togo.app.medicmobile.org": 443,
+    "portal-integratehealth.org": 444
+  }
 
   constructor(private syncService: SyncService, private http: HttpClient, private authService: AuthService) { }
 
@@ -207,7 +204,7 @@ export class SyncOrgUnitDataComponent implements OnInit {
   syncAllSiteZoneFamilyPersonFromDb(): void {
     this.loading4 = true;
     this.tab4_messages = null;
-    const port = this.medicUrl$[this.orgUnitAndPersonForm.value['medic_host']];
+    const port = this.getPort(this.orgUnitAndPersonForm.value['medic_host']);
     this.orgUnitAndPersonForm.value['port'] = port;
     this.orgUnitAndPersonForm.value['ssl_verification'] = `${port}` == '444' ? true : false;
     this.syncService.syncSiteZoneFamilyPerson(this.orgUnitAndPersonForm.value).subscribe((response: OrgUnitImport) => {
@@ -223,7 +220,7 @@ export class SyncOrgUnitDataComponent implements OnInit {
   syncAllChwsDataFromDb(): void {
     this.loading5 = true;
     this.tab5_messages = null;
-    const port = this.medicUrl$[this.chwsDataForm.value['medic_host']];
+    const port = this.getPort(this.chwsDataForm.value['medic_host']);
     this.chwsDataForm.value['port'] = port;
     this.chwsDataForm.value['ssl_verification'] = `${port}` == '444' ? true : false;
     this.syncService.syncChwsData(this.chwsDataForm.value).subscribe((response: OrgUnitImport) => {

@@ -85,8 +85,6 @@ export class Dashboard2Component implements OnInit {
 
   dhis2Params!: Dhis2Sync;
 
-  dhis2Url:string = "dhis2.integratehealth.org/dhis.443"
-  
   
   identifyBodyData(index:number, item: CompareData) {
     return item.Code;
@@ -102,7 +100,7 @@ export class Dashboard2Component implements OnInit {
 
   async initAllData() {
     const filter:FilterParams = {
-      sources: ['portal-integratehealth.org.444']
+      sources: ['Tonoudayo']
     }
     this.isLoading = true;
     this.initMsg = 'Chargement des Sites ...';
@@ -125,7 +123,7 @@ export class Dashboard2Component implements OnInit {
     const startDate: string = this.aggradateDataForm.value["start_date"];
     const endDate: string = this.aggradateDataForm.value["end_date"];
     const site: string = this.aggradateDataForm.value["sites"];
-    const source: string[] = ['portal-integratehealth.org.444','dhis2.integratehealth.org/dhis.443'] //this.aggradateDataForm.value["source"];
+    const source: string[] = ['Tonoudayo','dhis2'] //this.aggradateDataForm.value["source"];
 
     var paramsTopass: any = {
       start_date: startDate,
@@ -184,7 +182,7 @@ export class Dashboard2Component implements OnInit {
         const isDateValid: boolean = Functions.notNull(start_date) && Functions.notNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
 
         if (idSiteValid && isDateValid && outPutData.hasOwnProperty(asc)) {
-          if (data.source == this.dhis2Url) {
+          if (data.source == 'dhis2') {
             if (form === "PCIME") outPutData[asc].dhis_total_child_followup += 1
             if (form === "Maternelle" || form === "PF") outPutData[asc].dhis_total_num_fp_followup += 1
             if (form === "Recherche") outPutData[asc].dhis_total_active_research += 1

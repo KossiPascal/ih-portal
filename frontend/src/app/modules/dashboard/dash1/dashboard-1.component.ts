@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AggragateData, Chws, Families, FilterParams, Patients, Sites, Zones } from '@ih-app/models/Sync';
+import { AggragateData, Chws, Districts, Families, FilterParams, Patients, Sites, Zones } from '@ih-app/models/Sync';
 import { SyncService } from '@ih-app/services/sync.service';
 // import * as Highcharts from 'highcharts';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -21,6 +21,7 @@ export class Dashboard1Component implements OnInit {
   aggradateDataForm!: FormGroup;
   // initDate!: { start_date: string, end_date: string };
   initSources!: string;
+  initDistricts!: string;
   initSites!: string;
   initChws!: string[];
 
@@ -29,6 +30,7 @@ export class Dashboard1Component implements OnInit {
       // start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
       // end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
       sources: new FormControl(this.initSources),
+      districts: new FormControl(this.initDistricts),
       sites: new FormControl(this.initSites),
       chws: new FormControl(this.initChws),
     });
@@ -47,6 +49,7 @@ export class Dashboard1Component implements OnInit {
 
   Chws$: Chws[] = [];
   Sites$: Sites[] = [];
+  Districts$: Districts[] = [];
 
   chws$: Chws[] = [];
   sites$: Sites[] = [];
@@ -68,7 +71,8 @@ export class Dashboard1Component implements OnInit {
   ngOnInit(): void {
     this.isLoading = false;
     // this.initDate = DateUtils.startEnd21and20Date();
-    this.initSources = "portal-integratehealth.org.444",
+    this.initSources = "Tonoudayo",
+    this.initDistricts = "",
     this.initSites = "5ee14b0f-1224-47a6-abfc-5a1f47ddf934",
     this.aggradateDataForm = this.createDataFilterFormGroup();
     this.initAllData();
@@ -79,13 +83,17 @@ export class Dashboard1Component implements OnInit {
     const filter: FilterParams = this.ParamsToFilter();
 
     // if (Functions.notNull(filter.start_date) && Functions.notNull(filter.end_date)) {
+    this.initMsg = 'Chargement des Districts ...';
+    this.sync.getDistrictsList(filter).subscribe(async (_districts: any) => {
+      this.Districts$ = _districts;
+      for (let d = 0; d < this.Districts$.length; d++) {
+        const Did = this.Districts$[d].source;
+        if (Did != null && Did != '') if (!this.sources$.includes(Did)) this.sources$.push(Did);
+      }
       this.initMsg = 'Chargement des Sites ...';
       this.sync.getSitesList(filter).subscribe(async (_sites: any) => {
         this.Sites$ = _sites;
-        for (let s = 0; s < this.Sites$.length; s++) {
-          const Did = this.Sites$[s].source;
-          if (Did != null && Did != '') if (!this.sources$.includes(Did)) this.sources$.push(Did);
-        }
+
         this.genarateSites()
         this.initMsg = 'Chargement des Zones ...';
         this.sync.getZoneList(filter).subscribe((zones$: any) => {
@@ -121,6 +129,12 @@ export class Dashboard1Component implements OnInit {
         this.isLoading = false;
         console.log(err.error);
       });
+    }, (err: any) => {
+      this.isLoading = false;
+      console.log(err.error);
+    });
+
+
     // } else {
     //   this.isLoading = false;
     // }
@@ -190,11 +204,12 @@ export class Dashboard1Component implements OnInit {
 
     this.isLoading = true;
 
-    const { start_date, end_date, chws, sites, sources } = params ?? this.ParamsToFilter();
+    const { start_date, end_date, chws, sites, sources, districts } = params ?? this.ParamsToFilter();
 
     // this.initDate.start_date = start_date!;
     // this.initDate.end_date = end_date!;
     this.initSources = sources![0];
+    this.initDistricts = districts![0];
     this.initSites = sites![0];
     this.initChws = chws!;
 
