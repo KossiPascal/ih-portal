@@ -55,6 +55,14 @@ export interface Dhis2DataFormat {
 }
 
 
+export interface ChwUserParams {
+  host:string,
+  contact:string, 
+  parent:string,
+  new_parent:string
+}
+
+
 export interface MailConfig {
   admin: {
     from: string

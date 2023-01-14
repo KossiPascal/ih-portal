@@ -1,10 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column,Repository, DataSource, BeforeInsert } from "typeorm"
 import { AppDataSource } from "../data-source"
 import * as bcrypt from 'bcryptjs';
-import * as jwt from 'jsonwebtoken';
 import { response } from 'express';
 import { Utils } from "../utils/utils";
-import { isNotNull } from "../utils/functions";
+import { genarateToken, isNotNull } from "../utils/functions";
 
 // https://dev.to/brunoblaise/postgresql-how-to-add-array-data-type-and-quiz-api-in-nodejs-1kel
 
@@ -62,7 +61,7 @@ export class User {
     }
   
     token() {
-      return jwt.sign({ username: this.username, userId: this.id}, Utils().secretOrPrivateKey, { expiresIn: `${Utils().expiredIn}s` });
+      return genarateToken({id:this.id, name:this.username, role:this.roles, isActive:this.isActive});
     }
 
 

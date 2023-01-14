@@ -1,8 +1,12 @@
-import path = require("path");
-import https = require("https");
-import http = require("http");
-import { Dhis2Sync, MailConfig, Sync } from "./appInterface";
-
+import path from "path";
+import https from "https";
+import http from "http";
+import { Dhis2Sync, MailConfig, Sync, UserValue } from "./appInterface";
+import { Utils } from "./utils";
+import * as jwt from 'jsonwebtoken';
+import { User } from "../entity/User";
+import { ConversionUtils } from "turbocommons-ts";
+import moment from "moment";
 const nodemailer = require("nodemailer");
 const smtpTransport = require('nodemailer-smtp-transport');
 
@@ -305,37 +309,70 @@ export class Dhis2SyncConfig {
         this.host = host;
         this.port = param.port ?? 443;
         this.user = param.username,
-            this.pass = param.password,
-            this.cibleLink = 'https://' + host + link,
-            this.cibleName = cibleName
+        this.pass = param.password,
+        this.url = 'https://' + host + link,
+        this.cibleName = cibleName,
+        this.headers = {
+            'Authorization': 'Basic ' + Buffer.from(this.user + ':' + this.pass).toString('base64'),
+            "Accept": "application/json",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT, OPTIONS",
+            "Access-Control-Allow-Headers": "X-API-KEY, Origin, X-Requested-With, Content-Type, Accept,Access-Control-Request-Method, Authorization,Access-Control-Allow-Headers",
+            "Content-Type": "application/json",
+        }
     }
+    url: string;
     host: string;
     port: number;
     user: string;
     pass: string;
-    cibleLink: string;
     cibleName: string;
+    headers:any;
 
     headerOptions(): any {
         var options = {
-            url: this.cibleLink,
+            url: this.url,
             cache: 'no-cache',
             mode: "cors",
             credentials: "include",
             referrerPolicy: 'no-referrer',
-            headers: {
-                'Authorization': 'Basic ' + Buffer.from(this.user + ':' + this.pass).toString('base64'),
-                "Accept": "application/json",
-                "Access-Control-Allow-Credentials": "true",
-                "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT, OPTIONS",
-                "Access-Control-Allow-Headers": "X-API-KEY, Origin, X-Requested-With, Content-Type, Accept,Access-Control-Request-Method, Authorization,Access-Control-Allow-Headers",
-                "Content-Type": "application/json",
-            }
+            headers: this.headers
         };
         return options;
     }
 
+    fecthOptions(data?:any, method:'GET'|'POST'|'PUT'|'DELETE' = 'GET'): any {
+        var option = {
+            cache: 'no-cache',
+            mode: "cors",
+            credentials: "include",
+            referrerPolicy: 'no-referrer',
+            method: method,
+            body: isNotNull(data) ? JSON.stringify(data) : undefined,
+            headers: this.headers
+        };
+        return option;
+    }
 
+}
+
+
+
+export function genarateToken(data:{id:any, name:string, role:any, isActive:any}) {
+    return jwt.sign({ id: `${data.id}`, name: data.name, role:`${data.role}`, isActive:`${data.isActive}`}, Utils().secretOrPrivateKey, { expiresIn: `${Utils().expiredIn}s` });
+}
+
+export function generateAuthSuccessData(userFound:User): UserValue {
+    var user: UserValue = {
+        token: userFound.token(),
+        id: userFound.id,
+        username: userFound.username,
+        fullname: userFound.fullname,
+        roles: ConversionUtils.stringToBase64(userFound.roles),
+        isActive: userFound.isActive,
+        expiresIn: JSON.stringify((moment().add(Utils().expiredIn, 'seconds')).valueOf())
+      }
+      return user;
 }
 
 export function mailService(data: MailConfig) {

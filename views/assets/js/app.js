@@ -126,7 +126,7 @@ $(document).ready(function () {
 });
 
 
-function showToast(icon, title){
+function showToast(icon, title) {
   var Toast = Swal.mixin({
     toast: true,
     position: 'top-end',
@@ -141,6 +141,35 @@ function showToast(icon, title){
 
 }
 
+
+// $(document).ready(function () {
+//   const boxElem = document.getElementById("box");
+//   if (boxElem!=null && boxElem!=undefined) {
+
+//     boxElem.addEventListener("mousedown", logEvent);
+//     boxElem.addEventListener("mouseup", logEvent);
+//     boxElem.addEventListener("click", logEvent);
+//     boxElem.addEventListener("mouseenter", logEvent);
+//     boxElem.addEventListener("mouseleave", logEvent);
+//   }
+// });
+
+// function pageTouched(event){
+//   logEvent(event)
+// }
+
+// function logEvent(event) {
+//   const msg = `Event <strong>${event.type}</strong> at <em>${event.clientX}, ${event.clientY}</em>`;
+//   log(msg);
+// }
+
+// function log(msg) {
+//   const logElem = document.querySelector(".log");
+
+//   const time = new Date();
+//   const timeStr = time.toLocaleTimeString();
+//   logElem.innerHTML += `${timeStr}: ${msg}<br/>`;
+// }
 
 $(document).ready(function () {
   $('.toastrDefaultSuccess').click(function () {

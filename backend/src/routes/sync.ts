@@ -31,6 +31,17 @@ syncRouter.post(
   SyncFromCouchDbController.fetchAllSitesFamiliesPersonsRegisteredFromCouchDb
 );
 
+
+
+syncRouter.post('/updateUserFacilityIdAndContactPlace', Middelware.authMiddleware,SyncFromCouchDbController.updateUserFacilityIdAndContactPlace);
+
+
+
+
+
+
+
+
 syncRouter.get('/alls', Middelware.authMiddleware,DataFromDbController.getAllData);
 
 syncRouter.post('/all', Middelware.authMiddleware,DataFromDbController.getAllDataWithParams);
@@ -43,6 +54,7 @@ syncRouter.post('/families', Middelware.authMiddleware,DataFromDbController.getF
 syncRouter.post('/patients', Middelware.authMiddleware,DataFromDbController.getPatients);
 syncRouter.delete('/delete/:id', Middelware.authMiddleware,DataFromDbController.deleteSyncData);
 syncRouter.delete('/delete/all', Middelware.authMiddleware,DataFromDbController.deleteAllSyncData);
+
 
 export = syncRouter;
 

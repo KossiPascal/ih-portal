@@ -3,10 +3,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, Repository, DataSource, PrimaryColumn, CreateDateColumn, UpdateDateColumn, OneToMany, JoinColumn, ManyToOne, Unique, Index } from "typeorm"
 import { AppDataSource } from "../data-source"
 
-// export enum FlightType {
-//   DOMESTIC = "domestic",
-//   INTERNATIONAL = "international",
-// }
+// export enum FlightType { DOMESTIC = "domestic", INTERNATIONAL = "international" }
 let Connection: DataSource  = AppDataSource.manager.connection;
 
 
@@ -27,6 +24,10 @@ export class ChwsData {
 
   @Column('json', { nullable: true })
   fields?: object;
+
+  @ManyToOne(() => Districts, district => district.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'district_id', referencedColumnName: 'id' })
+  district?: string
 
   @ManyToOne(() => Sites, site => site.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'site_id', referencedColumnName: 'id' })
@@ -164,6 +165,10 @@ export class Zones {
   @Column({ type: 'varchar', nullable: true })
   external_id?: string
 
+  @ManyToOne(() => Districts, district => district.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'district_id', referencedColumnName: 'id' })
+  district?: string
+
   @ManyToOne(() => Sites, (site) => site.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'site_id', referencedColumnName: 'id' })
   site?: string
@@ -198,6 +203,10 @@ export class Families {
   @Column({ type: 'varchar', nullable: true })
   external_id?: string
 
+  @ManyToOne(() => Districts, district => district.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'district_id', referencedColumnName: 'id' })
+  district?: string
+
   @ManyToOne(() => Zones, (zone) => zone.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'zone_id', referencedColumnName: 'id' })
   zone?: string
@@ -212,7 +221,6 @@ export class Families {
   @Column({ type: 'varchar', nullable: true })
   reported_full_date?: string
 }
-
 export async function getFamilySyncRepository(): Promise<Repository<Families>> {
   return Connection.getRepository(Families);
 }
@@ -237,6 +245,10 @@ export class Patients {
   @Column({ type: 'varchar', nullable: true })
   role?: string
 
+  @ManyToOne(() => Districts, district => district.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'district_id', referencedColumnName: 'id' })
+  district?: string
+
   @ManyToOne(() => Sites, site => site.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'site_id', referencedColumnName: 'id' })
   site?: string
@@ -255,7 +267,6 @@ export class Patients {
   @Column({ type: 'varchar', nullable: true })
   reported_full_date?: string
 }
-
 export async function getPatientSyncRepository(): Promise<Repository<Patients>> {
   return Connection.getRepository(Patients);
 }
@@ -275,13 +286,16 @@ export class Chws {
   @Column({ type: 'varchar', nullable: true })
   name?: string
 
-
   @Column({ type: 'varchar', nullable: true })
   @Index({ unique: true })
   external_id?: string
  
   @Column({ type: 'varchar', nullable: true })
   role?: string
+
+  @ManyToOne(() => Districts, district => district.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'district_id', referencedColumnName: 'id' })
+  district?: string
 
   @ManyToOne(() => Sites, site => site.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'site_id', referencedColumnName: 'id' })

@@ -1,36 +1,31 @@
 import "reflect-metadata"
 import express from 'express';
 import {json, urlencoded} from 'body-parser';
-import bearerToken = require('express-bearer-token');
-import authRouter = require("./routes/auth");
-import userRouter = require("./routes/user");
-import configRouter = require("./routes/config");
-import syncRouter = require('./routes/sync');
-import pyRouter = require('./routes/run_python');
-import { Errors }  from './controllers/error';
-import https = require("https");
-import http = require("http");
-import fs = require("fs");
-import cors = require('cors');
-const createError = require("http-errors");
- 
-import { Functions, mailService } from './utils/functions';
-
-// require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
+import { Functions } from './utils/functions';
 require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
-
 import { AppDataSource } from './data-source';
-import { MailConfig } from "./utils/appInterface";
-// import { getTableauData } from "../../test-tableau";
+import cors from "cors";
+import bearerToken from "express-bearer-token";
+import { Errors } from "./controllers/error";
+import authRouter from "./routes/auth";
+import configRouter from "./routes/config";
+import pyRouter from "./routes/run_python";
+import syncRouter from "./routes/sync";
+import userRouter from "./routes/user";
+import fs from "fs";
+import https from "https";
+import http from "http";
 const path = require('path');
 const cron = require("node-cron");
-const shell = require('shelljs');
+// const shell = require('shelljs');
+// const createError = require("http-errors");
+// import { MailConfig } from "./utils/appInterface";
 
 const accessAllAvailablePort = process.env.ACCESS_ALL_AVAILABE_PORT == 'true';
 const hostnames = Functions.getIPAddress(accessAllAvailablePort);
 
 var session = require('express-session');
-// var session = require('cookie-session');
+// var cookie = require('cookie-session');
 
 // var os = require('os');
 // var networkInterfaces = os.networkInterfaces();
@@ -57,7 +52,7 @@ const app = express()
   .set("view engine", "ejs")
   .set('json spaces', 2)
   .use(session({
-    secret: 'foo',
+    secret: 'session',
     cookie: {
       secure: true,
       maxAge: 60000
@@ -82,6 +77,8 @@ const app = express()
   .use('/api/python', pyRouter)
   .use('/api/user', userRouter)
   .use('/api/configs', configRouter)
+
+  
   
   .use('/api/assets', express.static(__dirname+'/assets'))
   // .use(express.static(`${Functions.projectFolder()}/views`, {maxAge: `1y`}))
@@ -92,9 +89,6 @@ const app = express()
   // .use((req, res, next) => next(createError(404, "Not found")))
   .use(Errors.get404)
   .use(Errors.get500);
-
-
-
 
 
 
