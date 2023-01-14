@@ -252,7 +252,7 @@ export class SyncService {
     //   //     await repository.save(_sync);
     //   // }); 
     //   if (use_SSL_verification !== true) {
-    //     process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = '1';
+    //     process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = undefined;
     //   }
     //   // resp.status(200).json({status:200,message:`Fetching Data from couchdb Finished Successfully`});
     // }

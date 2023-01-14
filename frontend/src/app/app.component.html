@@ -1,3 +1,5 @@
+<div (mousedown)="pageTouched($event)"  (mouseenter)="pageTouched($event)" (mouseup)="pageTouched($event)" (mouseleave)="pageTouched($event)"  (click)="pageTouched($event)" class="box">
+  
 <!-- <div class="row my-1">
   <div class="col text-end"> Status:</div>
   <div class="col">
@@ -5,8 +7,6 @@
     <span class="badge bg-"></span>
   </div>
 </div> -->
-
-
 
 <div class="modal fade" id="modal-update-version">
   <div class="modal-dialog">
@@ -430,6 +430,13 @@
             </li>
 
             <li class="nav-item">
+              <a routerLink="chws/" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>Manage Chws</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
               <a routerLink="dashboards/dash1" class="nav-link">
                 <i class="nav-icon fas fa-tachometer-alt"></i>
                 <p>Dashboard 1</p>
@@ -516,7 +523,9 @@
               </a>
             </li>
 
-            <li *ngIf="isSuperAdmin" class="nav-item">
+
+
+            <!-- <li *ngIf="isSuperAdmin" class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-chart-pie"></i>
                 <p>
@@ -1048,7 +1057,10 @@
                 <i class="nav-icon far fa-circle text-info"></i>
                 <p>Informational</p>
               </a>
-            </li>
+            </li> -->
+
+
+
           </ul>
         </nav>
         <!-- /.sidebar-menu -->
@@ -1141,3 +1153,7 @@
 <!-- <ng-template #trigger>
   template to trigger changes...
 </ng-template> -->
+
+
+</div>
+

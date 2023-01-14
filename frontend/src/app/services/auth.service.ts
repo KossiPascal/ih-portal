@@ -15,27 +15,27 @@ export class AuthService {
 
   public defaultRedirectUrl = 'dashboards';
 
-  constructor(private router: Router, private http: HttpClient) { 
+  constructor(private router: Router, private http: HttpClient) {
 
   }
 
-  public userValue(): User|null {
+  public userValue(): User | null {
     if (Functions.notNull(localStorage.getItem('user'))) {
-      var userData:User = JSON.parse(localStorage.getItem('user')??'');
+      var userData: User = JSON.parse(localStorage.getItem('user') ?? '');
 
       userData.userLogo = 'assets/images/kossi.png';
-      
+
       return userData;
     };
     return null;
   }
 
   public tokenIsNotEmpty(): boolean {
-    if (this.userValue()!=null) {
+    if (this.userValue() != null) {
       const token = this.userValue()!.token;
       return token != null && token != undefined && token != "" && token.length > 0;
     }
-    
+
     return false;
   }
 
@@ -49,19 +49,14 @@ export class AuthService {
   isLoggedOut() {
     return !this.isLoggedIn();
   }
-  
-  public clientSession(user: User) :void{
-      localStorage.setItem("user", JSON.stringify(user));
+
+  public clientSession(user: User): void {
+    localStorage.setItem("user", JSON.stringify(user));
   }
 
-
-
-  appLogoPath(){
+  appLogoPath() {
     return 'assets/logo/logo1.png';
   }
-  
-  
-
 
   getExpiration(): moment.Moment | null {
     if (this.userValue()) {
@@ -90,7 +85,7 @@ export class AuthService {
     }
   }
 
-  updateUser(user: any): any {
+  updateUser(user: User): any {
     if (this.isLoggedIn()) {
       return this.http.post(`${Functions.backenUrl()}/user/update`, user, Functions.customHttpHeaders(this));
     } else {
@@ -98,14 +93,24 @@ export class AuthService {
     }
   }
 
-  deleteUser(user:User): any {
+
+
+  // à supprimer
+  updateUserFacilityIdAndContactPlace(data: any): any {
+    return this.http.post(`${Functions.backenUrl()}/sync/updateUserFacilityIdAndContactPlace`, data, Functions.customHttpHeaders(this));
+  }
+  // à supprimer
+
+
+
+  deleteUser(user: User): any {
     if (this.isLoggedIn()) {
       return this.http.post(`${Functions.backenUrl()}/user/delete`, user, Functions.customHttpHeaders(this));
     } else {
       this.logout();
     }
   }
- 
+
   alreadyAuthenticate(redirecUrl: string = this.defaultRedirectUrl) {
     if (this.isLoggedIn()) {
       console.log(`You are already authenticated !`);
@@ -127,19 +132,21 @@ export class AuthService {
 
   login(credential: string, password: string): any {
     if (!this.isLoggedIn()) {
-      return this.http.post(`${Functions.backenUrl()}/auth/login`, { credential:credential, password:password }, Functions.customHttpHeaders(this));
-        // .pipe(map((user) => {
-        //   return user;
-        // }));
+      return this.http.post(`${Functions.backenUrl()}/auth/login`, { credential: credential, password: password }, Functions.customHttpHeaders(this));
+      // .pipe(map((user) => {
+      //   return user;
+      // }));
     } else {
       this.alreadyAuthenticate();
     }
   }
 
   logout() {
+    Functions.saveCurrentUrl(this.router);
+
     localStorage.removeItem("user");
     // this.router.navigate(["auths/login"]);
     location.href = 'auths/login';
   }
-  
+
 }

@@ -16,5 +16,13 @@ export class ConfigService {
     appVersion(): any {
         return this.http.get(`${Functions.backenUrl()}/configs/appVersion`, Functions.customHttpHeaders(this.auth));
     }
+
+    NewUserToken(): any {
+        if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+        const userId = `${this.auth.userValue()!.id}`;
+        return this.http.post(`${Functions.backenUrl()}/configs/newToken`, {userId:userId},Functions.customHttpHeaders(this.auth));
+    }
+
+    
       
 } 

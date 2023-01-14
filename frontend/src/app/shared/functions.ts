@@ -7,6 +7,18 @@ import { AuthService } from "@ih-services/auth.service";
 
 export class Functions {
 
+  static returnEmptyArrayIfNul(data: any): string[] {
+    return Functions.notNull(data) ? data : [];
+  }
+
+  static returnDataAsArray(data: any): string[] {
+    return Functions.notNull(data) ? [data] : [];
+  }
+
+  static convertToArray(data: any): string[] {
+    return Functions.notNull(data) ? [data] : [];
+  }
+
   static saveCurrentUrl(router: Router):void{
     const link = router.url.split(Functions.backenUrl(''))[0];
     // const link = location.href;
@@ -190,16 +202,17 @@ export class DateUtils {
   static previousDate(dateObj: any): Date {
     var now: Date = dateObj instanceof Date ? dateObj : new Date(dateObj);
 
+    var y = now.getFullYear();
+    var m = String(now.getMonth()).padStart(2, '0');
     var d = String(now.getDate()).padStart(2, '0');
     var h = String(now.getHours()).padStart(2, '0');
     var mm = String(now.getMinutes()).padStart(2, '0');
     var s = String(now.getSeconds()).padStart(2, '0');
-
-    if (now.getMonth) {
-      var m = String(now.getMonth()).padStart(2, '0');
-      return new Date(`${now.getFullYear()}-${m}-${d} ${h}:${mm}:${s}`);
+  
+    if (m == '00') {
+      return new Date(`${y - 1}-12-${d} ${h}:${mm}:${s}`);
     } else {
-      return new Date(`${now.getFullYear() - 1}-12-${d} ${h}:${mm}:${s}`);
+      return new Date(`${y}-${m}-${d} ${h}:${mm}:${s}`);
     }
 
   }

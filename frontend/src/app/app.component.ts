@@ -10,8 +10,9 @@ import { SyncService } from './services/sync.service';
 import { TranslateService } from '@ngx-translate/core';
 import { CheckForUpdateService } from './services/check-for-update.service';
 import { ConfigService } from './services/config.service';
-import { Roles } from './shared/roles'; 
+import { Roles } from './shared/roles';
 import { User } from './models/User';
+import moment from 'moment';
 
 declare var $: any;
 @Component({
@@ -33,18 +34,18 @@ export class AppComponent implements OnInit {
   isSuperAdmin: boolean = false;
   time: number = 0;
   localSync: string = '';
-  stopVersionTchecking:boolean = false;
-  
-  appLogo:any = this.auth.appLogoPath()
-  userData:User|null = this.auth.userValue()
+  stopVersionTchecking: boolean = false;
+
+  appLogo: any = this.auth.appLogoPath()
+  userData: User | null = this.auth.userValue()
 
 
   @HostBinding('attr.app-version')
-  appVersion:any = localStorage.getItem('appVersion');
-  availableVersion:any;
+  appVersion: any = localStorage.getItem('appVersion');
+  availableVersion: any;
   // showReloadModal:boolean = false;
 
-  constructor(private conf:ConfigService, private sw:CheckForUpdateService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(private conf: ConfigService, private sw: CheckForUpdateService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
@@ -58,11 +59,11 @@ export class AppComponent implements OnInit {
     // if(this.auth.isLoggedIn()) this.sync.syncAllToLocalStorage();
 
   }
-  
+
   ngOnInit(): void {
     this.accessVersion();
     this.stopVersionTchecking = false;
-    
+
     this.isAdmin = Roles.isAdmin();
     this.isSuperAdmin = Roles.isSuperAdmin();
     const appTitle = this.titleService.getTitle();
@@ -95,8 +96,8 @@ export class AppComponent implements OnInit {
     this.loadModalPwa();
   }
 
-  
-  private  getVersion(){
+
+  private getVersion() {
     this.conf.appVersion().subscribe((newVersion: any) => {
       if (this.appVersion !== newVersion) {
         this.ShowUpdateVersionModal()
@@ -106,28 +107,24 @@ export class AppComponent implements OnInit {
     }, (err: any) => { console.log(err.error) });
   }
 
-  private accessVersion(){
-    this.getVersion();
-    
-    interval(10000)
-    .pipe(takeWhile(() => !this.stopVersionTchecking))
-    .subscribe(() => {
-      this.getVersion();
-      // console.log('version')
-    });
 
+  private accessVersion() {
+    if (this.auth.isLoggedIn()) this.getVersion();
+      interval(10000)
+        .pipe(takeWhile(() => !this.stopVersionTchecking && this.auth.isLoggedIn()))
+        .subscribe(() => this.getVersion());
   }
 
-  clickModal(btnId:string){
-    $('#'+btnId).trigger('click');
+  clickModal(btnId: string) {
+    $('#' + btnId).trigger('click');
   }
 
-  ShowUpdateVersionModal(){
+  ShowUpdateVersionModal() {
     this.clickModal('active-update-modal')
   }
 
-  UpdateVersion(){
-    localStorage.setItem('appVersion',this.availableVersion);
+  UpdateVersion() {
+    localStorage.setItem('appVersion', this.availableVersion);
     this.clickModal('close-update-modal');
     this.stopVersionTchecking = true;
     window.location.reload();
@@ -143,7 +140,7 @@ export class AppComponent implements OnInit {
     window.location.reload();
   }
 
-  private loadPwaVersion(){
+  private loadPwaVersion() {
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.pipe(
         filter((evt: any): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
@@ -203,6 +200,23 @@ export class AppComponent implements OnInit {
         })
       }, 4000);
     }
+  }
+
+
+  pageTouched(event: Event) {
+    const d1 = this.auth.getExpiration()?.toDate();
+    const d2 = new Date();
+    if (d1) {
+      const d11 = d1.getTime();
+      const d22 = d2.getTime();
+      if ((d11 - 300000) < d22) { // avant 5 min d'action
+        this.conf.NewUserToken().subscribe((res: any) => {
+          this.auth.clientSession(res.data);
+        }, (err: any) => { console.log(err.error) });
+      }
+    }
+
+
   }
 }
 

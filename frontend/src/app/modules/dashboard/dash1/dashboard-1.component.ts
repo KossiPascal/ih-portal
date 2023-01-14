@@ -145,7 +145,7 @@ export class Dashboard1Component implements OnInit {
   }
 
   genarateSites() {
-    const sources: string[] = this.returnEmptyArrayIfNul(this.convertToArray(this.aggradateDataForm.value.sources));
+    const sources: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sources);
     this.sites$ = [];
     this.chws$ = [];
     // this.aggradateDataForm.value["sites"] = "";
@@ -162,7 +162,7 @@ export class Dashboard1Component implements OnInit {
   }
 
   genarateChws() {
-    const sites: string[] = this.returnEmptyArrayIfNul(this.convertToArray(this.aggradateDataForm.value.sites));
+    const sites: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sites);
     this.chws$ = [];
     this.aggradateDataForm.value["chws"] = [];
     if (Functions.notNull(sites)) {
@@ -175,19 +175,12 @@ export class Dashboard1Component implements OnInit {
     }
   }
 
-  returnEmptyArrayIfNul(data: any): string[] {
-    return Functions.notNull(data) ? data : [];
-  }
-  convertToArray(data: any): string[] {
-    return Functions.notNull(data) ? [data] : [];
-  }
-
   ParamsToFilter(): FilterParams {
     // const startDate: string = this.aggradateDataForm.value.start_date;
     // const endDate: string = this.aggradateDataForm.value.end_date;
-    const sources: string[] = this.returnEmptyArrayIfNul(this.convertToArray(this.aggradateDataForm.value.sources)) as string[];
-    const sites: string[] = this.returnEmptyArrayIfNul(this.convertToArray(this.aggradateDataForm.value.sites)) as string[];
-    const chws: string[] = this.returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
+    const sources: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sources) as string[];
+    const sites: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sites) as string[];
+    const chws: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
 
     var params: FilterParams = {
       // start_date: startDate,

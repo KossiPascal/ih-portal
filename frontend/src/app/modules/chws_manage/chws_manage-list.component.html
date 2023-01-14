@@ -1,0 +1,175 @@
+<!-- PAGE TITLE -->
+<div class="page-title card card-primary card-outline">
+    <!-- <button (click)="CreateUser()"></button> -->
+    <div class="card-body">
+        <span style="float: left;" class="fas fa-user"> Chws List</span>
+
+        <div class="overlay-wrapper">
+            <div *ngIf="isLoading1" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                <div class="text-bold pt-2">{{LoadingMsg}}</div>
+            </div>
+
+            <form [formGroup]="filterForm" (ngSubmit)="getReplacementChws()" novalidate>
+                <div class="row">
+
+                    <div class="col-sm-3 col-6">
+                        <div class="form-group">
+                            <label>District</label>
+                            <select (change)="genarateSites()" class="form-control" formControlName="district">
+                                <!-- <option value="">Select All</option> -->
+                                <option *ngFor="let district of District$" value="{{district.id}}">
+                                    {{ district.name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3 col-6">
+                        <div class="form-group">
+                            <label>Site</label>
+                            <select class="form-control" formControlName="site">
+                                <!-- <option value="">Select All</option> -->
+                                <option *ngFor="let site of sites$" value="{{site.id}}">
+                                    {{ site.name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-2 col-6">
+                        <div class="form-group">
+                            <label>.</label>
+                            <button [disabled]="!filterForm.valid" type="submit" class="btn btn-warning form-control">
+                                OK <span class="fa fa-floppy-o fa-right"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- END PAGE TITLE -->
+
+<!-- PAGE CONTENT WRAPPER -->
+<div class="page-content-wrap">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- START DEFAULT DATATABLE -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+
+                </div>
+                <div class="panel-body">
+                    <table class="table datatable">
+                        <thead>
+                            <tr>
+                                <th>Chws</th>
+                                <th>Zone</th>
+                                <!-- <th>Edit</th> -->
+                            </tr>
+                        </thead>
+
+                        <tbody *ngFor="let chw of replacementChws$">
+                            <tr (click)="EditChwsZone(chw)" data-toggle="modal" data-target="#modal-default">
+                                <td>{{ chw.name }}</td>
+                                <td>{{ chw.zone.name }}</td>
+                                <!-- <td>
+                                    <i  class="btn-warning fas fa-edit"></i>
+                                </td> -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- END DEFAULT DATATABLE -->
+        </div>
+    </div>
+</div>
+<!-- PAGE CONTENT WRAPPER -->
+
+
+
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <div class="overlay-wrapper">
+            <div *ngIf="isLoading2" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                <div class="text-bold pt-2">{{LoadingMsg}}</div>
+            </div>
+            <form [formGroup]="replacementChwsForm" (ngSubmit)="updateChwsFacilityIdAndContactPlace()" novalidate
+                class="form-horizontal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <img height="30" class="modal-title" src="assets/logo/logo.png" alt="" srcset="">
+
+                        <strong style="text-align: center;" class="login-box-msg"><span class=" btn-warning">Modifier la
+                                zone</span></strong>
+
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <p class="login-box-msg"><strong>{{ message }}</strong></p>
+
+                        <p>L'ASC remplacante <strong>{{ chw?.name }}</strong> intervient présentement dans <strong>{{
+                                chw?.zone?.name }}</strong></p>
+                        <br>
+                        <p>Selectionner une nouvelle zone d'intervention</p>
+
+                        <!-- <label *ngIf="isEditMode" for="contact">ASC Choisi</label>
+                    <div class="input-group mb-3">
+                        <select id="contact" class="form-control" [disabled]="1==1">
+                            <option value="{{chw?.id}}"> {{ chw?.name }} </option>
+                        </select>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <label *ngIf="isEditMode" for="ciblezone">Zone actuelle</label>
+                    <div class="input-group mb-3">
+                        <select class="form-control"  [disabled]="1==1">
+                            <option value="{{zone?.id}}"> {{ zone?.name }} </option>
+                        </select>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div> -->
+
+
+                        <div class="input-group mb-3">
+                            <select id="new_parent" class="form-control" formControlName="new_parent">
+                                <option value=""></option>
+                                <option *ngFor="let zon of Zones$" value="{{zon.id}}">
+                                    {{ zon.name }}
+                                </option>
+                            </select>
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-edit"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button id="close-modal" type="button" class="btn btn-default"
+                            data-dismiss="modal">Close</button>
+                        <button [disabled]="!replacementChwsForm.valid" type="submit"
+                            class="btn btn-warning">Modifier</button>
+                    </div>
+                </div>
+            </form>
+            <!-- /.modal-content -->
+        </div>
+    </div>
+    <!-- /.modal-dialog -->
+</div>
