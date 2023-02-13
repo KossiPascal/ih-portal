@@ -1,65 +1,73 @@
 import { User } from '@ih-app/models/User';
+import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Functions } from '@ih-app/shared/functions';
 import { ConversionUtils } from 'turbocommons-ts';
 
+ 
 export class Roles {
 
-  private static userValue(): User|null {
-    if (Functions.notNull(localStorage.getItem('user'))) return JSON.parse(localStorage.getItem('user')??'');
+  constructor(private store:AppStorageService){ }
+
+  private userValue(): User | null {
+    if (Functions.notNull(this.store.get('user'))) return JSON.parse(this.store.get('user') ?? '');
     return null;
   }
-  
-  
-    static getRoles(): string[] {
-      if (this.userValue()!=null) return ConversionUtils.base64ToString(`${this.userValue()?.roles}`) as any;
-      return [];
-    }
 
+  getRoles(): string[] {
+    const userValue = this.userValue();
+    if (userValue) {
+      const roles =  userValue.roles;
+      return roles;
+    };
+    return [];
+  }
 
-  
-    static isSuperAdmin(): boolean {
-      if (Functions.notNull(this.getRoles())) {
-        return this.getRoles().includes('super_admin');
-      }
-      return false;
+  isSuperUser(): boolean {
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('yrB6vc5Ip3r');
     }
+    return false;
+  }
 
-    
-  
-    static canManageUser(): boolean {
-      if (Functions.notNull(this.getRoles())) {
-        return this.getRoles().includes('can_manage_user') || this.isSuperAdmin();
-      }
-      return false;
+  isUserManager(): boolean {
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('kMykXLnMsfF');
     }
+    return false;
+  }
 
-  
-    static isAdmin(): boolean {
-      if (Functions.notNull(this.getRoles())) {
-        return this.getRoles().includes('admin') || this.isSuperAdmin();
-      }
-      return false;
+  isDataManager(): boolean {
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('KWH2Gl2atF8');
     }
-  
-    static visitor(): boolean {
-      if (Functions.notNull(this.getRoles())) {
-        return this.getRoles().includes('visitor') || this.isAdmin();
-      }
-      return false;
+    return false;
+  }
+
+  isSupervisorMentor(): boolean {
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('Vjhs5PHK4lb');
     }
-  
-    static canSendToDhis2(): boolean {
-      if (Functions.notNull(this.getRoles())) {
-        return this.getRoles().includes('can_send_dhis2') || this.isAdmin();
-      }
-      return false;
+    return false;
+  }
+
+  isChws(): boolean {
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('c3WyuK3ibsN');
     }
-  
-    static canOnlySeedata(): boolean {
-      if (Functions.notNull(this.getRoles())) {
-        return this.getRoles().includes('can_only_see') || this.isAdmin();
-      }
-      return false;
+    return false;
+  }
+
+  onlySeedata(): boolean {
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('STAgD7Z462J');
     }
-  
+    return false;
+  }
+
+  isAdmin(): boolean {
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('FJXxMdr1gIB');
+    }
+    return false;
+  }
 } 

@@ -217,7 +217,7 @@ export class Dashboard4Component implements OnInit {
       this.initDate.start_date = startDate;
       this.initDate.end_date = endDate;
       this.initMsg = `Chargement des données du ${DateUtils.getDateInFormat(paramsTopass.start_date, 0, 'fr')} au ${DateUtils.getDateInFormat(paramsTopass.end_date, 0, 'fr')}`;
-      this.sync.getAllData(paramsTopass).subscribe((response: MedicMobileData[]) => {
+      this.sync.getAllChwsDataWithParams(paramsTopass).subscribe((response: MedicMobileData[]) => {
         this.ChwsDataFromDb$ = response;
         this.getAllAboutData(paramsTopass);
       }, (err: any) => {

@@ -4,8 +4,8 @@ import { Router } from "@angular/router";
 import { User } from "@ih-models/User";
 import moment from "moment";
 import { Functions } from "@ih-app/shared/functions";
-import { ConversionUtils } from 'turbocommons-ts';
 import { Roles } from "../shared/roles";
+import { AppStorageService } from "./cookie.service";
 
 Functions
 @Injectable({
@@ -15,19 +15,22 @@ export class AuthService {
 
   public defaultRedirectUrl = 'dashboards';
 
-  constructor(private router: Router, private http: HttpClient) {
+  constructor(private store:AppStorageService, private router: Router, private http: HttpClient) { }
 
-  }
+  private roles = new Roles(this.store);
 
   public userValue(): User | null {
-    if (Functions.notNull(localStorage.getItem('user'))) {
-      var userData: User = JSON.parse(localStorage.getItem('user') ?? '');
-
-      userData.userLogo = 'assets/images/kossi.png';
-
-      return userData;
-    };
-    return null;
+      try {
+        if (Functions.notNull(this.store.get('user'))) {
+          var userData: User = JSON.parse(this.store.get('user') ?? '');
+          userData.userLogo = 'assets/images/kossi.png';
+          // if( typeof(your_variable) === 'string' ) { ... }
+          return userData;
+        };
+      } catch (error) {
+        
+      }
+      return null;
   }
 
   public tokenIsNotEmpty(): boolean {
@@ -94,15 +97,6 @@ export class AuthService {
   }
 
 
-
-  // à supprimer
-  updateUserFacilityIdAndContactPlace(data: any): any {
-    return this.http.post(`${Functions.backenUrl()}/sync/updateUserFacilityIdAndContactPlace`, data, Functions.customHttpHeaders(this));
-  }
-  // à supprimer
-
-
-
   deleteUser(user: User): any {
     if (this.isLoggedIn()) {
       return this.http.post(`${Functions.backenUrl()}/user/delete`, user, Functions.customHttpHeaders(this));
@@ -123,16 +117,16 @@ export class AuthService {
   // window.location.pathname
 
   register(user: User): any {
-    if (!this.isLoggedIn() || Roles.isSuperAdmin()) {
+    if (!this.isLoggedIn() || this.roles.isSuperUser()) {
       return this.http.post(`${Functions.backenUrl()}/auth/register`, user, Functions.customHttpHeaders(this));
     } else {
       this.alreadyAuthenticate();
     }
   }
 
-  login(credential: string, password: string): any {
+  login(username: string, password: string): any {
     if (!this.isLoggedIn()) {
-      return this.http.post(`${Functions.backenUrl()}/auth/login`, { credential: credential, password: password }, Functions.customHttpHeaders(this));
+      return this.http.post(`${Functions.backenUrl()}/auth/login`, { username: username, password: password }, Functions.customHttpHeaders(this));
       // .pipe(map((user) => {
       //   return user;
       // }));

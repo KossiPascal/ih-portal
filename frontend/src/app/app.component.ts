@@ -13,6 +13,7 @@ import { ConfigService } from './services/config.service';
 import { Roles } from './shared/roles';
 import { User } from './models/User';
 import moment from 'moment';
+import { AppStorageService } from './services/cookie.service';
 
 declare var $: any;
 @Component({
@@ -31,7 +32,7 @@ export class AppComponent implements OnInit {
   modalPwaEvent!: any;
   modalPwaPlatform: 'ios' | 'android' | undefined;
   isAdmin: boolean = false;
-  isSuperAdmin: boolean = false;
+  isSuperUser: boolean = false;
   time: number = 0;
   localSync: string = '';
   stopVersionTchecking: boolean = false;
@@ -45,7 +46,7 @@ export class AppComponent implements OnInit {
   availableVersion: any;
   // showReloadModal:boolean = false;
 
-  constructor(private conf: ConfigService, private sw: CheckForUpdateService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(private store:AppStorageService, private conf: ConfigService, private sw: CheckForUpdateService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
@@ -59,13 +60,14 @@ export class AppComponent implements OnInit {
     // if(this.auth.isLoggedIn()) this.sync.syncAllToLocalStorage();
 
   }
+  private roles = new Roles(this.store);
 
   ngOnInit(): void {
     this.accessVersion();
     this.stopVersionTchecking = false;
 
-    this.isAdmin = Roles.isAdmin();
-    this.isSuperAdmin = Roles.isSuperAdmin();
+    this.isAdmin = this.roles.isAdmin();
+    this.isSuperUser = this.roles.isSuperUser();
     const appTitle = this.titleService.getTitle();
     this.localSync = this.sync.isLocalSyncSuccess() ? 'syncSuccess' : 'syncError'
 

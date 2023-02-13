@@ -15,8 +15,8 @@
                     <div class="col-sm-3 col-6">
                         <div class="form-group">
                             <label>District</label>
-                            <select (change)="genarateSites()" class="form-control" formControlName="district">
-                                <!-- <option value="">Select All</option> -->
+                            <select (change)="genarateSites()" class="form-control" formControlName="districts">
+                                <option value=""></option>
                                 <option *ngFor="let district of District$" value="{{district.id}}">
                                     {{ district.name }}
                                 </option>
@@ -27,8 +27,8 @@
                     <div class="col-sm-3 col-6">
                         <div class="form-group">
                             <label>Site</label>
-                            <select class="form-control" formControlName="site">
-                                <!-- <option value="">Select All</option> -->
+                            <select class="form-control" formControlName="sites">
+                                <option value=""></option>
                                 <option *ngFor="let site of sites$" value="{{site.id}}">
                                     {{ site.name }}
                                 </option>

@@ -104,14 +104,17 @@ export interface FilterParams {
   zones?: string[]
   patients?: string[]
   families?: string[]
+  type?:any
   user?:string
 }
 
 export interface MedicMobileData {
   id: string
+  rev: string
   source: string
   form: string
   patient_id: string
+  family_id: string
   fields: any
   site: Sites
   zone: Zones
@@ -188,9 +191,11 @@ export interface Chws {
 }
 
 export interface Dhis2Sync {
-  orgUnitFilter?: string
+  orgUnit?: string
   filter?: string[]
   fields?: string[]
+  username?:string
+  password?:string
   user?:string
 }
 

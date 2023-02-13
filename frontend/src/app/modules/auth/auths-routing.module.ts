@@ -9,10 +9,10 @@ import { RegisterComponent } from './register.component';
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full'},
   { path: 'login', component: LoginComponent, data: {title: 'Login'} },
-  { path: 'register', component: RegisterComponent, data: {title: 'Register'} },
+  // { path: 'register', component: RegisterComponent, data: {title: 'Register'} },
   { path: 'lock-screen', component: LockScreenComponent, data: {title: 'Lock Screen'} },
-  { path: 'recover-password', component: RecoverPasswordComponent, data: {title: 'Recover Password'} },
-  { path: 'forgot-password', component: ForgotPasswordComponent, data: {title: 'Forgot Password'} }
+  // { path: 'recover-password', component: RecoverPasswordComponent, data: {title: 'Recover Password'} },
+  // { path: 'forgot-password', component: ForgotPasswordComponent, data: {title: 'Forgot Password'} }
 ];
 
 

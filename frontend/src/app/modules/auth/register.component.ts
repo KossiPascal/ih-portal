@@ -4,6 +4,7 @@ import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn,
 import { Router } from "@angular/router";
 import { Configs } from "@ih-app/models/User";
 import { ConfigService } from "@ih-app/services/config.service";
+import { AppStorageService } from "@ih-app/services/cookie.service";
 import { Functions } from "@ih-app/shared/functions";
 import { Roles } from "@ih-app/shared/roles";
 import { AuthService } from "@ih-services/auth.service";
@@ -21,10 +22,12 @@ export class RegisterComponent implements OnInit {
   LoadingMsg: string = "Loading...";
   showRegisterPage:boolean = false;
 
-  constructor(private auth: AuthService, private router: Router, private http: HttpClient, private conf:ConfigService) { }
+  constructor(private store:AppStorageService, private auth: AuthService, private router: Router, private http: HttpClient, private conf:ConfigService) { }
+
+  private roles = new Roles(this.store);
 
   ngOnInit(): void {
-    this.showRegisterPage = Roles.canManageUser() ?? false;
+    this.showRegisterPage = this.roles.isUserManager() ?? false;
     this.getConfigs();
     if (!this.showRegisterPage) {
       this.auth.alreadyAuthenticate();

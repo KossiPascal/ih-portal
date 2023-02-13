@@ -23,11 +23,9 @@ declare var initDataTable: any;
 export class SyncComponent implements OnInit {
 
   thinkmdToDhis2Form!: FormGroup;
-  medicToDhis2Form!: FormGroup;
   ihChtToDhis2Form!: FormGroup;
-  medicThinkMdWeeklyForm!: FormGroup;
+  ChtThinkMdWeeklyForm!: FormGroup;
   tab1_messages: DataFromPython | null = null;
-  tab2_messages: DataFromPython | null = null;
   tab3_messages: DataFromPython | null = null;
   tab4_messages: DataFromPython | null = null;
   dates: moment.Moment[] = [];
@@ -38,7 +36,6 @@ export class SyncComponent implements OnInit {
   activePage:any = '';
 
   loading1!: boolean;
-  loading2!: boolean;
   loading3!: boolean;
   loading4!: boolean;
 
@@ -49,7 +46,7 @@ export class SyncComponent implements OnInit {
 
   sitesList: Sites[] = [];
 
-  constructor(private route:ActivatedRoute, private syncService: SyncService, private http: HttpClient, private authService: AuthService) { }
+  constructor(private route:ActivatedRoute, private sync: SyncService, private http: HttpClient, private authService: AuthService) { }
 
   ngOnInit(): void {
 
@@ -58,51 +55,33 @@ export class SyncComponent implements OnInit {
     });
     
 
-    this.syncService.getSitesList().subscribe((sitesList: any) => {
+    this.sync.getSitesList().subscribe((sitesList: any) => {
       this.sitesList = sitesList;
     }, (err: any) => console.log(err.error));
 
     this.loading1 = false;
-    this.loading2 = false;
     this.loading3 = false;
     
     this.thinkmdToDhis2Form = this.createThinkmdFormGroup();
-    this.medicToDhis2Form = this.createMedicFormGroup();
     this.ihChtToDhis2Form = this.createIhChtFormGroup();
     
-    this.medicThinkMdWeeklyForm = this.createMedicThinkmdFormGroup();
+    this.ChtThinkMdWeeklyForm = this.createChtThinkmdFormGroup();
 
   }
 
   createFormGroup(cible: string): FormGroup {
     return new FormGroup({
-      start_date: new FormControl("", cible === 'cht' || cible === 'medic' || cible === 'allChwsData' || cible === 'medic_thinkMd_cht' ? [Validators.required, Validators.minLength(7)] : []),
-      end_date: new FormControl("", cible === 'cht' || cible === 'medic' || cible === 'thinkMd' || cible === 'allChwsData' ? [Validators.required, Validators.minLength(7)] : []),
+      start_date: new FormControl("", cible === 'cht' || cible === 'allChwsData' || cible === 'cht_thinkMd' ? [Validators.required, Validators.minLength(7)] : []),
+      end_date: new FormControl("", cible === 'cht' || cible === 'thinkMd' || cible === 'allChwsData' ? [Validators.required, Validators.minLength(7)] : []),
 
       weekly_Choosen_Dates: new FormControl(""),
 
-      thinkmd_host: new FormControl("10az.online.tableau.com", cible === 'thinkMd' || cible === 'medic_thinkMd_cht' ? [Validators.required] : []),
-      thinkmd_site: new FormControl("datasincbeta", cible === 'thinkMd' || cible === 'medic_thinkMd_cht' ? [Validators.required] : []),
-      useToken: new FormControl(false),
+      useToken: new FormControl(true),
       thinkmd_token_username: new FormControl(""),
       thinkmd_token: new FormControl(""),
-      thinkmd_username: new FormControl("seaq@santeintegree.org"),
-      thinkmd_password: new FormControl(""),
-
-      medic_host: new FormControl("hth-togo.app.medicmobile.org", cible === 'medic' || cible === 'allChwsData' || cible === 'allOrgUnit' || cible === 'medic_thinkMd_cht' ? [Validators.required, Validators.minLength(3)] : []),
-      medic_username: new FormControl("admin", cible === 'medic' || cible === 'allChwsData' || cible === 'allOrgUnit' || cible === 'medic_thinkMd_cht' ? [Validators.required] : []),
-      medic_password: new FormControl(""),
-      medic_database: new FormControl("medic"),
-
-
-      cht_host: new FormControl("portal-integratehealth.org", cible === 'cht' || cible === 'allChwsData' || cible === 'allOrgUnit' || cible === 'medic_thinkMd_cht' ? [Validators.required, Validators.minLength(3)] : []),
-      cht_username: new FormControl("medic", cible === 'cht' || cible === 'allChwsData' || cible === 'allOrgUnit' || cible === 'medic_thinkMd_cht' ? [Validators.required] : []),
-      cht_password: new FormControl(""),
-      cht_database: new FormControl("medic"),
 
       InsertIntoDhis2: new FormControl(false, []),
-      dhis2_host: new FormControl("dhis2.integratehealth.org/dhis"),
-      dhis2_username: new FormControl("admin"),
+      dhis2_username: new FormControl(""),
       dhis2_password: new FormControl(""),
       ssl_verification: new FormControl(false, cible === 'allChwsData' || cible === 'allOrgUnit' ? [Validators.required] : []),
     });
@@ -128,16 +107,12 @@ export class SyncComponent implements OnInit {
     return this.createFormGroup('thinkMd');
   }
 
-  createMedicFormGroup(): FormGroup {
-    return this.createFormGroup('medic');
-  }
-
   createIhChtFormGroup(): FormGroup {
     return this.createFormGroup('cht');
   }
 
-  createMedicThinkmdFormGroup(): FormGroup {
-    return this.createFormGroup('medic_thinkMd_cht');
+  createChtThinkmdFormGroup(): FormGroup {
+    return this.createFormGroup('cht_thinkMd');
   }
 
 
@@ -150,7 +125,7 @@ export class SyncComponent implements OnInit {
         const isStart: boolean = DateUtils.isDayInDate(s_date, 21)
         const isEnd: boolean = DateUtils.isDayInDate(e_date, 20);
         const dateDiff: number = DateUtils.daysDiff(s_date, e_date);
-        if (parent['InsertIntoDhis2'] == true && type == 'medic') {
+        if (parent['InsertIntoDhis2'] == true && type == 'cht') {
           if (dateDiff > 31) {
             this.start_date_error = true
             this.end_date_error = true
@@ -220,7 +195,8 @@ export class SyncComponent implements OnInit {
       this.start_date_error = false;
       this.loading1 = true;
       this.tab1_messages = null;
-      this.syncService
+      // this.thinkmdToDhis2Form.value['useToken'] = true;
+      this.sync
         .thinkmdToDhis2Script(this.thinkmdToDhis2Form.value).subscribe((response: any) => {
           this.loading1 = false;
           this.tab1_messages = JSON.parse(response);
@@ -230,28 +206,13 @@ export class SyncComponent implements OnInit {
     }
   }
 
-  runMedicToDhis2(): void {
-    if (this.isValidParams(this.medicToDhis2Form, 'medic')) {
-      this.start_date_error = false;
-      this.end_date_error = false;
-      this.loading2 = true;
-      this.tab2_messages = null;
-      this.syncService
-        .medicToDhis2Script(this.medicToDhis2Form.value).subscribe((response: any) => {
-          this.loading2 = false;
-          this.tab2_messages = JSON.parse(response);
-          // console.log(response);
-        }, (err: any) => { this.loading2 = false; this.tab2_messages = err.message; console.log(err.error) });
-    }
-  }
-
   runIhChtToDhis2(): void {
-    if (this.isValidParams(this.ihChtToDhis2Form, 'medic')) {
+    if (this.isValidParams(this.ihChtToDhis2Form, 'cht')) {
       this.start_date_error = false;
       this.end_date_error = false;
       this.loading3 = true;
       this.tab3_messages = null;
-      this.syncService
+      this.sync
         .ihChtToDhis2Script(this.ihChtToDhis2Form.value).subscribe((response: any) => {
           this.loading3 = false;
           this.tab3_messages = JSON.parse(response);
@@ -262,14 +223,14 @@ export class SyncComponent implements OnInit {
 
   
 
-  runMedicThinkMdWeekly(): void {
+  runThinkMdWeekly(): void {
     this.addToDateList();
     if (this.weekly_Choosen_Dates.length > 1 && this.WeeklyDateIsValid()) {
       this.is_weekly_date_error = false;
       this.weekly_date_error_Msg = '';
       this.loading4 = true;
       this.tab4_messages = null;
-      this.syncService.syncWeeklyChwsData(this.medicThinkMdWeeklyForm.value).subscribe((response: any) => {
+      this.sync.syncThinkMdWeeklyChwsData(this.ChtThinkMdWeeklyForm.value).subscribe((response: any) => {
         this.loading4 = false;
         this.tab4_messages = JSON.parse(response);
         // console.log(response);
@@ -300,13 +261,13 @@ export class SyncComponent implements OnInit {
   }
 
   addToDateList() {
-    const start_date:string = this.medicThinkMdWeeklyForm.value.start_date;
+    const start_date:string = this.ChtThinkMdWeeklyForm.value.start_date;
     if (!this.weekly_Choosen_Dates.includes(start_date) && start_date != null && start_date != '') {
       this.weekly_Choosen_Dates.push(start_date);
     }
-    this.medicThinkMdWeeklyForm.value.start_date = '';
-    this.medicThinkMdWeeklyForm.value.end_date = '';
-    this.medicThinkMdWeeklyForm.value.weekly_Choosen_Dates = this.weekly_Choosen_Dates;
+    this.ChtThinkMdWeeklyForm.value.start_date = '';
+    this.ChtThinkMdWeeklyForm.value.end_date = '';
+    this.ChtThinkMdWeeklyForm.value.weekly_Choosen_Dates = this.weekly_Choosen_Dates;
     this.cleanWeeklyDateError();
   }
 

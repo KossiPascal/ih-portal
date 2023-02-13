@@ -11,7 +11,7 @@
                             aria-controls="custom-tabs-one-sync-orgunits" aria-selected="true">Sync OrgUnit
                         </a>
                     </li>
-                    
+
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-sync-chws-tab" data-toggle="pill"
                             href="#custom-tabs-one-sync-chws" role="tab" aria-controls="custom-tabs-one-sync-chws"
@@ -41,59 +41,97 @@
                                         <div class="text-bold pt-2">{{LoadingMsg}}</div>
                                     </div>
 
-                                    <!-- general form elements disabled -->
-                                    <div class="card card-danger">
+                                    <div class="card card-default">
                                         <div class="card-header">
-                                            <h3 class="card-title">Synchroniser OrgUnit && Personnes</h3>
+                                            <h3 class="card-title">Synchroniser OrgUnit, Patients and Chws</h3>
                                         </div>
-                                        <!-- /.card-header -->
-                                        <form [formGroup]="orgUnitAndPersonForm"
-                                            (ngSubmit)="syncAllSiteZoneFamilyPersonFromDb()" novalidate>
+                                        <form [formGroup]="orgUnitAndPersonForm" (ngSubmit)="syncOrgUnitsFromCouchDb()"
+                                            novalidate>
                                             <div class="card-body">
-                                                <div class="row">
-                                                    <div class="col-sm-6">
-                                                        <div class="form-group">
-                                                            <label>Hostname</label>
-                                                            <select class="form-control" formControlName="medic_host">
-                                                                <option *ngFor="let item of medicUrl$ | keyvalue"
-                                                                    value="{{item.key}}">
-                                                                    {{item.key}}
-                                                                </option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
+
 
                                                 <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
-                                                            <label>Username</label>
-                                                            <input type="text" class="form-control"
-                                                                formControlName="medic_username" />
+                                                            <label>Date de début</label>
+                                                            <input type="date" class="form-control"
+                                                                formControlName="start_date" />
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
-                                                            <label>Password</label>
-                                                            <input type="password" class="form-control"
-                                                                formControlName="medic_password" />
+                                                            <label>Date de fin</label>
+                                                            <input type="date" class="form-control"
+                                                                formControlName="end_date" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="row">
+                                                    <div class="col-sm-2">
+                                                        <div class="form-group">
+                                                            <div class="form-check">
+                                                                <input id="useTokenSite" class="form-check-input"
+                                                                    type="checkbox" formControlName="site">
+                                                                <label for="useTokenSite" class="form-check-label">
+                                                                    Site</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <div class="form-group">
+                                                            <div class="form-check">
+                                                                <input id="useTokenZone" class="form-check-input"
+                                                                    type="checkbox" formControlName="zone">
+                                                                <label for="useTokenZone" class="form-check-label">
+                                                                    Zone</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <div class="form-group">
+                                                            <div class="form-check">
+                                                                <input id="useTokenFamily" class="form-check-input"
+                                                                    type="checkbox" formControlName="family">
+                                                                <label for="useTokenFamily" class="form-check-label">
+                                                                    Family</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <div class="form-group">
+                                                            <div class="form-check">
+                                                                <input id="useTokenPatient" class="form-check-input"
+                                                                    type="checkbox" formControlName="patient">
+                                                                <label for="useTokenPatient" class="form-check-label">
+                                                                    Patient</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <div class="form-group">
+                                                            <div class="form-check">
+                                                                <input id="useTokenChw" class="form-check-input"
+                                                                    type="checkbox" formControlName="chw">
+                                                                <label for="useTokenChw" class="form-check-label">
+                                                                    Chw</label>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                             </div>
 
-                                            <!-- /.card-body -->
                                             <div class="card-footer">
                                                 <button [disabled]="!orgUnitAndPersonForm.valid" type="submit"
-                                                    class="btn btn-danger float-right"> Charger les données <span
-                                                        class="fa fa-floppy-o fa-right"></span></button>
+                                                    class="btn btn-danger float-right"> Démarrer la synchronisation
+                                                    <span class="fa fa-floppy-o fa-right"></span></button>
                                             </div>
-                                            <!-- /.card-footer -->
                                         </form>
-                                        <!-- /.card-body -->
+
                                     </div>
-                                    <!-- /.card -->
                                 </div>
                             </div>
 
@@ -134,14 +172,14 @@
                                     <!-- general form elements disabled -->
                                     <div class="card card-warning">
                                         <div class="card-header">
-                                            <h3 class="card-title">Syncroniser les données de tous les ASC</h3>
+                                            <h3 class="card-title">Syncroniser les données Tonoudayo des ASC</h3>
                                         </div>
                                         <!-- /.card-header -->
-                                        <form [formGroup]="chwsDataForm" (ngSubmit)="syncAllChwsDataFromDb()"
+                                        <form [formGroup]="chwsDataForm" (ngSubmit)="syncChwsDataFromCouchDb()"
                                             novalidate>
                                             <div class="card-body">
 
-                                                <div class="row">
+                                                <!-- <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Hostname</label>
@@ -153,9 +191,9 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> -->
 
-                                                <div class="row">
+                                                <!-- <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Username</label>
@@ -170,7 +208,7 @@
                                                                 formControlName="medic_password" />
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> -->
 
                                                 <div class="row">
                                                     <div class="col-sm-6">
@@ -194,7 +232,7 @@
                                             <!-- /.card-body -->
                                             <div class="card-footer">
                                                 <button [disabled]="!chwsDataForm.valid" type="submit"
-                                                    class="btn btn-warning float-right"> Charger les données <span
+                                                    class="btn btn-warning float-right"> Synchroniser des données<span
                                                         class="fa fa-floppy-o fa-right"></span></button>
                                             </div>
                                             <!-- /.card-footer -->
@@ -243,10 +281,10 @@
                                     <!-- general form elements disabled -->
                                     <div class="card card-success">
                                         <div class="card-header">
-                                            <h3 class="card-title">Syncroniser les données de tous les ASC</h3>
+                                            <h3 class="card-title">Synchroniser les données Dhis2 des ASC</h3>
                                         </div>
                                         <!-- /.card-header -->
-                                        <form [formGroup]="dhis2ChwsDataForm" (ngSubmit)="syncAllChwsDataFromDhis2()"
+                                        <form [formGroup]="dhis2ChwsDataForm" (ngSubmit)="syncChwsDataFromDhis2()"
                                             novalidate>
                                             <div class="card-body">
 
@@ -266,15 +304,47 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="row">
 
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 USERNAME</label>
+                                                            <input type="text" class="form-control"
+                                                                formControlName="username" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>DHIS2 PASSWORD</label>
+                                                            <input type="password" class="form-control"
+                                                                formControlName="password" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>District</label>
+                                                            <select (change)="genarateSites();" class="form-control"
+                                                                formControlName="districts" multiple="multiple">
+                                                                <option value=""></option>
+                                                                <option *ngFor="let dist of Districts$"
+                                                                    value="{{dist.id}}">
+                                                                    {{ dist.name }}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
 
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Site</label>
-                                                            <select class="form-control" formControlName="sites">
-                                                                <option value="">Select All</option>
-                                                                <option *ngFor="let site of sitesList"
+                                                            <select class="form-control" formControlName="sites"
+                                                                multiple="multiple">
+                                                                <option value=""></option>
+                                                                <option *ngFor="let site of sites$"
                                                                     value="{{site.external_id}}">
                                                                     {{ site.name }}
                                                                 </option>
@@ -305,13 +375,13 @@
                                     <table id="sync_chws_datatable" class="table table-bordered table-striped">
                                         <thead>
                                             <tr>
-                                                <th>Elément
+                                                <th>Elément</th>
                                                 <th>Success</th>
                                                 <th>Errors</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <tr *ngFor="let data of tab6_messages | keyvalue">
+                                        <tbody *ngFor="let dataMsg of tab6_messages; let i=index">
+                                            <tr *ngFor="let data of dataMsg | keyvalue">
                                                 <td>{{ data.key }}</td>
                                                 <td class="org-unit-success">{{ data.value.success }}</td>
                                                 <td class="org-unit-error">{{ data.value.error }}</td>

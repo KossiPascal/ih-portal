@@ -69,8 +69,6 @@ export class LoginComponent implements OnInit {
       this.isLoading = true;
       return this.auth.login(this.authForm.value.username, this.authForm.value.password)
         .subscribe((res: {status:number, data:any}) => {
-
-          
           if (res.status === 200) {
             this.message = 'Login successfully !';
             console.log(this.message);
@@ -83,11 +81,9 @@ export class LoginComponent implements OnInit {
             this.isLoading = false;
           }
 
-          console.log(res)
-
         }, (err: any) => {
           this.isLoading = false;
-          this.message = err.error;
+          this.message = err;
           console.log(this.message);
         });
     } else {

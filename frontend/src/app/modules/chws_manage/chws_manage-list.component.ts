@@ -3,8 +3,10 @@ import { FormGroup, FormControl, Validators, AbstractControl, ValidationErrors, 
 import { Router } from '@angular/router';
 import { Chws, Districts, FilterParams, Sites, Zones } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
+import { DatabaseUtilService } from '@ih-app/services/database-utils.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import { Functions } from '@ih-app/shared/functions';
+import { f } from '@ih-assets/plugins/dropzone/dropzone-amd-module';
 import { User } from '@ih-models/User';
 // import usersDb from '@ih-databases/users.json'; 
 
@@ -38,7 +40,7 @@ export class ChwsManageComponent implements OnInit {
   chw!: Chws | null;
   message: string = '';
 
-  constructor(private auth: AuthService, private syncService: SyncService, private router: Router) { }
+  constructor(private db: DatabaseUtilService, private auth: AuthService, private sync: SyncService, private router: Router) { }
 
   ngOnInit(): void {
     this.initAllData();
@@ -47,14 +49,10 @@ export class ChwsManageComponent implements OnInit {
   }
 
   async initAllData() {
-    const filter: FilterParams = {
-      sources: ['Tonoudayo']
-    }
-    this.syncService.getDistrictsList(filter).subscribe((district: any) => {
-      this.District$ = district;
-      this.syncService.getSitesList(filter).subscribe((sites: any) => {
-        this.Sites$ = sites;
-
+    this.sync.getDistrictsList().subscribe((_distResp: { status: number, data: Districts[] }) => {
+      if (_distResp.status == 200) this.District$ = _distResp.data;
+      this.sync.getSitesList().subscribe((_siteResp: { status: number, data: Sites[] }) => {
+        if (_distResp.status == 200) this.Sites$ = _siteResp.data;
       }, (err: any) => console.log(err.error));
     }, (err: any) => console.log(err.error));
   }
@@ -62,26 +60,28 @@ export class ChwsManageComponent implements OnInit {
   getReplacementChws() {
     this.isLoading1 = true;
     const filter: FilterParams = {
-      sources: ['Tonoudayo'],
-      sites: [`${this.filterForm.value.site}`]
+      districts: Functions.returnDataAsArray(this.filterForm.value.districts) as string[],
+      sites: Functions.returnDataAsArray(this.filterForm.value.sites) as string[],
     }
-    this.syncService.getZoneList(filter).subscribe((zones: any) => {
-      this.Zones$ = zones;
-      this.syncService.getChwsList(filter).subscribe((chws: Chws[]) => {
+    this.sync.getZonesList(filter).subscribe((_zoneResp: { status: number, data: Zones[] }) => {
+      if (_zoneResp.status == 200) this.Zones$ = _zoneResp.data;
+      this.sync.getChwsList(filter).subscribe((_chwsResp: { status: number, data: Chws[] }) => {
         this.replacementChws$ = [];
-        for (let i = 0; i < chws.length; i++) {
-          const chw = chws[i];
-          if (chw.name.includes('(R)')) {
-            this.replacementChws$.push(chw)
+        if (_chwsResp.status == 200) {
+          for (let i = 0; i < _chwsResp.data.length; i++) {
+            const _chw = _chwsResp.data[i];
+            if (_chw.name.includes('(R)')) {
+              this.replacementChws$.push(_chw);
+            }
           }
         }
         this.isLoading1 = false;
       }, (err: any) => {
-        console.log(err.error);
+        console.log(err);
         this.isLoading1 = false;
       });
     }, (err: any) => {
-      console.log(err.error); 
+      console.log(err);
       this.isLoading1 = false;
     });
   }
@@ -98,7 +98,7 @@ export class ChwsManageComponent implements OnInit {
 
   updateChwsFacilityIdAndContactPlace() {
     this.isLoading2 = true;
-    return this.auth.updateUserFacilityIdAndContactPlace(this.replacementChwsForm.value).subscribe((res: any) => {
+    return this.db.updateUserFacilityContactPlace(this.replacementChwsForm.value).subscribe((res: any) => {
       this.message = res.message;
       this.getReplacementChws();
       this.closeModal();
@@ -112,14 +112,13 @@ export class ChwsManageComponent implements OnInit {
 
   createFilterFormGroup(): FormGroup {
     return new FormGroup({
-      district: new FormControl('', [Validators.required]),
-      site: new FormControl('', [Validators.required]),
+      districts: new FormControl('', [Validators.required]),
+      sites: new FormControl('', [Validators.required]),
     });
   }
 
   createReplacementChwsFormGroup(chw?: Chws): FormGroup {
     return new FormGroup({
-      host: new FormControl(chw != null ? 'portal-integratehealth.org:444' : '', [Validators.required]),
       contact: new FormControl(chw != null ? chw.id : '', [Validators.required]),
       parent: new FormControl(chw != null ? chw.zone.id : '', [Validators.required]),
       new_parent: new FormControl('', [Validators.required]),
@@ -141,10 +140,9 @@ export class ChwsManageComponent implements OnInit {
   }
 
   genarateSites() {
-    const district: string[] = Functions.returnDataAsArray(this.filterForm.value.district);
+    const district: string[] = Functions.returnDataAsArray(this.filterForm.value.districts);
     this.sites$ = [];
     // this.replacementChws$ = [];
-
     if (Functions.notNull(district)) {
       for (let d = 0; d < this.Sites$.length; d++) {
         const site = this.Sites$[d];

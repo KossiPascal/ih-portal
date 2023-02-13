@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Chws, CompareData, Dhis2Sync, FilterParams, MedicMobileData, Sites } from '@ih-app/models/Sync';
+import { Chws, CompareData, Dhis2Sync, Districts, FilterParams, MedicMobileData, Sites } from '@ih-app/models/Sync';
 import { SyncService } from '@ih-app/services/sync.service';
 import { Functions, DateUtils } from '@ih-app/shared/functions';
 
@@ -16,7 +16,7 @@ declare var initDataTable: any;
   ]
 })
 export class Dashboard2Component implements OnInit {
-  constructor(private syncService: SyncService) { }
+  constructor(private sync: SyncService) { }
 
   aggradateDataForm!: FormGroup;
   initDate!: { start_date: string, end_date: string };
@@ -25,8 +25,8 @@ export class Dashboard2Component implements OnInit {
     return new FormGroup({
       start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
       end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
+      districts: new FormControl(""),
       sites: new FormControl(""),
-      sources: new FormControl(""),
     });
   }
 
@@ -75,18 +75,25 @@ export class Dashboard2Component implements OnInit {
 
 
   bodyData: CompareData[] = [];
-  
+
   ChwsDataFromDb$: MedicMobileData[] = [];
+
+  Districts$: Districts[] = [];
   Chws$: Chws[] = [];
   Sites$: Sites[] = [];
+
+  chws$: Chws[] = [];
+  sites$: Sites[] = [];
 
   initMsg!: string;
   isLoading!: boolean;
 
   dhis2Params!: Dhis2Sync;
 
-  
-  identifyBodyData(index:number, item: CompareData) {
+  responseMessage: string = '';
+
+
+  identifyBodyData(index: number, item: CompareData) {
     return item.Code;
   }
 
@@ -99,45 +106,100 @@ export class Dashboard2Component implements OnInit {
   }
 
   async initAllData() {
-    const filter:FilterParams = {
-      sources: ['Tonoudayo']
-    }
     this.isLoading = true;
-    this.initMsg = 'Chargement des Sites ...';
-    this.syncService.getSitesList(filter).subscribe((sites$: any) => {
-      this.Sites$ = sites$;
-      this.initMsg = 'Chargement des ASC ...';
-      this.syncService.getChwsList(filter).subscribe((chws$: any) => {
-        this.Chws$ = chws$;
-        this.initDataFilted();
-      }, (err: any) => console.log(err.error));
-    }, (err: any) => console.log(err.error));
-  }
-
-  returnEmptyArrayIfNul(data: any): string[] {
-    return Functions.notNull(data) ? data : [];
-  }
-
-  initDataFilted(): void {
-    this.isLoading = true;
-    const startDate: string = this.aggradateDataForm.value["start_date"];
-    const endDate: string = this.aggradateDataForm.value["end_date"];
-    const site: string = this.aggradateDataForm.value["sites"];
-    const source: string[] = ['Tonoudayo','dhis2'] //this.aggradateDataForm.value["source"];
-
-    var paramsTopass: any = {
-      start_date: startDate,
-      end_date: endDate,
-      sites: site,
-      source: source
-    };
-
-    this.syncService.getAllData(paramsTopass).subscribe((response: any) => {
-      this.ChwsDataFromDb$ = response;
-      this.getAllAboutData(paramsTopass);
+    this.initMsg = 'Chargement des Districts ...';
+    this.sync.getDistrictsList().subscribe(async (_d$: { status: number, data: Districts[] }) => {
+      if (_d$.status == 200) this.Districts$ = _d$.data;
+      this.initMsg = 'Chargement des Sites ...';
+      this.sync.getSitesList().subscribe(async (_s$: { status: number, data: Sites[] }) => {
+        if (_s$.status == 200) this.Sites$ = _s$.data;
+        this.genarateSites()
+        this.initMsg = 'Chargement des ASC ...';
+        this.sync.getChwsList().subscribe(async (_c$: { status: number, data: Chws[] }) => {
+          if (_c$.status == 200) {
+            this.Chws$ = _c$.data;
+            this.chws$ = _c$.data;
+          }
+          // this.initDataFilted();
+          this.isLoading = false;
+        }, (err: any) => {
+          this.isLoading = false;
+          console.log(err.error);
+        });
+      }, (err: any) => {
+        this.isLoading = false;
+        console.log(err.error);
+      });
     }, (err: any) => {
       this.isLoading = false;
       console.log(err.error);
+    });
+  }
+
+
+  genarateSites() {
+    this.sites$ = [];
+    this.chws$ = [];
+    const dist: string = this.aggradateDataForm.value["districts"];
+    this.aggradateDataForm.value["sites"] = "";
+    this.aggradateDataForm.value["chws"] = [];
+
+    if (Functions.notNull(dist)) {
+      for (let d = 0; d < this.Sites$.length; d++) {
+        const site = this.Sites$[d];
+        if (Functions.notNull(site)) if (dist.includes(site.district.id)) this.sites$.push(site)
+      }
+    } else {
+      this.sites$ = [];
+    }
+  }
+
+  genarateChws() {
+    const sites: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sites);
+    this.chws$ = [];
+    this.aggradateDataForm.value["chws"] = [];
+    if (Functions.notNull(sites)) {
+      for (let d = 0; d < this.Chws$.length; d++) {
+        const chws = this.Chws$[d];
+        if (Functions.notNull(chws)) if (sites.includes(chws.site.id)) this.chws$.push(chws)
+      }
+    } else {
+      this.chws$ = this.Chws$;
+    }
+  }
+
+  ParamsToFilter(): FilterParams {
+    const startDate: string = this.aggradateDataForm.value.start_date;
+    const endDate: string = this.aggradateDataForm.value.end_date;
+    // const sources: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sources) as string[];
+    const districts: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.districts) as string[];
+    const sites: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sites) as string[];
+    const chws: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
+
+    var params: FilterParams = {
+      // sources: sources,
+      start_date: startDate,
+      end_date: endDate,
+      districts: districts,
+      sites: sites,
+      chws: chws,
+    }
+    return params;
+  }
+
+  initDataFilted(params?: FilterParams): void {
+    this.isLoading = true;
+    this.sync.getAllChwsDataWithParams(params ?? this.ParamsToFilter()).subscribe((res: { status: number, data: any }) => {
+      if (res.status == 200) {
+        this.ChwsDataFromDb$ = res.data;
+        this.getAllAboutData(params ?? this.ParamsToFilter());
+      } else {
+        this.isLoading = false;
+        this.responseMessage = res.data
+      }
+    }, (err: any) => {
+      this.isLoading = false;
+      console.log(err);
     });
   }
 
@@ -147,8 +209,8 @@ export class Dashboard2Component implements OnInit {
 
     var outPutData: any = {}
 
-    for (let i = 0; i < this.Chws$!.length; i++) {
-      const ascId = this.Chws$![i].id;
+    for (let i = 0; i < this.chws$!.length; i++) {
+      const ascId = this.chws$![i].id;
       if (Functions.notNull(ascId)) {
         if (!outPutData.hasOwnProperty(ascId)) outPutData[ascId] = {
           chwId: ascId,
@@ -167,17 +229,12 @@ export class Dashboard2Component implements OnInit {
     }
 
 
-
-
-
-
-
     for (let index = 0; index < this.ChwsDataFromDb$!.length; index++) {
       const data: MedicMobileData = this.ChwsDataFromDb$[index];
       if (data != null) {
         const form = data.form;
         const asc: string = data.chw != null ? Functions.notNull(data.chw.id) ? data.chw.id : '' : '';
-        const site: string = data.site != null ?  Functions.notNull(data.site.id) ? data.site.id : '' : '';
+        const site: string = data.site != null ? Functions.notNull(data.site.id) ? data.site.id : '' : '';
         const idSiteValid: boolean = Functions.notNull(site) && Functions.notNull(sites) && sites?.includes(site) || !Functions.notNull(sites);
         const isDateValid: boolean = Functions.notNull(start_date) && Functions.notNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
 
@@ -188,8 +245,7 @@ export class Dashboard2Component implements OnInit {
             if (form === "Recherche") outPutData[asc].dhis_total_active_research += 1
             if (form !== "Recherche") outPutData[asc].dhis_total_consultation_followup += 1
             outPutData[asc].dhis_total_home_visit += 1
-          } else {
-    
+          } else if (data.source == 'Tonoudayo') {
             if (this.child_forms.includes(form)) outPutData[asc].app_total_child_followup += 1
             if (this.num_fp_forms.includes(form)) outPutData[asc].app_total_num_fp_followup += 1
             if (form === "home_visit") outPutData[asc].app_total_active_research += 1
@@ -306,8 +362,8 @@ export class Dashboard2Component implements OnInit {
 
   getChwInfos(chwId: string, byCode: boolean = false): Chws {
     var ascs!: Chws;
-    for (let i = 0; i < this.Chws$!.length; i++) {
-      const asc: Chws = this.Chws$![i];
+    for (let i = 0; i < this.chws$!.length; i++) {
+      const asc: Chws = this.chws$![i];
       if (Functions.notNull(asc)) {
         if (byCode == true) {
           if (Functions.notNull(asc.external_id) && asc.external_id == chwId) return asc;
