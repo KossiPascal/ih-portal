@@ -66,30 +66,44 @@ export interface DataFromPython {
   }
 }
 
+
+
 export interface OrgUnitImport {
   sites: {
-    error: number
-    success: number
+    successCount: number
+    errorCount: number
+    errorElements: string
+    errorIds:string
   }
   zones: {
-    error: number
-    success: number
+    successCount: number
+    errorCount: number
+    errorElements: string
+    errorIds:string
   }
   familles: {
-    error: number
-    success: number
+    successCount: number
+    errorCount: number
+    errorElements: string
+    errorIds:string
   }
   patients: {
-    error: number
-    success: number
+    successCount: number
+    errorCount: number
+    errorElements: string
+    errorIds:string
   }
   Asc: {
-    error: number
-    success: number
+    successCount: number
+    errorCount: number
+    errorElements: string
+    errorIds:string
   }
   Message: {
-    error: string
-    success: string
+    successCount: number
+    errorCount: number
+    errorElements: string
+    errorIds:string
   }
 }
 

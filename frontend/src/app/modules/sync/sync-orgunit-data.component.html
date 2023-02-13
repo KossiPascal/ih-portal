@@ -35,7 +35,7 @@
                         aria-labelledby="custom-tabs-one-sync-orgunits-tab">
 
                         <div class="row">
-                            <div class="col-sm-7">
+                            <div class="col-sm-12">
                                 <div class="overlay-wrapper">
                                     <div *ngIf="loading4" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
                                         <div class="text-bold pt-2">{{LoadingMsg}}</div>
@@ -134,22 +134,27 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="col-sm-5">
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
                                 <div *ngIf="tab4_messages != null" class="card-body">
                                     <table id="sync_chws_datatable" class="table table-bordered table-striped">
                                         <thead>
                                             <tr>
-                                                <th>Elément
-                                                <th>Success</th>
-                                                <th>Errors</th>
+                                                <th>Elément</th>
+                                                <th>SuccessCount</th>
+                                                <th>ErrorsCount</th>
+                                                <th>ErrorsIds</th>
+                                                <th>ErrorsMsg</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr *ngFor="let data of tab4_messages | keyvalue">
                                                 <td>{{ data.key }}</td>
-                                                <td class="org-unit-success">{{ data.value.success }}</td>
-                                                <td class="org-unit-error">{{ data.value.error }}</td>
+                                                <td class="org-unit-success">{{ data.value.successCount }}</td>
+                                                <td class="org-unit-error">{{ data.value.errorCount }}</td>
+                                                <td class="org-unit-error">{{ data.value.errorIds }}</td>
+                                                <td class="org-unit-error">{{ data.value.errorElements }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -163,7 +168,7 @@
                         aria-labelledby="custom-tabs-one-sync-chws-tab">
 
                         <div class="row">
-                            <div class="col-sm-7">
+                            <div class="col-sm-12">
                                 <div class="overlay-wrapper">
                                     <div *ngIf="loading5" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
                                         <div class="text-bold pt-2">{{LoadingMsg}}</div>
@@ -242,23 +247,28 @@
                                     <!-- /.card -->
                                 </div>
                             </div>
+                        </div>
 
-
-                            <div class="col-sm-5">
+                        <div class="row">
+                            <div class="col-sm-12">
                                 <div *ngIf="tab5_messages != null" class="card-body">
                                     <table id="sync_chws_datatable" class="table table-bordered table-striped">
                                         <thead>
                                             <tr>
-                                                <th>Elément
-                                                <th>Success</th>
-                                                <th>Errors</th>
+                                                <th>Elément</th>
+                                                <th>SuccessCount</th>
+                                                <th>ErrorsCount</th>
+                                                <th>ErrorsIds</th>
+                                                <th>ErrorsMsg</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr *ngFor="let data of tab5_messages | keyvalue">
                                                 <td>{{ data.key }}</td>
-                                                <td class="org-unit-success">{{ data.value.success }}</td>
-                                                <td class="org-unit-error">{{ data.value.error }}</td>
+                                                <td class="org-unit-success">{{ data.value.successCount }}</td>
+                                                <td class="org-unit-error">{{ data.value.errorCount }}</td>
+                                                <td class="org-unit-error">{{ data.value.errorIds }}</td>
+                                                <td class="org-unit-error">{{ data.value.errorElements }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -272,7 +282,7 @@
                         aria-labelledby="custom-tabs-one-sync-dhis2-chws-tab">
 
                         <div class="row">
-                            <div class="col-sm-7">
+                            <div class="col-sm-12">
                                 <div class="overlay-wrapper">
                                     <div *ngIf="loading6" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
                                         <div class="text-bold pt-2">{{LoadingMsg}}</div>
@@ -368,23 +378,28 @@
                                     <!-- /.card -->
                                 </div>
                             </div>
+                        </div>
 
-
-                            <div class="col-sm-5">
-                                <div *ngIf="tab6_messages != null" class="card-body">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div *ngIf="tab6_messages.length > 0" class="card-body">
                                     <table id="sync_chws_datatable" class="table table-bordered table-striped">
                                         <thead>
                                             <tr>
                                                 <th>Elément</th>
-                                                <th>Success</th>
-                                                <th>Errors</th>
+                                                <th>SuccessCount</th>
+                                                <th>ErrorsCount</th>
+                                                <th>ErrorsIds</th>
+                                                <th>ErrorsMsg</th>
                                             </tr>
                                         </thead>
                                         <tbody *ngFor="let dataMsg of tab6_messages; let i=index">
                                             <tr *ngFor="let data of dataMsg | keyvalue">
                                                 <td>{{ data.key }}</td>
-                                                <td class="org-unit-success">{{ data.value.success }}</td>
-                                                <td class="org-unit-error">{{ data.value.error }}</td>
+                                                <td class="org-unit-success">{{ data.value.successCount }}</td>
+                                                <td class="org-unit-error">{{ data.value.errorCount }}</td>
+                                                <td class="org-unit-error">{{ data.value.errorIds }}</td>
+                                                <td class="org-unit-error">{{ data.value.errorElements }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
