@@ -1,23 +1,38 @@
 import { Request, Response, NextFunction, Router } from 'express';
-import { getUserRepository, toMap, User } from '../entity/User';
+import { User } from '../entity/User';
+import { JsonDatabase } from '../json-data-source';
 import { isNotNull } from '../utils/functions';
 
 export class UserController {
+
+    // _repoUser = new JsonDatabase('users');
+    // 
+    // for (let i = 0; i < sites.length; i++) {
+    //     const site = sites[i];
+    //     if (site.external_id == uid) return site.id;
+    // }
+
+
+                                
     static allUsers = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const rep = await getUserRepository();
-            const usersFound = await rep.find({ order: { username: "ASC", id: "DESC" } });
-            var users: User[] = [];
-            for (let i = 0; i < usersFound.length; i++) {
-                const user = usersFound[i];
-                user.password = '';
-                users.push(user);
-            }
-            return res.status(res.statusCode).json({status:200, data: users});
+            const _repoUser = new JsonDatabase('users');
+            var users: User[] = Object.values(_repoUser.all());
+            return res.status(200).json({status:200, data: users});
+            
+            // const rep = await getUserRepository();
+            // const usersFound = await rep.find({ order: { username: "ASC", id: "DESC" } });
+            // var users: User[] = [];
+            // for (let i = 0; i < usersFound.length; i++) {
+            //     const user = usersFound[i];
+            //     user.password = '';
+            //     users.push(user);
+            // }
+            
         } catch (err: any) {
-            if (!err.statusCode) err.statusCode = 500;
-            next(err);
-            return res.status(err.statusCode).json({status:err.statusCode, data: `${err}`});
+            // if (!err.statusCode) err.statusCode = 500;
+            // next(err);
+            return res.status(201).json({status:201, data: `${err}`});
         }
     }
 
@@ -25,33 +40,33 @@ export class UserController {
 
     static updateUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const repo = await getUserRepository();
-            const user = await repo.findOneBy({ id: req.body.id });
+            // const repo = await getUserRepository();
+            // const user = await repo.findOneBy({ id: req.body.id });
 
-            if (user) {
-                if (req.body.editPassword && isNotNull(req.body.password)) {
-                    req.body.password = await user.hashPassword(req.body.password);
-                } else {
-                    delete req.body.password;
-                }
-                delete req.body.passwordConfirm;
-                delete req.body.id;
-                delete req.body.editPassword;
+            // if (user) {
+            //     if (req.body.editPassword && isNotNull(req.body.password)) {
+            //         req.body.password = await user.hashPassword(req.body.password);
+            //     } else {
+            //         delete req.body.password;
+            //     }
+            //     delete req.body.passwordConfirm;
+            //     delete req.body.id;
+            //     delete req.body.editPassword;
 
-                req.body.roles = isNotNull(req.body.roles)?`[${req.body.roles}]`:'[]'
+            //     req.body.roles = isNotNull(req.body.roles)?`[${req.body.roles}]`:'[]'
 
-                const userUpdated = await repo.update({ id: user.id, }, req.body);
+            //     const userUpdated = await repo.update({ id: user.id, }, req.body);
 
-                return res.status(res.statusCode).json({status:200, data:userUpdated});
-            } else {
-                return res.status(res.statusCode).json({ status:401, data: 'Not Found' });
-            }
-            // const { parse } = require('postgres-array')
-            // parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
+            //     return res.status(200).json({status:200, data:userUpdated});
+            // } else {
+            //     return res.status(res.statusCode).json({ status:401, data: 'Not Found' });
+            // }
+            // // const { parse } = require('postgres-array')
+            // // parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
         } catch (err: any) {
-            if (!err.statusCode) err.statusCode = 500;
-            next(err);
-            return res.status(err.statusCode).json({status:err.statusCode, data: `${err}`});
+            // if (!err.statusCode) err.statusCode = 500;
+            // next(err);
+            return res.status(201).json({status:201, data: `${err}`});
         }
     }
 
@@ -59,17 +74,17 @@ export class UserController {
 
     static deleteUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const repo = await getUserRepository();
-            if (req.body.isSuperAdmin!==true) {
-                const user = await repo.delete({ id: req.body.id });
-                return res.status(res.statusCode).json({status:200, data:user});
-            } else {
-                return res.status(res.statusCode).json({status:401, data:'Vous ne pouvez pas supprimer cet utilisateur'});
-            }
+            // const repo = await getUserRepository();
+            // if (req.body.isSuperAdmin!==true) {
+            //     const user = await repo.delete({ id: req.body.id });
+            //     return res.status(200).json({status:200, data:user});
+            // } else {
+            //     return res.status(res.statusCode).json({status:401, data:'Vous ne pouvez pas supprimer cet utilisateur'});
+            // }
         } catch (err: any) {
-            if (!err.statusCode) err.statusCode = 500;
-            next(err);
-            return res.status(err.statusCode).json({status:err.statusCode, data: `${err}`});
+            // if (!err.statusCode) err.statusCode = 500;
+            // next(err);
+            return res.status(201).json({status:201, data: `${err}`});
         }
     }
 
@@ -123,7 +138,7 @@ export class UserController {
 //         const usernameFound = await repository.findOneBy({ username: username });
 //         const useremailFound = await repository.findOneBy({ email: email });
 //         if (usernameFound || useremailFound) {
-//             return res.status(401).send('This Credential is already used !');
+//             return res.status(res.statusCode).send('This Credential is already used !');
 //         }
 //         const hashedPassword = await bcrypt.hash(req.body.password, 12);
 //         user.password = hashedPassword;
@@ -152,14 +167,14 @@ export class UserController {
 //         const useremailFound = await repository.findOneBy({ email: credential });
 
 //         if (!usernameFound && !useremailFound) {
-//             return res.status(401).send('No user with this crediential');
+//             return res.status(res.statusCode).send('No user with this crediential');
 //         }
 
 //         const userFound = usernameFound ?? useremailFound;
 
 //         const isEqual = await bcrypt.compare(password, userFound.password);
 //         if (!isEqual) {
-//             return res.status(401).send('Wrong password or Not Authorized !');
+//             return res.status(res.statusCode).send('Wrong password or Not Authorized !');
 //         }
 //         const token = jwt.sign(
 //             {
@@ -207,7 +222,7 @@ export class UserController {
 //   try {
 //     const token = (req as any).token;
 //     if (!token) {
-//       return res.status(401).send('Not Authorized');
+//       return res.status(res.statusCode).send('Not Authorized');
 //     }
 //     const jwt = await oktaJwtVerifier.verifyAccessToken(token, 'api://default');
 //     // @ts-ignore
@@ -218,5 +233,5 @@ export class UserController {
 //     next();
 //   }
 //   catch (err) {
-//     return res.status(401).send(err.message);
+//     return res.status(res.statusCode).send(err.message);
 //   }

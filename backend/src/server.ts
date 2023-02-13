@@ -1,12 +1,14 @@
 import "reflect-metadata"
 import express from 'express';
-import {json, urlencoded} from 'body-parser';
+import { json, urlencoded } from 'body-parser';
 import { Functions } from './utils/functions';
 require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
 import { AppDataSource } from './data-source';
+// import { JsonDatabase } from './json-data-source';
+
 import cors from "cors";
 import bearerToken from "express-bearer-token";
-import { Errors } from "./controllers/error";
+import { Errors } from "./routes/error";
 import authRouter from "./routes/auth";
 import configRouter from "./routes/config";
 import pyRouter from "./routes/run_python";
@@ -15,15 +17,19 @@ import userRouter from "./routes/user";
 import fs from "fs";
 import https from "https";
 import http from "http";
+import databaseRouter from "./routes/database";
 const path = require('path');
 const cron = require("node-cron");
 // const shell = require('shelljs');
 // const createError = require("http-errors");
 // import { MailConfig } from "./utils/appInterface";
 
+
+
 const accessAllAvailablePort = process.env.ACCESS_ALL_AVAILABE_PORT == 'true';
 const hostnames = Functions.getIPAddress(accessAllAvailablePort);
 
+const cookieParser = require('cookie-parser')
 var session = require('express-session');
 // var cookie = require('cookie-session');
 
@@ -77,10 +83,9 @@ const app = express()
   .use('/api/python', pyRouter)
   .use('/api/user', userRouter)
   .use('/api/configs', configRouter)
+  .use('/api/database', databaseRouter)
 
-  
-  
-  .use('/api/assets', express.static(__dirname+'/assets'))
+  .use('/api/assets', express.static(__dirname + '/assets'))
   // .use(express.static(`${Functions.projectFolder()}/views`, {maxAge: `1y`}))
   // .use('/', (req,res) => res.sendFile(`${Functions.projectFolder()}/views/index.html`))
   .use(express.static(path.join(Functions.projectFolder(), "views")))
@@ -89,7 +94,6 @@ const app = express()
   // .use((req, res, next) => next(createError(404, "Not found")))
   .use(Errors.get404)
   .use(Errors.get500);
-
 
 
 

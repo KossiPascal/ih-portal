@@ -1,88 +1,123 @@
 import { Request, Response, NextFunction, Router } from 'express';
-import { Utils } from '../utils/utils';
-import { UserValue } from '../utils/appInterface';
-import moment from "moment";
-import { ConversionUtils } from 'turbocommons-ts';
-import { getUserRepository, User, toMap } from '../entity/User';
-import { generateAuthSuccessData } from '../utils/functions';
+import { User } from '../entity/User';
+import { generateUserMapData } from '../utils/functions';
+import { JsonDatabase } from '../json-data-source';
+import { userLoginStatus, getMe } from '../utils/dhis2-api-functions';
 
 export class AuthController {
-    static register = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const repository = await getUserRepository();
-            const user: User = toMap(req.body)
-
-            const usernameFound = await repository.findOneBy({ username: user.username });
-            const useremailFound = await repository.findOneBy({ email: user.email });
-            if (usernameFound || useremailFound) return res.status(res.statusCode).json({ status: res.statusCode, data: 'This Credential is already used !' });
-
-            user.password = await user.hashPassword();
-            const result = await repository.save(user);
-            return res.status(res.statusCode).json({ status: 200, data: result });
-            // next();
-        }
-        catch (err: any) {
-            if (!err.statusCode) err.statusCode = 500;
-            // next(err);
-            return res.status(err.statusCode).json({ status: err.statusCode, data: `${err}` });
-
-        }
-    }
-
+    
     static login = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const credential = req.body.credential;
+            const username = req.body.username;
             const password = req.body.password;
-
-            if (credential && password) {
-                const repository = await getUserRepository();
-                const usernameFound = await repository.findOneBy({ username: credential });
-                let useremailFound: User | null | undefined;
-
-                if (!usernameFound) useremailFound = await repository.findOneBy({ email: credential });
-
-                if (!usernameFound && !useremailFound) {
-                    return res.status(res.statusCode).json({ status: res.statusCode, data: 'No user found with this crediential, retry!' });
-                } else {
-                    const userFound = usernameFound ?? useremailFound;
-                    if (userFound) {
-                        if (userFound.isActive !== true && userFound.isSuperAdmin !== true) {
-                            return res.status(res.statusCode).json({ status: res.statusCode, data: "You don't have permission to login!" });
+            if (username && password) {
+                const dhisuserAuthorization = 'Basic ' + Buffer.from(username + ':' + password).toString('base64');
+                await userLoginStatus(dhisuserAuthorization)
+                    .then(r =>  {
+                        if(r == true){
+                            getMe(dhisuserAuthorization).then((user: User) => {
+                                if (user.isActive !== true) {
+                                    return res.status(201).json({ status: 201, data: "You don't have permission to login!" });
+                                }
+                                const userData = generateUserMapData(user, dhisuserAuthorization);
+                                const _repoUser = new JsonDatabase('users');
+                                _repoUser.save(userData);
+        
+                                return res.status(200).json({ status: 200, data: userData });
+                            }).catch(err => res.status(201).json({ status: 201, data: 'No user found with this crediential, retry!' }))
+        
+                        } else {
+                            return res.status(201).json({ status: 201, data: 'Problem found when trying to connect' });
                         }
-                        const isEqual = await userFound.comparePassword(password);
-                        if (!isEqual) {
-                            return res.status(res.statusCode).json({ status: res.statusCode, data: 'Wrong password or Not Authorized !' });
-                        }
-
-                        var user: UserValue = generateAuthSuccessData(userFound);
-
-                        return res.status(res.statusCode).json({ status: 200, data: user });
-                    } else {
-                        return res.status(res.statusCode).json({ status: res.statusCode, data: 'No user found with this crediential, retry!' });
-                    }
-                }
+                    }).catch(err => res.status(201).json({ status: 201, data: 'Error When getting user informations, retry!' }));
             } else {
-
-                if (!credential) {
-                    return res.status(res.statusCode).json({ status: res.statusCode, data: 'No username given' });
-                } else if (!password) {
-                    return res.status(res.statusCode).json({ status: res.statusCode, data: 'You not give password!' });
-                } else {
-                    return res.status(res.statusCode).json({ status: res.statusCode, data: 'crediential error' });
-                }
+                return res.status(201).json({ status: 201, data: !username ? 'No username given' : !password ? 'You not give password!' : 'crediential error' });
             }
         }
         catch (err: any) {
-            if (!err.statusCode) err.statusCode = 500;
-            // next(err);
-            // return res.status(err.statusCode).end();
-            return res.status(err.statusCode).json({ status: err.statusCode, data: `${err}` });
+            return res.status(201).json({ status: 201, data: `${err}` });
         }
     }
+
 }
 
 
 
+
+
+    // static login = async (req: Request, res: Response, next: NextFunction) => {
+    //     try {
+    //         const credential = req.body.credential;
+    //         const password = req.body.password;
+
+    //         if (credential && password) {
+    //             const repository = await getUserRepository();
+    //             const usernameFound = await repository.findOneBy({ username: credential });
+    //             let useremailFound: User | null | undefined;
+
+    //             if (!usernameFound) useremailFound = await repository.findOneBy({ email: credential });
+
+    //             if (!usernameFound && !useremailFound) {
+    //                 return res.status(res.statusCode).json({ status: res.statusCode, data: 'No user found with this crediential, retry!' });
+    //             } else {
+    //                 const userFound = usernameFound ?? useremailFound;
+    //                 if (userFound) {
+    //                     if (userFound.isActive !== true && userFound.isSuperAdmin !== true) {
+    //                         return res.status(res.statusCode).json({ status: res.statusCode, data: "You don't have permission to login!" });
+    //                     }
+    //                     const isEqual = await userFound.comparePassword(password);
+    //                     if (!isEqual) {
+    //                         return res.status(res.statusCode).json({ status: res.statusCode, data: 'Wrong password or Not Authorized !' });
+    //                     }
+
+    //                     var user: UserValue = generateAuthSuccessData(userFound);
+
+    //                     return res.status(res.statusCode).json({ status: 200, data: user });
+    //                 } else {
+    //                     return res.status(res.statusCode).json({ status: res.statusCode, data: 'No user found with this crediential, retry!' });
+    //                 }
+    //             }
+    //         } else {
+
+    //             if (!credential) {
+    //                 return res.status(res.statusCode).json({ status: res.statusCode, data: 'No username given' });
+    //             } else if (!password) {
+    //                 return res.status(res.statusCode).json({ status: res.statusCode, data: 'You not give password!' });
+    //             } else {
+    //                 return res.status(res.statusCode).json({ status: res.statusCode, data: 'crediential error' });
+    //             }
+    //         }
+    //     }
+    //     catch (err: any) {
+    //         if (!err.statusCode) err.statusCode = 500;
+    //         // next(err);
+    //         // return res.status(err.statusCode).end();
+    //         return res.status(err.statusCode).json({ status: err.statusCode, data: `${err}` });
+    //     }
+    // }
+
+    
+    // static register = async (req: Request, res: Response, next: NextFunction) => {
+    //     try {
+    //         const repository = await getUserRepository();
+    //         const user: User = toMap(req.body)
+
+    //         const usernameFound = await repository.findOneBy({ username: user.username });
+    //         const useremailFound = await repository.findOneBy({ email: user.email });
+    //         if (usernameFound || useremailFound) return res.status(res.statusCode).json({ status: res.statusCode, data: 'This Credential is already used !' });
+
+    //         user.password = await user.hashPassword();
+    //         const result = await repository.save(user);
+    //         return res.status(res.statusCode).json({ status: 200, data: result });
+    //         // next();
+    //     }
+    //     catch (err: any) {
+    //         if (!err.statusCode) err.statusCode = 500;
+    //         // next(err);
+    //         return res.status(err.statusCode).json({ status: err.statusCode, data: `${err}` });
+
+    //     }
+    // }
 
 
 
@@ -97,7 +132,7 @@ export class AuthController {
 //         const usernameFound = await repository.findOneBy({ username: username });
 //         const useremailFound = await repository.findOneBy({ email: email });
 //         if (usernameFound || useremailFound) {
-//             return res.status(401).send('This Credential is already used !');
+//             return res.status(res.statusCode).send('This Credential is already used !');
 //         }
 //         const hashedPassword = await bcrypt.hash(req.body.password, 12);
 //         user.password = hashedPassword;
@@ -126,14 +161,14 @@ export class AuthController {
 //         const useremailFound = await repository.findOneBy({ email: credential });
 
 //         if (!usernameFound && !useremailFound) {
-//             return res.status(401).send('No user with this crediential');
+//             return res.status(res.statusCode).send('No user with this crediential');
 //         }
 
 //         const userFound = usernameFound ?? useremailFound;
 
 //         const isEqual = await bcrypt.compare(password, userFound.password);
 //         if (!isEqual) {
-//             return res.status(401).send('Wrong password or Not Authorized !');
+//             return res.status(res.statusCode).send('Wrong password or Not Authorized !');
 //         }
 //         const token = jwt.sign(
 //             {
@@ -181,7 +216,7 @@ export class AuthController {
 //   try {
 //     const token = (req as any).token;
 //     if (!token) {
-//       return res.status(401).send('Not Authorized');
+//       return res.status(res.statusCode).send('Not Authorized');
 //     }
 //     const jwt = await oktaJwtVerifier.verifyAccessToken(token, 'api://default');
 //     // @ts-ignore
@@ -192,5 +227,5 @@ export class AuthController {
 //     next();
 //   }
 //   catch (err) {
-//     return res.status(401).send(err.message);
+//     return res.status(res.statusCode).send(err.message);
 //   }

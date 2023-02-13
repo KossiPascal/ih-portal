@@ -1,8 +1,7 @@
 import path from "path";
 import https from "https";
 import http from "http";
-import { Dhis2Sync, MailConfig, Sync, UserValue } from "./appInterface";
-import { Utils } from "./utils";
+import { CouchDbFetchData, Dhis2Sync, MailConfig, Sync, UserValue } from "./appInterface";
 import * as jwt from 'jsonwebtoken';
 import { User } from "../entity/User";
 import { ConversionUtils } from "turbocommons-ts";
@@ -13,7 +12,58 @@ const smtpTransport = require('nodemailer-smtp-transport');
 var rootCas = require('ssl-root-cas').create();
 
 
+
+export function httpHeaders(Authorization?: string, withParams: boolean = true) {
+    // process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = '0';
+    var p:any = {
+        'Authorization': Authorization ?? 'Basic ' + Buffer.from(`${process.env.CHT_USER}:${process.env.CHT_PASS}`).toString('base64'),
+        "Accept": "application/json",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT, OPTIONS",
+        "Access-Control-Allow-Headers": "X-API-KEY, Origin, X-Requested-With, Content-Type, Accept,Access-Control-Request-Method, Authorization,Access-Control-Allow-Headers",
+        
+    }
+
+    if (withParams) {
+        p["Content-Type"] = "application/json";
+        
+        // 'Accept-Charset': 'UTF-8',
+        // "Access-Control-Allow-Origin": "*",
+        // "Access-Control-Max-Age": "86400",
+        // 'ca': [fs.readFileSync(path.dirname(__dirname)+'/ssl/server.pem', {encoding: 'utf-8'})]
+        // 'Accept-Encoding': '*',
+    }
+
+    return p;
+}
+
+
+
 export class Functions {
+
+
+    // const interval = setInterval(function() {}, 5000);
+    // clearInterval(interval); // thanks @Luca D'Amico
+    // var minutes = 5, the_interval = minutes * 60 * 1000;
+    // setInterval(function() {}, the_interval);
+
+
+
+
+    static Utils(): { expiredIn: string, secretOrPrivateKey: string } {
+        return {
+            expiredIn: '7200',//2h
+            secretOrPrivateKey: 'kossi-secretfortoken',
+        }
+    }
+
+    // set it in an HTTP Only + Secure Cookie
+    // res.cookie("SESSIONID", token, { httpOnly: true, secure: true });
+
+    // import * as fs from "fs";
+    // const RSA_PRIVATE_KEY = fs.readFileSync('./demos/private.key');
+    // const jwtBearerToken = jwt.sign({}, RSA_PRIVATE_KEY, {algorithm: 'RS256', expiresIn: 120,subject: userId}
+
     static date_to_milisecond = (stringDate: string, start: boolean = true): string => {
         if (stringDate != "") {
             let dt = start ? " 00:00:00.000001" : " 23:59:59.999999";
@@ -105,34 +155,18 @@ export class Functions {
         return JSON.parse(`{${data}}`.replace(/\n/g, '').replace(/\\n/g, '').trim().replace(/\s\s+/g, ' '));
     }
 
-    static getkeysElements(viewName: string, key: any, start: boolean = true) {
-        if (viewName === 'reports_by_date') {
-            return Functions.date_to_milisecond(key, start);
-        } else {
-            return key;
-        }
-    }
 
     static getHttpsOptions(data: any): Object {
         var options: Object = {
             host: data.host,
             port: data.port,
             path: data.path,
+            url: data.url,
             rejectUnauthorized: data.use_SSL_verification === true,
             requestCert: data.use_SSL_verification === true,
             strictSSL: data.use_SSL_verification === true,
             agent: false,
-            headers: {
-                'Authorization': 'Basic ' + Buffer.from(data.user + ':' + data.pass).toString('base64'),
-                'Content-Type': 'application/json',
-                'Accept-Charset': 'UTF-8',
-                'Accept': 'application/json',
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "PUT, POST, GET, DELETE, OPTIONS",
-                "Access-Control-Allow-Headers": "X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept",
-                "Access-Control-Max-Age": "86400",
-                // 'ca': [fs.readFileSync(path.dirname(__dirname)+'/ssl/server.pem', {encoding: 'utf-8'})]
-            },
+            headers: httpHeaders('Basic ' + Buffer.from(data.user + ':' + data.pass).toString('base64')),
             ca: data.use_SSL_verification === true ? rootCas.addFile(`${this.sslFolder('server.pem')}`) : []
         }
         return options;
@@ -167,6 +201,7 @@ export class Functions {
         var addr = server.address();
         var bind = typeof addr === 'string' ? addr : addr!.port;
         for (let i = 0; i < hostnames.length; i++) {
+            888
             console.log(`🚀 ${protocole.toLocaleUpperCase()} Server is available at ${protocole}://${hostnames[i]}:${bind}`)
         }
         console.log('\n');
@@ -224,6 +259,11 @@ export class Functions {
         return `${this.projectFolderParent()}/ssl/${file_Name_with_extension}`
     }
 
+    static JsonDbFolder(file_Name_without_extension: string): string {
+        const fileName: string = file_Name_without_extension.trim().replace(' ', '-').split('.')[0];
+        return `${this.projectFolderParent()}/IhJsonStorage/${fileName}.json`
+    }
+
     static appVersion() {
         return require('../../package.json').version;
     }
@@ -241,58 +281,76 @@ export class Functions {
 }
 
 
+export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
+    var dbCibleUrl = `/medic/_design/medic-client/_view/${params.viewName}`;
+    if (dbCibleUrl[0] != '/') dbCibleUrl = `/${dbCibleUrl}`;
+    if (dbCibleUrl[dbCibleUrl.length - 1] == '/') dbCibleUrl.slice(0, -1);
 
+    var couchArg = ['include_docs=true', 'returnDocs=true', 'attachments=false', 'binary=false', 'reduce=false'];
+    couchArg.push(`descending=${params.descending == true}`);
+    if (isNotNull(params.startKey)) couchArg.push(`key=[${params.startKey}]`);
+    if (isNotNull(params.endKey)) couchArg.push(`endkey=[${params.endKey}]`);
 
-export class CouchDbSyncConfig {
+    var options = {
+        host: params.medic_host,
+        port: params.port ?? 443,
+        path: `${dbCibleUrl}?${couchArg.join('&')}`,
+        url: `${params.medic_host}${dbCibleUrl}?${couchArg.join('&')}`,
+        use_SSL_verification: params.ssl_verification,
+        user: params.medic_username,
+        pass: params.medic_password,
+    };
+    return Functions.getHttpsOptions(options);
+}
 
-    constructor(sync: Sync, viewName: string) {
-        this.host = sync.medic_host;
-        this.user = sync.medic_username,
-            this.pass = sync.medic_password,
-            this.port = sync.port ?? 443,
-            this.dbCibleUrl = `/medic/_design/medic-client/_view/${viewName}`,
-            this.start_date = Functions.getkeysElements(viewName, sync.start_date),
-            this.end_date = Functions.getkeysElements(viewName, sync.end_date, false),
-            this.use_SSL_verification = sync.ssl_verification,
-            this.descending = false
-    }
+// export class OldCouchDbSyncConfig {
 
-    host: string;
-    user: string;
-    pass: string;
-    port: number;
-    dbCibleUrl: string;
-    start_date: string;
-    end_date: string;
-    descending: boolean;
-    use_SSL_verification: boolean;
+//     constructor(sync: Sync, viewName: string) {
+//         this.host = sync.medic_host;
+//         this.user = sync.medic_username,
+//             this.pass = sync.medic_password,
+//             this.port = sync.port ?? 443,
+//             this.dbCibleUrl = `/medic/_design/medic-client/_view/${viewName}`,
+//             this.start_date = Functions.getkeysElements(viewName, sync.start_date),
+//             this.end_date = Functions.getkeysElements(viewName, sync.end_date, false),
+//             this.use_SSL_verification = sync.ssl_verification,
+//             this.descending = false
+//     }
 
-    headerOptions(): Object {
-        const rootCas = require('ssl-root-cas').create();
-        let couchArg = ['include_docs=true', 'returnDocs=true', 'attachments=false', 'binary=false', 'reduce=false'];
-        if (this.descending == true) couchArg.push('descending=false');
-        if (this.start_date !== '' && this.start_date !== null && typeof this.start_date !== undefined) couchArg.push(`key=[${this.start_date}]`);
-        if (this.end_date !== '' && this.end_date !== null && typeof this.end_date !== undefined) couchArg.push(`endkey=[${this.end_date}]`);
-        if (this.dbCibleUrl[0] != '/') this.dbCibleUrl = `/${this.dbCibleUrl}`;
-        if (this.dbCibleUrl[this.dbCibleUrl.length - 1] == '/') this.dbCibleUrl.slice(0, -1);
-        var options = {
-            host: this.host,
-            port: this.port,
-            path: `${this.dbCibleUrl}?${couchArg.join('&')}`,
-            use_SSL_verification: this.use_SSL_verification,
-            user: this.user,
-            pass: this.pass
-        };
-        return Functions.getHttpsOptions(options);
-    }
-};
+//     host: string;
+//     user: string;
+//     pass: string;
+//     port: number;
+//     dbCibleUrl: string;
+//     start_date: string;
+//     end_date: string;
+//     descending: boolean;
+//     use_SSL_verification: boolean;
+
+//     headerOptions(): Object {
+//         const rootCas = require('ssl-root-cas').create();
+//         let couchArg = ['include_docs=true', 'returnDocs=true', 'attachments=false', 'binary=false', 'reduce=false'];
+//         if (this.descending == true) couchArg.push('descending=false');
+//         if (this.start_date !== '' && this.start_date !== null && typeof this.start_date !== undefined) couchArg.push(`key=[${this.start_date}]`);
+//         if (this.end_date !== '' && this.end_date !== null && typeof this.end_date !== undefined) couchArg.push(`endkey=[${this.end_date}]`);
+//         if (this.dbCibleUrl[0] != '/') this.dbCibleUrl = `/${this.dbCibleUrl}`;
+//         if (this.dbCibleUrl[this.dbCibleUrl.length - 1] == '/') this.dbCibleUrl.slice(0, -1);
+//         var options = {
+//             host: this.host,
+//             port: this.port,
+//             path: `${this.dbCibleUrl}?${couchArg.join('&')}`,
+//             use_SSL_verification: this.use_SSL_verification,
+//             user: this.user,
+//             pass: this.pass
+//         };
+//         return Functions.getHttpsOptions(options);
+//     }
+// };
 
 
 export function isNotNull(data: any): boolean {
     return data != '' && data != null && data != undefined && data.length != 0;
 }
-
-
 
 export class Dhis2SyncConfig {
     constructor(param: Dhis2Sync) {
@@ -300,26 +358,20 @@ export class Dhis2SyncConfig {
         const cibleName: string = param.cibleName.replace('/', '').replace('.json', '');
         var link: string = `/api/${cibleName}.json?paging=false`;
         if (param.program != null && param.program != '') link += `&program=${param.program}`;
-        if (isNotNull(param.orgUnitFilter)) link += `&orgUnit=${param.orgUnitFilter}`;
-        if (param.filter != null && param.filter.length != 0) link += `&filter=${param.filter.join('&filter=')}`;
-        if (param.fields != null && param.fields.length != 0) link += `&fields=${param.fields.join(',')}`;
+
+        if (isNotNull(param.orgUnit)) link += `&orgUnit=${param.orgUnit}`;
+        if (isNotNull(param.filter)) link += `&filter=${param.filter?.join('&filter=')}`;
+        if (isNotNull(param.fields)) link += `&fields=${param.fields?.join(',')}`;
 
         const order: string = param.order ?? 'desc';
         link += `&order=created:${order}`;
         this.host = host;
         this.port = param.port ?? 443;
         this.user = param.username,
-        this.pass = param.password,
-        this.url = 'https://' + host + link,
-        this.cibleName = cibleName,
-        this.headers = {
-            'Authorization': 'Basic ' + Buffer.from(this.user + ':' + this.pass).toString('base64'),
-            "Accept": "application/json",
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT, OPTIONS",
-            "Access-Control-Allow-Headers": "X-API-KEY, Origin, X-Requested-With, Content-Type, Accept,Access-Control-Request-Method, Authorization,Access-Control-Allow-Headers",
-            "Content-Type": "application/json",
-        }
+            this.pass = param.password,
+            this.url = 'https://' + host + link,
+            this.cibleName = cibleName,
+            this.headers = httpHeaders('Basic ' + Buffer.from(this.user + ':' + this.pass).toString('base64'))
     }
     url: string;
     host: string;
@@ -327,7 +379,7 @@ export class Dhis2SyncConfig {
     user: string;
     pass: string;
     cibleName: string;
-    headers:any;
+    headers: any;
 
     headerOptions(): any {
         var options = {
@@ -341,7 +393,7 @@ export class Dhis2SyncConfig {
         return options;
     }
 
-    fecthOptions(data?:any, method:'GET'|'POST'|'PUT'|'DELETE' = 'GET'): any {
+    fecthOptions(data?: any, method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET'): any {
         var option = {
             cache: 'no-cache',
             mode: "cors",
@@ -358,22 +410,30 @@ export class Dhis2SyncConfig {
 
 
 
-export function genarateToken(data:{id:any, name:string, role:any, isActive:any}) {
-    return jwt.sign({ id: `${data.id}`, name: data.name, role:`${data.role}`, isActive:`${data.isActive}`}, Utils().secretOrPrivateKey, { expiresIn: `${Utils().expiredIn}s` });
+export function genarateToken(data: { id: any, username: string, roles: string[], isActive: any }) {
+    return jwt.sign({ id: `${data.id}`, username: data.username, roles: `${data.roles}`, isActive: `${data.isActive}` }, Functions.Utils().secretOrPrivateKey, { expiresIn: `${Functions.Utils().expiredIn}s` });
 }
 
-export function generateAuthSuccessData(userFound:User): UserValue {
-    var user: UserValue = {
-        token: userFound.token(),
-        id: userFound.id,
-        username: userFound.username,
-        fullname: userFound.fullname,
-        roles: ConversionUtils.stringToBase64(userFound.roles),
-        isActive: userFound.isActive,
-        expiresIn: JSON.stringify((moment().add(Utils().expiredIn, 'seconds')).valueOf())
-      }
-      return user;
+
+
+export function generateUserMapData(userFound: User, dhisusersession: string): any {
+    userFound.dhisusersession = dhisusersession,
+        userFound.expiresIn = JSON.stringify((moment().add(Functions.Utils().expiredIn, 'seconds')).valueOf())
+    return userFound.toMap();
 }
+
+// export function generateAuthSuccessData(userFound:User): UserValue {
+//     var user: UserValue = {
+//         token: userFound.token(),
+//         id: userFound.id,
+//         username: userFound.username,
+//         fullname: userFound.fullname,
+//         roles: ConversionUtils.stringToBase64(userFound.roles),
+//         isActive: userFound.isActive,
+//         expiresIn: JSON.stringify((moment().add(Utils().expiredIn, 'seconds')).valueOf())
+//       }
+//       return user;
+// }
 
 export function mailService(data: MailConfig) {
     var mailTransporter = nodemailer.createTransport(smtpTransport({

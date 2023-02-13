@@ -30,6 +30,20 @@ export interface Sync {
 }
 
 
+
+
+export interface CouchDbFetchData {
+  viewName:string,
+  startKey?: string[];
+  endKey?: string[];
+  medic_host: string;
+  medic_username: string;
+  medic_password: string;
+  port: number;
+  ssl_verification: boolean;
+  descending?: boolean
+}
+
 export interface Dhis2Sync {
   host: string;
   port: number
@@ -37,7 +51,7 @@ export interface Dhis2Sync {
   password: string;
   cibleName: string,
   program?: string,
-  orgUnitFilter?: string
+  orgUnit?: string
   filter?: string[],
   fields?: string[],
   order?: string
