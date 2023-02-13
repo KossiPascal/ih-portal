@@ -1,14 +1,11 @@
-import { privateEncrypt } from "crypto";
+import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository } from "../entity/Sync";
+import { CouchDbFetchData, Dhis2DataFormat } from "../utils/appInterface";
+import { Dhis2SyncConfig, Functions, isNotNull, CouchDbFetchDataOptions } from "../utils/functions";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import https from 'https';
+
 const fetch = require('node-fetch');
-
-import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository } from "../entity/Sync";
-import sync from "../routes/sync";
-import { CouchDbFetchData, Dhis2DataFormat } from "../utils/appInterface";
-import { Dhis2SyncConfig, Functions, isNotNull, CouchDbFetchDataOptions, httpHeaders } from "../utils/functions";
-
 require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
 
 
@@ -75,7 +72,7 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
     if (!validationResult(req).isEmpty()) {
         // outPutInfo.status = 201;
         outPutInfo["Message"] = {}
-        outPutInfo["Message"]["error"] = "Your request provides was rejected !";
+        outPutInfo["Message"]["errorElements"] = "Your request provides was rejected !";
         return res.status(201).json(outPutInfo);
     }
 
@@ -91,7 +88,7 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
 
     const dhis2Sync = new Dhis2SyncConfig(req.body);
 
-    var siteName = (await _repoSite.findOneBy({external_id:req.body.orgUnit}))?.name;
+    var siteName = (await _repoSite.findOneBy({ external_id: req.body.orgUnit }))?.name;
 
     await fetch(dhis2Sync.url, dhis2Sync.fecthOptions())
         .then((response: any) => response.json())
@@ -107,17 +104,17 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
                         const row: Dhis2DataFormat = jsonBody[i];
                         if (isNotNull(row)) {
                             if (row.dataValues.length > 0) {
-                                const siteId:any = await getSiteByDhis2Uid(row.orgUnit);
+                                const siteId: any = await getSiteByDhis2Uid(row.orgUnit);
                                 var districtId = undefined;
                                 try {
                                     districtId = (await _repoSite.findOneBy({ id: siteId }))?.district;
                                 } catch (error) {
                                     console.log('No district found !')
                                 }
-                                const chwsId:any = await getChwsByDhis2Uid(getValue(row.dataValues, 'JkMyqI3e6or'));
+                                const chwsId: any = await getChwsByDhis2Uid(getValue(row.dataValues, 'JkMyqI3e6or'));
                                 const dateVal = getValue(row.dataValues, 'RlquY86kI66');
                                 if (districtId && isNotNull(siteId) && isNotNull(chwsId) && isNotNull(dateVal)) {
-                                    if (!outPutInfo.hasOwnProperty(`Données Total ${siteName}`)) outPutInfo[`Données Total ${siteName}`] = { error: 0, success: 0 }
+                                    if (!outPutInfo.hasOwnProperty(`Données Total ${siteName}`)) outPutInfo[`Données Total ${siteName}`] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
                                     try {
                                         const _dhis2Sync = new ChwsData();
                                         _dhis2Sync.source = 'dhis2';
@@ -130,9 +127,11 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
                                         _dhis2Sync.chw = chwsId;
                                         _dhis2Sync.fields = getDataValuesAsMap(row.dataValues, ['JkMyqI3e6or', 'plW6bCSnXKU', 'RlquY86kI66', 'JC752xYegbJ']);
                                         await repository.save(_dhis2Sync);
-                                        outPutInfo[`Données Total ${siteName}`]["success"] += 1;
+                                        outPutInfo[`Données Total ${siteName}`]["successCount"] += 1;
                                     } catch (error: any) {
-                                        outPutInfo[`Données Total ${siteName}`]["error"] += 1
+                                        outPutInfo[`Données Total ${siteName}`]["errorCount"] += 1;
+                                        outPutInfo[`Données Total ${siteName}`]["errorElements"] += `\n\n\n\n__________\n\n\n\n${error.toString()}`;
+                                        outPutInfo[`Données Total ${siteName}`]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.event}`;
                                     }
                                 }
                             }
@@ -149,26 +148,26 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
                 process.on('UnhandledPromiseRejectionWarning', (err: any) => {
                     // outPutInfo.status = 201;
                     outPutInfo[`Message ${siteName}`] = {}
-                    outPutInfo[`Message ${siteName}`]["error"] = err.message;
+                    outPutInfo[`Message ${siteName}`]["errorElements"] = err.message;
                     return res.status(201).json(outPutInfo);
                 });
                 process.on('uncaughtException', (err: any) => {
                     // outPutInfo.status = 201;
                     outPutInfo[`Message ${siteName}`] = {}
-                    outPutInfo[`Message ${siteName}`]["error"] = err.message;
+                    outPutInfo[`Message ${siteName}`]["errorElements"] = err.message;
                     return res.status(201).json(outPutInfo);
                 });
 
             } catch (err: any) {
                 // outPutInfo.status = 201;
                 outPutInfo[`Message ${siteName}`] = {}
-                outPutInfo[`Message ${siteName}`]["error"] = err.message;
+                outPutInfo[`Message ${siteName}`]["errorElements"] = err.message;
                 return res.status(201).json(outPutInfo);
             }
-        }).catch(async(err: any) => {
+        }).catch(async (err: any) => {
             // outPutInfo.status = 201;
             outPutInfo[`Message ${siteName}`] = {}
-            outPutInfo[`Message ${siteName}`]["error"] = err.message;
+            outPutInfo[`Message ${siteName}`]["errorElements"] = err.message;
             return res.status(201).json(outPutInfo);
         });
 
@@ -182,7 +181,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
 
     if (!validationResult(req).isEmpty()) {
         outPutInfo["Message"] = {}
-        outPutInfo["Message"]["error"] = "Your request provides was rejected !";
+        outPutInfo["Message"]["errorElements"] = "Your request provides was rejected !";
         resp.status(500).json(outPutInfo);
         return;
     }
@@ -228,7 +227,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                         console.log('No district found !')
                                     }
                                     if (districtId && siteId) {
-                                        if (!outPutInfo.hasOwnProperty("Données Total")) outPutInfo["Données Total"] = { error: 0, success: 0 }
+                                        if (!outPutInfo.hasOwnProperty("Données Total")) outPutInfo["Données Total"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
                                         try {
                                             const _sync = new ChwsData();
                                             _sync.source = 'Tonoudayo';
@@ -249,12 +248,14 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                             // _sync.patient_id = row.doc.fields.patient_id;
                                             if (!row.doc.geolocation.hasOwnProperty('code')) _sync.geolocation = Functions.getJsonFieldsAsKeyValue('', row.doc.geolocation);
                                             await repository.save(_sync);
-                                            outPutInfo["Données Total"]["success"] += 1;
+                                            outPutInfo["Données Total"]["successCount"] += 1;
                                         } catch (err: any) {
-                                            console.log()
-                                            outPutInfo["Données Total"]["error"] += 1
-                                            outPutInfo["ErrorMsg"] = {}
-                                            outPutInfo["ErrorMsg"]["error"] = err.toString()
+                                            outPutInfo["Données Total"]["errorCount"] += 1;
+                                            outPutInfo["Données Total"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
+                                            outPutInfo["Données Total"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.doc._id}`;
+
+                                            // outPutInfo["ErrorMsg"] = {}
+                                            // outPutInfo["ErrorMsg"]["error"] = err.toString()
                                         }
                                     }
                                 }
@@ -270,27 +271,27 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                     // process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = undefined;
                     if (!err.statusCode) err.statusCode = 500;
                     outPutInfo["Message"] = {}
-                    outPutInfo["Message"]["error"] = err.message;
+                    outPutInfo["Message"]["errorElements"] = err.message;
                     resp.status(err.statusCode).json(outPutInfo);
                 }
             });
             process.on('uncaughtException', (err: any) => {
                 if (!err.statusCode) err.statusCode = 500;
                 outPutInfo["Message"] = {}
-                outPutInfo["Message"]["error"] = err.message;
+                outPutInfo["Message"]["errorElements"] = err.message;
                 resp.status(err.statusCode).json(outPutInfo);
             });
             res.on('error', (err: any) => {
                 if (!err.statusCode) err.statusCode = 500;
                 outPutInfo["Message"] = {}
-                outPutInfo["Message"]["error"] = err.message;
+                outPutInfo["Message"]["errorElements"] = err.message;
                 resp.status(err.statusCode).json(outPutInfo);
             });
         });
     } catch (err: any) {
         if (!err.statusCode) err.statusCode = 500;
         outPutInfo["Message"] = {}
-        outPutInfo["Message"]["error"] = err.message;
+        outPutInfo["Message"]["errorElements"] = err.message;
         resp.status(err.statusCode).json(outPutInfo);
     }
 };
@@ -300,7 +301,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
     var outPutInfo: any = {};
     if (!validationResult(req).isEmpty()) {
         outPutInfo["Message"] = {}
-        outPutInfo["Message"]["error"] = "Your request provides was rejected !";
+        outPutInfo["Message"]["errorElements"] = "Your request provides was rejected !";
         return resp.status(500).json(outPutInfo);
     }
 
@@ -356,15 +357,15 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                             if (row.doc.type === 'district_hospital') {
                                 const siteId = row.doc._id;
                                 if (siteId) {
-                                    if (!outPutInfo.hasOwnProperty("Sites")) outPutInfo["Sites"] = { error: 0, success: 0 };
+                                    if (!outPutInfo.hasOwnProperty("Sites")) outPutInfo["Sites"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' };
                                     try {
                                         const _syncSite = new Sites();
-                                        if (row.doc.hasOwnProperty("district_external_id")) { 
+                                        if (row.doc.hasOwnProperty("district_external_id")) {
                                             const districtId = row.doc.district_external_id;
                                             const districtName = row.doc.district_external_name;
                                             try {
                                                 if (isNotNull(districtId) && isNotNull(districtName)) {
-                                                    if (!outPutInfo.hasOwnProperty("Districts")) outPutInfo["Districts"] = { error: 0, success: 0 };
+                                                    if (!outPutInfo.hasOwnProperty("Districts")) outPutInfo["Districts"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' };
                                                     const _syncDistrict = new Districts();
                                                     _syncDistrict.id = districtId
                                                     _syncDistrict.name = districtName;
@@ -372,15 +373,16 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                                     await _repoDistrict.save(_syncDistrict);
                                                     if (!districtList.includes(districtId)) {
                                                         districtList.push(districtId);
-                                                        outPutInfo["Districts"]["success"] += 1;
+                                                        outPutInfo["Districts"]["successCount"] += 1;
                                                     }
                                                     _syncSite.district = districtId;
-
                                                 }
-                                            } catch (error) {
+                                            } catch (err: any) {
                                                 if (!districtList.includes(districtId)) {
                                                     districtList.push(districtId);
-                                                    outPutInfo["Districts"]["error"] += 1;
+                                                    outPutInfo["Districts"]["errorCount"] += 1;
+                                                    outPutInfo["Districts"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
+                                                    outPutInfo["Districts"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${districtId}`;
                                                 }
                                             }
                                         }
@@ -392,9 +394,11 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                         _syncSite.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
                                         _syncSite.reported_full_date = Functions.milisecond_to_date(row.doc.reported_date, 'fulldate');
                                         await _repoSite.save(_syncSite);
-                                        outPutInfo["Sites"]["success"] += 1;
-                                    } catch (error: any) {
-                                        outPutInfo["Sites"]["error"] += 1
+                                        outPutInfo["Sites"]["successCount"] += 1;
+                                    } catch (err: any) {
+                                        outPutInfo["Sites"]["errorCount"] += 1;
+                                        outPutInfo["Sites"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
+                                        outPutInfo["Sites"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${siteId}`;
                                     }
                                 }
                             }
@@ -416,7 +420,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                     console.log('No district found !')
                                 }
                                 if (siteId && districtId) {
-                                    if (!outPutInfo.hasOwnProperty("Zones")) outPutInfo["Zones"] = { error: 0, success: 0 };
+                                    if (!outPutInfo.hasOwnProperty("Zones")) outPutInfo["Zones"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' };
                                     try {
                                         const _syncZone = new Zones();
                                         _syncZone.source = dataSource;
@@ -430,9 +434,11 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                         _syncZone.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
                                         _syncZone.reported_full_date = Functions.milisecond_to_date(row.doc.reported_date, 'fulldate');
                                         await _repoZone.save(_syncZone);
-                                        outPutInfo["Zones"]["success"] += 1;
-                                    } catch (error: any) {
-                                        outPutInfo["Zones"]["error"] += 1
+                                        outPutInfo["Zones"]["successCount"] += 1;
+                                    } catch (err: any) {
+                                        outPutInfo["Zones"]["errorCount"] += 1;
+                                        outPutInfo["Zones"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
+                                        outPutInfo["Zones"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.doc._id}`;
                                     }
                                 }
                             }
@@ -455,7 +461,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                         console.log('No district found !')
                                     }
                                     if (siteId && districtId) {
-                                        if (!outPutInfo.hasOwnProperty("Familles")) outPutInfo["Familles"] = { error: 0, success: 0 }
+                                        if (!outPutInfo.hasOwnProperty("Familles")) outPutInfo["Familles"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
                                         try {
                                             const _syncFamily = new Families();
                                             _syncFamily.source = dataSource;
@@ -469,9 +475,11 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                             _syncFamily.site = siteId;
                                             _syncFamily.zone = row.doc.parent._id;
                                             await _repoFamily.save(_syncFamily);
-                                            outPutInfo["Familles"]["success"] += 1;
-                                        } catch (error: any) {
-                                            outPutInfo["Familles"]["error"] += 1
+                                            outPutInfo["Familles"]["successCount"] += 1;
+                                        } catch (err: any) {
+                                            outPutInfo["Familles"]["errorCount"] += 1;
+                                            outPutInfo["Familles"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
+                                            outPutInfo["Familles"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.doc._id}`;
                                         }
                                     }
                                 }
@@ -496,7 +504,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                             console.log('No district found !')
                                         }
                                         if (districtId && siteId) {
-                                            if (!outPutInfo.hasOwnProperty("Patients")) outPutInfo["Patients"] = { error: 0, success: 0, }
+                                            if (!outPutInfo.hasOwnProperty("Patients")) outPutInfo["Patients"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '', }
                                             try {
                                                 const _syncPatient = new Patients();
                                                 _syncPatient.source = dataSource;
@@ -512,9 +520,12 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                                 _syncPatient.zone = row.doc.parent.parent._id;
                                                 _syncPatient.family = row.doc.parent._id;
                                                 await _repoPatient.save(_syncPatient);
-                                                outPutInfo["Patients"]["success"] += 1;
-                                            } catch (error: any) {
-                                                outPutInfo["Patients"]["error"] += 1;
+                                                outPutInfo["Patients"]["successCount"] += 1;
+                                            } catch (err: any) {
+                                                outPutInfo["Patients"]["errorCount"] += 1;;
+                                                outPutInfo["Patients"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
+                                                outPutInfo["Patients"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.doc._id}`;
+                                                console.log(row.doc._id)
                                             }
                                         }
                                     }
@@ -539,7 +550,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                         console.log('No district found !')
                                     }
                                     if (districtId && siteId) {
-                                        if (!outPutInfo.hasOwnProperty("Asc")) outPutInfo["Asc"] = { error: 0, success: 0 };
+                                        if (!outPutInfo.hasOwnProperty("Asc")) outPutInfo["Asc"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' };
                                         try {
                                             const _syncChws = new Chws();
                                             _syncChws.source = dataSource;
@@ -550,19 +561,20 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                             _syncChws.role = row.doc.role;
                                             _syncChws.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
                                             _syncChws.reported_full_date = Functions.milisecond_to_date(row.doc.reported_date, 'fulldate');
-                                            _syncChws.district = districtId ;
+                                            _syncChws.district = districtId;
                                             _syncChws.site = siteId;
                                             _syncChws.zone = row.doc.parent._id;
                                             await _repoChws.save(_syncChws);
-                                            outPutInfo["Asc"]["success"] += 1;
-                                        } catch (error: any) {
-                                            outPutInfo["Asc"]["error"] += 1;
+                                            outPutInfo["Asc"]["successCount"] += 1;
+                                        } catch (err: any) {
+                                            outPutInfo["Asc"]["errorCount"] += 1;
+                                            outPutInfo["Asc"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
+                                            outPutInfo["Asc"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.doc._id}`;
                                         }
                                     }
                                 }
                             }
                         }
-
                     }
 
                     // if (sync.use_SSL_verification !== true) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = undefined;
@@ -572,33 +584,33 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                     // process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = undefined;
                     if (!err.statusCode) err.statusCode = 500;
                     outPutInfo["Message"] = {};
-                    outPutInfo["Message"]["error"] = err.message;
+                    outPutInfo["Message"]["errorElements"] = err.message;
                     resp.status(err.statusCode).json(outPutInfo);
                 }
             });
             process.on('uncaughtException', (err: any) => {
                 if (!err.statusCode) err.statusCode = 500;
                 outPutInfo["Message"] = {}
-                outPutInfo["Message"]["error"] = err.message;
+                outPutInfo["Message"]["errorElements"] = err.message;
                 resp.status(err.statusCode).json(outPutInfo);
             });
             res.on('error', (err: any) => {
                 if (!err.statusCode) err.statusCode = 500;
                 outPutInfo["Message"] = {}
-                outPutInfo["Message"]["error"] = err.message;
+                outPutInfo["Message"]["errorElements"] = err.message;
                 resp.status(err.statusCode).json(outPutInfo);
             });
         }).on('error', (err: any) => {
             if (!err.statusCode) err.statusCode = 500;
             outPutInfo["Message"] = {}
-            outPutInfo["Message"]["error"] = err.message;
+            outPutInfo["Message"]["errorElements"] = err.message;
             resp.status(err.statusCode).json(outPutInfo);
         });
 
     } catch (err: any) {
         if (!err.statusCode) err.statusCode = 500;
         outPutInfo["Message"] = {}
-        outPutInfo["Message"]["error"] = err.message;
+        outPutInfo["Message"]["errorElements"] = err.message;
         resp.status(err.statusCode).json(outPutInfo);
     }
 };
