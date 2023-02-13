@@ -149,8 +149,6 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
 
     req.body['dhis2_host'] = process.env.DHIS_HOST;
 
-    console.log(req.body)
-
     const python = spawn('python3', [basename + '/pythons/thinkmd_weekly_data.py', JSON.stringify(req.body),]);
 
     python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data);});

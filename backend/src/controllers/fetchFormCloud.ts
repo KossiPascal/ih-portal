@@ -306,8 +306,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
 
     var params: CouchDbFetchData = {
         viewName: 'contacts_by_type',
-        startKey: [Functions.date_to_milisecond(req.body.start_date, true)],
-        endKey: [Functions.date_to_milisecond(req.body.end_date, false)],
+        // startKey: [Functions.date_to_milisecond(req.body.start_date, true)],
+        // endKey: [Functions.date_to_milisecond(req.body.end_date, false)],
         medic_host: process.env.CHT_HOST ?? '',
         port: parseInt(process.env.CHT_PORT ?? ''),
         medic_username: process.env.CHT_USER ?? '',
@@ -339,12 +339,14 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                     const dataSource: string = 'Tonoudayo';
 
                     var authorized = {
-                        site: req.body.site == true,
-                        zone: req.body.zone == true,
-                        family: req.body.family == true,
-                        patient: req.body.patient == true,
-                        chw: req.body.chw == true
+                        site: req.body.site,
+                        zone: req.body.zone,
+                        family: req.body.family,
+                        patient: req.body.patient,
+                        chw: req.body.chw
                     };
+
+                    console.log(authorized)
 
                     if (authorized.site) {
                         outDoneLenght++;
