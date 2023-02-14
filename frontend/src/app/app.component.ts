@@ -127,16 +127,20 @@ export class AppComponent implements OnInit {
         this.sw.versionUpdates.subscribe(evt => {
           switch (evt.type) {
             case 'VERSION_DETECTED':
-              console.log(`Downloading new app version: ${evt.version.hash}`);
-              this.currentVersion = evt.version.hash;
+              // console.log(`Downloading new app version: ${evt.version.hash}`);
+              console.log(`Downloading new app version: ${evt.version}`);
+              this.currentVersion = evt.version;
               this.ShowUpdateVersionModal();
               break;
             case 'VERSION_READY':
-              console.log(`Current app version: ${evt.currentVersion.hash}`);
-              console.log(`Last app version: ${evt.latestVersion.hash}`);
+              console.log(`Current app version: ${evt.currentVersion}`);
+              console.log(`Last app version: ${evt.latestVersion}`);
+              break;
+            case 'NO_NEW_VERSION_DETECTED':
+              console.log(`Current app version: '${evt.version}'`);
               break;
             case 'VERSION_INSTALLATION_FAILED':
-              console.log(`Failed to install app version '${evt.version.hash}': ${evt.error}`);
+              console.log(`Failed to install app version '${evt.version}': ${evt.error}`);
               break;
           }
         });
