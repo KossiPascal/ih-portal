@@ -138,6 +138,7 @@ def pathExist(pathName):
 def deleteFile(filePath):
     # check if file exists 
     try:
+        io.open(filePath, **OPEN_KWARGS())
         if os.path.exists(filePath):
             os.remove(filePath)
     except:

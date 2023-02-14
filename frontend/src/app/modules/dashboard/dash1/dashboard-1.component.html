@@ -1,111 +1,137 @@
-<!-- Main content -->
-
-<section class="content">
-  <div class="container-fluid">
-    <div class="card card-warning">
-      <div class="overlay-wrapper">
-        <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i> <div class="text-bold pt-2"> {{initMsg}}</div></div>
-      
-      <div class="card-header">
-        <form [formGroup]="aggradateDataForm" (ngSubmit)="initAllData()" novalidate>
-          <div class="row">
-
-            <!-- <div class="col-sm-2 col-6">
-              <div class="form-group">
-                <label>Date Début</label>
-                <input type="date" class="form-control" formControlName="start_date"/>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="card card-info">
+        <div class="overlay-wrapper">
+          <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i> <div class="text-bold pt-2"> {{initMsg}}</div></div>
+        
+        <div class="card-header">
+          <form [formGroup]="aggradateDataForm" (ngSubmit)="initDataFilted()" novalidate>
+            <div class="row">
+  
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Début</label>
+                  <input type="date" class="form-control" formControlName="start_date"/>
+                </div>
               </div>
+  
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Fin</label>
+                  <input type="date" class="form-control" formControlName="end_date"/>
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>District</label>
+                  <select (change)="genarateSites()" class="form-control" formControlName="districts">
+                    <option value=""></option>
+                    <option *ngFor="let district of Districts$" value="{{district.id}}">
+                      {{ district.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+  
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Site</label>
+                  <select (change)="genarateChws()" class="form-control" formControlName="sites">
+                    <option value=""></option>
+                    <option *ngFor="let site of sites$" value="{{site.id}}">
+                      {{ site.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+  
+              <div class="col-sm-1 col-6">
+                <div class="form-group">
+                  <label>.</label>
+                  <button [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control"> 
+                          OK <span class="fa fa-floppy-o fa-right"></span>
+                  </button>
+                </div>
+              </div>
+  
             </div>
-
-            <div class="col-sm-2 col-6">
-              <div class="form-group">
-                <label>Date Fin</label>
-                <input type="date" class="form-control" formControlName="end_date"/>
-              </div>
-            </div>            -->
-            
-            <!-- <div class="col-sm-2 col-6">
-              <div class="form-group">
-                <label>Source</label>
-                <select (change)="genarateSites()" class="form-control" formControlName="sources" (click)="genarateSites()">
-                  <option value=""></option>
-                  <option *ngFor="let source of sources$" value="{{source}}">
-                    {{formatHostName(source)}}
-                  </option>
-                </select>
-                
-              </div>
-            </div> -->
-
-            <div class="col-sm-2 col-6">
-              <div class="form-group">
-                <label>District</label>
-                <select (change)="genarateSites()" class="form-control" formControlName="districts">
-                  <option value=""></option>
-                  <option *ngFor="let district of Districts$" value="{{district.id}}">
-                    {{ district.name }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-sm-2 col-6">
-              <div class="form-group">
-                <label>Site</label>
-                <select (change)="genarateChws()" class="form-control" formControlName="sites" (click)="genarateChws()">
-                  <option value=""></option>
-                  <option *ngFor="let site of sites$" value="{{site.id}}">
-                    {{ site.name }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-sm-3 col-6">
-              <div class="form-group">
-                <label>ASC</label>
-                <select *ngIf="chws$.length > 0" class="form-control" multiple="multiple" formControlName="chws">
-                  <option value=""></option>
-                  <option *ngFor="let chw of chws$" value="{{chw.id}}">
-                    {{chw.name}}
-                  </option>
-                </select>
-                <select *ngIf="chws$.length == 0"  class="form-control">
-
-                </select>
-              </div>
-            </div>
-
-            <div class="col-sm-1 col-6">
-              <div class="form-group">
-                <label>.</label>
-                <button [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control"> 
-                  <i class="nav-icon fas fa-search"></i>
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </form>
-      </div>
-
-    </div>
-    </div>
-
-    <div class="row card-body">
-      <div class="col-sm-3 col-6" *ngFor="let data of allAggragateData; trackBy:identifyAggragateData">
-        <div class="small-box {{data.color}}">
-          <div class="inner">
-            <h3 style="font-size: 40px;">{{ data.count }}</h3>
-            <p><strong>{{ data.label }}</strong></p>
-          </div>
-          <div class="icon"> <i class="ion {{data.icon}}"></i> </div>
+          </form>
         </div>
+  
+      </div>
       </div>
     </div>
+  </section>  
+  
+  <section *ngIf="bodyData.length > 0" class="content">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <button type="button" (click)="initTable()">Generate Table</button>
+        </h3>
+      </div>
+      <!-- /.card-header -->
+      <div class="card-body">
+        <table id="compare_data" class="table table-bordered table-hover" >
+          <thead>
+            <tr class="bg-primary">
+              <th rowspan="2" style="width: 50px">Code ASC</th>
+              <th rowspan="2" style="width: 150px">Nom ASC</th>
+              <th colspan="2" style="width: 50px">Pcime</th>
+              <th colspan="2" style="width: 50px">Maternel & PF</th>
+              <th colspan="2" style="width: 50px">Consultation</th>
+              <th colspan="2" style="width: 50px">Recherche</th>
+              <th colspan="2" style="width: 50px">Total</th>
+              <th rowspan="2" style="width: 50px">Diff</th>
+              <th rowspan="2" style="width: 50px">Ratio</th>
+            </tr>
+            <tr class="bg-primary">
+              <th style="width: 50px">APPLI</th>
+              <th style="width: 50px">DHIS2</th>
 
-    <br><br>
+              <th style="width: 50px">APPLI</th>
+              <th style="width: 50px">DHIS2</th>
 
-  </div>
-</section>
-<!-- /.content -->
+              <th style="width: 50px">APPLI</th>
+              <th style="width: 50px">DHIS2</th>
+
+              <th style="width: 50px">APPLI</th>
+              <th style="width: 50px">DHIS2</th>
+
+              <th style="width: 50px">APPLI</th>
+              <th style="width: 50px">DHIS2</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of bodyData; trackBy:identifyBodyData">
+              <td class="info" >{{ item.Code }}</td>
+              <td class="info" >{{ item.Name }}</td>
+              <td class="warning">{{ item.Pcime }}</td>
+              <td class="warning">{{ item.PcimeDhis2 }}</td>
+              <td class="primary" >{{ item.MaternellePf }}</td>
+              <td class="primary" >{{ item.MaternellePfDhis2 }}</td>
+              <td class="warning">{{ item.Consultation }}</td>
+              <td class="warning">{{ item.ConsultationDhis }}</td>
+              <td class="primary" >{{ item.Recherche }}</td>
+              <td class="primary" >{{ item.RechercheDhis }}</td>
+              <td class="final">{{ item.Total }}</td>
+              <td class="final">{{ item.TotalDhis }}</td>
+              <td class="line" class=""> <strong>{{ item.TotalDiff }}</strong> </td>
+              <td class="bg-{{ item.Ratio.color }}">{{ item.Ratio.value }} %</td>
+            </tr>
+          </tbody>
+        </table> 
+      </div>
+      <!-- <div class="card-footer clearfix">
+        <ul class="pagination pagination-sm m-0 float-right">
+          <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+          <li class="page-item"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+        </ul>
+      </div> -->
+    </div>
+  </section>

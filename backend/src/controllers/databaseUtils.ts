@@ -2,9 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 import { DataSource, EntityMetadata, In } from "typeorm";
 import { AppDataSource } from "../data-source";
-import { CouchDbFetchDataOptions, Functions, httpHeaders, isNotNull } from "../utils/functions";
-import https from 'https';
-import { ChwUserParams, CouchDbFetchData } from "../utils/appInterface";
+import { httpHeaders} from "../utils/functions";
 import { getChwsDataSyncRepository, getChwsSyncRepository, getDistrictSyncRepository, getFamilySyncRepository, getPatientSyncRepository, getSiteSyncRepository, getZoneSyncRepository } from "../entity/Sync";
 import { getChwsDataWithParams } from "./dataFromDB";
 import { getPatients, getFamilies } from "./orgUnitsFromDB ";
@@ -13,16 +11,35 @@ const request = require('request');
 const fetch = require('node-fetch')
 
 
+export async function databaseEntitiesList(req: Request, res: Response, next: NextFunction) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
+    try {
+        const Connection: DataSource = AppDataSource.manager.connection;
+        const entities: EntityMetadata[] = Connection.entityMetadatas;
+        var entitiesElements:{name:string, table:string}[] = [];
+        for (const entity of entities) {
+            entitiesElements.push({name:entity.name, table:entity.tableName})
+        }
+        return res.status(200).json({ status: 200, data: entitiesElements });
+    } catch (err) {
+        // return next(err);
+        return res.status(201).json({ status: 201, data: err });
+    }
+};
+
+
 export async function truncatePostgresMysqlJsonDatabase(req: Request, res: Response, next: NextFunction) {
+    console.log(req.body)
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
     if (req.body.procide == true) {
         try {
             const Connection: DataSource = AppDataSource.manager.connection;
-            const entities: EntityMetadata[] = Connection.entityMetadatas;
+            const entities:{name:string, table:string}[] = req.body.entities;
             for (const entity of entities) {
                 const repository = await Connection.getRepository(entity.name);
-                await repository.query(`TRUNCATE ${entity.tableName} RESTART IDENTITY CASCADE;`);
+                await repository.query(`TRUNCATE ${entity.table} RESTART IDENTITY CASCADE;`);
             }
             return res.status(200).json({ status: 200, data: 'Done successfully' });
         } catch (err) {
@@ -219,7 +236,7 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
                             if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
                             const data = JSON.parse(body);
                             data.parent._id = req.body.new_parent;
-
+ 
                             // start updating Contact Place Informations
                             request({
                                 url: `https://${process.env.CHT_HOST}/api/v1/people`,

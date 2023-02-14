@@ -13,9 +13,9 @@ export class ConfigService {
         return this.http.get(`${Functions.backenUrl()}/configs`, Functions.customHttpHeaders(this.auth));
     }
 
-    // appVersion(): any {
-    //     return this.http.get(`${Functions.backenUrl()}/configs/appVersion`, Functions.customHttpHeaders(this.auth));
-    // }
+    appVersion(): any {
+        return this.http.get(`${Functions.backenUrl()}/configs/appVersion`, Functions.customHttpHeaders(this.auth));
+    }
 
     NewUserToken(): any {
         if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();

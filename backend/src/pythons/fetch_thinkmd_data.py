@@ -45,16 +45,19 @@ def insertOrUpdateDataToDhis2(data, KWARG):
         return [None, None]
 
 def UploadThinkMdDataToDhis2(KWARG):
-    #get data lenght
-    file0 = open(extractPath("output"+"_"+str(str(KWARG['user']))+".csv"))
-    datalenght = len(list(csv.reader(file0))) -1
-    file0.close()
+    # #get data lenght
+    # file0 = open(extractPath("output"+"_"+str(str(KWARG['user']))+".csv"))
+    # datalenght = len(list(csv.reader(file0))) -1
+    # file0.close()
     
-    #Fecth data
-    file = open(extractPath("output"+"_"+str(KWARG['user'])+".csv"))
-    csvreader = csv.reader(file)
-    headers = next(csvreader)
+    # #Fecth data
+    # file = open(extractPath("output"+"_"+str(KWARG['user'])+".csv"))
+    # csvreader = csv.reader(file)
+    # headers = next(csvreader)
 
+    fileData = getOutPutDataFromFile("output"+"_"+str(KWARG['user']))
+    headers = fileData['head']
+    csvreader = fileData['body']
 
     with createFile(extractFolder(), "thinkMd_output"+"_"+str(KWARG['user'])+"_output") as result:
         result.write("site,reported_date,district,asc_code,total_vad,total_vad_pcime_c,total_suivi_pcime_c,reference_femmes_pf,reference_pcime,reference_femmes_enceinte_postpartum,total_vad_femmes_enceinte,total_vad_femmes_postpartum,total_home_visit,total_diarrhee_pcime_soins,total_paludisme_pcime_soins,total_pneumonie_pcime_soins,total_malnutrition_pcime_soins,prompt_diarrhee_24h_pcime_soins,prompt_diarrhee_48h_pcime_soins,prompt_diarrhee_72h_pcime_soins,prompt_paludisme_24h_pcime_soins,prompt_paludisme_48h_pcime_soins,prompt_paludisme_72h_pcime_soins,prompt_pneumonie_24h_pcime_soins,prompt_pneumonie_48h_pcime_soins,prompt_pneumonie_72h_pcime_soins,total_vad_femme_enceinte_NC_soins,total_vad_femme_postpartum_NC,total_test_de_grossesse_domicile,total_vad_family_planning\n")
@@ -216,7 +219,7 @@ def UploadThinkMdDataToDhis2(KWARG):
 
     generateDataFromFinalFile(KWARG)
 
-    file.close()
+    # file.close()
     try:
         deleteFile(extractPath("output"+"_"+str(KWARG['user'])+".csv"))
     except:
@@ -255,13 +258,18 @@ def flushThinkMdDataToDhis2(KWARG):
         
         #################################################################################################""
 
-        file = open(extractPath("brut"+"_"+str(KWARG['user'])+".csv"))
-        csvreader = csv.reader(file)
-        header = next(csvreader)
+        # file = open(extractPath("brut"+"_"+str(KWARG['user'])+".csv"), 'r')
+        # csvreader = csv.reader(file)
+        # header = next(csvreader)
+        fileData = getOutPutDataFromFile("brut"+"_"+str(KWARG['user']))
+        headers = fileData['head']
+        csvreader = fileData['body']
+
         allData = []
         code = []
         title = []
-        for row in csvreader:
+        # for row in csvreader:
+        for row in fileData['body']:
             allData.append(row)
             if row[0] not in code:
                 code.append(row[0])
@@ -286,7 +294,6 @@ def flushThinkMdDataToDhis2(KWARG):
                         old+=','+getData(allData,c,j)
                     old+='\n'
                     result.write(old)
-            file.close()
 
             #########################################################################################
             

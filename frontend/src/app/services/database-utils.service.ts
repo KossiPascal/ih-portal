@@ -15,7 +15,11 @@ export class DatabaseUtilService {
         return this.http.post(`${Functions.backenUrl()}/database/couchdb/update_user_facility_contact_place`, data, Functions.customHttpHeaders(this.auth));
     }
 
-    truncateDatabase(data: any): any {
+    getDatabaseEntities(): any {
+        return this.http.get(`${Functions.backenUrl()}/database/postgres/entities`, Functions.customHttpHeaders(this.auth));
+    }
+
+    truncateDatabase(data: {procide:boolean, entities:{name:string, table:string}[]}): any {
         return this.http.post(`${Functions.backenUrl()}/database/postgres/truncate`, data, Functions.customHttpHeaders(this.auth));
     }
 

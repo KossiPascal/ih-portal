@@ -12,7 +12,7 @@
     <div class="modal-dialog">
       <div class="modal-content bg-default">
         <div class="modal-header">
-          <strong>Mise à jour disponible</strong>
+          <strong>Mise à jour de l'Application</strong>
           <span id="active-update-modal" (click)="ShowUpdateVersionModal()" data-toggle="modal"
             data-target="#modal-update-version"></span>
   
@@ -21,12 +21,12 @@
           </button>
         </div>
         <div class="modal-body">
-          <p>Une version mise à jour du site est disponible. Mettez à jour pour obtenir la nouvelle version :
-            {{currentVersion}}</p>
+          <h3>Une nouvelle version de l'application est disponible.</h3>
+          <p>Voulez-vous procéder à la mise à jour ?</p>
         </div>
         <div class="modal-footer justify-content-between">
-          <button id="close-update-modal" type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
-          <button (click)="UpdateVersion()" type="button" class="btn btn-info swalDefaultSuccess">Mettre à jour</button>
+          <button id="close-update-modal"  (click)="CancelUpdateVersion()" type="button" class="btn btn-default" data-dismiss="modal">Non annuler</button>
+          <button (click)="UpdateVersion()" type="button" class="btn btn-info swalDefaultSuccess">Oui mettre à jour</button>
         </div>
       </div>
       <!-- /.modal-content -->
@@ -1067,6 +1067,8 @@
             </ul>
           </nav>
           <!-- /.sidebar-menu -->
+
+<h3 *ngIf="appVersionExist()" style="margin-top: 50px; text-align: center ;font-size: large; color: white;">Version: {{ appVersion }} </h3>
         </div>
         <!-- /.sidebar -->
       </aside>

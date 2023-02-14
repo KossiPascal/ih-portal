@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Districts, Chws, Sites, Zones, FilterParams, MedicMobileData } from '@ih-app/models/Sync';
+import { Districts, Chws, Sites, Zones, FilterParams, ChwsDataFormDb } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
 import { DatabaseUtilService } from '@ih-app/services/database-utils.service';
 import { SyncService } from '@ih-app/services/sync.service';
@@ -20,30 +20,36 @@ export class DatabaseUtilsComponent implements OnInit {
 
   responseMsg: string = '';
   dataListToDeleteForm!: FormGroup;
-
-  foundedDataToDelete:any[] = []
-  selectedListToBeDelete: { _deleted:boolean, _id: string, _rev: string }[] = [];
-
+  foundedDataToDelete: any[] = []
+  selectedListToBeDelete: { _deleted: boolean, _id: string, _rev: string }[] = [];
 
   Districts$: Districts[] = [];
   Sites$: Sites[] = [];
   Zones$: Zones[] = [];
   Chws$: Chws[] = [];
 
-
   sites$: Sites[] = [];
   zones$: Zones[] = [];
   chws$: Chws[] = [];
 
-  types$: string[] = [
-    'data', 'patients', 'families'
-  ]
-
+  types$: string[] = ['data', 'patients', 'families']
 
   constMsg: string = "Loading...";
   initMsg: string = this.constMsg;
 
   isLoading!: boolean;
+  isEntityLoading!: boolean;
+  EntitiesList$: { name: string, table: string }[] = [];
+  EntitiesForm!: FormGroup;
+  initEntity: string[] = [];
+
+  createEntitiesFilterFormGroup(): FormGroup {
+    return new FormGroup({
+      entities: new FormControl([], [Validators.required]),
+    });
+  }
+
+
 
 
   dataListToDeleteFilterFormGroup(): FormGroup {
@@ -63,6 +69,7 @@ export class DatabaseUtilsComponent implements OnInit {
   constructor(private sync: SyncService, private auth: AuthService, private dbUtils: DatabaseUtilService, private router: Router) { }
 
   ngOnInit(): void {
+    this.EntitiesForm = this.createEntitiesFilterFormGroup();
     this.dataListToDeleteForm = this.dataListToDeleteFilterFormGroup();
     this.initAllData();
   }
@@ -70,20 +77,27 @@ export class DatabaseUtilsComponent implements OnInit {
 
   async initAllData() {
     this.isLoading = true;
-    this.initMsg = 'Chargement des Districts ...';
-    this.sync.getDistrictsList().subscribe(async (_d$: { status: number, data: Districts[] }) => {
-      if (_d$.status == 200) this.Districts$ = _d$.data;
-      this.initMsg = 'Chargement des Sites ...';
-      this.sync.getSitesList().subscribe(async (_s$: { status: number, data: Sites[] }) => {
-        if (_s$.status == 200) this.Sites$ = _s$.data;
-        this.initMsg = 'Chargement des Zones ...';
-        this.sync.getZonesList().subscribe(async (_z$: { status: number, data: Zones[] }) => {
-          if (_z$.status == 200) this.Zones$ = _z$.data;
-          this.initMsg = 'Chargement des ASC ...';
-          this.sync.getChwsList().subscribe(async (_c$: { status: number, data: Chws[] }) => {
-            if (_c$.status == 200) this.Chws$ = _c$.data;
-            // this.initDataFilted();
-            this.isLoading = false;
+    this.initMsg = 'Chargement des Entities ...';
+    this.dbUtils.getDatabaseEntities().subscribe(async (res: { status: number, data: any }) => {
+      if (res.status == 200) this.EntitiesList$ = res.data;
+      this.initMsg = 'Chargement des Districts ...';
+      this.sync.getDistrictsList().subscribe(async (_d$: { status: number, data: Districts[] }) => {
+        if (_d$.status == 200) this.Districts$ = _d$.data;
+        this.initMsg = 'Chargement des Sites ...';
+        this.sync.getSitesList().subscribe(async (_s$: { status: number, data: Sites[] }) => {
+          if (_s$.status == 200) this.Sites$ = _s$.data;
+          this.initMsg = 'Chargement des Zones ...';
+          this.sync.getZonesList().subscribe(async (_z$: { status: number, data: Zones[] }) => {
+            if (_z$.status == 200) this.Zones$ = _z$.data;
+            this.initMsg = 'Chargement des ASC ...';
+            this.sync.getChwsList().subscribe(async (_c$: { status: number, data: Chws[] }) => {
+              if (_c$.status == 200) this.Chws$ = _c$.data;
+              // this.initDataFilted();
+              this.isLoading = false;
+            }, (err: any) => {
+              this.isLoading = false;
+              console.log(err.error);
+            });
           }, (err: any) => {
             this.isLoading = false;
             console.log(err.error);
@@ -103,31 +117,48 @@ export class DatabaseUtilsComponent implements OnInit {
   }
 
 
+  EntitiesSelectedList(): { name: string, table: string }[] {
+    var entitiesSelected: { name: string, table: string }[] = [];
+    const entities: string[] = Functions.returnEmptyArrayIfNul(this.EntitiesForm.value.entities);
+    this.initEntity = entities;
+    for (let i = 0; i < this.EntitiesList$.length; i++) {
+      const entity = this.EntitiesList$[i];
+      if (entities.includes(entity.name)) entitiesSelected.push(entity)
+    }
+    return entitiesSelected;
+  }
+
+
   TruncateBd() {
-    this.initMsg = this.constMsg;
-    this.isLoading = true;
-    this.dbUtils.truncateDatabase({ procide: true }).subscribe(async (res: { status: number, data: any }) => {
-      this.responseMsg = res.data.toString();
-      // if (res.status == 200) console.log(res.data);
-      this.isLoading = false;
-    }, (err: any) => {
-      console.log(err.error);
-      this.isLoading = false;
-      this.responseMsg = err.toString();
-    });
+    const selectedEntites = this.EntitiesSelectedList();
+    if (selectedEntites.length > 0) {
+      this.responseMsg = '';
+      this.initMsg = this.constMsg;
+      this.isEntityLoading = true;
+      this.dbUtils.truncateDatabase({ procide: true, entities: selectedEntites }).subscribe(async (res: { status: number, data: any }) => {
+        this.responseMsg = res.data.toString();
+        if (res.status == 200) this.initEntity = [];
+        this.isEntityLoading = false;
+      }, (err: any) => {
+        console.log(err.error);
+        this.isEntityLoading = false;
+        this.responseMsg = err.toString();
+      });
+    }
   }
 
   getListOfDataToDeleteFromCouchDb() {
     this.initMsg = this.constMsg;
-    this.isLoading = true;      
+    this.isLoading = true;
     this.foundedDataToDelete = [];
     this.selectedListToBeDelete = [];
+    this.responseMsg = '';
     this.dbUtils.getDataToDeleteFromCouchDb(this.ParamsToFilter()).subscribe(async (res: { status: number, data: any }) => {
       if (res.status == 200) {
         this.foundedDataToDelete = res.data;
         for (let d = 0; d < this.foundedDataToDelete.length; d++) {
           const data = this.foundedDataToDelete[d];
-          this.selectedListToBeDelete.push({ _deleted:true, _id: data.id, _rev: data.rev })
+          this.selectedListToBeDelete.push({ _deleted: true, _id: data.id, _rev: data.rev })
         }
       } else {
         this.responseMsg = res.data;
@@ -142,6 +173,7 @@ export class DatabaseUtilsComponent implements OnInit {
 
   deleteSelectedDataFromCouchDb() {
     this.initMsg = this.constMsg;
+    this.responseMsg = '';
     if (this.selectedListToBeDelete.length > 0) {
       this.dbUtils.deleteDataFromCouchDb(this.selectedListToBeDelete, this.dataListToDeleteForm.value.type).subscribe(async (res: { status: number, data: any }) => {
         if (res.status == 200) {

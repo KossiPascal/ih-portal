@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AggragateData, Chws, Families, FilterParams, MedicMobileData, Patients, Sites, Zones } from '@ih-app/models/Sync';
+import { AggragateData, Chws, Families, FilterParams, ChwsDataFormDb, Patients, Sites, Zones } from '@ih-app/models/Sync';
 import { SyncService } from '@ih-app/services/sync.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ChtOutPutData, DataIndicators } from '@ih-app/models/DataAggragate';
@@ -105,7 +105,7 @@ export class Dashboard4Component implements OnInit {
     `fp_follow_up_renewal`,
   ]
 
-  ChwsDataFromDb$: MedicMobileData[] = [];
+  ChwsDataFromDb$: ChwsDataFormDb[] = [];
   sources$: string[] = []
 
   Chws$: Chws[] = [];
@@ -217,7 +217,7 @@ export class Dashboard4Component implements OnInit {
       this.initDate.start_date = startDate;
       this.initDate.end_date = endDate;
       this.initMsg = `Chargement des données du ${DateUtils.getDateInFormat(paramsTopass.start_date, 0, 'fr')} au ${DateUtils.getDateInFormat(paramsTopass.end_date, 0, 'fr')}`;
-      this.sync.getAllChwsDataWithParams(paramsTopass).subscribe((response: MedicMobileData[]) => {
+      this.sync.getAllChwsDataWithParams(paramsTopass).subscribe((response: ChwsDataFormDb[]) => {
         this.ChwsDataFromDb$ = response;
         this.getAllAboutData(paramsTopass);
       }, (err: any) => {
@@ -286,7 +286,7 @@ export class Dashboard4Component implements OnInit {
       }
 
       for (let index = 0; index < this.ChwsDataFromDb$!.length; index++) {
-        const data: MedicMobileData = this.ChwsDataFromDb$[index];
+        const data: ChwsDataFormDb = this.ChwsDataFromDb$[index];
 
         if (data != null) {
           const form = data.form;

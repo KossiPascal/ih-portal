@@ -22,20 +22,18 @@
                 <label>Date Fin</label>
                 <input type="date" class="form-control" formControlName="end_date"/>
               </div>
-            </div>           
-            
+            </div>
+
             <div class="col-sm-2 col-6">
               <div class="form-group">
-                <label>Source</label>
-                <select *ngIf="sources$.length > 0" (change)="genarateSites()" class="form-control" multiple="multiple" formControlName="sources">
-                  <!-- <option value="">Select All</option> -->
-                  <option *ngFor="let source of sources$" value="{{source}}">
-                    {{formatHostName(source)}}
+                <label>District</label>
+                <select *ngIf="Districts$.length > 0" (change)="genarateSites()" class="form-control" multiple="multiple" formControlName="districts">
+                  <option value=""></option>
+                  <option *ngFor="let dist of Districts$" value="{{dist.id}}">
+                    {{ dist.name }}
                   </option>
                 </select>
-                <select *ngIf="sources$.length == 0"  class="form-control">
-
-                </select>
+                <select *ngIf="Districts$.length == 0"  class="form-control"></select>
               </div>
             </div>
 
@@ -43,33 +41,41 @@
               <div class="form-group">
                 <label>Site</label>
                 <select *ngIf="sites$.length > 0" (change)="genarateChws()" class="form-control" multiple="multiple" formControlName="sites">
-                  <!-- <option value="">Select All</option> -->
+                  <option value=""></option>
                   <option *ngFor="let site of sites$" value="{{site.id}}">
                     {{ site.name }}
                   </option>
                 </select>
-                <select *ngIf="sites$.length == 0"  class="form-control">
-
-                </select>
+                <select *ngIf="sites$.length == 0"  class="form-control"></select>
               </div>
             </div>
 
-            <div class="col-sm-3 col-6">
+            <div class="col-sm-2 col-6">
               <div class="form-group">
                 <label>ASC</label>
                 <select *ngIf="chws$.length > 0" class="form-control" multiple="multiple" formControlName="chws">
-                  <!-- <option value="">Select All</option> -->
+                  <option value=""></option>
                   <option *ngFor="let chw of chws$" value="{{chw.id}}">
                     {{chw.name}}
                   </option>
                 </select>
-                <select *ngIf="chws$.length == 0"  class="form-control">
-
+                <select *ngIf="chws$.length == 0"  class="form-control"></select>
+              </div>
+            </div>           
+            
+            <div *ngIf="Sources$.length > 0" class="col-sm-2 col-6">
+              <div class="form-group">
+                <label>Source</label>
+                <select class="form-control" formControlName="sources">
+                  <option value=""></option>
+                  <option *ngFor="let source of Sources$" value="{{source}}">
+                    {{ source }}
+                  </option>
                 </select>
               </div>
             </div>
 
-            <div class="col-sm-1 col-6">
+            <div class="col-sm-2 col-6">
               <div class="form-group">
                 <label>.</label>
                 <button [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control"> 
@@ -98,9 +104,9 @@
 
     <br><br> -->
 
-    <div class="row card-body">
+    <div *ngIf="allAggragateData.length > 0" class="row card-body">
       <div class="col-sm-3 col-6" *ngFor="let data of allAggragateData; trackBy:identifyAggragateData">
-        <div class="small-box {{data.color}}">
+        <div style="border: 1px solid black;" class="small-box {{data.color}}">
           <div class="inner">
             <h3 style="font-size: 40px;">{{ data.count }}</h3>
             <p><strong>{{ data.label }}</strong></p>
@@ -109,6 +115,10 @@
           <!-- <a [routerLink]="data.detailUrl" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> -->
         </div>
       </div>
+    </div>
+    <div  *ngIf="allAggragateData.length <= 0 && ChwsDataFromDbError != ''" class="row card-body">
+      <div class="col-sm-3 col-6"> {{ ChwsDataFromDbError }} </div>
+
     </div>
 
     <br><br>

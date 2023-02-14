@@ -8,7 +8,6 @@ require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
 
 
 export async function getChwsDataWithParams(req: Request, res: Response, next: NextFunction) {
-
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
 
@@ -28,8 +27,7 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
                 zone: isNotNull(req.body.zones) ? { id: In(req.body.zones) } : undefined,
                 chw: isNotNull(req.body.chws) ? { id: In(req.body.chws) } : undefined
             }
-        }
-        );
+        });
         if (!allSync) return res.status(201).json({ status: 201, data: 'Not data found with parametter!' });
         return res.status(200).json({ status: 200, data: allSync });
     }

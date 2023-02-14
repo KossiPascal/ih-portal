@@ -35,11 +35,11 @@ export class AppComponent implements OnInit {
 
   appLogo: any = this.auth.appLogoPath()
   userData: User | null = this.auth.userValue()
+  checkForAppNewVersion: boolean = true;
 
 
   @HostBinding('attr.app-version')
-  appVersion: any = localStorage.getItem('appVersion');
-  currentVersion: any;
+  appVersion: any;
   updateSubscription?: Subscription;
 
   constructor(private store: AppStorageService, private conf: ConfigService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private sw: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
@@ -63,6 +63,7 @@ export class AppComponent implements OnInit {
     this.isAdmin = this.roles.isAdmin();
     this.isSuperUser = this.roles.isSuperUser();
     const appTitle = this.titleService.getTitle();
+    this.checkForAppNewVersion = true;
 
     this.router
       .events.pipe(
@@ -88,6 +89,7 @@ export class AppComponent implements OnInit {
     window.addEventListener('online', this.updateOnlineStatus.bind(this));
     window.addEventListener('offline', this.updateOnlineStatus.bind(this));
     this.checkForUpdates();
+    this.appVersion = localStorage.getItem('appVersion');
   }
 
 
@@ -100,28 +102,36 @@ export class AppComponent implements OnInit {
   }
 
   UpdateVersion() {
-    localStorage.setItem('appVersion', this.currentVersion);
-    this.clickModal('close-update-modal');
-    window.location.reload();
+    this.conf.appVersion().subscribe((newVersion: any) => {
+        this.ShowUpdateVersionModal()
+        localStorage.setItem('appVersion', newVersion);
+        this.appVersion = newVersion;
+        this.clickModal('close-update-modal');
+        window.location.reload();
+    }, (err: any) => { console.log(err.error) });
+  }
+
+  CancelUpdateVersion(){
+    this.checkForAppNewVersion = false;
+  }
+
+  appVersionExist(): boolean {
+    var nullField: any[] = [undefined, 'undefined', null, 'null', ''];
+    return !nullField.includes(this.appVersion);
   }
 
 
   private async checkForUpdates() {
     console.log('Service Worker is Enable: ', this.sw.isEnabled);
-    if (this.sw.isEnabled && this.auth.isLoggedIn()) this.checkForAvailableVersion();
-    interval(300000)
-      .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn()))
+    if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion();
+    interval(1000)
+      .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
       .subscribe(() => {
         this.sw.checkForUpdate().then((updateFound) => {
-          if (updateFound) {
-            console.log('A new version is available.');
-            this.checkForAvailableVersion();
-          }
+          if (updateFound) this.checkForAvailableVersion();
         });
       });
   }
-
-
 
   private checkForAvailableVersion(): void {
     this.sw.activateUpdate().then((activate) => {
@@ -130,24 +140,22 @@ export class AppComponent implements OnInit {
           switch (evt.type) {
             case 'VERSION_DETECTED':
               // console.log(`Downloading new app version: ${evt.version.hash}`);
-              console.log(`Downloading new app version: ${evt.version}`);
-              this.currentVersion = evt.version;
               this.ShowUpdateVersionModal();
               break;
             case 'VERSION_READY':
-              console.log(`Current app version: ${evt.currentVersion}`);
-              console.log(`Last app version: ${evt.latestVersion}`);
+              // console.log(`Current app version: ${evt.currentVersion.hash}`);
+              // console.log(`Last app version: ${evt.latestVersion.hash}`);
               break;
             case 'NO_NEW_VERSION_DETECTED':
-              console.log(`Current app version: '${evt.version}'`);
+              // console.log(`Current app version: '${evt.version.hash}'`);
               break;
             case 'VERSION_INSTALLATION_FAILED':
-              console.log(`Failed to install app version '${evt.version}': ${evt.error}`);
+              // console.log(`Failed to install app version '${evt.version.hash}': ${evt.error}`);
               break;
           }
         });
       } else {
-        console.log('Service Worker for Update is Inactive');
+        // console.log('Service Worker for Update is Inactive');
       }
     });
   }

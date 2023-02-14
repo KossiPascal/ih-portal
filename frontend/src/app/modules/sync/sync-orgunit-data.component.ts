@@ -156,8 +156,8 @@ export class SyncOrgUnitDataComponent implements OnInit {
     const sites: string[] = Functions.returnEmptyArrayIfNul(this.dhis2ChwsDataForm.value.sites);
 
     this.tab6_messages = [];
-    var i:number = 0;
     this.loading6 = true;
+    var resp = [];
 
     for (let ou = 0; ou < sites.length; ou++) {
       await this.sync.syncDhis2ChwsData({
@@ -170,7 +170,8 @@ export class SyncOrgUnitDataComponent implements OnInit {
         password:this.dhis2ChwsDataForm.value.password
       }).subscribe((response: OrgUnitImport) => {
         this.tab6_messages.push(response);
-        this.loading6 = false;
+        resp.push('Ok');
+        if (resp.length == sites.length) this.loading6 = false;
         return;
         // console.log(response);
       }, (err: any) => {

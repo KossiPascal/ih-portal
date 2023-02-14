@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { ErrorHandlerService } from "./error-handler.service";
-import { Chws, Dhis2Sync, Families, FilterParams, MedicMobileData, Patients, Sites, Sync, Zones } from "@ih-app/models/Sync";
+import { Chws, Dhis2Sync, Families, FilterParams, ChwsDataFormDb, Patients, Sites, Sync, Zones } from "@ih-app/models/Sync";
 import { Router } from "@angular/router";
 import { DateUtils, Functions } from '@ih-app/shared/functions';
 import { AuthService } from "./auth.service";
@@ -58,7 +58,7 @@ export class SyncService {
                 await this.db.createOrUpdate(this.db.patients, PatientsList[p]);
               }
 
-              this.getAllChwsDataWithParams().subscribe(async (data: MedicMobileData[]) => {
+              this.getAllChwsDataWithParams().subscribe(async (data: ChwsDataFormDb[]) => {
                 for (let dt = 0; dt < data.length; dt++) {
                   await this.db.createOrUpdate(this.db.mobileData, data[dt]);
                 }

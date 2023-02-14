@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { DataList, TodoItem, TodoList } from "@ih-app/models/IndexDb";
-import { Sites, Zones, Families, Patients, Chws, MedicMobileData } from "@ih-app/models/Sync";
+import { Sites, Zones, Families, Patients, Chws, ChwsDataFormDb } from "@ih-app/models/Sync";
 import { User } from "@ih-app/models/User";
 import { Functions } from "@ih-app/shared/functions";
 import Dexie, { Table } from 'dexie';
@@ -23,7 +23,7 @@ export class IndexDbService extends Dexie {
     public zones!: Table<Zones, string>;
     public families!: Table<Families, string>;
     public patients!: Table<Patients, string>;
-    public mobileData!: Table<MedicMobileData, string>;
+    public mobileData!: Table<ChwsDataFormDb, string>;
     
     public chws!: Table<Chws, string>;
 

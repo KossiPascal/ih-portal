@@ -122,7 +122,7 @@ export interface FilterParams {
   user?:string
 }
 
-export interface MedicMobileData {
+export interface ChwsDataFormDb {
   id: string
   rev: string
   source: string
@@ -130,6 +130,7 @@ export interface MedicMobileData {
   patient_id: string
   family_id: string
   fields: any
+  district: Districts
   site: Sites
   zone: Zones
   chw: Chws

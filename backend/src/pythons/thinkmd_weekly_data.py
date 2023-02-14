@@ -56,9 +56,14 @@ def getThinkMdWeeklyDataFromDhis2(ARGS):
         ###############################################################################
 
 
-        file = open(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
-        csvreader = csv.reader(file)
-        header = next(csvreader)
+        # file = open(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
+        # csvreader = csv.reader(file)
+        # header = next(csvreader)
+
+        fileData = getOutPutDataFromFile("week_reports_"+str(ARGS['user']))
+        headers = fileData['head']
+        csvreader = fileData['body']
+
         allData = []
         chwsFounded = {}
         allChws = getChwsFromDhis2(ARGS)
@@ -114,7 +119,7 @@ def getThinkMdWeeklyDataFromDhis2(ARGS):
                             old+='\n'
                         result.write(old)
                         oldOrgUnitLine = newOrgUnitLine
-            file.close()
+            # file.close()
     except Exception as err :
         outPutData['Error'] +=1
         if 'server_error' not in outPutData['ErrorMsg']:
@@ -138,10 +143,17 @@ def generateThinkMdWeeklyData(ARGS):
 
 
 def getMedicWeeklyData(ARGS, data_type="TotalVad"):
-    if pathExist(extractPath("week_reports_"+str(ARGS['user'])+".csv")):
-        dFile = open(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
-        dCsvreader = csv.reader(dFile)
-        dHeader = next(dCsvreader)
+
+    fileName = "week_reports_"+str(ARGS['user'])
+
+    if pathExist(extractPath(fileName +".csv")):
+        # dFile = open(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
+        # dCsvreader = csv.reader(dFile)
+        # dHeader = next(dCsvreader)
+
+        fileData = getOutPutDataFromFile(fileName)
+        dHeader = fileData['head']
+        dCsvreader = fileData['body']
         AllSelectedDates = []
         for row in dCsvreader:
             for ddDate in ARGS['weekly_Choosen_Dates']:
