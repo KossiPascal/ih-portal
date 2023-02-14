@@ -136,6 +136,11 @@
                                 </div>
                             </div>
                             <div class="col-sm-5">
+                                
+                                <div *ngIf="tab1_messages_error != null">
+                                    {{ tab1_messages_error }} <br>
+                                </div>
+
                                 <div *ngFor="let item of tab1_messages?.dataToSend?.Dhis2Import| keyvalue">
                                     {{item.key}}:{{item.value}} <br>
                                 </div>
@@ -493,6 +498,11 @@
                             </div>
 
                             <div class="col-sm-5">
+                                
+                                <div *ngIf="tab4_messages_error!=null">
+                                    {{ tab4_messages_error }} <br>
+                                </div>
+
                                 <div *ngFor="let item of tab4_messages?.dataToSend?.Dhis2Import| keyvalue">
                                     {{item.key}}:{{item.value}} <br>
                                 </div>

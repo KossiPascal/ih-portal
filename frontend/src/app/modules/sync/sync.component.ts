@@ -26,8 +26,10 @@ export class SyncComponent implements OnInit {
   ihChtToDhis2Form!: FormGroup;
   ChtThinkMdWeeklyForm!: FormGroup;
   tab1_messages: DataFromPython | null = null;
+  tab1_messages_error: string | null = null;
   tab3_messages: DataFromPython | null = null;
   tab4_messages: DataFromPython | null = null;
+  tab4_messages_error: string | null = null;
   dates: moment.Moment[] = [];
   weekly_Choosen_Dates: string[] = [];
   is_weekly_date_error: boolean = false;
@@ -195,13 +197,18 @@ export class SyncComponent implements OnInit {
       this.start_date_error = false;
       this.loading1 = true;
       this.tab1_messages = null;
+      this.tab1_messages_error = null;
       // this.thinkmdToDhis2Form.value['useToken'] = true;
       this.sync
         .thinkmdToDhis2Script(this.thinkmdToDhis2Form.value).subscribe((response: any) => {
           this.loading1 = false;
-          this.tab1_messages = JSON.parse(response);
+          try {
+            this.tab1_messages = JSON.parse(response);
+          } catch (error) {
+            this.tab1_messages_error = response.toString();
+          }
           // console.log(response);
-        }, (err: any) => { this.loading1 = false; this.tab1_messages = err.message; console.log(err.error) });
+        }, (err: any) => { this.loading1 = false; this.tab1_messages_error = err.toString(); console.log(err.error) });
 
     }
   }
@@ -230,11 +237,16 @@ export class SyncComponent implements OnInit {
       this.weekly_date_error_Msg = '';
       this.loading4 = true;
       this.tab4_messages = null;
+      this.tab4_messages_error = null;
       this.sync.syncThinkMdWeeklyChwsData(this.ChtThinkMdWeeklyForm.value).subscribe((response: any) => {
         this.loading4 = false;
-        this.tab4_messages = JSON.parse(response);
+        try {
+          this.tab4_messages = JSON.parse(response);
+        } catch (error) {
+          this.tab4_messages_error = response.toString();
+        }
         // console.log(response);
-      }, (err: any) => { this.loading4 = false; this.tab4_messages = err.message; console.log(err.error) });
+      }, (err: any) => { this.loading4 = false; this.tab4_messages_error = err.toString(); console.log(err.error) });
     } else {
       this.is_weekly_date_error = true;
       if (this.weekly_Choosen_Dates.length <= 1) {
