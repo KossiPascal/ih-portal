@@ -113,9 +113,11 @@ export class AppComponent implements OnInit {
       .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn()))
       .subscribe(() => {
         this.sw.checkForUpdate().then((updateFound) => {
-          console.log(updateFound ? 'A new version is available.' : 'Already on the latest version.');
+          if (updateFound) {
+            console.log('A new version is available.');
+            this.checkForAvailableVersion();
+          }
         });
-        this.checkForAvailableVersion();
       });
   }
 
