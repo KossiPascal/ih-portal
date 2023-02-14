@@ -37,10 +37,11 @@ def insertOrUpdateDataToDhis2(data, KWARG):
             r = ih_dhis_api.post("events", json=json)
             outPutData['Dhis2Import']['Created'] += 1
             return [str(r.status_code), 'Created']
-    except:
+    except Exception as err:
         outPutData['Dhis2Import']['ErrorCount'] +=1
         if outPutData['Dhis2Import']['ErrorMsg'] == None:
-            outPutData['Dhis2Import']['ErrorMsg'] = "Erreur lors de l'importation des données dans le DHIS2"
+            # outPutData['Dhis2Import']['ErrorMsg'] = "Erreur lors de l'importation des données dans le DHIS2"
+            outPutData['Dhis2Import']['ErrorMsg'] = " "+str(err)
         return [None, None]
 
 def UploadThinkMdDataToDhis2(KWARG):
@@ -303,10 +304,11 @@ def flushThinkMdDataToDhis2(KWARG):
             outPutData['Error'] +=1
             if 'noDataOnApp' not in outPutData['ErrorMsg']:
                 outPutData['ErrorMsg']['noDataOnApp'] = "Data was not found on ThinkMd for this periode"
-    except:
+    except Exception as err:
         outPutData['Error'] +=1
         if 'server_error' not in outPutData['ErrorMsg']:
-            outPutData['ErrorMsg']['server_error'] = " Can not connect to server to get Data. Check your Connection or informations you provided !"
+            # outPutData['ErrorMsg']['server_error'] = " Can not connect to server to get Data. Check your Connection or informations you provided !"
+            outPutData['ErrorMsg']['server_error'] = " "+ str(err) 
 
         generateDataFromFinalFile(KWARG)
 

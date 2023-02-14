@@ -9,7 +9,6 @@ import { AuthInterceptorService } from '@ih-services/auth-interceptor.service';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '@ih-environments/environment';
-import { CheckForUpdateService } from '@ih-services/check-for-update.service';
 import { OnlineService } from '@ih-services/detecting-online.service';
 import { IndexDbItemListComponent } from './modules/index_db/indexdb_items.component';
 
@@ -107,7 +106,6 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorService, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-    CheckForUpdateService,
     OnlineService,
     { provide: MAT_DATE_LOCALE, useValue: 'fr-FR' },
     { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE] },

@@ -115,10 +115,11 @@ def getThinkMdWeeklyDataFromDhis2(ARGS):
                         result.write(old)
                         oldOrgUnitLine = newOrgUnitLine
             file.close()
-    except:
+    except Exception as err :
         outPutData['Error'] +=1
         if 'server_error' not in outPutData['ErrorMsg']:
-            outPutData['ErrorMsg']['server_error'] = " Can not connect to ThinkMd server to get Data. Check your Connection or informations you provided !"
+            # outPutData['ErrorMsg']['server_error'] = " Can not connect to ThinkMd server to get Data. Check your Connection or informations you provided !"
+            outPutData['ErrorMsg']['server_error'] = " "+str(err)
 
     generateThinkMdWeeklyData(ARGS)
     # getMedicWeeklyData(ARGS)
@@ -136,80 +137,81 @@ def generateThinkMdWeeklyData(ARGS):
     print(str(outPutData).replace("'", '"'))
 
 
-# def getMedicWeeklyData(ARGS, data_type="TotalVad"):
-#     if pathExist(extractPath("week_reports_"+str(ARGS['user'])+".csv")):
-#         dFile = open(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
-#         dCsvreader = csv.reader(dFile)
-#         dHeader = next(dCsvreader)
-#         AllSelectedDates = []
-#         for row in dCsvreader:
-#             for ddDate in ARGS['weekly_Choosen_Dates']:
-#                 dDate = str(ddDate).replace('-','')
-#                 if dDate == row[2] and ddDate not in AllSelectedDates:
-#                     AllSelectedDates.append(ddDate)
+def getMedicWeeklyData(ARGS, data_type="TotalVad"):
+    if pathExist(extractPath("week_reports_"+str(ARGS['user'])+".csv")):
+        dFile = open(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
+        dCsvreader = csv.reader(dFile)
+        dHeader = next(dCsvreader)
+        AllSelectedDates = []
+        for row in dCsvreader:
+            for ddDate in ARGS['weekly_Choosen_Dates']:
+                dDate = str(ddDate).replace('-','')
+                if dDate == row[2] and ddDate not in AllSelectedDates:
+                    AllSelectedDates.append(ddDate)
 
-#         deleteFile(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
+        deleteFile(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
 
-#     try:
-#         for anyDate in AllSelectedDates:
-#             # print(anyDate, ' ==> ' ,getNexSundayDate(anyDate))
-#             ARGS['start_date'] = anyDate
-#             ARGS['end_date'] = getNexSundayDate(anyDate)
+    # try:
+    #     for anyDate in AllSelectedDates:
+    #         # print(anyDate, ' ==> ' ,getNexSundayDate(anyDate))
+    #         ARGS['start_date'] = anyDate
+    #         ARGS['end_date'] = getNexSundayDate(anyDate)
 
-#             flushMedicDataToDhis2(ARGS,"medic_week_reports_"+str(indexOf(AllSelectedDates,anyDate))+"_"+str(ARGS['user']),data_type)
+    #         flushMedicDataToDhis2(ARGS,"medic_week_reports_"+str(indexOf(AllSelectedDates,anyDate))+"_"+str(ARGS['user']),data_type)
     
-#         file = open(extractPath("medic_week_reports_0"+"_"+str(ARGS['user'])+".csv"))
-#         csvreader = list(csv.reader(file))
-#         with open(extractPath("weekly_thinkmd_medic_data_"+str(ARGS['user'])+".csv"), 'a', newline='') as f_object:  
-#             merge_result = []
-#             oldOrgUnitLine = ''
-#             writer_object = csv.writer(f_object)
+    #     file = open(extractPath("medic_week_reports_0"+"_"+str(ARGS['user'])+".csv"))
+    #     csvreader = list(csv.reader(file))
+    #     with open(extractPath("weekly_thinkmd_medic_data_"+str(ARGS['user'])+".csv"), 'a', newline='') as f_object:  
+    #         merge_result = []
+    #         oldOrgUnitLine = ''
+    #         writer_object = csv.writer(f_object)
 
-#             for anyDate in AllSelectedDates:
-#                 index = indexOf(AllSelectedDates,anyDate)
-#                 for bigrow in csvreader:
-#                     if index > 0:
-#                         file0 = open(extractPath("medic_week_reports_"+str(index)+"_"+str(ARGS['user'])+".csv"))
-#                         csvRead = list(csv.reader(file0))
-#                         for r in csvRead:
-#                             p = 0
-#                             if r[2] == bigrow[2]:
-#                                 bigrow.append(r[5])
-#                                 if index == len(AllSelectedDates) - 1 and bigrow not in merge_result:
-#                                     if indexOf(csvreader,bigrow) <= 0:
-#                                         bigrow.append('Sum')
-#                                     else:
-#                                         for j in range(5,len(bigrow)):
-#                                             p+=int(bigrow[j])
-#                                         bigrow.append(str(p))
-#                                     newOrgUnitLine = bigrow[1] + bigrow[0]
-#                                     # if oldOrgUnitLine != '' and oldOrgUnitLine != newOrgUnitLine or 'Sum' in bigrow and 'District' in bigrow:
-#                                     #     gs = []
-#                                     #     for g in bigrow:
-#                                     #         gs.append('')
-#                                     #     writer_object.writerow(gs) 
-#                                     #     writer_object.writerow(gs) 
-#                                     if 'Sum' not in bigrow and 'District' not in bigrow:
-#                                         merge_result.append(bigrow)
-#                                         writer_object.writerow(bigrow)
-#                                         oldOrgUnitLine = newOrgUnitLine 
-#                         file0.close()
-#         f_object.close()
-#         # with createFile(extractFolder(), 'medic_weekly_output') as result:
-#         #     for match in merge_result:
-#         #         f = ''
-#         #         for m in range(len(match)):
-#         #             f+=match[m]+','
-#         #         f = f[:-1]
-#         #         f+='\n'
-#         #         result.write(f)
-#         file.close()
-#         for i in range(50):
-#             deleteFile(extractPath("medic_week_reports_"+str(i)+"_"+str(ARGS['user'])+".csv"))
-#     except:
-#         outPutData['Error'] +=1
-#         if 'server_error' not in outPutData['ErrorMsg']:
-#             outPutData['ErrorMsg']['server_error'] = " Can not connect to Medic server to get Data. Check your Connection or informations you provided !"
+    #         for anyDate in AllSelectedDates:
+    #             index = indexOf(AllSelectedDates,anyDate)
+    #             for bigrow in csvreader:
+    #                 if index > 0:
+    #                     file0 = open(extractPath("medic_week_reports_"+str(index)+"_"+str(ARGS['user'])+".csv"))
+    #                     csvRead = list(csv.reader(file0))
+    #                     for r in csvRead:
+    #                         p = 0
+    #                         if r[2] == bigrow[2]:
+    #                             bigrow.append(r[5])
+    #                             if index == len(AllSelectedDates) - 1 and bigrow not in merge_result:
+    #                                 if indexOf(csvreader,bigrow) <= 0:
+    #                                     bigrow.append('Sum')
+    #                                 else:
+    #                                     for j in range(5,len(bigrow)):
+    #                                         p+=int(bigrow[j])
+    #                                     bigrow.append(str(p))
+    #                                 newOrgUnitLine = bigrow[1] + bigrow[0]
+    #                                 # if oldOrgUnitLine != '' and oldOrgUnitLine != newOrgUnitLine or 'Sum' in bigrow and 'District' in bigrow:
+    #                                 #     gs = []
+    #                                 #     for g in bigrow:
+    #                                 #         gs.append('')
+    #                                 #     writer_object.writerow(gs) 
+    #                                 #     writer_object.writerow(gs) 
+    #                                 if 'Sum' not in bigrow and 'District' not in bigrow:
+    #                                     merge_result.append(bigrow)
+    #                                     writer_object.writerow(bigrow)
+    #                                     oldOrgUnitLine = newOrgUnitLine 
+    #                     file0.close()
+    #     f_object.close()
+    #     # with createFile(extractFolder(), 'medic_weekly_output') as result:
+    #     #     for match in merge_result:
+    #     #         f = ''
+    #     #         for m in range(len(match)):
+    #     #             f+=match[m]+','
+    #     #         f = f[:-1]
+    #     #         f+='\n'
+    #     #         result.write(f)
+    #     file.close()
+    #     for i in range(50):
+    #         deleteFile(extractPath("medic_week_reports_"+str(i)+"_"+str(ARGS['user'])+".csv"))
+    # except Exception as err:
+    #     outPutData['Error'] +=1
+    #     if 'server_error' not in outPutData['ErrorMsg']:
+    #         # outPutData['ErrorMsg']['server_error'] = " Can not connect to Medic server to get Data. Check your Connection or informations you provided !"
+    #         outPutData['ErrorMsg']['server_error'] = " "+str(err)
 
 
 

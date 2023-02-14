@@ -91,25 +91,25 @@ pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, (req: Request, res
 });
 
 
-// pyRouter.post('/medic_to_dhis2', Middelware.authMiddleware, (req: Request, res: Response) => {
-//     var dataToSend: string = '{}';
-//     req.body['type'] = 'medic_only';
-//     const user = `${req.body['user']}`;
-//     errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
+pyRouter.post('/medic_to_dhis2', Middelware.authMiddleware, (req: Request, res: Response) => {
+    var dataToSend: string = '{}';
+    req.body['type'] = 'medic_only';
+    const user = `${req.body['user']}`;
+    errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
-//     req.body['medic_password'] = process.env.COUCH_PASS;
+    req.body['medic_password'] = process.env.COUCH_PASS;
     
-//     const python = spawn('python3', [basename + '/pythons/fetch_medic_data.py', JSON.stringify(req.body),]);
+    const python = spawn('python3', [basename + '/pythons/fetch_medic_data.py', JSON.stringify(req.body),]);
 
-//     python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data) });
-//     python.stderr.on('data', (data) => { 
-//         errorToSend[`${user}`]['ErrorCount'] += 1; 
-//         errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
-//     });
-//     python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err.message; });
-//     python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
-//     python.on('end', (msg) => console.log(`Finish`));
-// });
+    python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data) });
+    python.stderr.on('data', (data) => { 
+        errorToSend[`${user}`]['ErrorCount'] += 1; 
+        errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
+    });
+    python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err.message; });
+    python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
+    python.on('end', (msg) => console.log(`Finish`));
+});
 
 
 // pyRouter.post('/ih_cht_to_dhis2', Middelware.authMiddleware, (req: Request, res: Response) => {

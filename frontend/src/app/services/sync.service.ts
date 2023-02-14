@@ -70,11 +70,11 @@ export class SyncService {
     }, (err: any) => { console.log(err.error); });
   } 
 
-  isLocalSyncSuccess(): boolean {
-    const sync_date = localStorage.getItem('sync_date');
-    if (Functions.notNull(sync_date)) return DateUtils.isGreater(sync_date, new Date())
-    return false;
-  }
+  // isLocalSyncSuccess(): boolean {
+  //   const sync_date = localStorage.getItem('sync_date');
+  //   if (Functions.notNull(sync_date)) return DateUtils.isGreater(sync_date, new Date())
+  //   return false;
+  // }
 
 
   getAllChwsDataWithParams(params?: FilterParams): any {

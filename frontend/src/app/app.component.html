@@ -22,7 +22,7 @@
         </div>
         <div class="modal-body">
           <p>Une version mise à jour du site est disponible. Mettez à jour pour obtenir la nouvelle version :
-            {{availableVersion}}</p>
+            {{currentVersion}}</p>
         </div>
         <div class="modal-footer justify-content-between">
           <button id="close-update-modal" type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
@@ -45,13 +45,13 @@
       <span class="badge bg-danger" *ngIf="!isOnline">Ooops!</span> You are Offline
     </div>
   
-    <div class="" *ngIf="modalVersion">
+    <!-- <div class="" *ngIf="modalVersion">
       <div class="alert alert-secondary m-2">
         <button type="button" class="btn-close" aria-label="Close" (click)="closeVersion()">Ignore</button>
         A new version ( {{updateCheckText}} ) of this app is available. <a href="" (click)="updateVersion()">Update
           now</a>
       </div>
-    </div>
+    </div> -->
   
     <div class="w-100 position-absolute bottom-0" *ngIf="modalPwaPlatform === 'android' || modalPwaPlatform === 'ios'">
       <div class="alert alert-secondary m-2">
@@ -343,10 +343,7 @@
               <div class="dropdown-divider"></div>
               <div class="dropdown-divider"></div>
   
-              <a class="{{localSync}}" href="#" class="dropdown-item">
-                <i class="fas fa-file mr-2"></i> Synchronisé
-                <span class="float-right text-muted text-sm">2 days</span>
-              </a>
+              <!-- <a clas   -->
             </div>
           </li>
   

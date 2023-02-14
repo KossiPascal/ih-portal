@@ -1,14 +1,13 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { NavigationEnd, Router, ActivatedRoute } from '@angular/router';
-import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
+import { SwUpdate, UpdateAvailableEvent, VersionReadyEvent } from '@angular/service-worker';
 import { filter, map, takeWhile } from 'rxjs/operators';
 import { AuthService } from '@ih-services/auth.service';
 import { Platform } from '@angular/cdk/platform';
 import { TitleService } from '@ih-services/title.service';
-import { interval } from 'rxjs';
+import { interval, Subscription } from 'rxjs';
 import { SyncService } from './services/sync.service';
 import { TranslateService } from '@ngx-translate/core';
-import { CheckForUpdateService } from './services/check-for-update.service';
 import { ConfigService } from './services/config.service';
 import { Roles } from './shared/roles';
 import { User } from './models/User';
@@ -33,9 +32,6 @@ export class AppComponent implements OnInit {
   modalPwaPlatform: 'ios' | 'android' | undefined;
   isAdmin: boolean = false;
   isSuperUser: boolean = false;
-  time: number = 0;
-  localSync: string = '';
-  stopVersionTchecking: boolean = false;
 
   appLogo: any = this.auth.appLogoPath()
   userData: User | null = this.auth.userValue()
@@ -43,10 +39,10 @@ export class AppComponent implements OnInit {
 
   @HostBinding('attr.app-version')
   appVersion: any = localStorage.getItem('appVersion');
-  availableVersion: any;
-  // showReloadModal:boolean = false;
+  currentVersion: any;
+  updateSubscription?: Subscription;
 
-  constructor(private store:AppStorageService, private conf: ConfigService, private sw: CheckForUpdateService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private swUpdate: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(private store: AppStorageService, private conf: ConfigService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private sw: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
@@ -63,13 +59,10 @@ export class AppComponent implements OnInit {
   private roles = new Roles(this.store);
 
   ngOnInit(): void {
-    this.accessVersion();
-    this.stopVersionTchecking = false;
 
     this.isAdmin = this.roles.isAdmin();
     this.isSuperUser = this.roles.isSuperUser();
     const appTitle = this.titleService.getTitle();
-    this.localSync = this.sync.isLocalSyncSuccess() ? 'syncSuccess' : 'syncError'
 
     this.router
       .events.pipe(
@@ -94,28 +87,9 @@ export class AppComponent implements OnInit {
     this.updateOnlineStatus();
     window.addEventListener('online', this.updateOnlineStatus.bind(this));
     window.addEventListener('offline', this.updateOnlineStatus.bind(this));
-    this.loadPwaVersion();
-    this.loadModalPwa();
+    this.checkForUpdates();
   }
 
-
-  private getVersion() {
-    this.conf.appVersion().subscribe((newVersion: any) => {
-      if (this.appVersion !== newVersion) {
-        this.ShowUpdateVersionModal()
-        this.availableVersion = newVersion;
-        this.stopVersionTchecking = true;
-      }
-    }, (err: any) => { console.log(err.error) });
-  }
-
-
-  private accessVersion() {
-    if (this.auth.isLoggedIn()) this.getVersion();
-      interval(10000)
-        .pipe(takeWhile(() => !this.stopVersionTchecking && this.auth.isLoggedIn()))
-        .subscribe(() => this.getVersion());
-  }
 
   clickModal(btnId: string) {
     $('#' + btnId).trigger('click');
@@ -126,10 +100,72 @@ export class AppComponent implements OnInit {
   }
 
   UpdateVersion() {
-    localStorage.setItem('appVersion', this.availableVersion);
+    localStorage.setItem('appVersion', this.currentVersion);
     this.clickModal('close-update-modal');
-    this.stopVersionTchecking = true;
     window.location.reload();
+  }
+
+  
+  private async checkForUpdates() {
+    console.log('Service Worker is Enable: ', this.sw.isEnabled);
+    await this.sw.activateUpdate().then(activate => {
+      console.log('Service Worker has activate Update: ', activate);
+    })
+    
+
+    if (this.sw.isEnabled && this.auth.isLoggedIn()) this.checkForAvailableVersion();
+    interval(300000)
+      .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn()))
+      .subscribe(() => {
+        this.sw.checkForUpdate().then((updateFound) => {
+          console.log(updateFound ? 'A new version is available.' : 'Already on the latest version.');
+        });
+        this.checkForAvailableVersion();
+      });
+  }
+
+
+  private checkForAvailableVersion(): void {
+    this.updateSubscription = this.sw.available.subscribe((event: UpdateAvailableEvent) => {
+      console.log('current version is', event.current);
+      console.log('available version is', event.available);
+      this.currentVersion = event.available;
+      this.promptUser();
+    });
+  }
+
+  private promptUser(): void {
+    this.sw.activateUpdate().then(() => {
+      console.log('A New Update Is Available Click To Reload');
+      this.ShowUpdateVersionModal();
+      //   const snack = this.snackbar.open('A New Update Is Available Click To Reload', 'Reload');
+      //   snack
+      //     .onAction()
+      //     .subscribe(() => {
+      //       window.location.reload();
+      //     })
+    });
+
+    this.sw.activated.subscribe(event => {
+      console.log('old version was', event.previous);
+      console.log('new version is', event.current);
+      this.currentVersion = event.current
+
+      this.sw.versionUpdates.subscribe(evt => {
+        switch (evt.type) {
+          case 'VERSION_DETECTED':
+            console.log(`Downloading new app version: ${evt.version.hash}`);
+            break;
+          case 'VERSION_READY':
+            console.log(`Current app version: ${evt.currentVersion.hash}`);
+            console.log(`New app version ready for use: ${evt.latestVersion.hash}`);
+            break;
+          case 'VERSION_INSTALLATION_FAILED':
+            console.log(`Failed to install app version '${evt.version.hash}': ${evt.error}`);
+            break;
+        }
+      });
+    });
   }
 
   private updateOnlineStatus(): void {
@@ -137,39 +173,22 @@ export class AppComponent implements OnInit {
     console.info(`isOnline=[${this.isOnline}]`);
   }
 
-  public updateVersion(): void {
-    this.modalVersion = false;
-    window.location.reload();
-  }
+  // private loadModalPwa(): void {
+  //   if (this.platform.ANDROID) {
+  //     window.addEventListener('beforeinstallprompt', (event: any) => {
+  //       event.preventDefault();
+  //       this.modalPwaEvent = event;
+  //       this.modalPwaPlatform = 'android';
+  //     });
+  //   }
 
-  private loadPwaVersion() {
-    if (this.swUpdate.isEnabled) {
-      this.swUpdate.versionUpdates.pipe(
-        filter((evt: any): evt is VersionReadyEvent => evt.type === 'VERSION_READY'),
-        map((evt: any) => {
-          console.info(`currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
-          this.modalVersion = true;
-        }),
-      );
-    }
-  }
-
-  private loadModalPwa(): void {
-    if (this.platform.ANDROID) {
-      window.addEventListener('beforeinstallprompt', (event: any) => {
-        event.preventDefault();
-        this.modalPwaEvent = event;
-        this.modalPwaPlatform = 'android';
-      });
-    }
-
-    if (this.platform.IOS && this.platform.SAFARI) {
-      const isInStandaloneMode = ('standalone' in window.navigator) && ((<any>window.navigator)['standalone']);
-      if (!isInStandaloneMode) {
-        this.modalPwaPlatform = 'ios';
-      }
-    }
-  }
+  //   if (this.platform.IOS && this.platform.SAFARI) {
+  //     const isInStandaloneMode = ('standalone' in window.navigator) && ((<any>window.navigator)['standalone']);
+  //     if (!isInStandaloneMode) {
+  //       this.modalPwaPlatform = 'ios';
+  //     }
+  //   }
+  // }
 
   public closeVersion(): void {
     this.modalVersion = false;
