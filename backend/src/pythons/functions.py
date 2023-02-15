@@ -6,7 +6,7 @@ from dhis2 import Api
 from datetime import datetime, timedelta
 import io
 import tableauserverclient as TSC
-
+import errno
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -51,6 +51,18 @@ def getOutPutDataFromFile(fileName):
         "head":finalCsvFileHeader,
         "body":finalCsvFileBody
     }
+
+def make_sure_path_exists(path):
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+
+
+def createExtractFolderIfNotExist():
+    make_sure_path_exists(pythonFolder()+'/'+extractFolder())
+
 
 def getOutPutData():
     return {

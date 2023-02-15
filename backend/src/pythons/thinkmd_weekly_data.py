@@ -1,7 +1,7 @@
 # _*_ coding:utf-8 _*_
 
 import csv
-from functions import chwRemplacante, convertDate, createFile, deleteFile, extractFolder, extractPath, getChwsFromDhis2, getNexSundayDate, getOutPutData, getOutPutDataFromFile, getReportData, getReportOrgUnit, pathExist, signIn
+from functions import chwRemplacante, convertDate, createExtractFolderIfNotExist, createFile, deleteFile, extractFolder, extractPath, getChwsFromDhis2, getNexSundayDate, getOutPutData, getOutPutDataFromFile, getReportData, getReportOrgUnit, pathExist, signIn
 from fetch_medic_data import flushMedicDataToDhis2
 import tableauserverclient as TSC
 from operator import indexOf
@@ -232,4 +232,5 @@ def getMedicWeeklyData(ARGS, data_type="TotalVad"):
 KWARGS = json.loads(sys.argv[1])
 
 if KWARGS['type'] == 'thinkMd_weekly':
+    createExtractFolderIfNotExist()
     getThinkMdWeeklyDataFromDhis2(KWARGS)

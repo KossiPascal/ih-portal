@@ -85,7 +85,7 @@ pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, (req: Request, res
         errorToSend[`${user}`]['ErrorCount'] += 1; 
         errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
     });
-    python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err.message; });
+    python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err; });
     python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
     python.on('end', (msg) => console.log(`Finish`));
 });
@@ -106,34 +106,34 @@ pyRouter.post('/medic_to_dhis2', Middelware.authMiddleware, (req: Request, res: 
         errorToSend[`${user}`]['ErrorCount'] += 1; 
         errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
     });
-    python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err.message; });
+    python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err; });
     python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
     python.on('end', (msg) => console.log(`Finish`));
 });
 
 
-// pyRouter.post('/ih_cht_to_dhis2', Middelware.authMiddleware, (req: Request, res: Response) => {
-//     var dataToSend: string = '{}';
-//     req.body['type'] = 'cht_only';
-//     const user = `${req.body['user']}`;
-//     errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
+pyRouter.post('/ih_cht_to_dhis2', Middelware.authMiddleware, (req: Request, res: Response) => {
+    var dataToSend: string = '{}';
+    req.body['type'] = 'cht_only';
+    const user = `${req.body['user']}`;
+    errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
-//     if (req.body['dhis2_password'] === '' || req.body['dhis2_password'] === null) req.body['dhis2_password'] = process.env.DHIS_PASS;
-//     if (req.body['cht_password'] === '' || req.body['cht_password'] === null) req.body['cht_password'] = process.env.CHT_PASS;
-//     const python = spawn('python3', [basename + '/pythons/fetch_ih_cht_data.py', JSON.stringify(req.body),]);
+    if (req.body['dhis2_password'] === '' || req.body['dhis2_password'] === null) req.body['dhis2_password'] = process.env.DHIS_PASS;
+    if (req.body['cht_password'] === '' || req.body['cht_password'] === null) req.body['cht_password'] = process.env.CHT_PASS;
+    const python = spawn('python3', [basename + '/pythons/fetch_ih_cht_data.py', JSON.stringify(req.body),]);
 
-//     python.stdout.on('data', (data) => { 
-//         if (dataToSend === '{}') dataToSend = formatData(data);
-//         console.log(dataToSend)
-//      });
-//     python.stderr.on('data', (data) => { 
-//         errorToSend[`${user}`]['ErrorCount'] += 1; 
-//         errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
-//     });
-//     python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err.message; });
-//     python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
-//     python.on('end', (msg) => console.log(`Finish`));
-// });
+    python.stdout.on('data', (data) => { 
+        if (dataToSend === '{}') dataToSend = formatData(data);
+        console.log(dataToSend)
+     });
+    python.stderr.on('data', (data) => { 
+        errorToSend[`${user}`]['ErrorCount'] += 1; 
+        errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
+    });
+    python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err; });
+    python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
+    python.on('end', (msg) => console.log(`Finish`));
+});
 
 
 
@@ -156,7 +156,7 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
         errorToSend[`${user}`]['ErrorCount'] += 1; 
         errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
     });
-    python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err.message; });
+    python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err; });
     python.on('close', (code) => res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`));
     python.on('end', (msg) => console.log(`Finish`));
 });

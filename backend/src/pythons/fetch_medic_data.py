@@ -3,7 +3,7 @@
 import json
 from operator import indexOf
 import couchdb
-from functions import between, chwsFound, convert_milisecond_to_date, createFile, date_to_milisecond, dhisApi, districtFound, extractFolder, formView, getOutPutData, getOutPutDataFromFile, getValue, matchDhis2Data, medicDataType, record
+from functions import between, chwsFound, convert_milisecond_to_date, createExtractFolderIfNotExist, createFile, date_to_milisecond, dhisApi, districtFound, extractFolder, formView, getOutPutData, getOutPutDataFromFile, getValue, matchDhis2Data, medicDataType, record
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -709,4 +709,5 @@ def flushMedicDataToDhis2(KWARG,fileName = "medic_output",data_type = "Consultat
 KWARGS = json.loads(sys.argv[1])
 
 if KWARGS['type'] == 'medic_only':
+    createExtractFolderIfNotExist()
     flushMedicDataToDhis2(KWARGS)

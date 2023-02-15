@@ -3,7 +3,7 @@
 import json
 from operator import indexOf
 import couchdb
-from functions import between, chwsFound, convert_milisecond_to_date, createFile, date_to_milisecond, dhisApi, districtFound, extractFolder, formView, getOutPutData, getOutPutDataFromFile, getValue, matchDhis2Data, medicDataType, record
+from functions import between, chwsFound, convert_milisecond_to_date, createExtractFolderIfNotExist, createFile, date_to_milisecond, dhisApi, districtFound, extractFolder, formView, getOutPutData, getOutPutDataFromFile, getValue, matchDhis2Data, medicDataType, record
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -710,6 +710,7 @@ KWARGS = json.loads(sys.argv[1])
 
 if KWARGS['type'] == 'cht_only':
     # flushIhChtDataToDhis2(KWARGS)
+    createExtractFolderIfNotExist()
     couch = couchdb.Server("https://{}:{}@{}:444".format(KWARGS['cht_username'],KWARGS['cht_password'], KWARGS['cht_host']))[KWARGS['cht_database']]
 
     for row in couch.view("medic-client/reports_by_date", key=[date_to_milisecond(KWARGS['start_date'], True)], endkey=[date_to_milisecond(KWARGS['end_date'], False)], **COUCH_KWARGS):

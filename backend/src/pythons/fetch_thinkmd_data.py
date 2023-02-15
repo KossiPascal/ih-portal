@@ -6,7 +6,7 @@ from datetime import datetime
 from operator import indexOf
 import pandas as pd  
 import csv
-from functions import createFile, deleteFile, dhisApi, extractFolder, extractPath, getData, getDhis2OrgUnit, getMatchDataElementUid, getOtherData, getOutPutData, getOutPutDataFromFile, getVal, getValue, matchDhis2Data, signIn
+from functions import createExtractFolderIfNotExist, createFile, deleteFile, dhisApi, extractFolder, extractPath, getData, getDhis2OrgUnit, getMatchDataElementUid, getOtherData, getOutPutData, getOutPutDataFromFile, getVal, getValue, matchDhis2Data, signIn
 
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
@@ -350,4 +350,5 @@ def generateDataFromFinalFile(KWARG):
 KWARGS = json.loads(sys.argv[1])
 
 if KWARGS['type'] == 'thinkMd_only':
+    createExtractFolderIfNotExist()
     flushThinkMdDataToDhis2(KWARGS)

@@ -1,21 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { AggragateData, Chws, Families, FilterParams, ChwsDataFormDb, Patients, Sites, Zones } from '@ih-app/models/Sync';
-import { SyncService } from '@ih-app/services/sync.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ChtOutPutData, DataIndicators } from '@ih-app/models/DataAggragate';
-import { IndexDbService } from '@ih-app/services/index-db.service'; // db index start
-import { DateUtils, Functions } from '@ih-app/shared/functions';
+import { Chws, CompareData, Dhis2Sync, Districts, FilterParams, ChwsDataFormDb, Sites } from '@ih-app/models/Sync';
+import { SyncService } from '@ih-app/services/sync.service';
+import { Consts } from '@ih-app/shared/constantes';
+import { Functions, DateUtils } from '@ih-app/shared/functions';
 
-// import * as Highcharts from 'highcharts';
-// import { liveQuery } from 'dexie';
+// declare var $: any;
+// declare var initJsGridTable: any;
+declare var initDataTable: any;
 
 @Component({
-  selector: 'app-dashboard-4',
+  selector: 'app-dashboard-1',
   templateUrl: `./dashboard-4.component.html`,
-  styleUrls: [`./dashboard-4.component.css`]
+  styleUrls: [
+    './dashboard-4.component.css'
+  ]
 })
 export class Dashboard4Component implements OnInit {
-  constructor(private db: IndexDbService, private sync: SyncService) { }
+  constructor(private sync: SyncService) { }
 
   aggradateDataForm!: FormGroup;
   initDate!: { start_date: string, end_date: string };
@@ -24,127 +26,64 @@ export class Dashboard4Component implements OnInit {
     return new FormGroup({
       start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
       end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
+      districts: new FormControl(""),
       sites: new FormControl(""),
-      sources: new FormControl(""),
     });
   }
 
-  initMsg!: string;
-  isLoading!: boolean;
-  allAggragateData: AggragateData[] = [];
 
-  identifyAggragateData(index: number, item: AggragateData) {
-    return item.label;
-  }
-
-  home_actions_forms: string[] = [
-    `pcime_c_asc`,
-    `pcime_c_referral`,
-    `pcime_c_followup`,
-    `malnutrition_followup`,
-    `pregnancy_family_planning`,
-    `prenatal_followup`,
-    `postnatal_followup`,
-    `newborn_followup`,
-    `home_visit`,
-    `women_emergency_followup`,
-    `fp_follow_up_renewal`,
-  ];
-  vaccination_forms: string[] = [
-    `vaccination`,
-  ];
-  consultations_followup_forms: string[] = [
-    `pcime_c_asc`,
-    `pregnancy_family_planning`,
-    `pcime_c_followup`,
-    `pcime_c_referral`,
-    `malnutrition_followup`,
-    `prenatal_followup`,
-    `postnatal_followup`,
-    `newborn_followup`,
-    `women_emergency_followup`,
-    `fp_follow_up_renewal`,
-  ];
-  consultations_forms: string[] = [
-    `pcime_c_asc`,
-    `pregnancy_family_planning`
-  ];
-  followup_forms: string[] = [
-    `pcime_c_followup`,
-    `pcime_c_referral`,
-    `malnutrition_followup`,
-    `prenatal_followup`,
-    `postnatal_followup`,
-    `newborn_followup`,
-    `women_emergency_followup`,
-    `fp_follow_up_renewal`,
-  ];
-  all_child_forms: string[] = [
-    `pcime_c_asc`,
-    `pcime_c_followup`,
-    `newborn_followup`,
-    `malnutrition_followup`
-  ];
-  child_followup_forms: string[] = [
-    `pcime_c_followup`,
-    `newborn_followup`,
-    `malnutrition_followup`
-  ];
-  allForms: string[] = [
-    "pcime_c_asc",
-    "vaccination_followup",
-    "pregnancy_family_planning",
-    "delivery",
-    "home_visit",
-    "newborn_followup",
-    "pcime_c_followup",
-    "malnutrition_followup",
-    "postnatal_followup",
-    "prenatal_followup",
-    "pcime_c_referral",
-    `fp_follow_up_renewal`,
-  ]
+  bodyData: CompareData[] = [];
 
   ChwsDataFromDb$: ChwsDataFormDb[] = [];
-  sources$: string[] = []
 
+  Districts$: Districts[] = [];
   Chws$: Chws[] = [];
   Sites$: Sites[] = [];
 
   chws$: Chws[] = [];
   sites$: Sites[] = [];
 
-  Zones$: Zones[] = [];
-  Patients$: Patients[] = [];
-  Families$: Families[] = [];
+  initMsg!: string;
+  isLoading!: boolean;
 
-  chwsCount: number = 0;
-  sitesChwsCount: number = 0;
-  zonesChwsCount: number = 0;
-  patientsChwsCount: number = 0;
-  familiesChwsCount: number = 0;
+  dhis2Params!: Dhis2Sync;
+
+  responseMessage: string = '';
+
+
+  identifyBodyData(index: number, item: CompareData) {
+    return item.Code;
+  }
 
   ngOnInit(): void {
     this.isLoading = false;
     this.initDate = DateUtils.startEnd21and20Date();
     this.aggradateDataForm = this.createDataFilterFormGroup();
     this.initAllData();
+
   }
 
   async initAllData() {
-    // const sites$ = await this.db.getAllByParams(this.db.sites);
     this.isLoading = true;
-    this.initMsg = 'Chargement des Sites ...';
-    this.sync.getSitesList().subscribe(async (_sites: any) => {
-      this.Sites$ = _sites;
-      for (let s = 0; s < this.Sites$.length; s++) {
-        const Did = this.Sites$[s].source;
-        if (Did != null && Did != '' && !this.sources$.includes(Did)) this.sources$.push(Did);
-      }
-      this.initMsg = 'Chargement des ASC ...';
-      this.sync.getChwsList().subscribe(async (_chws: any) => {
-        this.Chws$ = _chws;
-        this.initDataFilted();
+    this.initMsg = 'Chargement des Districts ...';
+    this.sync.getDistrictsList().subscribe(async (_d$: { status: number, data: Districts[] }) => {
+      if (_d$.status == 200) this.Districts$ = _d$.data;
+      this.initMsg = 'Chargement des Sites ...';
+      this.sync.getSitesList().subscribe(async (_s$: { status: number, data: Sites[] }) => {
+        if (_s$.status == 200) this.Sites$ = _s$.data;
+        this.genarateSites()
+        this.initMsg = 'Chargement des ASC ...';
+        this.sync.getChwsList().subscribe(async (_c$: { status: number, data: Chws[] }) => {
+          if (_c$.status == 200) {
+            this.Chws$ = _c$.data;
+            this.chws$ = _c$.data;
+          }
+          // this.initDataFilted();
+          this.isLoading = false;
+        }, (err: any) => {
+          this.isLoading = false;
+          console.log(err.error);
+        });
       }, (err: any) => {
         this.isLoading = false;
         console.log(err.error);
@@ -155,28 +94,26 @@ export class Dashboard4Component implements OnInit {
     });
   }
 
-  formatHostName(val: string): string {
-    return val.replace('.org', '').replace('-', '.').trim();
-  }
 
   genarateSites() {
-    const sources: string[] = this.aggradateDataForm.value["sources"];
     this.sites$ = [];
     this.chws$ = [];
-    this.aggradateDataForm.value["sites"] = [];
+    const dist: string = this.aggradateDataForm.value["districts"];
+    this.aggradateDataForm.value["sites"] = "";
     this.aggradateDataForm.value["chws"] = [];
-    if (Functions.notNull(sources)) {
+
+    if (Functions.notNull(dist)) {
       for (let d = 0; d < this.Sites$.length; d++) {
         const site = this.Sites$[d];
-        if (Functions.notNull(site)) if (sources.includes(site.source)) this.sites$.push(site)
+        if (Functions.notNull(site)) if (dist.includes(site.district.id)) this.sites$.push(site)
       }
     } else {
-      this.sites$ = this.Sites$;
+      this.sites$ = [];
     }
   }
 
   genarateChws() {
-    const sites: string[] = this.aggradateDataForm.value["sites"];
+    const sites: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sites);
     this.chws$ = [];
     this.aggradateDataForm.value["chws"] = [];
     if (Functions.notNull(sites)) {
@@ -189,298 +126,214 @@ export class Dashboard4Component implements OnInit {
     }
   }
 
-  returnEmptyArrayIfNul(data: any): string[] {
-    return Functions.notNull(data) ? data : [];
-  }
+  ParamsToFilter(): FilterParams {
+    const startDate: string = this.aggradateDataForm.value.start_date;
+    const endDate: string = this.aggradateDataForm.value.end_date;
+    // const sources: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sources) as string[];
+    const districts: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.districts) as string[];
+    const sites: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sites) as string[];
+    const chws: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
 
-  initDataFilted(): void {
-    const startDate: string = this.aggradateDataForm.value["start_date"];
-    const endDate: string = this.aggradateDataForm.value["end_date"];
-    const chws: string[] = this.returnEmptyArrayIfNul(this.aggradateDataForm.value["chws"]);
-    const sites: string[] = this.returnEmptyArrayIfNul(this.aggradateDataForm.value["sites"]);
-    const sources: string[] = this.returnEmptyArrayIfNul(this.aggradateDataForm.value["sources"]);
-
-    var paramsTopass: FilterParams = {
+    var params: FilterParams = {
+      // sources: sources,
       start_date: startDate,
       end_date: endDate,
-      sources: sources,
-      chws: chws,
+      districts: districts,
       sites: sites,
-      districts: []
+      chws: chws,
     }
-
-    this.isLoading = true;
-
-    if (this.initDate.start_date == startDate && this.initDate.end_date == endDate && this.ChwsDataFromDb$?.length != 0) {
-      this.getAllAboutData(paramsTopass);
-    } else {
-      this.initDate.start_date = startDate;
-      this.initDate.end_date = endDate;
-      this.initMsg = `Chargement des données du ${DateUtils.getDateInFormat(paramsTopass.start_date, 0, 'fr')} au ${DateUtils.getDateInFormat(paramsTopass.end_date, 0, 'fr')}`;
-      this.sync.getAllChwsDataWithParams(paramsTopass).subscribe((response: ChwsDataFormDb[]) => {
-        this.ChwsDataFromDb$ = response;
-        this.getAllAboutData(paramsTopass);
-      }, (err: any) => {
-        this.isLoading = false;
-        console.log(err.error);
-      });
-    }
+    return params;
   }
 
-  getAllAboutData(params: FilterParams) {
-    this.initMsg = 'Démarrage du calcule des indicateurs ...';
-    const { start_date, end_date, chws, sites, sources } = params;
-    if (Functions.notNull(start_date) && Functions.notNull(end_date)) {
-
-      var outPutData: ChtOutPutData = {
-        total_home_visit: {},
-        total_pcime_soins: {},
-        total_pcime_suivi: {},
-        total_reference_pcime_suivi: {},
-        total_reference_pcime_soins: {},
-        total_diarrhee_pcime_soins: {},
-        total_paludisme_pcime_soins: {},
-        total_pneumonie_pcime_soins: {},
-        total_malnutrition_pcime_soins: {},
-        prompt_diarrhee_24h_pcime_soins: {},
-        prompt_diarrhee_48h_pcime_soins: {},
-        prompt_diarrhee_72h_pcime_soins: {},
-        prompt_paludisme_24h_pcime_soins: {},
-        prompt_paludisme_48h_pcime_soins: {},
-        prompt_paludisme_72h_pcime_soins: {},
-        prompt_pneumonie_24h_pcime_soins: {},
-        prompt_pneumonie_48h_pcime_soins: {},
-        prompt_pneumonie_72h_pcime_soins: {},
-        total_pregnancy_family_planning: {},
-        total_reference_family_planning_soins: {},
-        total_reference_femme_enceinte_soins: {},
-        total_vad_femme_enceinte_soins: {},
-        total_vad_femme_enceinte_NC_soins: {},
-        total_test_de_grossesse_domicile: {},
-        total_newborn_suivi: {},
-        total_reference_newborn: {},
-        total_malnutrition_suivi: {},
-        total_reference_malnutrition_suivi: {},
-        total_prenatal_suivi: {},
-        total_reference_prenatal_suivi: {},
-        total_postnatal_suivi: {},
-        total_reference_postnatal_suivi: {},
-        total_vad_femme_postpartum_NC: {},
-        total_vad_women_emergency_suivi: {},
-        total_reference_women_emergency_suivi: {},
-        total_femme_enceinte_women_emergency_suivi: {},
-        total_femme_postpartum_women_emergency_suivi: {},
-        total_family_planning_renewal_suivi: {},
-        total_reference_family_planning_renewal_suivi: {},
-        total_vad_family_planning_NC: {}
+  initDataFilted(params?: FilterParams): void {
+    this.isLoading = true;
+    this.sync.getAllChwsDataWithParams(params ?? this.ParamsToFilter()).subscribe((res: { status: number, data: any }) => {
+      if (res.status == 200) {
+        this.ChwsDataFromDb$ = res.data;
+        this.getAllAboutData(params ?? this.ParamsToFilter());
+      } else {
+        this.isLoading = false;
+        this.responseMessage = res.data
       }
+    }, (err: any) => {
+      this.isLoading = false;
+      console.log(err);
+    });
+  }
 
-      for (let i = 0; i < this.Chws$!.length; i++) {
-        const ascId = this.Chws$![i].id;
-        if (ascId != null && ascId != '') {
-          Object.entries(outPutData).map(([key, val]) => {
-            const vals: any = val as any;
-            if (!vals.hasOwnProperty(ascId)) vals[ascId] = { chwId: ascId, count: 0 }
-          });
+
+  getAllAboutData(params: FilterParams) {
+    const { start_date, end_date, sites } = params;
+
+    var outPutData: any = {}
+
+    for (let i = 0; i < this.chws$!.length; i++) {
+      const ascId = this.chws$![i].id;
+      if (Functions.notNull(ascId)) {
+        if (!outPutData.hasOwnProperty(ascId)) outPutData[ascId] = {
+          chwId: ascId,
+          app_total_child_followup: 0,
+          dhis_total_child_followup: 0,
+          app_total_num_fp_followup: 0,
+          dhis_total_num_fp_followup: 0,
+          app_total_active_research: 0,
+          dhis_total_active_research: 0,
+          app_total_consultation_followup: 0,
+          dhis_total_consultation_followup: 0,
+          app_total_home_visit: 0,
+          dhis_total_home_visit: 0
         }
       }
-
-      for (let index = 0; index < this.ChwsDataFromDb$!.length; index++) {
-        const data: ChwsDataFormDb = this.ChwsDataFromDb$[index];
-
-        if (data != null) {
-          const form = data.form;
-          const field = data.fields;
-          const asc: string = data.chw != null ? data.chw.id != null && data.chw.id != '' ? data.chw.id : '' : '';
-          const site: string = data.site != null ? data.site.id != null && data.site.id != '' ? data.site.id : '' : '';
-          const source: string = data.source != null && data.source != '' ? data.source : '';
-
-          const idChwValid: boolean = Functions.notNull(asc) && Functions.notNull(chws) && chws?.includes(asc) || !Functions.notNull(chws);
-          const idSiteValid: boolean = Functions.notNull(site) && Functions.notNull(sites) && sites?.includes(site) || !Functions.notNull(sites);
-          const idHostValid: boolean = Functions.notNull(source) && Functions.notNull(sources) && sources?.includes(source) || !Functions.notNull(sources);
-          const isDateValid: boolean = Functions.notNull(start_date) && Functions.notNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
+    }
 
 
-          if (idChwValid && idSiteValid && isDateValid && idHostValid) {
+    for (let index = 0; index < this.ChwsDataFromDb$!.length; index++) {
+      const data: ChwsDataFormDb = this.ChwsDataFromDb$[index];
+      if (data != null) {
+        const form = data.form;
+        const asc: string = data.chw != null ? Functions.notNull(data.chw.id) ? data.chw.id : '' : '';
+        const site: string = data.site != null ? Functions.notNull(data.site.id) ? data.site.id : '' : '';
+        const idSiteValid: boolean = Functions.notNull(site) && Functions.notNull(sites) && sites?.includes(site) || !Functions.notNull(sites);
+        const isDateValid: boolean = Functions.notNull(start_date) && Functions.notNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
 
-            if (form === "home_visit") outPutData.total_home_visit[asc].count += 1
-
-            if (form === "pcime_c_asc") {
-              outPutData.total_pcime_soins[asc].count += 1
-
-              if (field["group_review.s_have_you_refer_child"] == "yes") outPutData.total_reference_pcime_soins[asc].count += 1
-
-              if (field["has_diarrhea"] == "true") {
-                outPutData.total_diarrhee_pcime_soins[asc].count += 1
-                if (field["within_24h"] == "true") outPutData.prompt_diarrhee_24h_pcime_soins[asc].count += 1
-                if (field["within_24h"] == "true" || field["within_48h"] == "true") outPutData.prompt_diarrhee_48h_pcime_soins[asc].count += 1
-                if (field["within_24h"] == "true" || field["within_48h"] == "true" || field["within_72h"] == "true") outPutData.prompt_diarrhee_72h_pcime_soins[asc].count += 1
-              }
-
-              if (field["fever_with_malaria"] == "true") {
-                outPutData.total_paludisme_pcime_soins[asc].count += 1
-                if (field["within_24h"] == "true") outPutData.prompt_paludisme_24h_pcime_soins[asc].count += 1
-                if (field["within_24h"] == "true" || field["within_48h"] == "true") outPutData.prompt_paludisme_48h_pcime_soins[asc].count += 1
-                if (field["within_24h"] == "true" || field["within_48h"] == "true" || field["within_72h"] == "true") outPutData.prompt_paludisme_72h_pcime_soins[asc].count += 1
-              }
-
-              if (field["has_pneumonia"] == "true") {
-                outPutData.total_pneumonie_pcime_soins[asc].count += 1
-                if (field["within_24h"] == "true") outPutData.prompt_pneumonie_24h_pcime_soins[asc].count += 1
-                if (field["within_24h"] == "true" || field["within_48h"] == "true") outPutData.prompt_pneumonie_48h_pcime_soins[asc].count += 1
-                if (field["within_24h"] == "true" || field["within_48h"] == "true" || field["within_72h"] == "true") outPutData.prompt_pneumonie_72h_pcime_soins[asc].count += 1
-              }
-
-              if (field["has_malnutrition"] == "true") outPutData.total_malnutrition_pcime_soins[asc].count += 1
-            }
-
-            if (form === "pcime_c_followup") {
-              outPutData.total_pcime_suivi[asc].count += 1
-              if (field["group_review.s_have_you_refer_child"] == "yes") outPutData.total_reference_pcime_suivi[asc].count += 1
-            }
-
-            if (form === "newborn_followup") {
-              outPutData.total_newborn_suivi[asc].count += 1
-              if (field["group_summary.s_have_you_refer_child"] == "yes") outPutData.total_reference_newborn[asc].count += 1
-            }
-
-            if (form === "malnutrition_followup") {
-              outPutData.total_malnutrition_suivi[asc].count += 1
-              if (field["results_page.s_have_you_refer_child"] == "yes") outPutData.total_reference_malnutrition_suivi[asc].count += 1
-            }
-
-            if (form === "prenatal_followup") {
-              outPutData.total_prenatal_suivi[asc].count += 1
-              if (field["group_summary.s_have_you_refer_child"] == "yes") outPutData.total_reference_prenatal_suivi[asc].count += 1
-            }
-
-            if (form === "postnatal_followup") {
-              outPutData.total_postnatal_suivi[asc].count += 1
-              if (field["group_summary.s_have_you_refer_child"] == "yes") outPutData.total_reference_postnatal_suivi[asc].count += 1
-              if (field["follow_up_count"] == "1") outPutData.total_vad_femme_postpartum_NC[asc].count += 1
-            }
-
-            if (form === "pregnancy_family_planning") {
-              outPutData.total_pregnancy_family_planning[asc].count += 1
-              var pregnant_1 = field["s_reg_pregnancy_screen.s_reg_urine_result"] == "positive"
-              var pregnant_2 = field["s_reg_pregnancy_screen.s_reg_why_urine_test_not_done"] == "already_pregnant"
-
-              if (field["s_reg_pregnancy_screen.s_reg_urine_test"] == "yes") outPutData.total_test_de_grossesse_domicile[asc].count += 1
-              if (field["s_summary.s_have_you_refer_child"] == "yes" && !pregnant_1 && !pregnant_2) outPutData.total_reference_family_planning_soins[asc].count += 1
-              if (pregnant_1 || pregnant_2) {
-                outPutData.total_vad_femme_enceinte_soins[asc].count += 1
-                if (field["s_reg_mode.s_reg_how_found"] != "fp_followup") outPutData.total_vad_femme_enceinte_NC_soins[asc].count += 1
-                if (field["s_summary.s_have_you_refer_child"] == "yes") outPutData.total_reference_femme_enceinte_soins[asc].count += 1
-              }
-              if (field["s_fam_plan_screen.agreed_to_fp"] == "yes") outPutData.total_vad_family_planning_NC[asc].count += 1
-            }
-
-            if (form === "women_emergency_followup") {
-              outPutData.total_vad_women_emergency_suivi[asc].count += 1
-              if (field["group_summary.s_have_you_refer_child"] == "yes") outPutData.total_reference_women_emergency_suivi[asc].count += 1
-              if (field["initial.woman_status"] == "pregnant") outPutData.total_femme_enceinte_women_emergency_suivi[asc].count += 1
-              if (field["initial.woman_status"] == "postpartum") outPutData.total_femme_postpartum_women_emergency_suivi[asc].count += 1
-            }
-
-            if (form === "fp_follow_up_renewal") {
-              outPutData.total_family_planning_renewal_suivi[asc].count += 1
-              if (field["check$2.s_refer_for_health_state"] == "true") outPutData.total_reference_family_planning_renewal_suivi[asc].count += 1
-            }
+        if (idSiteValid && isDateValid && outPutData.hasOwnProperty(asc)) {
+          if (data.source == 'dhis2') {
+            if (form === "PCIME") outPutData[asc].dhis_total_child_followup += 1
+            if (form === "Maternelle" || form === "PF") outPutData[asc].dhis_total_num_fp_followup += 1
+            if (form === "Recherche") outPutData[asc].dhis_total_active_research += 1
+            if (form !== "Recherche") outPutData[asc].dhis_total_consultation_followup += 1
+            outPutData[asc].dhis_total_home_visit += 1
+          } else if (data.source == 'Tonoudayo') {
+            if (Consts.child_forms.includes(form)) outPutData[asc].app_total_child_followup += 1
+            if (Consts.num_fp_forms.includes(form)) outPutData[asc].app_total_num_fp_followup += 1
+            if (form === "home_visit") outPutData[asc].app_total_active_research += 1
+            if (Consts.consultations_followup_forms.includes(form)) outPutData[asc].app_total_consultation_followup += 1
+            if (Consts.home_actions_forms.includes(form)) outPutData[asc].app_total_home_visit += 1
           }
         }
       }
-
-      this.transformData(outPutData, params);
     }
-  }
 
-  transformData(allDatasFound: ChtOutPutData, params: FilterParams) {
-    const { start_date, end_date, chws, sites, sources } = params;
 
-    if (Functions.notNull(start_date) && Functions.notNull(end_date)) {
+    // Object.entries(this.AllDhis2SelectedDataValues).map(([key, value]) => {
+    //   // plW6bCSnXKU [PCIME, Maternelle, PF, Recherche]
+    //   const vals = value as any;
 
-      var chwsData: DataIndicators = {
-        total_vad: 0,
-        total_vad_pcime_c: 0,
-        total_suivi_pcime_c: 0,
-        total_vad_femmes_enceinte: 0,
-        total_vad_femmes_postpartum: 0,
-        total_recherche_active: 0,
-        total_vad_family_planning: 0,
-        reference_femmes_pf: 0,
-        reference_pcime: 0,
-        reference_femmes_enceinte_postpartum: 0,
-        total_diarrhee_pcime_soins: 0,
-        total_paludisme_pcime_soins: 0,
-        total_pneumonie_pcime_soins: 0,
-        total_malnutrition_pcime_soins: 0,
-        prompt_diarrhee_24h_pcime_soins: 0,
-        prompt_diarrhee_48h_pcime_soins: 0,
-        prompt_diarrhee_72h_pcime_soins: 0,
-        prompt_paludisme_24h_pcime_soins: 0,
-        prompt_paludisme_48h_pcime_soins: 0,
-        prompt_paludisme_72h_pcime_soins: 0,
-        prompt_pneumonie_24h_pcime_soins: 0,
-        prompt_pneumonie_48h_pcime_soins: 0,
-        prompt_pneumonie_72h_pcime_soins: 0,
-        total_vad_femmes_enceintes_NC: 0,
-        total_vad_femme_postpartum_NC: 0,
-        total_test_de_grossesse_domicile: 0,
+    //   for (let i = 0; i < vals.length; i++) {
+    //     const dataArray = vals[i] as { dataElement: string, value: any }[];
+
+    //     var isResearchFound: boolean = false;
+    //     var isChwFound: boolean = false;
+
+    //     for (let j = 0; j < dataArray.length; j++) {
+    //       const vals = dataArray[j];
+    //       if (vals.dataElement == 'plW6bCSnXKU' && vals.value == 'Recherche') {
+    //         isResearchFound = true;
+    //       }
+    //       if (vals.dataElement == 'JkMyqI3e6or' && vals.value == this.getChwInfos(key).external_id) {
+    //         isChwFound = true;
+    //       }
+    //     }
+
+    //     if (isChwFound) {
+    //       outPutData[key].dhis_total_home_visit += 1;
+    //       if (isResearchFound == true) {
+    //         outPutData[key].dhis_total_active_research += 1
+    //       } else {
+    //         outPutData[key].dhis_total_consultation_followup += 1
+    //       }
+    //     }
+
+    //   }
+
+    // });
+
+
+    this.bodyData = [];
+
+
+
+    Object.entries(outPutData).map(([keys, value]) => {
+      const vals = value as {
+        chwId: string,
+        app_total_child_followup: 0,
+        dhis_total_child_followup: 0,
+        app_total_num_fp_followup: 0,
+        dhis_total_num_fp_followup: 0,
+        app_total_active_research: number,
+        dhis_total_active_research: number,
+        app_total_consultation_followup: number,
+        dhis_total_consultation_followup: number,
+        app_total_home_visit: number,
+        dhis_total_home_visit: number
       };
-
-      for (let i = 0; i < this.Chws$!.length; i++) {
-        const chws$: Chws = this.Chws$![i];
-        const ascId = chws$.id;
-        const total_vad = allDatasFound.total_home_visit[ascId]["count"] + allDatasFound.total_pcime_soins[ascId]["count"] + allDatasFound.total_pregnancy_family_planning[ascId]["count"] + allDatasFound.total_pcime_suivi[ascId]["count"] + allDatasFound.total_newborn_suivi[ascId]["count"] + allDatasFound.total_prenatal_suivi[ascId]["count"] + allDatasFound.total_postnatal_suivi[ascId]["count"] + allDatasFound.total_malnutrition_suivi[ascId]["count"] + allDatasFound.total_vad_women_emergency_suivi[ascId]["count"] + allDatasFound.total_family_planning_renewal_suivi[ascId]["count"];
-        const total_vad_pcime_c = allDatasFound.total_pcime_soins[ascId]["count"] + allDatasFound.total_pcime_suivi[ascId]["count"] + allDatasFound.total_newborn_suivi[ascId]["count"] + allDatasFound.total_malnutrition_suivi[ascId]["count"];
-        const total_suivi_pcime_c = allDatasFound.total_pcime_suivi[ascId]["count"] + allDatasFound.total_newborn_suivi[ascId]["count"] + allDatasFound.total_malnutrition_suivi[ascId]["count"];
-        const reference_femmes_pf = allDatasFound.total_reference_family_planning_soins[ascId]["count"] + allDatasFound.total_reference_family_planning_renewal_suivi[ascId]["count"];
-        const reference_pcime = allDatasFound.total_reference_pcime_soins[ascId]["count"] + allDatasFound.total_reference_pcime_suivi[ascId]["count"] + allDatasFound.total_reference_newborn[ascId]["count"] + allDatasFound.total_reference_malnutrition_suivi[ascId]["count"];
-        const reference_femmes_enceinte_postpartum = allDatasFound.total_reference_femme_enceinte_soins[ascId]["count"] + allDatasFound.total_reference_prenatal_suivi[ascId]["count"] + allDatasFound.total_reference_postnatal_suivi[ascId]["count"] + allDatasFound.total_reference_women_emergency_suivi[ascId]["count"];
-        const total_vad_femmes_enceinte = allDatasFound.total_vad_femme_enceinte_soins[ascId]["count"] + allDatasFound.total_prenatal_suivi[ascId]["count"] + allDatasFound.total_femme_enceinte_women_emergency_suivi[ascId]["count"];
-        const total_vad_femmes_postpartum = allDatasFound.total_postnatal_suivi[ascId]["count"] + allDatasFound.total_femme_postpartum_women_emergency_suivi[ascId]["count"];
-        const total_vad_family_planning = total_vad - (total_vad_pcime_c + total_vad_femmes_enceinte + total_vad_femmes_postpartum + allDatasFound["total_home_visit"][ascId]["count"]);
-
-        chwsData.total_vad += total_vad;
-        chwsData.total_vad_pcime_c += total_vad_pcime_c;
-        chwsData.total_suivi_pcime_c += total_suivi_pcime_c;
-        chwsData.total_vad_femmes_enceinte += total_vad_femmes_enceinte;
-        chwsData.total_vad_femmes_postpartum += total_vad_femmes_postpartum;
-        chwsData.total_recherche_active += allDatasFound.total_home_visit[ascId]["count"];
-        chwsData.total_vad_family_planning = total_vad_family_planning;
-        chwsData.reference_femmes_pf += reference_femmes_pf;
-        chwsData.reference_pcime += reference_pcime;
-        chwsData.reference_femmes_enceinte_postpartum = reference_femmes_enceinte_postpartum;
-        chwsData.total_diarrhee_pcime_soins += allDatasFound.total_diarrhee_pcime_soins[ascId]["count"];
-        chwsData.total_paludisme_pcime_soins += allDatasFound.total_paludisme_pcime_soins[ascId]["count"];
-        chwsData.total_pneumonie_pcime_soins += allDatasFound.total_pneumonie_pcime_soins[ascId]["count"];
-        chwsData.total_malnutrition_pcime_soins += allDatasFound.total_malnutrition_pcime_soins[ascId]["count"];
-        chwsData.prompt_diarrhee_24h_pcime_soins += allDatasFound.prompt_diarrhee_24h_pcime_soins[ascId]["count"];
-        chwsData.prompt_diarrhee_48h_pcime_soins += allDatasFound.prompt_diarrhee_48h_pcime_soins[ascId]["count"];
-        chwsData.prompt_diarrhee_72h_pcime_soins += allDatasFound.prompt_diarrhee_72h_pcime_soins[ascId]["count"];
-        chwsData.prompt_paludisme_24h_pcime_soins += allDatasFound.prompt_paludisme_24h_pcime_soins[ascId]["count"];
-        chwsData.prompt_paludisme_48h_pcime_soins += allDatasFound.prompt_paludisme_48h_pcime_soins[ascId]["count"];
-        chwsData.prompt_paludisme_72h_pcime_soins += allDatasFound.prompt_paludisme_72h_pcime_soins[ascId]["count"];
-        chwsData.prompt_pneumonie_24h_pcime_soins += allDatasFound.prompt_pneumonie_24h_pcime_soins[ascId]["count"];
-        chwsData.prompt_pneumonie_48h_pcime_soins += allDatasFound.prompt_pneumonie_48h_pcime_soins[ascId]["count"];
-        chwsData.prompt_pneumonie_72h_pcime_soins += allDatasFound.prompt_pneumonie_72h_pcime_soins[ascId]["count"];
-        chwsData.total_vad_femmes_enceintes_NC += allDatasFound.total_vad_femme_enceinte_NC_soins[ascId]["count"];
-        chwsData.total_vad_femme_postpartum_NC += allDatasFound.total_vad_femme_postpartum_NC[ascId]["count"];
-        chwsData.total_test_de_grossesse_domicile += allDatasFound.total_test_de_grossesse_domicile[ascId]["count"];
-      }
-
-      this.allAggragateData = [];
-
-      let datas = Object.entries(chwsData).map(([key, val]) => {
-        let finalData: AggragateData = { label: Functions.capitaliseDataGiven(key, '_', ' '), count: 0, icon: "ion-bag", color: "bg-info", detailUrl: "/dashboards/dash1" };
-        finalData.count = val as number;
-        this.allAggragateData.push(finalData);
-        return ``;
+      this.bodyData.push({
+        Code: this.getChwInfos(vals.chwId).external_id,
+        Name: this.getChwInfos(vals.chwId).name,
+        Pcime: vals.app_total_child_followup,
+        PcimeDhis2: vals.dhis_total_child_followup,
+        MaternellePf: vals.app_total_num_fp_followup,
+        MaternellePfDhis2: vals.dhis_total_num_fp_followup,
+        Recherche: vals.app_total_active_research,
+        RechercheDhis: vals.dhis_total_active_research,
+        Consultation: vals.app_total_consultation_followup,
+        ConsultationDhis: vals.dhis_total_consultation_followup,
+        Total: vals.app_total_home_visit,
+        TotalDhis: vals.dhis_total_home_visit,
+        TotalDiff: this.getRatio(vals.app_total_home_visit, vals.dhis_total_home_visit, false).value,
+        Ratio: this.getRatio(vals.app_total_home_visit, vals.dhis_total_home_visit)
       });
-    }
+    });
 
-    this.initMsg = '';
     this.isLoading = false;
+
   }
+
+  getDataValuesElements(data: { dataValues: { dataElement: string, value: any }[], dataElement: string, value: any }): boolean {
+    for (let j = 0; j < data.dataValues.length; j++) {
+      const vals = data.dataValues[j];
+      if (vals.dataElement == data.dataElement && vals.value == data.value) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  getRatio(val1: number, val2: number, isRatio: boolean = true): { value: number, color: string } {
+    var finals: number = 0;
+    var color: string = 'success';
+    var diff: number = val1 - val2;
+    if (isRatio) {
+      const final = (val1 > 0 ? ((diff) / val1) : val2 / 100) * 100;
+      finals = +(final < 0 ? -1 * final : final).toFixed(2);
+      if (finals > 0 && finals <= 5) color = 'warning';
+      if (finals > 5) color = 'danger';
+    } else {
+      finals = +(diff < 0 ? -1 * diff : diff).toFixed(2);
+    }
+    return { value: finals, color: color }
+  }
+
+  initTable() {
+    initDataTable('compare_data', false)
+  }
+
+  getChwInfos(chwId: string, byCode: boolean = false): Chws {
+    var ascs!: Chws;
+    for (let i = 0; i < this.chws$!.length; i++) {
+      const asc: Chws = this.chws$![i];
+      if (Functions.notNull(asc)) {
+        if (byCode == true) {
+          if (Functions.notNull(asc.external_id) && asc.external_id == chwId) return asc;
+        } else {
+          if (Functions.notNull(asc.id) && asc.id == chwId) return asc;
+        }
+      }
+    }
+    return ascs;
+  }
+
 
 }
+
+
