@@ -122,7 +122,7 @@ export class AppComponent implements OnInit {
     console.log('Service Worker is Enable: ', this.sw.isEnabled);
 
     if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion();
-    interval(300000)
+    interval(30000)
       .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
       .subscribe(() => {
         this.sw.checkForUpdate().then((updateFound) => {
