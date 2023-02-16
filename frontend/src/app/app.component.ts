@@ -112,7 +112,7 @@ export class AppComponent implements OnInit {
   }
 
   CancelUpdateVersion(){
-    // this.checkForAppNewVersion = false;
+    this.checkForAppNewVersion = false;
   }
 
   appVersionExist(): boolean {
@@ -125,17 +125,11 @@ export class AppComponent implements OnInit {
     console.log('Service Worker is Enable: ', this.sw.isEnabled);
 
     if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion();
-    interval(1000)
+    interval(30000)
       .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
       .subscribe(() => {
         this.sw.checkForUpdate().then((updateFound) => {
-          console.log('checkForUpdate ...')
-          if (updateFound) {
-            console.log('checkForUpdate')
-            this.checkForAvailableVersion();
-          }else{
-            console.log('everything is OK')
-          }
+          if (updateFound) this.checkForAvailableVersion();
         });
       });
   }
@@ -146,23 +140,23 @@ export class AppComponent implements OnInit {
         this.sw.versionUpdates.subscribe(evt => {
           switch (evt.type) {
             case 'VERSION_DETECTED':
-              console.log(`Downloading new app version: ${evt.version.hash}`);
+              // console.log(`Downloading new app version: ${evt.version.hash}`);
               this.ShowUpdateVersionModal();
               break;
             case 'VERSION_READY':
-              console.log(`Current app version: ${evt.currentVersion.hash}`);
-              console.log(`Last app version: ${evt.latestVersion.hash}`);
+              // console.log(`Current app version: ${evt.currentVersion.hash}`);
+              // console.log(`Last app version: ${evt.latestVersion.hash}`);
               break;
             case 'NO_NEW_VERSION_DETECTED':
-              console.log(`Current app version: '${evt.version.hash}'`);
+              // console.log(`Current app version: '${evt.version.hash}'`);
               break;
             case 'VERSION_INSTALLATION_FAILED':
-              console.log(`Failed to install app version '${evt.version.hash}': ${evt.error}`);
+              // console.log(`Failed to install app version '${evt.version.hash}': ${evt.error}`);
               break;
           }
         });
       } else {
-        console.log('Service Worker for Update is Inactive');
+        // console.log('Service Worker for Update is Inactive');
       }
     });
   }
