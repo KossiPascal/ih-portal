@@ -1,6 +1,6 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { NavigationEnd, Router, ActivatedRoute } from '@angular/router';
-import { SwUpdate, UpdateAvailableEvent, VersionReadyEvent } from '@angular/service-worker';
+import { SwUpdate } from '@angular/service-worker';
 import { filter, map, takeWhile } from 'rxjs/operators';
 import { AuthService } from '@ih-services/auth.service';
 import { Platform } from '@angular/cdk/platform';
@@ -11,7 +11,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { ConfigService } from './services/config.service';
 import { Roles } from './shared/roles';
 import { User } from './models/User';
-import moment from 'moment';
 import { AppStorageService } from './services/cookie.service';
 
 declare var $: any;
@@ -98,6 +97,7 @@ export class AppComponent implements OnInit {
   }
 
   ShowUpdateVersionModal() {
+    this.checkForAppNewVersion = false;
     this.clickModal('active-update-modal')
   }
 
@@ -111,9 +111,6 @@ export class AppComponent implements OnInit {
     }, (err: any) => { console.log(err.error) });
   }
 
-  CancelUpdateVersion(){
-    this.checkForAppNewVersion = false;
-  }
 
   appVersionExist(): boolean {
     var nullField: any[] = [undefined, 'undefined', null, 'null', ''];
@@ -125,7 +122,7 @@ export class AppComponent implements OnInit {
     console.log('Service Worker is Enable: ', this.sw.isEnabled);
 
     if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion();
-    interval(30000)
+    interval(300000)
       .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
       .subscribe(() => {
         this.sw.checkForUpdate().then((updateFound) => {
