@@ -123,6 +123,11 @@ export class AppComponent implements OnInit {
 
   private async checkForUpdates() {
     console.log('Service Worker is Enable: ', this.sw.isEnabled);
+    console.log('Service Can procide1 : ', this.auth.isLoggedIn());
+    console.log('Service Can procide2 : ', this.checkForAppNewVersion);
+    console.log('Service Can procide3 : ', this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion);
+
+
     if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion();
     interval(1000)
       .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
