@@ -6,27 +6,28 @@ export interface Sync {
   id: any;
   start_date: string;
   end_date: string;
+  dhisusersession:string
 
-  thinkmd_host: string;
-  thinkmd_site: string;
-  useToken: string;
-  thinkmd_token_username: string;
-  thinkmd_token: string;
-  thinkmd_username: string;
-  thinkmd_password: string;
+  // thinkmd_host: string;
+  // thinkmd_site: string;
+  // useToken: string;
+  // thinkmd_token_username: string;
+  // thinkmd_token: string;
+  // thinkmd_username: string;
+  // thinkmd_password: string;
 
-  medic_host: string;
-  medic_username: string;
-  medic_password: string;
-  medic_database: string;
+  // medic_host: string;
+  // medic_username: string;
+  // medic_password: string;
+  // medic_database: string;
 
-  InsertIntoDhis2: boolean;
-  dhis2_host: string;
-  dhis2_username: string;
-  dhis2_password: string;
+  // InsertIntoDhis2: boolean;
+  // dhis2_host: string;
+  // dhis2_username: string;
+  // dhis2_password: string;
 
-  port: number;
-  ssl_verification: boolean;
+  // port: number;
+  // ssl_verification: boolean;
 }
 
 
@@ -36,25 +37,26 @@ export interface CouchDbFetchData {
   viewName:string,
   startKey?: string[];
   endKey?: string[];
-  medic_host: string;
-  medic_username: string;
-  medic_password: string;
-  port: number;
-  ssl_verification: boolean;
+  // medic_host: string;
+  // medic_username: string;
+  // medic_password: string;
+  // port: number;
+  // ssl_verification: boolean;
   descending?: boolean
+  dhisusersession?:string
 }
 
 export interface Dhis2Sync {
-  host: string;
+  host: string
   port: number
-  username: string;
-  password: string;
-  cibleName: string,
-  program?: string,
+  cibleName: string
+  program?: string
   orgUnit?: string
-  filter?: string[],
-  fields?: string[],
+  filter?: string[]
+  fields?: string[]
   order?: string
+  user: string
+  dhisusersession: string
 }
 
 
@@ -91,11 +93,12 @@ export interface MailConfig {
 
 
 export interface UserValue {
-  token: string
   id: string
+  token: string
   username: string
   fullname: string
   roles:any
   isActive:boolean
   expiresIn:any
+  dhisusersession:string
 }

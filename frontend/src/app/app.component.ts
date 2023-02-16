@@ -224,12 +224,10 @@ export class AppComponent implements OnInit {
       const d22 = d2.getTime();
       if ((d11 - 300000) < d22) { // avant 5 min d'action
         this.conf.NewUserToken().subscribe((res: any) => {
-          this.auth.clientSession(res.data);
+          this.store.set("user", JSON.stringify(res.data));
         }, (err: any) => { console.log(err.error) });
       }
     }
-
-
   }
 }
 

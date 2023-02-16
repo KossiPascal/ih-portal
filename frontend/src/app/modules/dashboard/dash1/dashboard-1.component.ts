@@ -28,6 +28,7 @@ export class Dashboard1Component implements OnInit {
       end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
       districts: new FormControl(""),
       sites: new FormControl(""),
+      withRatio:new FormControl(false, [Validators.required]),
     });
   }
 
@@ -78,8 +79,8 @@ export class Dashboard1Component implements OnInit {
             this.Chws$ = _c$.data;
             this.chws$ = _c$.data;
           }
-          // this.initDataFilted();
-          this.isLoading = false;
+          this.initDataFilted();
+          // this.isLoading = false;
         }, (err: any) => {
           this.isLoading = false;
           console.log(err.error);
@@ -146,6 +147,7 @@ export class Dashboard1Component implements OnInit {
   }
 
   initDataFilted(params?: FilterParams): void {
+    this.initMsg = 'Loading Data ...';
     this.isLoading = true;
     this.sync.getAllChwsDataWithParams(params ?? this.ParamsToFilter()).subscribe((res: { status: number, data: any }) => {
       if (res.status == 200) {

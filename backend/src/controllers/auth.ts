@@ -11,7 +11,7 @@ export class AuthController {
             const username = req.body.username;
             const password = req.body.password;
             if (username && password) {
-                const dhisuserAuthorization = 'Basic ' + Buffer.from(username + ':' + password).toString('base64');
+                const dhisuserAuthorization = Buffer.from(username + ':' + password).toString('base64');
                 await userLoginStatus(dhisuserAuthorization)
                     .then(r =>  {
                         if(r == true){

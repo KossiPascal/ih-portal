@@ -23,7 +23,7 @@ export class AuthService {
       try {
         if (Functions.notNull(this.store.get('user'))) {
           var userData: User = JSON.parse(this.store.get('user') ?? '');
-          userData.userLogo = 'assets/images/kossi.png';
+          userData.userLogo = 'assets/images/default_icon.png';
           // if( typeof(your_variable) === 'string' ) { ... }
           return userData;
         };
@@ -51,10 +51,6 @@ export class AuthService {
 
   isLoggedOut() {
     return !this.isLoggedIn();
-  }
-
-  public clientSession(user: User): void {
-    localStorage.setItem("user", JSON.stringify(user));
   }
 
   appLogoPath() {

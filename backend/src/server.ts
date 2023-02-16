@@ -1,9 +1,9 @@
 import "reflect-metadata"
 import express from 'express';
 import { json, urlencoded } from 'body-parser';
-import { Functions } from './utils/functions';
-require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
-import { AppDataSource } from './data-source';
+import { Functions, projectFolder, sslFolder } from './utils/functions';
+require('dotenv').config({ path: sslFolder('.env') });
+import { AppDataSource } from './data_source';
 // import { JsonDatabase } from './json-data-source';
 
 import cors from "cors";
@@ -88,8 +88,8 @@ const app = express()
   .use('/api/assets', express.static(__dirname + '/assets'))
   // .use(express.static(`${Functions.projectFolder()}/views`, {maxAge: `1y`}))
   // .use('/', (req,res) => res.sendFile(`${Functions.projectFolder()}/views/index.html`))
-  .use(express.static(path.join(Functions.projectFolder(), "views")))
-  .use("/", (req, res) => res.sendFile(path.join(Functions.projectFolder(), "views/index.html")))
+  .use(express.static(path.join(projectFolder(), "views")))
+  .use("/", (req, res) => res.sendFile(path.join(projectFolder(), "views/index.html")))
   .all('*', (req, res) => res.status(200).redirect("/"))
   // .use((req, res, next) => next(createError(404, "Not found")))
   .use(Errors.get404)
@@ -99,9 +99,9 @@ const app = express()
 
 const appSecured = app;
 const credentials = {
-  key: fs.readFileSync(`${Functions.sslFolder('server.key')}`, 'utf8'),
-  ca: fs.readFileSync(`${Functions.sslFolder('server-ca.crt')}`, 'utf8'),
-  cert: fs.readFileSync(`${Functions.sslFolder('server.crt')}`, 'utf8')
+  key: fs.readFileSync(`${sslFolder('server.key')}`, 'utf8'),
+  ca: fs.readFileSync(`${sslFolder('server-ca.crt')}`, 'utf8'),
+  cert: fs.readFileSync(`${sslFolder('server.crt')}`, 'utf8')
 };
 
 app.set('port', port);

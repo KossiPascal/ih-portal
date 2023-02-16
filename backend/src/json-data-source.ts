@@ -1,8 +1,8 @@
-import { Functions } from "./utils/functions";
+import { sslFolder, JsonDbFolder } from "./utils/functions";
 const JSONFileStorage = require('node-json-file-storage');
 
-// require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
-// const { DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS } = process.env
+require('dotenv').config({ path: sslFolder('.env') });
+const { DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS } = process.env
 
 // const districts_uri = 
 // const sites_uri = `${Functions.JsonDbFolder('sites')}`;
@@ -13,7 +13,7 @@ export class JsonDatabase {
     storage: any;
 
     constructor(file_Name: 'users' | 'districts' | 'sites' | 'zones' | 'chws' | 'families' | 'patients' | 'configs') {
-        this.storage = new JSONFileStorage(`${Functions.JsonDbFolder(file_Name)}`);
+        this.storage = new JSONFileStorage(`${JsonDbFolder(file_Name)}`);
     }
 
     //get from file

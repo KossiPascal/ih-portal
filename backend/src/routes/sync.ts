@@ -1,4 +1,4 @@
-import { getChwsDataWithParams, deleteChwsData } from "../controllers/dataFromDB";
+import { getChwsDataWithParams, deleteChwsData, fetchIhChtDataPerChw } from "../controllers/dataFromDB";
 import { getChws, getDistricts, getFamilies, getPatients, getSites, getZones } from "../controllers/orgUnitsFromDB ";
 import { fetchChwsDataFromCouchDb, fetchChwsDataFromDhis2, fetchOrgUnitsFromCouchDb } from "../controllers/fetchFormCloud";
 import { Middelware } from "../middleware/auth";
@@ -17,6 +17,7 @@ syncRouter.post(
     body('start_date').trim().isDate().not().isEmpty(),
     body('end_date').trim().isDate().not().isEmpty()
   ],
+  Middelware.authMiddleware,
   fetchChwsDataFromCouchDb
 );
 
@@ -31,8 +32,6 @@ syncRouter.post(
     body('fields').not().isEmpty(),
     body('filter').not().isEmpty(),
     body('orgUnit').not().isEmpty(),
-    body('username').not().isEmpty(),
-    body('password').not().isEmpty(),
   ],
   Middelware.authMiddleware,fetchChwsDataFromDhis2);
 
@@ -43,8 +42,22 @@ syncRouter.post(
   //   body('medic_username').trim().isLength({ min: 3 }).not().isEmpty(),
   //   body('medic_password').trim().isLength({ min: 8 }).not().isEmpty(),
   // ],
+  Middelware.authMiddleware,
   fetchOrgUnitsFromCouchDb
 );
+
+syncRouter.post(
+  '/ih_cht_data_per_chw',
+  // [
+  //   body('medic_host').trim().isLength({ min: 5 }).not().isEmpty(),
+  //   body('medic_username').trim().isLength({ min: 3 }).not().isEmpty(),
+  //   body('medic_password').trim().isLength({ min: 8 }).not().isEmpty(),
+  // ],
+  Middelware.authMiddleware,
+  fetchIhChtDataPerChw
+);
+
+
 
 syncRouter.post('/chws', Middelware.authMiddleware,getChws);
 syncRouter.post('/districts', Middelware.authMiddleware,getDistricts);

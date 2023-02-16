@@ -1,15 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 import { DataSource, EntityMetadata, In } from "typeorm";
-import { AppDataSource } from "../data-source";
+import { AppDataSource } from "../data_source";
 import { httpHeaders} from "../utils/functions";
-import { getChwsDataSyncRepository, getChwsSyncRepository, getDistrictSyncRepository, getFamilySyncRepository, getPatientSyncRepository, getSiteSyncRepository, getZoneSyncRepository } from "../entity/Sync";
+import { getChwsDataSyncRepository, getChwsSyncRepository, getFamilySyncRepository, getPatientSyncRepository } from "../entity/Sync";
 import { getChwsDataWithParams } from "./dataFromDB";
 import { getPatients, getFamilies } from "./orgUnitsFromDB ";
 const request = require('request');
 // const axios = require('axios');
-const fetch = require('node-fetch')
-
+// const fetch = require('node-fetch')
 
 export async function databaseEntitiesList(req: Request, res: Response, next: NextFunction) {
     const errors = validationResult(req);
@@ -30,7 +29,6 @@ export async function databaseEntitiesList(req: Request, res: Response, next: Ne
 
 
 export async function truncatePostgresMysqlJsonDatabase(req: Request, res: Response, next: NextFunction) {
-    console.log(req.body)
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
     if (req.body.procide == true) {

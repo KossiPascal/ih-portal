@@ -1,69 +1,13 @@
 import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository } from "../entity/Sync";
 import { CouchDbFetchData, Dhis2DataFormat } from "../utils/appInterface";
-import { Dhis2SyncConfig, Functions, isNotNull, CouchDbFetchDataOptions } from "../utils/functions";
+import { Dhis2SyncConfig, Functions, isNotNull, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder } from "../utils/functions";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import https from 'https';
 
 const fetch = require('node-fetch');
-require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
 
-
-// function formatDataId(host: any, id: any, port: any): string {
-//     const val = `${host}`.replace('.org', '').replace('.', '').replace('-', '').replace('/', '').trim();
-//     return `${id}_${val}.${port}`;
-// }
-
-async function getSiteByDhis2Uid(uid: string): Promise<string | undefined> {
-    var res: string | undefined = undefined;
-    try {
-        const _repoSite = await getSiteSyncRepository();
-        const site: Sites = await _repoSite.findOneByOrFail({ external_id: uid })
-        return site.id;
-    } catch (error) {
-
-    }
-    return res;
-}
-
-async function getChwsByDhis2Uid(id: string): Promise<string | undefined> {
-    var res: string | undefined = undefined;
-    try {
-        const _repoChws = await getChwsSyncRepository();
-        const asc: Chws = await _repoChws.findOneByOrFail({ external_id: id })
-        return asc.id;
-    } catch (error) {
-
-    }
-    return res;
-}
-
-function getValue(dataValues: { dataElement: string, value: any }[], elementId: string): string {
-    for (let i = 0; i < dataValues.length; i++) {
-        const data = dataValues[i];
-        if (data.dataElement == elementId) {
-            return data.value;
-        }
-    }
-    return '';
-}
-
-function getDataValuesAsMap(dataValues: { dataElement: string, value: any }[], excludeDataElement?: string[]) {
-    var finalData: any = {};
-
-    for (let i = 0; i < dataValues.length; i++) {
-        const data = dataValues[i];
-        if (isNotNull(excludeDataElement)) {
-            if (!excludeDataElement!.includes(data.dataElement)) {
-                finalData[data.dataElement] = data.value;
-            }
-        } else {
-            finalData[data.dataElement] = data.value;
-        }
-    }
-    return finalData;
-}
-
+require('dotenv').config({ path: sslFolder('.env') });
 
 
 export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: NextFunction) {
@@ -78,11 +22,7 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
 
     const repository = await getChwsDataSyncRepository();
     const _repoSite = await getSiteSyncRepository();
-    // const _repoChws = await getChwsSyncRepository();
-
     req.body['host'] = process.env.DHIS_HOST;
-    // req.body['username'] = process.env.DHIS_USER;
-    // req.body['password'] = process.env.DHIS_PASS;
     req.body['cibleName'] = 'events';
     req.body['program'] = 'siupB4uk4O2';
 
@@ -109,7 +49,7 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
                                 try {
                                     districtId = (await _repoSite.findOneBy({ id: siteId }))?.district;
                                 } catch (error) {
-                                    console.log('No district found !')
+                                    // console.log('No district found !')
                                 }
                                 const chwsId: any = await getChwsByDhis2Uid(getValue(row.dataValues, 'JkMyqI3e6or'));
                                 const dateVal = getValue(row.dataValues, 'RlquY86kI66');
@@ -190,12 +130,6 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
         viewName: 'reports_by_date',
         startKey: [Functions.date_to_milisecond(req.body.start_date, true)],
         endKey: [Functions.date_to_milisecond(req.body.end_date, false)],
-
-        medic_host: process.env.CHT_HOST ?? '',
-        port: parseInt(process.env.CHT_PORT ?? '443'),
-        medic_username: process.env.CHT_USER ?? '',
-        medic_password: process.env.CHT_PASS ?? '',
-        ssl_verification: true,
     };
 
     try {
@@ -224,7 +158,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                     try {
                                         districtId = (await _repoSite.findOneBy({ id: siteId }))?.district;
                                     } catch (error) {
-                                        console.log('No district found !')
+                                        // console.log('No district found !')
                                     }
                                     if (districtId && siteId) {
                                         if (!outPutInfo.hasOwnProperty("Données Total")) outPutInfo["Données Total"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
@@ -294,7 +228,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
         outPutInfo["Message"]["errorElements"] = err.message;
         resp.status(err.statusCode).json(outPutInfo);
     }
-};
+}
 
 export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, next: NextFunction) {
 
@@ -309,11 +243,6 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
         viewName: 'contacts_by_type',
         // startKey: [Functions.date_to_milisecond(req.body.start_date, true)],
         // endKey: [Functions.date_to_milisecond(req.body.end_date, false)],
-        medic_host: process.env.CHT_HOST ?? '',
-        port: parseInt(process.env.CHT_PORT ?? ''),
-        medic_username: process.env.CHT_USER ?? '',
-        medic_password: process.env.CHT_PASS ?? '',
-        ssl_verification: true,
     };
 
     try {
@@ -346,8 +275,6 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                         patient: req.body.patient,
                         chw: req.body.chw
                     };
-
-                    console.log(authorized)
 
                     if (authorized.site) {
                         outDoneLenght++;
@@ -417,7 +344,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                 try {
                                     districtId = (await _repoSite.findOneBy({ id: siteId }))?.district;
                                 } catch (error) {
-                                    console.log('No district found !')
+                                    // console.log('No district found !')
                                 }
                                 if (siteId && districtId) {
                                     if (!outPutInfo.hasOwnProperty("Zones")) outPutInfo["Zones"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' };
@@ -458,7 +385,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                     try {
                                         districtId = (await _repoSite.findOneBy({ id: siteId }))?.district;
                                     } catch (error) {
-                                        console.log('No district found !')
+                                        // console.log('No district found !')
                                     }
                                     if (siteId && districtId) {
                                         if (!outPutInfo.hasOwnProperty("Familles")) outPutInfo["Familles"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
@@ -501,7 +428,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                         try {
                                             districtId = (await _repoSite.findOneBy({ id: siteId }))?.district;
                                         } catch (error) {
-                                            console.log('No district found !')
+                                            // console.log('No district found !')
                                         }
                                         if (districtId && siteId) {
                                             if (!outPutInfo.hasOwnProperty("Patients")) outPutInfo["Patients"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '', }
@@ -525,7 +452,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                                 outPutInfo["Patients"]["errorCount"] += 1;;
                                                 outPutInfo["Patients"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
                                                 outPutInfo["Patients"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.doc._id}`;
-                                                console.log(row.doc._id)
+                                                // console.log(row.doc._id)
                                             }
                                         }
                                     }
@@ -547,7 +474,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                     try {
                                         districtId = (await _repoSite.findOneBy({ id: siteId }))?.district;
                                     } catch (error) {
-                                        console.log('No district found !')
+                                        // console.log('No district found !')
                                     }
                                     if (districtId && siteId) {
                                         if (!outPutInfo.hasOwnProperty("Asc")) outPutInfo["Asc"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' };
@@ -613,8 +540,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
         outPutInfo["Message"]["errorElements"] = err.message;
         resp.status(err.statusCode).json(outPutInfo);
     }
-};
-
+}
 
 
 

@@ -5,9 +5,9 @@ import { Between, Equal, In } from "typeorm";
 // const request = require('request');
 
 import { getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, getDistrictSyncRepository, Districts } from "../entity/Sync";
-import { Functions, isNotNull } from "../utils/functions";
+import { isNotNull, sslFolder } from "../utils/functions";
 
-require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
+require('dotenv').config({ path: sslFolder('.env') });
 
 
 // OperatorSymbolToFunction = new Map<FilterOperator, (...args: any[]) => FindOperator<string>>([
@@ -46,7 +46,6 @@ export async function getDistricts(req: Request, res: Response, next: NextFuncti
 };
 
 export async function getSites(req: Request, res: Response, next: NextFunction) {
-    console.log(req.body)
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
     try {
@@ -95,10 +94,15 @@ export async function getZones(req: Request, res: Response, next: NextFunction) 
     }
 };
 
-export async function getChws(req: Request, res: Response, next: NextFunction) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
+export async function getChws(req: Request, res: Response, next: NextFunction, onlyData:boolean = false):Promise<any> {
+    var respData:{ status: number, data: any };
 
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        respData = { status: 201, data: 'Informations you provided are not valid' }
+        return onlyData ? respData : res.status(201).json(respData);
+    }
+    
     try {
         const _chwRepo = await getChwsSyncRepository();
         const user: string[] = req.body.user;
@@ -118,13 +122,13 @@ export async function getChws(req: Request, res: Response, next: NextFunction) {
 
         });
 
-        if (!chws) return res.status(201).json({ status: 201, data: 'No Data Found !' });
-        return res.status(200).json({ status: 200, data: chws });
+        respData = !chws ? { status: 201, data: 'No Data Found !' } : { status: 200, data: chws }
     } catch (err) {
         // return next(err);
-        console.log(err)
-        return res.status(201).json({ status: 201, data: err });
+        respData = { status: 201, data: err };
     }
+
+    return onlyData ? respData : res.status(respData.status).json(respData);
 };
 
 export async function getFamilies(req: Request, res: Response, next: NextFunction) {

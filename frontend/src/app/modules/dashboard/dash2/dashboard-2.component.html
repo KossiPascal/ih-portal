@@ -2,107 +2,220 @@
 
 <section class="content">
   <div class="container-fluid">
-    <div class="card card-warning">
+    <div class="card card-info">
       <div class="overlay-wrapper">
-        <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i> <div class="text-bold pt-2"> {{initMsg}}</div></div>
-      
-      <div class="card-header">
-        <form [formGroup]="aggradateDataForm" (ngSubmit)="initAllData()" novalidate>
-          <div class="row">
+        <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
+          <div class="text-bold pt-2"> {{initMsg}}</div>
+        </div>
 
-            <!-- <div class="col-sm-2 col-6">
-              <div class="form-group">
-                <label>Date Début</label>
-                <input type="date" class="form-control" formControlName="start_date"/>
+        <div class="card-header">
+          <form [formGroup]="aggradateDataForm" (ngSubmit)="initDataFilted()" novalidate>
+            <div class="row">
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Début</label>
+                  <input type="date" class="form-control" formControlName="start_date" />
+                </div>
               </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Fin</label>
+                  <input type="date" class="form-control" formControlName="end_date" />
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>District</label>
+                  <select *ngIf="Districts$.length > 0" (change)="genarateSites()" class="form-control"
+                    multiple="multiple" formControlName="districts">
+                    <option value=""></option>
+                    <option *ngFor="let dist of Districts$" value="{{dist.id}}">
+                      {{ dist.name }}
+                    </option>
+                  </select>
+                  <select *ngIf="Districts$.length == 0" class="form-control"></select>
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Site</label>
+                  <select *ngIf="sites$.length > 0" (change)="genarateChws()" class="form-control" multiple="multiple"
+                    formControlName="sites">
+                    <option value=""></option>
+                    <option *ngFor="let site of sites$" value="{{site.id}}">
+                      {{ site.name }}
+                    </option>
+                  </select>
+                  <select *ngIf="sites$.length == 0" class="form-control"></select>
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>ASC</label>
+                  <select *ngIf="chws$.length > 0" class="form-control" multiple="multiple" formControlName="chws">
+                    <option value=""></option>
+                    <option *ngFor="let chw of chws$" value="{{chw.id}}">
+                      {{chw.name}}
+                    </option>
+                  </select>
+                  <select *ngIf="chws$.length == 0" class="form-control"></select>
+                </div>
+              </div>
+
+              <div *ngIf="Sources$.length > 0" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Source</label>
+                  <select class="form-control" formControlName="sources">
+                    <option value=""></option>
+                    <option *ngFor="let source of Sources$" value="{{source}}">
+                      {{ source }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>.</label>
+                  <button [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control">
+                    OK <span class="fa fa-floppy-o fa-right"></span>
+                  </button>
+                </div>
+              </div>
+
             </div>
+          </form>
+        </div>
 
-            <div class="col-sm-2 col-6">
-              <div class="form-group">
-                <label>Date Fin</label>
-                <input type="date" class="form-control" formControlName="end_date"/>
+      </div>
+    </div>
+
+
+    <!-- Main content -->
+
+    <section class="content">
+      <div class="container-fluid">
+
+        <div class="col-sm-5">
+          <h2 *ngIf="data_error_messages!=''">
+              <div class="card card-info">
+                  <div class="card-body">
+                      {{ data_error_messages }}
+                  </div>
               </div>
-            </div>            -->
-            
-            <!-- <div class="col-sm-2 col-6">
-              <div class="form-group">
-                <label>Source</label>
-                <select (change)="genarateSites()" class="form-control" formControlName="sources" (click)="genarateSites()">
-                  <option value=""></option>
-                  <option *ngFor="let source of sources$" value="{{source}}">
-                    {{formatHostName(source)}}
-                  </option>
-                </select>
-                
+          </h2>
+          <h2 *ngIf="data_no_data_found == true">
+              <div class="card card-info">
+                  <div class="card-body">
+                      Pas de données trouvée avec les paramettres renseignés !
+                  </div>
               </div>
-            </div> -->
-
-            <div class="col-sm-2 col-6">
-              <div class="form-group">
-                <label>District</label>
-                <select (change)="genarateSites()" class="form-control" formControlName="districts">
-                  <option value=""></option>
-                  <option *ngFor="let district of Districts$" value="{{district.id}}">
-                    {{ district.name }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-sm-2 col-6">
-              <div class="form-group">
-                <label>Site</label>
-                <select (change)="genarateChws()" class="form-control" formControlName="sites" (click)="genarateChws()">
-                  <option value=""></option>
-                  <option *ngFor="let site of sites$" value="{{site.id}}">
-                    {{ site.name }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-sm-3 col-6">
-              <div class="form-group">
-                <label>ASC</label>
-                <select *ngIf="chws$.length > 0" class="form-control" multiple="multiple" formControlName="chws">
-                  <option value=""></option>
-                  <option *ngFor="let chw of chws$" value="{{chw.id}}">
-                    {{chw.name}}
-                  </option>
-                </select>
-                <select *ngIf="chws$.length == 0"  class="form-control">
-
-                </select>
-              </div>
-            </div>
-
-            <div class="col-sm-1 col-6">
-              <div class="form-group">
-                <label>.</label>
-                <button [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control"> 
-                  <i class="nav-icon fas fa-search"></i>
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </form>
+          </h2>
       </div>
 
-    </div>
-    </div>
+        <div *ngIf="data_error_messages==''  && ChwsDataFromDb$.length > 0" class="card card-info">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Données par ASC</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+              <table class="table table-sm table-striped" style="margin: auto;">
+                <thead>
+                  <tr>
+                    <th>ASC</th>
+                    <th>Nbre Action/Jour</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let data of ChwsDataFromDb$; let i=index" (click)="seeSelectedChwData(data)"
+                    data-toggle="modal" data-target="#modal-default">
+                    <td>
+                      <span style="font-size: 18px;" class="custom-badge"> <b>{{ data.chw.name }}</b> </span><br>
+                      <span class="custom-badge">{{ data.chw.external_id }}</span><br>
+                      <span style="font-size: 14px;" class="info"><small>Total Action: </small> <b>{{
+                          data.data.total_vad }}</b> </span>
+                    </td>
 
-    <div class="row card-body">
-      <div class="col-sm-3 col-6" *ngFor="let data of allAggragateData; trackBy:identifyAggragateData">
-        <div class="small-box {{data.color}}">
-          <div class="inner">
-            <h3 style="font-size: 40px;">{{ data.count }}</h3>
-            <p><strong>{{ data.label }}</strong></p>
+                    <td>
+                      <span style="font-size: 20px;">~ </span><span style="font-size: 35px;padding: 1px;"
+                        class="custom-action badge bg-warning"> {{
+                        (data.data.total_vad/18).toFixed((data.data.total_vad/18)<1 ? 1 : 0) }} </span>
+                          <br>
+                          <span class="info"><strong>Actions/Jr</strong></span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- /.card-body -->
           </div>
-          <div class="icon"> <i class="ion {{data.icon}}"></i> </div>
+
+        </div>
+
+      </div>
+    </section>
+
+
+
+
+
+    <div *ngIf="selectedChwData!=null" class="modal fade" id="modal-default">
+      <div class="modal-dialog">
+
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2> {{ selectedChwData.chw.name  }} <br> <small>{{ selectedChwData.chw.external_id }}</small> </h2>
+
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+          </div>
+          <div class="modal-body">
+            <div class="row card-body">
+              <div class="col-sm-6 col-6" *ngFor="let data of selectedChwData.data | keyvalue">
+                <div style="border: 1px solid black;" class="small-box bg-info">
+                  <div class="inner">
+                    <h3 style="font-size: 40px;">{{ data.value }}</h3>
+                    <p><strong>{{ capitaliseDataGiven(data.key, '_', ' ') }}</strong></p>
+                  </div>
+                  <div class="icon"> <i class="ion ion-stats-bars"></i> </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer justify-content-between">
+            <button id="close-modal" type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+          </div>
         </div>
       </div>
     </div>
+
+
+
+
+
+    <!-- /.content -->
+
+    <!-- <br><br>
+
+    <div class="row" style="display: none;">
+      <section class="col-lg-12 connectedSortable">
+        <div id="main-head" style="text-align:center">
+          <h1>view-graph</h1>
+          <div id="container"></div>
+        </div>
+      </section>
+    </div>
+
+    <br><br> -->
+
+
 
     <br><br>
 

@@ -5,7 +5,6 @@ import { DashboardsRoutingModule } from './dashboards-routing.module';
 import { Dashboard1Component } from './dash1/dashboard-1.component';
 import { Dashboard2Component } from './dash2/dashboard-2.component';
 import { Dashboard3Component } from './dash3/dashboard-3.component';
-import { Dashboard4Component } from './dash4/dashboard-4.component';
 
 @NgModule({
   imports: [
@@ -13,6 +12,6 @@ import { Dashboard4Component } from './dash4/dashboard-4.component';
     ReactiveFormsModule,
     DashboardsRoutingModule
   ],
-  declarations: [Dashboard1Component,Dashboard2Component,Dashboard3Component,Dashboard4Component]
+  declarations: [Dashboard1Component,Dashboard2Component,Dashboard3Component]
 })
 export class DashboardsModule { }

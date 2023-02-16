@@ -53,7 +53,7 @@ export class UserComponent implements OnInit {
         const userfound:User[] = res.data;
         for (let i = 0; i < userfound.length; i++) {
           const user = userfound[i];
-          delete user.password;
+          // delete user.password;
           this.users$.push(user)
         }
       } else {
@@ -105,12 +105,12 @@ export class UserComponent implements OnInit {
     return new FormGroup({
       username: new FormControl(user != null ? user.username : '', [Validators.required, Validators.minLength(4)]),
       fullname: new FormControl(user != null ? user.fullname : '', [Validators.required, Validators.minLength(4)]),
-      email: new FormControl(user != null ? user.email : '', [Validators.required, Validators.email]),
+      // email: new FormControl(user != null ? user.email : '', [Validators.required, Validators.email]),
       password: new FormControl('', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]),
       passwordConfirm: new FormControl('', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]),
       roles: new FormControl(user != null ? user.roles : '', [Validators.required, Validators.minLength(1)]),
       isActive: new FormControl(user != null ? user.isActive : false),
-      isSuperAdmin: new FormControl(user != null ? user.isSuperAdmin : false)
+      // isSuperAdmin: new FormControl(user != null ? user.isSuperAdmin : false)
       
     }, [this.MatchValidator('password', 'passwordConfirm')]);
   }

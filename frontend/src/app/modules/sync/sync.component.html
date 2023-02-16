@@ -3,7 +3,7 @@
 
     <div class="col-12 col-sm-12">
 
-        <div *ngIf="activePage === 'dataToDhis2'" class="card card-warning card-tabs">
+        <div class="card card-warning card-tabs">
             <div class="card-header p-0 pt-1">
                 <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
                     <li class="nav-item">
@@ -15,6 +15,12 @@
                     <li class="nav-item">
                         <a class="nav-link" id="custom-tabs-one-cht-tab" data-toggle="pill" href="#custom-tabs-one-cht"
                             role="tab" aria-controls="custom-tabs-one-cht" aria-selected="false">CHT To DHIS2
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-chws-week-data-tab" data-toggle="pill"
+                            href="#custom-tabs-chws-week-data" role="tab" aria-controls="custom-tabs-chws-week-data"
+                            aria-selected="true">Chws Week Data
                         </a>
                     </li>
                 </ul>
@@ -50,8 +56,21 @@
                                                                 (change)="cleanError()" formControlName="end_date" />
                                                         </div>
                                                     </div>
+                                                    <div class="col-sm-2"></div>
+                                                    
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Use Dhis2</label>
+                                                            <div class="form-check">
+                                                                <input id="thinkmdToDhis2" class="form-check-input"
+                                                                    type="checkbox" formControlName="InsertIntoDhis2">
+                                                                <label class="form-check-label"
+                                                                    for="thinkmdToDhis2">Insert Into Dhis2</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                
+
                                                 <!-- <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
@@ -66,7 +85,7 @@
                                                     </div>
                                                 </div> -->
 
-                                                <br>
+                                                <!-- <br>
                                                 <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
@@ -82,24 +101,9 @@
                                                                 formControlName="thinkmd_token" />
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> -->
 
                                                 <br>
-
-                                                <div class="row">
-                                                    <div class="col-sm-6">
-                                                        <div class="form-group">
-                                                            <label>Use Dhis2</label>
-                                                            <div class="form-check">
-                                                                <input id="thinkmdToDhis2" class="form-check-input"
-                                                                    type="checkbox" formControlName="InsertIntoDhis2">
-                                                                <label class="form-check-label"
-                                                                    for="thinkmdToDhis2">Insert Into Dhis2</label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
 
 
 
@@ -136,7 +140,7 @@
                                 </div>
                             </div>
                             <div class="col-sm-5">
-                                
+
                                 <div *ngIf="tab1_messages_error != null">
                                     {{ tab1_messages_error }} <br>
                                 </div>
@@ -218,8 +222,10 @@
                                             <h3 class="card-title">Get Aggregate Data From CHT mebile</h3>
                                         </div>
                                         <!-- /.card-header -->
-                                        <form [formGroup]="ihChtToDhis2Form" (ngSubmit)="runIhChtToDhis2()" novalidate>
+                                        <form [formGroup]="ihChtToDhis2Form" (ngSubmit)="flushIhChtDataToDhis2()"
+                                            novalidate>
                                             <div class="card-body">
+
                                                 <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
@@ -240,6 +246,56 @@
                                                 <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
+                                                            <label>District</label>
+                                                            <select *ngIf="Districts$.length > 0"
+                                                                (change)="genarateSites()" class="form-control"
+                                                                multiple="multiple" formControlName="districts">
+                                                                <option value=""></option>
+                                                                <option *ngFor="let district of Districts$"
+                                                                    value="{{district.id}}">
+                                                                    {{ district.name }}
+                                                                </option>
+                                                            </select>
+                                                            <select *ngIf="Districts$.length == 0"
+                                                                class="form-control"></select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Site</label>
+                                                            <select *ngIf="sites$.length > 0" (change)="genarateChws()"
+                                                                class="form-control" multiple="multiple"
+                                                                formControlName="sites" (click)="genarateChws()">
+                                                                <option value=""></option>
+                                                                <option *ngFor="let site of sites$" value="{{site.id}}">
+                                                                    {{ site.name }}
+                                                                </option>
+                                                            </select>
+                                                            <select *ngIf="sites$.length == 0"
+                                                                class="form-control"></select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>ASC</label>
+                                                            <select *ngIf="chws$.length > 0" class="form-control"
+                                                                multiple="multiple" formControlName="chws">
+                                                                <option value=""></option>
+                                                                <option *ngFor="let chw of chws$" value="{{chw.id}}">
+                                                                    {{chw.name}}
+                                                                </option>
+                                                            </select>
+                                                            <select *ngIf="chws$.length == 0"
+                                                                class="form-control"></select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
                                                             <label>Use Dhis2</label>
                                                             <div class="form-check">
                                                                 <input id="InsertIntoDhis2" class="form-check-input"
@@ -250,18 +306,9 @@
                                                             </div>
                                                         </div>
                                                     </div>
-
-                                                    <div *ngIf="ihChtToDhis2Form.value.InsertIntoDhis2"
-                                                        class="col-sm-6">
-                                                        <div class="form-group">
-                                                            <label>DHIS2 HOST</label>
-                                                            <input type="text" class="form-control"
-                                                                formControlName="dhis2_host" />
-                                                        </div>
-                                                    </div>
                                                 </div>
 
-                                                <div *ngIf="ihChtToDhis2Form.value.InsertIntoDhis2" class="row">
+                                                <!-- <div *ngIf="ihChtToDhis2Form.value.InsertIntoDhis2" class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>DHIS2 USERNAME</label>
@@ -276,7 +323,7 @@
                                                                 formControlName="dhis2_password" />
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> -->
                                             </div>
 
                                             <!-- /.card-body -->
@@ -294,66 +341,135 @@
                             </div>
 
                             <div class="col-sm-5">
-                                <div *ngFor="let item of tab3_messages?.dataToSend?.Dhis2Import| keyvalue">
-                                    {{item.key}}:{{item.value}} <br>
-                                </div>
-
-                                <!-- {{ tab3_messages?.dataToSend?.Error }}<br> -->
-                                <div *ngFor="let item of tab3_messages?.dataToSend?.ErrorMsg| keyvalue">
-                                    {{item.key}}:{{item.value}} <br>
-                                </div>
-
-                                <!-- {{ tab3_messages?.errorToSend?.ErrorCount }}<br> -->
-                                {{ tab3_messages?.errorToSend?.ConsoleError }}<br>
-
-                                <div *ngFor="let item of tab3_messages?.errorToSend?.ErrorData">
-                                    Error Found: {{item}}<br>
-                                </div>
-                                <div *ngIf="tab3_messages?.dataToSend?.success == 'true'">
-                                    Pas d'erreur rencontré lors de la récupération des données sur le serveur!
-                                </div>
-
-
+                                <h2 *ngIf="tab3_error_messages!=''">
+                                    <div class="card card-info">
+                                        <div class="card-body">
+                                            {{ tab3_error_messages }}
+                                        </div>
+                                    </div>
+                                </h2>
+                                <h2 *ngIf="tab3_no_data_found == true">
+                                    <div class="card card-info">
+                                        <div class="card-body">
+                                            Pas de données trouvée avec les paramettres renseignés !
+                                        </div>
+                                    </div>
+                                </h2>
                             </div>
                         </div>
+
+
+
+
 
                         <div class="row">
                             <div class="col-sm-12">
                                 <!-- /.card -->
-                                <div class="card"
-                                    *ngIf="tab3_messages?.dataToSend?.Data != null && tab3_messages?.dataToSend?.Data != undefined">
+                                <div class="card" *ngIf="tab3_error_messages==''  && tab3_messages.length > 0">
                                     <div class="card-header">
                                         <h3 class="card-title">DataTable with default features</h3>
-                                        <button type="button" (click)="initTable('medic_datatable')">Generate
-                                            Table</button>
+                                        <button type="button" (click)="initTable('cht_datatable')">Generate Table</button>
                                     </div>
                                     <!-- /.card-header -->
                                     <div class="card-body">
-                                        <table id="medic_datatable" class="table table-bordered table-striped">
+                                        <table id="cht_datatable" class="table table-bordered table-striped">
                                             <thead>
-                                                <tr>
-                                                    <th *ngFor="let data of tab3_messages?.dataToSend?.Data?.head">
-                                                        {{ capitaliseData(data, '_') }}
-                                                    </th>
-                                                </tr>
+                                                <th>Nom Asc</th>
+                                                <th>Code Asc</th>
+                                                <th>{{ capitaliseDataGiven('total_vad', '_', ' ') }}</th>
+                                                <th>{{ capitaliseDataGiven('total_vad_pcime_c', '_', ' ') }}</th>
+                                                <th>{{ capitaliseDataGiven('total_suivi_pcime_c', '_', ' ') }}</th>
+                                                <th>{{ capitaliseDataGiven('total_vad_femmes_enceinte', '_', ' ') }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('total_vad_femmes_postpartum', '_', ' ') }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('total_recherche_active', '_', ' ') }}</th>
+                                                <th>{{ capitaliseDataGiven('total_vad_family_planning', '_', ' ') }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('reference_femmes_pf', '_', ' ') }}</th>
+                                                <th>{{ capitaliseDataGiven('reference_pcime', '_', ' ') }}</th>
+                                                <th>{{ capitaliseDataGiven('reference_femmes_enceinte_postpartum', '_',
+                                                    ' ')
+                                                    }}</th>
+                                                <th>{{ capitaliseDataGiven('total_diarrhee_pcime_soins', '_', ' ') }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('total_paludisme_pcime_soins', '_', ' ') }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('total_pneumonie_pcime_soins', '_', ' ') }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('total_malnutrition_pcime_soins', '_', ' ')
+                                                    }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('prompt_diarrhee_24h_pcime_soins', '_', ' ')
+                                                    }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('prompt_diarrhee_48h_pcime_soins', '_', ' ')
+                                                    }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('prompt_diarrhee_72h_pcime_soins', '_', ' ')
+                                                    }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('prompt_paludisme_24h_pcime_soins', '_', ' ')
+                                                    }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('prompt_paludisme_48h_pcime_soins', '_', ' ')
+                                                    }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('prompt_paludisme_72h_pcime_soins', '_', ' ')
+                                                    }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('prompt_pneumonie_24h_pcime_soins', '_', ' ')
+                                                    }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('prompt_pneumonie_48h_pcime_soins', '_', ' ')
+                                                    }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('prompt_pneumonie_72h_pcime_soins', '_', ' ')
+                                                    }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('total_vad_femmes_enceintes_NC', '_', ' ') }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('total_vad_femme_postpartum_NC', '_', ' ') }}
+                                                </th>
+                                                <th>{{ capitaliseDataGiven('total_test_de_grossesse_domicile', '_', ' ')
+                                                    }}
+                                                </th>
+
                                             </thead>
                                             <tbody>
-                                                <tr
-                                                    *ngFor="let data of tab3_messages?.dataToSend?.Data?.body | keyvalue">
-                                                    <td *ngFor="let item of getItemAsArray(data)">
-                                                        {{ item }}
-                                                    </td>
+                                                <tr *ngFor="let data of tab3_messages">
+
+                                                    <th>{{ data.chw.name }}</th>
+                                                    <th>{{ data.chw.external_id }}</th>
+                                                    <td>{{ data.data.total_vad }}</td>
+                                                    <td>{{ data.data.total_vad_pcime_c }}</td>
+                                                    <td>{{ data.data.total_suivi_pcime_c }}</td>
+                                                    <td>{{ data.data.total_vad_femmes_enceinte }}</td>
+                                                    <td>{{ data.data.total_vad_femmes_postpartum }}</td>
+                                                    <td>{{ data.data.total_recherche_active }}</td>
+                                                    <td>{{ data.data.total_vad_family_planning }}</td>
+                                                    <td>{{ data.data.reference_femmes_pf }}</td>
+                                                    <td>{{ data.data.reference_pcime }}</td>
+                                                    <td>{{ data.data.reference_femmes_enceinte_postpartum }}</td>
+                                                    <td>{{ data.data.total_diarrhee_pcime_soins }}</td>
+                                                    <td>{{ data.data.total_paludisme_pcime_soins }}</td>
+                                                    <td>{{ data.data.total_pneumonie_pcime_soins }}</td>
+                                                    <td>{{ data.data.total_malnutrition_pcime_soins }}</td>
+                                                    <td>{{ data.data.prompt_diarrhee_24h_pcime_soins }}</td>
+                                                    <td>{{ data.data.prompt_diarrhee_48h_pcime_soins }}</td>
+                                                    <td>{{ data.data.prompt_diarrhee_72h_pcime_soins }}</td>
+                                                    <td>{{ data.data.prompt_paludisme_24h_pcime_soins }}</td>
+                                                    <td>{{ data.data.prompt_paludisme_48h_pcime_soins }}</td>
+                                                    <td>{{ data.data.prompt_paludisme_72h_pcime_soins }}</td>
+                                                    <td>{{ data.data.prompt_pneumonie_24h_pcime_soins }}</td>
+                                                    <td>{{ data.data.prompt_pneumonie_48h_pcime_soins }}</td>
+                                                    <td>{{ data.data.prompt_pneumonie_72h_pcime_soins }}</td>
+                                                    <td>{{ data.data.total_vad_femmes_enceintes_NC }}</td>
+                                                    <td>{{ data.data.total_vad_femme_postpartum_NC }}</td>
+                                                    <td>{{ data.data.total_test_de_grossesse_domicile }}</td>
                                                 </tr>
+
                                             </tbody>
-                                            <!-- <tfoot>
-                                                <tr *ngFor="let data of tab3_messages?.dataToSend?.Data | keyvalue">
-                                                    <td>{{capitaliseData(item.key, '_')}}</td>
-                                                    <th *ngFor="let item of getItemAsArray(data,true)">
-                                                        <td>{{capitaliseData(item.key, '_')}}</td>
-                                                        {{ item }}
-                                                    </th>
-                                                </tr>
-                                            </tfoot> -->
                                         </table>
                                     </div>
                                     <!-- /.card-body -->
@@ -362,28 +478,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <!-- /.card -->
-        </div>
 
-
-        <div *ngIf="activePage === 'weeklyData'" class="card card-warning card-tabs">
-            <div class="card-header p-0 pt-1">
-                <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link active" id="custom-tabs-chws-week-data-tab" data-toggle="pill"
-                            href="#custom-tabs-chws-week-data" role="tab" aria-controls="custom-tabs-chws-week-data"
-                            aria-selected="true">Chws Week Data
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="card-body">
-                <div class="tab-content" id="custom-tabs-one-tabContent">
-                    <!-- start tab 4 -->
-                    <div class="tab-pane fade show active" id="custom-tabs-chws-week-data" role="tabpanel"
+                    <div class="tab-pane fade show" id="custom-tabs-chws-week-data" role="tabpanel"
                         aria-labelledby="custom-tabs-chws-week-data-tab">
 
                         <div class="row">
@@ -395,9 +491,9 @@
 
                                     <div class="card card-primary">
                                         <div class="card-header">
-                                            <h3 class="card-title">Get Chws Weekly Data from ThinkMd and Medic</h3>
+                                            <h3 class="card-title">Get Chws Weekly Data from ThinkMd</h3>
                                         </div>
-                                        <form [formGroup]="ChtThinkMdWeeklyForm" (ngSubmit)="runThinkMdWeekly()"
+                                        <form [formGroup]="ThinkMdWeeklyForm" (ngSubmit)="runThinkMdWeekly()"
                                             novalidate>
                                             <div class="card-body">
 
@@ -443,7 +539,7 @@
                                                 </div> -->
 
 
-                                                <div class="row">
+                                                <!-- <div class="row">
                                                     <div class="col-sm-6">
                                                         <div class="form-group">
                                                             <label>Tableau Token User</label>
@@ -458,7 +554,7 @@
                                                                 formControlName="thinkmd_token" />
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> -->
 
                                                 <div class="row">
                                                     <div class="col-sm-6">
@@ -480,7 +576,7 @@
 
                                             <!-- /.card-body -->
                                             <div class="card-footer">
-                                                <button [disabled]="!ChtThinkMdWeeklyForm.valid" type="submit"
+                                                <button [disabled]="!ThinkMdWeeklyForm.valid" type="submit"
                                                     class="btn btn-primary float-right"> Charger les données <span
                                                         class="fa fa-floppy-o fa-right"></span></button>
 
@@ -498,7 +594,7 @@
                             </div>
 
                             <div class="col-sm-5">
-                                
+
                                 <div *ngIf="tab4_messages_error!=null">
                                     {{ tab4_messages_error }} <br>
                                 </div>

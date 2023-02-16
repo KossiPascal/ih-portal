@@ -1,32 +1,30 @@
 import path from "path";
 import https from "https";
 import http from "http";
-import { CouchDbFetchData, Dhis2Sync, MailConfig, Sync, UserValue } from "./appInterface";
+import { CouchDbFetchData, Dhis2Sync, MailConfig } from "./appInterface";
 import * as jwt from 'jsonwebtoken';
 import { User } from "../entity/User";
-import { ConversionUtils } from "turbocommons-ts";
 import moment from "moment";
+import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws } from "../entity/Sync";
 const nodemailer = require("nodemailer");
 const smtpTransport = require('nodemailer-smtp-transport');
 
 var rootCas = require('ssl-root-cas').create();
 
-
-
 export function httpHeaders(Authorization?: string, withParams: boolean = true) {
     // process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = '0';
-    var p:any = {
+    var p: any = {
         'Authorization': Authorization ?? 'Basic ' + Buffer.from(`${process.env.CHT_USER}:${process.env.CHT_PASS}`).toString('base64'),
         "Accept": "application/json",
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT, OPTIONS",
         "Access-Control-Allow-Headers": "X-API-KEY, Origin, X-Requested-With, Content-Type, Accept,Access-Control-Request-Method, Authorization,Access-Control-Allow-Headers",
-        
+
     }
 
     if (withParams) {
         p["Content-Type"] = "application/json";
-        
+
         // 'Accept-Charset': 'UTF-8',
         // "Access-Control-Allow-Origin": "*",
         // "Access-Control-Max-Age": "86400",
@@ -37,8 +35,6 @@ export function httpHeaders(Authorization?: string, withParams: boolean = true) 
     return p;
 }
 
-
-
 export class Functions {
 
 
@@ -47,7 +43,12 @@ export class Functions {
     // var minutes = 5, the_interval = minutes * 60 * 1000;
     // setInterval(function() {}, the_interval);
 
+    // set it in an HTTP Only + Secure Cookie
+    // res.cookie("SESSIONID", token, { httpOnly: true, secure: true });
 
+    // import * as fs from "fs";
+    // const RSA_PRIVATE_KEY = fs.readFileSync('./demos/private.key');
+    // const jwtBearerToken = jwt.sign({}, RSA_PRIVATE_KEY, {algorithm: 'RS256', expiresIn: 120,subject: userId}
 
 
     static Utils(): { expiredIn: string, secretOrPrivateKey: string } {
@@ -56,13 +57,6 @@ export class Functions {
             secretOrPrivateKey: 'kossi-secretfortoken',
         }
     }
-
-    // set it in an HTTP Only + Secure Cookie
-    // res.cookie("SESSIONID", token, { httpOnly: true, secure: true });
-
-    // import * as fs from "fs";
-    // const RSA_PRIVATE_KEY = fs.readFileSync('./demos/private.key');
-    // const jwtBearerToken = jwt.sign({}, RSA_PRIVATE_KEY, {algorithm: 'RS256', expiresIn: 120,subject: userId}
 
     static date_to_milisecond = (stringDate: string, start: boolean = true): string => {
         if (stringDate != "") {
@@ -155,7 +149,6 @@ export class Functions {
         return JSON.parse(`{${data}}`.replace(/\n/g, '').replace(/\\n/g, '').trim().replace(/\s\s+/g, ' '));
     }
 
-
     static getHttpsOptions(data: any): Object {
         var options: Object = {
             host: data.host,
@@ -167,7 +160,7 @@ export class Functions {
             strictSSL: data.use_SSL_verification === true,
             agent: false,
             headers: httpHeaders('Basic ' + Buffer.from(data.user + ':' + data.pass).toString('base64')),
-            ca: data.use_SSL_verification === true ? rootCas.addFile(`${this.sslFolder('server.pem')}`) : []
+            ca: data.use_SSL_verification === true ? rootCas.addFile(`${sslFolder('server.pem')}`) : []
         }
         return options;
     }
@@ -239,31 +232,6 @@ export class Functions {
     //     return path.basename(rootdirname) === 'dist' ? path.dirname(path.dirname(rootdirname)) : path.dirname(rootdirname);
     // }
 
-
-    static utilsFolder(): string {
-        return __dirname; // utils
-    }
-    static srcFolder(): string {
-        return path.dirname(this.utilsFolder());//  src
-    }
-    static backendFolder(): string {
-        return path.dirname(this.srcFolder())//  backend
-    }
-    static projectFolder(): string {
-        return path.dirname(this.backendFolder())//  ih-portal
-    }
-    static projectFolderParent(): string {
-        return path.dirname(this.projectFolder())//  ih-portal
-    }
-    static sslFolder(file_Name_with_extension: string): string {
-        return `${this.projectFolderParent()}/ssl/${file_Name_with_extension}`
-    }
-
-    static JsonDbFolder(file_Name_without_extension: string): string {
-        const fileName: string = file_Name_without_extension.trim().replace(' ', '-').split('.')[0];
-        return `${this.projectFolderParent()}/IhJsonStorage/${fileName}.json`
-    }
-
     static appVersion() {
         return require('../../package.json').version;
     }
@@ -280,6 +248,190 @@ export class Functions {
 
 }
 
+export function utilsFolder(): string {
+    return __dirname; // utils
+}
+export function srcFolder(): string {
+    return path.dirname(utilsFolder());//  src
+}
+export function backendFolder(): string {
+    return path.dirname(srcFolder())//  backend
+}
+export function projectFolder(): string {
+    return path.dirname(backendFolder())//  ih-portal
+}
+export function projectFolderParent(): string {
+    return path.dirname(projectFolder())//  ih-portal parent
+}
+export function sslFolder(file_Name_with_extension: string): string {
+    // return `${this.projectFolderParent()}/ssl/${file_Name_with_extension}`;
+    return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/ssl/${file_Name_with_extension}`
+}
+
+export function JsonDbFolder(file_Name_without_extension: string): string {
+    const fileName: string = file_Name_without_extension.trim().replace(' ', '-').split('.')[0];
+    return `${projectFolderParent()}/IhJsonStorage/${fileName}.json`
+}
+
+export class DateUtils {
+    static isGreater(d1: any, d2: any): boolean {
+        try {
+            let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
+            let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
+            if (date1 > date2) return true;
+        } catch (error) {
+
+        }
+        return false;
+    }
+    static isGreaterOrEqual(d1: any, d2: any): boolean {
+        try {
+            let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
+            let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
+            if (date1 >= date2) return true;
+        } catch (error) {
+
+        }
+        return false;
+    }
+
+    static isLess(d1: any, d2: any): boolean {
+        try {
+            let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
+            let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
+            if (date1 < date2) return true;
+        } catch (error) {
+
+        }
+        return false;
+    }
+
+    static isLessOrEqual(d1: any, d2: any): boolean {
+        try {
+            let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
+            let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
+            if (date1 <= date2) return true;
+        } catch (error) {
+
+        }
+        return false;
+    }
+
+    static isEqual(d1: any, d2: any): boolean {
+        try {
+            let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
+            let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
+            if (date1 == date2) return true;
+        } catch (error) {
+
+        }
+        return false;
+    }
+
+    static isBetween(start: string, dateToCompare: string, end: string): boolean {
+        if (DateUtils.isGreaterOrEqual(dateToCompare, start) && DateUtils.isLessOrEqual(dateToCompare, end)) return true;
+        return false;
+    }
+
+    static getDateInFormat(dateObj: any, day: number = 0, format: string = `en`, withHour: boolean = false): string {
+        var now: Date = dateObj instanceof Date ? dateObj : new Date(dateObj);
+
+        var m = String(now.getMonth() + 1).padStart(2, '0');
+        var d = String(day !== 0 ? day : now.getDate()).padStart(2, '0');
+        var y = now.getFullYear();
+        var h = now.getHours();
+        var mm = String(now.getMinutes()).padStart(2, '0');
+        var s = String(now.getSeconds()).padStart(2, '0');
+        if (withHour === true) {
+            if (format === `fr`) return `${d}/${m}/${y} ${h}:${mm}:${s}`;
+            return `${y}-${m}-${d} ${h}:${mm}:${s}`;
+        } else {
+            if (format === `fr`) return `${d}/${m}/${y}`;
+            return `${y}-${m}-${d}`;
+        }
+    }
+
+    static previousDate(dateObj: any): Date {
+        var now: Date = dateObj instanceof Date ? dateObj : new Date(dateObj);
+
+        var y = now.getFullYear();
+        var m = String(now.getMonth()).padStart(2, '0');
+        var d = String(now.getDate()).padStart(2, '0');
+        var h = String(now.getHours()).padStart(2, '0');
+        var mm = String(now.getMinutes()).padStart(2, '0');
+        var s = String(now.getSeconds()).padStart(2, '0');
+
+        if (m == '00') {
+            return new Date(`${y - 1}-12-${d} ${h}:${mm}:${s}`);
+        } else {
+            return new Date(`${y}-${m}-${d} ${h}:${mm}:${s}`);
+        }
+
+    }
+
+    static startEnd21and20Date(): { start_date: string, end_date: string } {
+        const now = new Date();
+
+        var prev: string, end: string;
+        if (now.getDate() < 21) {
+            prev = DateUtils.getDateInFormat(DateUtils.previousDate(now), 21);
+            end = DateUtils.getDateInFormat(now, 20);
+        } else {
+            prev = DateUtils.getDateInFormat(now, 21);
+            end = DateUtils.getDateInFormat(now, parseInt(DateUtils.lastDayOfMonth(now)));
+        }
+        return { start_date: prev, end_date: end };
+    }
+
+    static lastDayOfMonth(dateObj: any): string {
+        var date: Date = dateObj instanceof Date ? dateObj : new Date(dateObj);
+        var d = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        return String(d.getDate()).padStart(2, '0');
+    }
+
+
+    static daysDiff(d1: any, d2: any): number {
+        try {
+            let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
+            let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
+            let difference = date1 - date2;
+            let TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
+            return TotalDays < 0 ? -1 * TotalDays : TotalDays;
+        } catch (error) {
+
+        }
+        return 0;
+    }
+
+    static isDayInDate(date: any, day: any): boolean {
+        var d: string = String((date instanceof Date ? date : new Date(date)).getDate()).padStart(2, '0');
+
+        return d == `${day}`;
+    }
+
+    static isBetween21and20(date: string): boolean {
+        var betweenDate = DateUtils.startEnd21and20Date();
+        return DateUtils.isGreaterOrEqual(date, betweenDate.start_date) && DateUtils.isLessOrEqual(date, betweenDate.end_date)
+    }
+
+    static getMondays(dateObj: any, format: string = `en`, withHour: boolean = false): string[] {
+        var d = dateObj instanceof Date ? dateObj : new Date(dateObj);
+        var month = d.getMonth();
+        var mondays = [];
+        d.setDate(1);
+        // Get the first Monday in the month
+        while (d.getDay() !== 1) {
+            d.setDate(d.getDate() + 1);
+        }
+        // Get all the other Mondays in the month
+        while (d.getMonth() === month) {
+            const dt: Date = new Date(d.getTime());
+            mondays.push(DateUtils.getDateInFormat(dt, 0, format, withHour));
+            d.setDate(d.getDate() + 7);
+        }
+        return mondays;
+    }
+}
 
 export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
     var dbCibleUrl = `/medic/_design/medic-client/_view/${params.viewName}`;
@@ -292,13 +444,13 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
     if (isNotNull(params.endKey)) couchArg.push(`endkey=[${params.endKey}]`);
 
     var options = {
-        host: params.medic_host,
-        port: params.port ?? 443,
+        host: process.env.CHT_HOST ?? '',
+        port: parseInt(process.env.CHT_PORT ?? '443'),
         path: `${dbCibleUrl}?${couchArg.join('&')}`,
-        url: `${params.medic_host}${dbCibleUrl}?${couchArg.join('&')}`,
-        use_SSL_verification: params.ssl_verification,
-        user: params.medic_username,
-        pass: params.medic_password,
+        url: `${process.env.CHT_HOST ?? ''}${dbCibleUrl}?${couchArg.join('&')}`,
+        use_SSL_verification: true,
+        user: process.env.CHT_USER ?? '',
+        pass: process.env.CHT_PASS ?? '',
     };
     return Functions.getHttpsOptions(options);
 }
@@ -347,10 +499,12 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
 //     }
 // };
 
-
 export function isNotNull(data: any): boolean {
     return data != '' && data != null && data != undefined && data.length != 0;
 }
+
+
+
 
 export class Dhis2SyncConfig {
     constructor(param: Dhis2Sync) {
@@ -363,21 +517,18 @@ export class Dhis2SyncConfig {
         if (isNotNull(param.filter)) link += `&filter=${param.filter?.join('&filter=')}`;
         if (isNotNull(param.fields)) link += `&fields=${param.fields?.join(',')}`;
 
-        const order: string = param.order ?? 'desc';
-        link += `&order=created:${order}`;
+        link += `&order=created:${param.order ?? 'desc'}`;
         this.host = host;
         this.port = param.port ?? 443;
-        this.user = param.username,
-            this.pass = param.password,
+        this.dhisusersession = param.dhisusersession,
             this.url = 'https://' + host + link,
             this.cibleName = cibleName,
-            this.headers = httpHeaders('Basic ' + Buffer.from(this.user + ':' + this.pass).toString('base64'))
+            this.headers = httpHeaders('Basic ' + this.dhisusersession)
     }
     url: string;
     host: string;
     port: number;
-    user: string;
-    pass: string;
+    dhisusersession: string;
     cibleName: string;
     headers: any;
 
@@ -408,13 +559,9 @@ export class Dhis2SyncConfig {
 
 }
 
-
-
 export function genarateToken(data: { id: any, username: string, roles: string[], isActive: any }) {
     return jwt.sign({ id: `${data.id}`, username: data.username, roles: `${data.roles}`, isActive: `${data.isActive}` }, Functions.Utils().secretOrPrivateKey, { expiresIn: `${Functions.Utils().expiredIn}s` });
 }
-
-
 
 export function generateUserMapData(userFound: User, dhisusersession: string): any {
     userFound.dhisusersession = dhisusersession,
@@ -468,7 +615,60 @@ export function mailService(data: MailConfig) {
 }
 
 
+// function formatDataId(host: any, id: any, port: any): string {
+//     const val = `${host}`.replace('.org', '').replace('.', '').replace('-', '').replace('/', '').trim();
+//     return `${id}_${val}.${port}`;
+// }
 
+export async function getSiteByDhis2Uid(uid: string): Promise<string | undefined> {
+    var res: string | undefined = undefined;
+    try {
+        const _repoSite = await getSiteSyncRepository();
+        const site: Sites = await _repoSite.findOneByOrFail({ external_id: uid })
+        return site.id;
+    } catch (error) {
+
+    }
+    return res;
+}
+
+export async function getChwsByDhis2Uid(id: string): Promise<string | undefined> {
+    var res: string | undefined = undefined;
+    try {
+        const _repoChws = await getChwsSyncRepository();
+        const asc: Chws = await _repoChws.findOneByOrFail({ external_id: id })
+        return asc.id;
+    } catch (error) {
+
+    }
+    return res;
+}
+
+export function getValue(dataValues: { dataElement: string, value: any }[], elementId: string): string {
+    for (let i = 0; i < dataValues.length; i++) {
+        const data = dataValues[i];
+        if (data.dataElement == elementId) {
+            return data.value;
+        }
+    }
+    return '';
+}
+
+export function getDataValuesAsMap(dataValues: { dataElement: string, value: any }[], excludeDataElement?: string[]) {
+    var finalData: any = {};
+
+    for (let i = 0; i < dataValues.length; i++) {
+        const data = dataValues[i];
+        if (isNotNull(excludeDataElement)) {
+            if (!excludeDataElement!.includes(data.dataElement)) {
+                finalData[data.dataElement] = data.value;
+            }
+        } else {
+            finalData[data.dataElement] = data.value;
+        }
+    }
+    return finalData;
+}
 // set it in an HTTP Only + Secure Cookie
 // res.cookie("SESSIONID", token, { httpOnly: true, secure: true });
 

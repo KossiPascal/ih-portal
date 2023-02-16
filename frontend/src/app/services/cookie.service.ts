@@ -9,6 +9,10 @@ export class AppStorageService {
     constructor() { }
 
 
+    getDhis2AuthToken = (): string|null => sessionStorage.getItem('dhisusersession');
+
+    setDhis2AuthToken = (value:string) => sessionStorage.setItem('dhisusersession', value);
+
     get = (name: string): string => localStorage.getItem(name) ?? '';
 
     set = (name: string, value: string)  => localStorage.setItem(name, value);

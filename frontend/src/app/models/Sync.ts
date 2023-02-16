@@ -6,40 +6,41 @@ export interface AggragateData {
   color?: string
   detailUrl?: string
 }
- 
+
 export interface Sync {
   id: any
   start_date: string
   end_date: string
   weekly_Choosen_Dates: string[]
-
-  thinkmd_host: string
-  thinkmd_site: string
-  useToken: string
-  thinkmd_token_username: string
-  thinkmd_token: string
-  thinkmd_username: string
-  thinkmd_password: string
-
-  medic_host: string
-  medic_username: string
-  medic_password: string
-  medic_database: string
-
-  cht_host: string
-  cht_username: string
-  cht_password: string
-  cht_database: string
-
   InsertIntoDhis2: boolean
-  dhis2_host: string
-  dhis2_username: string
-  dhis2_password: string
+  dhisusersession: string
 
-  port: number
-  ssl_verification: boolean
-  
-  user?:string
+  // thinkmd_host: string
+  // thinkmd_site: string
+  // useToken: string
+  // thinkmd_token_username: string
+  // thinkmd_token: string
+  // thinkmd_username: string
+  // thinkmd_password: string
+
+  // medic_host: string
+  // medic_username: string
+  // medic_password: string
+  // medic_database: string
+
+  // cht_host: string
+  // cht_username: string
+  // cht_password: string
+  // cht_database: string
+
+  // dhis2_host: string
+  // dhis2_username: string
+  // dhis2_password: string
+
+  // port: number
+  // ssl_verification: boolean
+
+  user?: string
 }
 
 export interface DataFromPython {
@@ -73,37 +74,37 @@ export interface OrgUnitImport {
     successCount: number
     errorCount: number
     errorElements: string
-    errorIds:string
+    errorIds: string
   }
   zones: {
     successCount: number
     errorCount: number
     errorElements: string
-    errorIds:string
+    errorIds: string
   }
   familles: {
     successCount: number
     errorCount: number
     errorElements: string
-    errorIds:string
+    errorIds: string
   }
   patients: {
     successCount: number
     errorCount: number
     errorElements: string
-    errorIds:string
+    errorIds: string
   }
   Asc: {
     successCount: number
     errorCount: number
     errorElements: string
-    errorIds:string
+    errorIds: string
   }
   Message: {
     successCount: number
     errorCount: number
     errorElements: string
-    errorIds:string
+    errorIds: string
   }
 }
 
@@ -118,8 +119,9 @@ export interface FilterParams {
   zones?: string[]
   patients?: string[]
   families?: string[]
-  type?:any
-  user?:string
+  type?: any
+  user?: string
+  dhisusersession?: string
 }
 
 export interface ChwsDataFormDb {
@@ -209,12 +211,24 @@ export interface Dhis2Sync {
   orgUnit?: string
   filter?: string[]
   fields?: string[]
-  username?:string
-  password?:string
-  user?:string
+  username?: string
+  password?: string
+  user?: string
+  dhisusersession?: string
 }
 
 
+export interface SyncOrgUnit { 
+  start_date: string
+  end_date: string
+  site: boolean
+  zone: boolean
+  family: boolean
+  patient: boolean
+  chw: boolean
+  user: string 
+  dhisusersession?: string
+}
 
 export interface CompareData {
   Code: string
@@ -230,5 +244,5 @@ export interface CompareData {
   Total: number
   TotalDhis: number
   TotalDiff: number
-  Ratio: {value:number, color:string}
+  Ratio: { value: number, color: string }
 }

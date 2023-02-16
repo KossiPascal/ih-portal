@@ -1,11 +1,16 @@
-import "reflect-metadata"
+// import "reflect-metadata"
 import { DataSource } from "typeorm"
-import { Functions } from "./utils/functions";
-require('dotenv').config({ path: `${Functions.sslFolder('.env')}` });
+import path from "path";
+import { sslFolder } from "./utils/functions";
+// import { sslFolder } from "./utils/functions";
+
+
+// require('dotenv').config({ path: sslFolder('.env')});
+require('dotenv').config({ path: `${path.dirname(path.dirname(path.dirname(__dirname)))}/ssl/.env` });
+
+
 
 const { DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS } = process.env
-
-
 
 // const appdirname = Functions.appDirectory();
 // `${appdirname}/ssl/server.key`
@@ -31,7 +36,6 @@ export const AppDataSource = new DataSource({
     // dropSchema: false,
 });
 
- 
   
 // export const AppDataSource = new DataSource({
 //     type: "mysql",

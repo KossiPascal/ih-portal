@@ -1,7 +1,7 @@
 
 
 import { Entity, PrimaryGeneratedColumn, Column, Repository, DataSource, PrimaryColumn, CreateDateColumn, UpdateDateColumn, OneToMany, JoinColumn, ManyToOne, Unique, Index } from "typeorm"
-import { AppDataSource } from "../data-source"
+import { AppDataSource } from "../data_source"
 
 // export enum FlightType { DOMESTIC = "domestic", INTERNATIONAL = "international" }
 let Connection: DataSource = AppDataSource.manager.connection;
@@ -258,23 +258,23 @@ export class ChwsData {
   form?: string
 
   @Column('json', { nullable: true })
-  fields?: object;
+  fields?: any;
 
   @ManyToOne(() => Districts, district => district.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'district_id', referencedColumnName: 'id' })
-  district!: Districts|null;
+  district!: Districts;
 
   @ManyToOne(() => Sites, site => site.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'site_id', referencedColumnName: 'id' })
-  site!: Sites|null
+  site!: Sites
 
   @ManyToOne(() => Zones, zone => zone.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'zone_id', referencedColumnName: 'id' })
-  zone!: Zones|null
+  zone!: Zones
 
   @ManyToOne(() => Chws, chw => chw.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'chw_id', referencedColumnName: 'id' })
-  chw!: Chws|null
+  chw!: Chws
 
   @Column({ type: 'varchar', nullable: true })
   family_id?: string
@@ -286,7 +286,7 @@ export class ChwsData {
   phone?: string
 
   @Column({ type: 'varchar', nullable: true })
-  reported_date?: string
+  reported_date!: string
 
   @Column({ type: 'varchar', nullable: true })
   reported_full_date?: string

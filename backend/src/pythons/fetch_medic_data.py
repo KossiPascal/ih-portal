@@ -598,6 +598,7 @@ def flushMedicDataToDhis2(KWARG,fileName = "medic_output",data_type = "Consultat
                     chwsData["code_asc"] = i
                     chwsData["district"] = "Kozah"
                     chwsData["data_source"] = 'medic'
+                    
                     chwsData["total_vad"] = total_vad
                     chwsData["total_vad_pcime_c"] = total_vad_pcime_c
                     chwsData["total_suivi_pcime_c"] = total_suivi_pcime_c

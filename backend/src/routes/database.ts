@@ -7,7 +7,7 @@ const databaseRouter = express.Router();
 
 
 
-databaseRouter.get('/postgres/entities', Middelware.authMiddleware,databaseEntitiesList);
+databaseRouter.post('/postgres/entities', Middelware.authMiddleware,databaseEntitiesList);
 
 databaseRouter.post('/postgres/truncate',
 [

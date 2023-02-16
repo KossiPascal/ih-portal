@@ -46,7 +46,7 @@
                 </div>
               </div>
   
-              <div class="col-sm-1 col-6">
+              <div class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>.</label>
                   <button [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control"> 
@@ -55,6 +55,21 @@
                 </div>
               </div>
   
+            </div>
+            <div class="row">
+
+
+              <div class="col-sm-4">
+                <div class="form-group">
+                    <label>.</label>
+                    <div class="form-check">
+                        <input style="font-size: 20px;" id="withRatio" class="form-check-input"
+                            type="checkbox" formControlName="withRatio">
+                        <label class="form-check-label"
+                            for="withRatio"> <b>Avec Ratio</b> </label>
+                    </div>
+                </div>
+            </div>
             </div>
           </form>
         </div>
@@ -83,8 +98,8 @@
               <th colspan="2" style="width: 50px">Consultation</th>
               <th colspan="2" style="width: 50px">Recherche</th>
               <th colspan="2" style="width: 50px">Total</th>
-              <th rowspan="2" style="width: 50px">Diff</th>
-              <th rowspan="2" style="width: 50px">Ratio</th>
+              <th *ngIf="this.aggradateDataForm.value.withRatio == true" rowspan="2" style="width: 50px">Diff</th>
+              <th *ngIf="this.aggradateDataForm.value.withRatio == true" rowspan="2" style="width: 50px">Ratio</th>
             </tr>
             <tr class="bg-primary">
               <th style="width: 50px">APPLI</th>
@@ -118,8 +133,8 @@
               <td class="primary" >{{ item.RechercheDhis }}</td>
               <td class="final">{{ item.Total }}</td>
               <td class="final">{{ item.TotalDhis }}</td>
-              <td class="line" class=""> <strong>{{ item.TotalDiff }}</strong> </td>
-              <td class="bg-{{ item.Ratio.color }}">{{ item.Ratio.value }} %</td>
+              <td *ngIf="this.aggradateDataForm.value.withRatio == true" class="line" class=""> <strong>{{ item.TotalDiff }}</strong> </td>
+              <td *ngIf="this.aggradateDataForm.value.withRatio == true" class="bg-{{ item.Ratio.color }}">{{ item.Ratio.value }} %</td>
             </tr>
           </tbody>
         </table> 

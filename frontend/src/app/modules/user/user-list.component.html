@@ -47,7 +47,7 @@
                                 <td>{{ index+1 }}</td>
                                 <td>{{ user.username }}</td>
                                 <td>{{ user.fullname }}</td>
-                                <td>{{ user.email }}</td>
+                                <!-- <td>{{ user.email }}</td> -->
                                 <td>{{ user.roles }}</td>
                                 <td>
                                     <i (click)="EditUser(user)" class="btn-warning fas fa-edit" data-toggle="modal" data-target="#modal-default"></i>
@@ -56,7 +56,7 @@
                                     <i (click)="selectedUser(user)"  class="btn-danger fas fa-trash-alt" data-toggle="modal" data-target="#modal-danger"></i>
                                 </td>
                                 <td><span style='font-size:20px;'>{{user.isActive ? '' : '&#10003;'}}</span></td>
-                                <td><span style='font-size:20px;'>{{user.isSuperAdmin ? '&#10003;' : ''}}</span></td>
+                                <!-- <td><span style='font-size:20px;'>{{user.isSuperAdmin ? '&#10003;' : ''}}</span></td> -->
                                 
                                 <!-- <td>{{ isFirst }}</td>
                                         <td>{{ isOdd }}</td> -->
@@ -110,7 +110,7 @@
                 </div>
             </div>
 
-            <label *ngIf="isEditMode" for="email">Email</label>
+            <!-- <label *ngIf="isEditMode" for="email">Email</label>
             <div class="input-group mb-3">
                 <input id="email" type="email" class="form-control" placeholder="Email" formControlName="email" />
                 <div class="input-group-append">
@@ -118,7 +118,7 @@
                         <span class="fas fa-envelope"></span>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <label *ngIf="isEditMode" for="password">Password</label>
             <div class="input-group mb-3">
@@ -167,14 +167,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
+                <!-- <div class="col-6">
                     <div class="input-group mb-3">
                         <div class="icheck-primary">
                             <input type="checkbox" id="isSuperAdmin" formControlName="isSuperAdmin">
                             <label for="isSuperAdmin">isSuperAdmin</label>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
 
 

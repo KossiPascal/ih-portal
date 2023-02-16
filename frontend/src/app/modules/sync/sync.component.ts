@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { DataFromPython, Dhis2Sync, OrgUnitImport, Sites } from '@ih-app/models/Sync';
+import { Chws, DataFromPython, Dhis2Sync, Districts, FilterParams, OrgUnitImport, Sites } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import * as moment from 'moment';
@@ -9,6 +9,8 @@ import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { KeyValue } from '@angular/common';
 import { DateUtils, Functions } from '@ih-app/shared/functions';
 import { ActivatedRoute } from '@angular/router'
+import dist from 'dexie-relationships';
+import { DataIndicators } from '@ih-app/models/DataAggragate';
 
 declare var $: any;
 declare var initDataTable: any;
@@ -24,75 +26,56 @@ export class SyncComponent implements OnInit {
 
   thinkmdToDhis2Form!: FormGroup;
   ihChtToDhis2Form!: FormGroup;
-  ChtThinkMdWeeklyForm!: FormGroup;
+  ThinkMdWeeklyForm!: FormGroup;
   tab1_messages: DataFromPython | null = null;
   tab1_messages_error: string | null = null;
-  tab3_messages: DataFromPython | null = null;
+  tab3_messages: {chw:Chws, data:DataIndicators}[] = [];
+  tab3_error_messages:string = '';
+  tab3_no_data_found:boolean = false;
   tab4_messages: DataFromPython | null = null;
   tab4_messages_error: string | null = null;
   dates: moment.Moment[] = [];
   weekly_Choosen_Dates: string[] = [];
   is_weekly_date_error: boolean = false;
-  weekly_date_error_Msg:string = '';
+  weekly_date_error_Msg: string = '';
 
-  activePage:any = '';
+  // activePage: any = '';
 
-  loading1!: boolean;
-  loading3!: boolean;
-  loading4!: boolean;
+  loading1: boolean = false;
+  loading3: boolean = false;
+  loading4: boolean = false;
 
   start_date_error: boolean = false;
   end_date_error: boolean = false;
+  LoadingMsg: string = "Loading...";
 
-  LoadingMsg: string = "Loading..."
+  Districts$: Districts[] = [];
+  Sites$: Sites[] = [];
+  Chws$: Chws[] = [];
 
-  sitesList: Sites[] = [];
+  chws$: Chws[] = [];
+  sites$: Sites[] = [];
 
-  constructor(private route:ActivatedRoute, private sync: SyncService, private http: HttpClient, private authService: AuthService) { }
+  constructor(private route: ActivatedRoute, private sync: SyncService, private http: HttpClient, private authService: AuthService) { }
 
   ngOnInit(): void {
-
-    this.route.params.subscribe(params => {
-      this.activePage = params['cible'];
-    });
-    
-
-    this.sync.getSitesList().subscribe((sitesList: any) => {
-      this.sitesList = sitesList;
-    }, (err: any) => console.log(err.error));
-
-    this.loading1 = false;
-    this.loading3 = false;
-    
+    // this.route.params.subscribe(params => this.activePage = params['cible']);
+    this.initAllData();
     this.thinkmdToDhis2Form = this.createThinkmdFormGroup();
     this.ihChtToDhis2Form = this.createIhChtFormGroup();
-    
-    this.ChtThinkMdWeeklyForm = this.createChtThinkmdFormGroup();
-
+    this.ThinkMdWeeklyForm = this.createThinkmdWeeklyFormGroup();
   }
 
-  createFormGroup(cible: string): FormGroup {
+
+  createThinkmdWeeklyFormGroup(): FormGroup {
     return new FormGroup({
-      start_date: new FormControl("", cible === 'cht' || cible === 'allChwsData' || cible === 'cht_thinkMd' ? [Validators.required, Validators.minLength(7)] : []),
-      end_date: new FormControl("", cible === 'cht' || cible === 'thinkMd' || cible === 'allChwsData' ? [Validators.required, Validators.minLength(7)] : []),
-
-      weekly_Choosen_Dates: new FormControl(""),
-
+      start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
       useToken: new FormControl(true),
-      thinkmd_token_username: new FormControl(""),
-      thinkmd_token: new FormControl(""),
-
       InsertIntoDhis2: new FormControl(false, []),
       dhis2_username: new FormControl(""),
       dhis2_password: new FormControl(""),
-      ssl_verification: new FormControl(false, cible === 'allChwsData' || cible === 'allOrgUnit' ? [Validators.required] : []),
     });
   }
-
-  createChwsDataFormGroup(): FormGroup {
-    return this.createFormGroup('allChwsData');
-  }
-
   createDhis2ChwsDataFormGroup(): FormGroup {
     return new FormGroup({
       start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
@@ -101,22 +84,106 @@ export class SyncComponent implements OnInit {
     });
   }
 
-  createOrgUnitAndPersonFormGroup(): FormGroup {
-    return this.createFormGroup('allOrgUnit');
-  }
-
   createThinkmdFormGroup(): FormGroup {
-    return this.createFormGroup('thinkMd');
+    return new FormGroup({
+      end_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      weekly_Choosen_Dates: new FormControl(""),
+      useToken: new FormControl(true),
+      InsertIntoDhis2: new FormControl(false, []),
+      dhis2_username: new FormControl(""),
+      dhis2_password: new FormControl(""),
+    });
   }
 
   createIhChtFormGroup(): FormGroup {
-    return this.createFormGroup('cht');
+    return new FormGroup({
+      start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      end_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      districts: new FormControl("", [Validators.required]),
+      sites: new FormControl("", [Validators.required]),
+      chws: new FormControl(""),
+      InsertIntoDhis2: new FormControl(false, []),
+      // dhis2_username: new FormControl(""),
+      // dhis2_password: new FormControl(""),
+    });
   }
 
-  createChtThinkmdFormGroup(): FormGroup {
-    return this.createFormGroup('cht_thinkMd');
+
+  capitaliseDataGiven(str: any, inputSeparator?: string, outPutSeparator?: string): string {
+    return Functions.capitaliseDataGiven(str,inputSeparator, outPutSeparator);
   }
 
+  async initAllData() {
+    this.loading3 = true;
+    this.LoadingMsg = 'Chargement des Districts ...';
+    this.sync.getDistrictsList().subscribe(async (_d$: { status: number, data: Districts[] }) => {
+      if (_d$.status == 200) this.Districts$ = _d$.data;
+      this.LoadingMsg = 'Chargement des Sites ...';
+      this.sync.getSitesList().subscribe(async (_s$: { status: number, data: Sites[] }) => {
+        if (_s$.status == 200) this.Sites$ = _s$.data;
+        this.genarateSites()
+        this.LoadingMsg = 'Chargement des ASC ...';
+        this.sync.getChwsList().subscribe(async (_c$: { status: number, data: Chws[] }) => {
+          if (_c$.status == 200) this.Chws$ = _c$.data;
+          this.genarateChws();
+          this.loading3 = false;
+          this.LoadingMsg = '';
+        }, (err: any) => {
+          this.loading3 = false;
+          console.log(err.error);
+        });
+      }, (err: any) => {
+        this.loading3 = false;
+        console.log(err.error);
+      });
+
+    });
+  }
+  genarateSites() {
+    this.sites$ = [];
+    this.chws$ = [];
+    const dist: string[] = Functions.returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.districts);
+    this.ihChtToDhis2Form.value["sites"] = "";
+    this.ihChtToDhis2Form.value["chws"] = [];
+
+    if (Functions.notNull(dist)) {
+      for (let d = 0; d < this.Sites$.length; d++) {
+        const site = this.Sites$[d];
+        if (Functions.notNull(site)) if (dist.includes(site.district.id)) this.sites$.push(site)
+      }
+    } else {
+      this.sites$ = [];
+    }
+  }
+
+  genarateChws() {
+    const sites: string[] = Functions.returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.sites);
+    this.chws$ = [];
+    this.ihChtToDhis2Form.value["chws"] = [];
+    if (Functions.notNull(sites)) {
+      for (let d = 0; d < this.Chws$.length; d++) {
+        const chws = this.Chws$[d];
+        if (Functions.notNull(chws)) if (sites.includes(chws.site.id)) this.chws$.push(chws)
+      }
+    } else {
+      this.chws$ = [];
+    }
+  }
+
+
+  ParamsToFilter() {
+    return {
+      start_date: this.ihChtToDhis2Form.value.start_date,
+      end_date: this.ihChtToDhis2Form.value.end_date,
+      sources: ['Tonoudayo'],
+      districts: Functions.returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.districts),
+      sites: Functions.returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.sites),
+      chws: Functions.returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.chws),
+      InsertIntoDhis2: this.ihChtToDhis2Form.value.InsertIntoDhis2,
+      // dhis2_username: this.ihChtToDhis2Form.value.dhis2_username,
+      // dhis2_password: this.ihChtToDhis2Form.value.dhis2_password
+    }
+  }
 
   isValidParams(fForm: FormGroup, type: string): boolean {
     if (fForm != undefined) {
@@ -167,15 +234,15 @@ export class SyncComponent implements OnInit {
   }
 
   WeeklyDateIsValid(): boolean {
-    var t:number = 0;
+    var t: number = 0;
     for (let i = 0; i < this.weekly_Choosen_Dates.length; i++) {
       const dt = this.weekly_Choosen_Dates[i];
-      if(!DateUtils.getMondays(dt).includes(dt)) t++;
+      if (!DateUtils.getMondays(dt).includes(dt)) t++;
     }
     return t == 0;
   }
 
-  genarateColor(data:any):string {
+  genarateColor(data: any): string {
     if (Functions.isNumber(data)) {
       const d = parseInt(data);
       if (d <= 5) return 'danger'
@@ -185,8 +252,8 @@ export class SyncComponent implements OnInit {
     }
     return '';
   }
- 
-  removeWeekDate(date:string):void {
+
+  removeWeekDate(date: string): void {
     const index = this.weekly_Choosen_Dates.indexOf(date);
     this.weekly_Choosen_Dates.splice(index, 1);
     // this.weekly_Choosen_Dates.r
@@ -213,22 +280,31 @@ export class SyncComponent implements OnInit {
     }
   }
 
-  runIhChtToDhis2(): void {
+  flushIhChtDataToDhis2(): void {
     if (this.isValidParams(this.ihChtToDhis2Form, 'cht')) {
       this.start_date_error = false;
       this.end_date_error = false;
       this.loading3 = true;
-      this.tab3_messages = null;
+      this.tab3_messages = [];
+      this.tab3_error_messages = ''; 
+      this.tab3_no_data_found = false;
       this.sync
-        .ihChtToDhis2Script(this.ihChtToDhis2Form.value).subscribe((response: any) => {
+        .ihChtDataPerChw(this.ParamsToFilter()).subscribe((_resp: {status:number, data: {chw:Chws, data:DataIndicators}[]|any}) => {
+          // this.loading3 = false;
+          if (_resp.status == 200) {
+            this.tab3_messages = _resp.data;
+            this.tab3_no_data_found = this.tab3_messages.length <= 0;
+          } else {
+            this.tab3_error_messages = _resp.data.toString();
+            this.tab3_no_data_found = true;
+          }
           this.loading3 = false;
-          this.tab3_messages = JSON.parse(response);
-          // console.log(response);
-        }, (err: any) => { this.loading3 = false; this.tab3_messages = err.message; console.log(err.error) });
+        }, (err: any) => { 
+          this.tab3_no_data_found = false;this.loading3 = false; this.tab3_error_messages = err.toString()});
     }
   }
 
-  
+
 
   runThinkMdWeekly(): void {
     this.addToDateList();
@@ -238,7 +314,7 @@ export class SyncComponent implements OnInit {
       this.loading4 = true;
       this.tab4_messages = null;
       this.tab4_messages_error = null;
-      this.sync.syncThinkMdWeeklyChwsData(this.ChtThinkMdWeeklyForm.value).subscribe((response: any) => {
+      this.sync.syncThinkMdWeeklyChwsData(this.ThinkMdWeeklyForm.value).subscribe((response: any) => {
         this.loading4 = false;
         try {
           this.tab4_messages = JSON.parse(response);
@@ -273,13 +349,13 @@ export class SyncComponent implements OnInit {
   }
 
   addToDateList() {
-    const start_date:string = this.ChtThinkMdWeeklyForm.value.start_date;
+    const start_date: string = this.ThinkMdWeeklyForm.value.start_date;
     if (!this.weekly_Choosen_Dates.includes(start_date) && start_date != null && start_date != '') {
       this.weekly_Choosen_Dates.push(start_date);
     }
-    this.ChtThinkMdWeeklyForm.value.start_date = '';
-    this.ChtThinkMdWeeklyForm.value.end_date = '';
-    this.ChtThinkMdWeeklyForm.value.weekly_Choosen_Dates = this.weekly_Choosen_Dates;
+    this.ThinkMdWeeklyForm.value.start_date = '';
+    this.ThinkMdWeeklyForm.value.end_date = '';
+    this.ThinkMdWeeklyForm.value.weekly_Choosen_Dates = this.weekly_Choosen_Dates;
     this.cleanWeeklyDateError();
   }
 

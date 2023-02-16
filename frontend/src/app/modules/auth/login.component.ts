@@ -3,9 +3,10 @@ import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from '@angular/router';
 import { AuthService } from '@ih-services/auth.service';
 import { HttpClient } from "@angular/common/http";
-import { Configs } from '@ih-app/models/User';
+import { Configs, User } from '@ih-app/models/User';
 import { Functions } from '@ih-app/shared/functions';
 import { ConfigService } from '@ih-app/services/config.service';
+import { AppStorageService } from '@ih-app/services/cookie.service';
 
 
 @Component({
@@ -15,12 +16,12 @@ import { ConfigService } from '@ih-app/services/config.service';
 export class LoginComponent implements OnInit {
   authForm!: FormGroup;
   isLoginForm: boolean = true;
-  message: string = 'Vous êtes déconnecté !';
+  message: any = 'Vous êtes déconnecté !';
   isLoading:boolean = false;
   LoadingMsg: string = "Loading...";
   showRegisterPage:boolean = false;
 
-  constructor(private auth: AuthService, private router: Router, private http: HttpClient, private conf:ConfigService) { }
+  constructor(private store:AppStorageService, private auth: AuthService, private router: Router, private http: HttpClient, private conf:ConfigService) { }
 
   ngOnInit(): void {
     this.getConfigs;
@@ -68,11 +69,10 @@ export class LoginComponent implements OnInit {
     if (!this.auth.isLoggedIn()) {
       this.isLoading = true;
       return this.auth.login(this.authForm.value.username, this.authForm.value.password)
-        .subscribe((res: {status:number, data:any}) => {
+        .subscribe((res: {status:number, data:User|string}) => {
           if (res.status === 200) {
             this.message = 'Login successfully !';
-            console.log(this.message);
-            this.auth.clientSession(res.data);
+            this.store.set("user", JSON.stringify(res.data));
             const redirectUrl = Functions.getSavedUrl();
             // this.router.navigate([redirectUrl || this.auth.defaultRedirectUrl]);
             location.href = redirectUrl || this.auth.defaultRedirectUrl;

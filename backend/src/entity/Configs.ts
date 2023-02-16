@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column,Repository, DataSource, BeforeInsert } from "typeorm"
-import { AppDataSource } from "../data-source"
+import { AppDataSource } from "../data_source"
 
 @Entity()
 export class Config {

@@ -10,17 +10,21 @@ export class ConfigService {
     constructor(private auth:AuthService,private http: HttpClient,) { }
 
     getConfigs(): any {
-        return this.http.get(`${Functions.backenUrl()}/configs`, Functions.customHttpHeaders(this.auth));
+        if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+        const user = this.auth.userValue()!;
+        return this.http.post(`${Functions.backenUrl()}/configs`, {userId:user.id, dhisusersession: user.dhisusersession}, Functions.customHttpHeaders(this.auth));
     }
 
     appVersion(): any {
-        return this.http.get(`${Functions.backenUrl()}/configs/appVersion`, Functions.customHttpHeaders(this.auth));
+        if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+        const user = this.auth.userValue()!;
+        return this.http.post(`${Functions.backenUrl()}/configs/appVersion`, {userId:user.id, dhisusersession: user.dhisusersession}, Functions.customHttpHeaders(this.auth));
     }
 
     NewUserToken(): any {
         if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-        const userId = `${this.auth.userValue()!.id}`;
-        return this.http.post(`${Functions.backenUrl()}/configs/newToken`, {userId:userId},Functions.customHttpHeaders(this.auth));
+        const user = this.auth.userValue()!;
+        return this.http.post(`${Functions.backenUrl()}/configs/newToken`, {userId:user.id, dhisusersession: user.dhisusersession},Functions.customHttpHeaders(this.auth));
     }
 
     

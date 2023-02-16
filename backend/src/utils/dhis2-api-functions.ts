@@ -18,10 +18,8 @@ export async function getMe(dhisuserAuthorization: string): Promise<User> {
 		credentials: "include",
 		referrerPolicy: 'no-referrer',
 		method: 'GET',
-		headers: httpHeaders(dhisuserAuthorization, false)
+		headers: httpHeaders('Basic ' + dhisuserAuthorization, false)
 	};
-
-
 	await fetch(getBaseUrl() + "me", option)
 		.then((response: any) => response.json())
 		.then(async (res: any) => {
@@ -29,7 +27,6 @@ export async function getMe(dhisuserAuthorization: string): Promise<User> {
 				var allUserRole = [];
 			if (res.hasOwnProperty('userCredentials')) {
 				const user = res["userCredentials"];
-
 				if (user.hasOwnProperty('userRoles')) {
 					for (let item in user["userRoles"]) {
 						if (user["userRoles"][item].hasOwnProperty("id")) {
@@ -37,7 +34,6 @@ export async function getMe(dhisuserAuthorization: string): Promise<User> {
 						}
 					}
 				}
-
 				userFound.id = user["id"];
 				userFound.username = user["username"];
 				userFound.fullname = user["name"];
@@ -58,7 +54,7 @@ export async function getMe(dhisuserAuthorization: string): Promise<User> {
 export async function userLoginStatus(dhisuserAuthorization: string) {
 	return await fetch(getBaseUrl(), {
 		method: 'GET',
-		headers: httpHeaders(dhisuserAuthorization)
+		headers: httpHeaders('Basic ' + dhisuserAuthorization)
 	})
 		.then((res: any) => true)
 		.catch((err: any) => false);

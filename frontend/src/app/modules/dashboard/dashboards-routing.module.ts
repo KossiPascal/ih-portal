@@ -5,7 +5,6 @@ import { AuthGuard } from '@ih-services/auth-guard.service';
 import { Dashboard1Component } from './dash1/dashboard-1.component';
 import { Dashboard2Component } from './dash2/dashboard-2.component';
 import { Dashboard3Component } from './dash3/dashboard-3.component';
-import { Dashboard4Component } from './dash4/dashboard-4.component';
 
 function isEq(){
   var x = 2;
@@ -37,14 +36,6 @@ const routes: Routes = [
       icon: "fa fa-user",
       label: "Dashboard-3",
       title: "Dashboard-3"
-    }
-  },
-  {
-    path: 'dash4', component: Dashboard4Component, canActivate: [AuthGuard], data: {
-      href: "dashboard4",
-      icon: "fa fa-user",
-      label: "Dashboard-4",
-      title: "Dashboard-4"
     }
   }
 ];

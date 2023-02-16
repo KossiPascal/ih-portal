@@ -74,8 +74,8 @@ export class SyncOrgUnitDataComponent implements OnInit {
 
   createOrgUnitAndPersonFormGroup(): FormGroup {
     return new FormGroup({
-      start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
-      end_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      // start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      // end_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
       site: new FormControl(true, [Validators.required]),
       zone: new FormControl(true, [Validators.required]),
       family: new FormControl(true, [Validators.required]),
@@ -97,10 +97,8 @@ export class SyncOrgUnitDataComponent implements OnInit {
       end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
       districts:new FormControl("", [Validators.required]),
       sites: new FormControl("", [Validators.required]),
-      username: new FormControl("", [Validators.required]),
-      password: new FormControl("", [Validators.required]),
-      
-
+      // username: new FormControl("", [Validators.required]),
+      // password: new FormControl("", [Validators.required]),
     });
   }
 
@@ -166,8 +164,8 @@ export class SyncOrgUnitDataComponent implements OnInit {
         filter: [`RlquY86kI66:GE:${this.dhis2ChwsDataForm.value.start_date}:LE:${this.dhis2ChwsDataForm.value.end_date}`],
         // filter: [`RlquY86kI66:GE:2022-06-21:LE:2022-06-31`],
         fields: ['event', 'orgUnit', 'orgUnitName', 'dataValues[dataElement,value]'],
-        username:this.dhis2ChwsDataForm.value.username,
-        password:this.dhis2ChwsDataForm.value.password
+        // username:this.dhis2ChwsDataForm.value.username,
+        // password:this.dhis2ChwsDataForm.value.password
       }).subscribe((response: OrgUnitImport) => {
         this.tab6_messages.push(response);
         resp.push('Ok');
