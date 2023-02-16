@@ -79,8 +79,8 @@ export class Dashboard1Component implements OnInit {
             this.Chws$ = _c$.data;
             this.chws$ = _c$.data;
           }
-          this.initDataFilted();
-          // this.isLoading = false;
+          // this.initDataFilted();
+          this.isLoading = false;
         }, (err: any) => {
           this.isLoading = false;
           console.log(err.error);
