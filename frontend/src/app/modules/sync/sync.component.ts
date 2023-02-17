@@ -26,14 +26,6 @@ declare var initDataTable: any;
 })
 export class SyncComponent implements OnInit {
 
-  isAdmin: boolean = false;
-  isSuperUser: boolean = false;
-  isUserManager: boolean = false;
-  isDataManager: boolean = false;
-  isSupervisorMentor: boolean = false;
-  isChws: boolean = false;
-  onlySeedata: boolean = false;
-
   thinkmdToDhis2Form!: FormGroup;
   ihChtToDhis2Form!: FormGroup;
   ThinkMdWeeklyForm!: FormGroup;
@@ -88,18 +80,10 @@ export class SyncComponent implements OnInit {
   constructor(private store: AppStorageService, private auth: AuthService, private route: ActivatedRoute, private sync: SyncService) { }
 
 
-  private roles = new Roles(this.store);
+  public roles = new Roles(this.store);
 
   ngOnInit(): void {
     this.route.params.subscribe(params => this.activePage = params['cible']);
-
-    this.isSuperUser = this.roles.isSuperUser();
-    this.isUserManager = this.roles.isUserManager();
-    this.isAdmin = this.roles.isAdmin();
-    this.isDataManager = this.roles.isDataManager();
-    this.isSupervisorMentor = this.roles.isSupervisorMentor();
-    this.isChws = this.roles.isChws();
-    this.onlySeedata = this.roles.onlySeedata();
 
     if (this.activePage === 'dataToDhis2' && !this.roles.isDataManager() ||
       this.activePage === 'weeklyData' && !this.roles.isSupervisorMentor()) location.href = this.auth.userValue()?.defaultRedirectUrl!;

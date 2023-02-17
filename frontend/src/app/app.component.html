@@ -35,7 +35,7 @@
   </div>
   
   
-  <div *ngIf="isSuperUser">
+  <div *ngIf="roles.isSuperUser">
   
     <div class="w-100 btn btn-success onlinemsg">
       <span class="badge bg-success" *ngIf="isOnline">Ok</span> You are Online
@@ -135,7 +135,7 @@
           </li>
   
           <!-- Messages Dropdown Menu -->
-          <!-- <li *ngIf="isSuperUser" class="nav-item dropdown">
+          <!-- <li *ngIf="roles.isSuperUser" class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
               <i class="far fa-comments"></i>
               <span class="badge badge-danger navbar-badge">3</span>
@@ -210,7 +210,7 @@
               <div class="dropdown-divider"></div>
               <div class="dropdown-divider"></div>
   
-              <a *ngIf="isSuperUser" class="nav-link" data-widget="control-sidebar" data-slide="true" href="#"
+              <a *ngIf="roles.isSuperUser" class="nav-link" data-widget="control-sidebar" data-slide="true" href="#"
                 role="button">
                 <i class="fas far fa-bell"></i> Menu de controle
               </a>
@@ -234,7 +234,7 @@
                 <i class="fa fa-sign-out-alt"></i> Se déconnecter
               </a>
   
-              <div *ngIf="isSuperUser">
+              <div *ngIf="roles.isSuperUser">
                 <p>{{ 'HOME.TITLE' | translate }}</p>
                 <p>{{ 'HOME.SELECT' | translate }}</p>
                   
@@ -312,7 +312,7 @@
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
               <!-- Add icons to the links using the .nav-icon class
                  with font-awesome or any other icon font library -->
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-sync fa-spin"></i>
                   <p>
@@ -337,14 +337,14 @@
               </li>
 
              
-              <li *ngIf="isDataManager" class="nav-item">
+              <li *ngIf="roles.isDataManager" class="nav-item">
                 <a routerLink="fetch/sync" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Sync OrgUnits & Data</p>
                 </a>
               </li>
   
-              <li *ngIf="isDataManager" class="nav-item">
+              <li *ngIf="roles.isDataManager" class="nav-item">
                 <a [routerLink]="[ '/fetch/data','dataToDhis2']" class="nav-link">
                   <i class="nav-icon fas fa-th"></i>
                   <p>
@@ -357,21 +357,21 @@
 
               <p style="color: white;">_____________________________________</p>
 
-              <li *ngIf="isSupervisorMentor || isChws" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor || roles.isChws" class="nav-item">
                 <a routerLink="dashboards/dash1" class="nav-link">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
                   <p>Tonoudayo Dashboard 1</p>
                 </a>
               </li>
   
-              <li *ngIf="isSupervisorMentor || isChws" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor || roles.isChws" class="nav-item">
                 <a routerLink="dashboards/dash2" class="nav-link">
                   <i class="nav-icon fas fa-chart-pie"></i>
                   <p>Tonoudayo Dashboard 2</p>
                 </a>
               </li>
   
-              <li *ngIf="isDataManager" class="nav-item">
+              <li *ngIf="roles.isDataManager" class="nav-item">
                 <a routerLink="dashboards/dash3" class="nav-link">
                   <i class="nav-icon fas fa-chart-line"></i>
                   <p>Tonoudayo Dashboard 3</p>
@@ -380,7 +380,7 @@
 
 
   
-              <li *ngIf="isSupervisorMentor" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor" class="nav-item">
                 <a routerLink="chws/" class="nav-link">
                   <i class="nav-icon fas fa-plus-square"></i>
                   <p>Tonoudayo Gestion ASC</p>
@@ -419,7 +419,7 @@
               </li> -->
 
             
-              <li *ngIf="isSupervisorMentor" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor" class="nav-item">
                 <a [routerLink]="[ '/fetch/data','weeklyData']" class="nav-link">
                   <i class="nav-icon fas fa-book"></i>
                   <p>
@@ -429,7 +429,7 @@
               </li>
   
               
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a routerLink="docs" class="nav-link">
                   <i class="nav-icon fas fa-file"></i>
                   <p>
@@ -440,7 +440,7 @@
   
               <p style="color: white;">_____________________________________</p>
   
-              <!-- <li *ngIf="isSuperUser" class="nav-item">
+              <!-- <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-chart-pie"></i>
                   <p>
@@ -470,7 +470,7 @@
                 </ul>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-tree"></i>
                   <p>
@@ -530,7 +530,7 @@
                 </ul>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-edit"></i>
                   <p>
@@ -566,7 +566,7 @@
                 </ul>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-table"></i>
                   <p>
@@ -596,9 +596,9 @@
                 </ul>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-header">EXAMPLES</li>
+              <li *ngIf="roles.isSuperUser" class="nav-header">EXAMPLES</li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="pages/calendar.html" class="nav-link">
                   <i class="nav-icon far fa-calendar-alt"></i>
                   <p>
@@ -608,7 +608,7 @@
                 </a>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="pages/gallery.html" class="nav-link">
                   <i class="nav-icon far fa-image"></i>
                   <p>
@@ -617,7 +617,7 @@
                 </a>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon far fa-envelope"></i>
                   <p>
@@ -647,7 +647,7 @@
                 </ul>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-book"></i>
                   <p>
@@ -719,7 +719,7 @@
                 </ul>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon far fa-plus-square"></i>
                   <p>
@@ -849,7 +849,7 @@
                 </ul>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-search"></i>
                   <p>
@@ -873,25 +873,25 @@
                 </ul>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-header">MISCELLANEOUS</li>
+              <li *ngIf="roles.isSuperUser" class="nav-header">MISCELLANEOUS</li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="https://adminlte.io/docs/3.1/" class="nav-link">
                   <i class="nav-icon fas fa-file"></i>
                   <p>Documentation</p>
                 </a>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-header">MULTI LEVEL EXAMPLE</li>
+              <li *ngIf="roles.isSuperUser" class="nav-header">MULTI LEVEL EXAMPLE</li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="fas fa-circle nav-icon"></i>
                   <p>Level 1</p>
                 </a>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-circle"></i>
                   <p>
@@ -944,30 +944,30 @@
                 </ul>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="fas fa-circle nav-icon"></i>
                   <p>Level 1</p>
                 </a>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-header">LABELS</li>
+              <li *ngIf="roles.isSuperUser" class="nav-header">LABELS</li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon far fa-circle text-danger"></i>
                   <p class="text">Important</p>
                 </a>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon far fa-circle text-warning"></i>
                   <p>Warning</p>
                 </a>
               </li>
   
-              <li *ngIf="isSuperUser" class="nav-item">
+              <li *ngIf="roles.isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon far fa-circle text-info"></i>
                   <p>Informational</p>

@@ -13,58 +13,51 @@ export class Roles {
     return null;
   }
 
-  getRoles(): string[] {
+  getRoles = (): string[] => {
     const userValue = this.userValue();
-    if (userValue) {
-      const roles =  userValue.roles;
-      return roles;
-    };
-    return [];
+    return userValue && Functions.notNull(userValue) ? userValue.roles : [];
   }
 
-  isSuperUser(): boolean {
-    if (Functions.notNull(this.getRoles())) {
-      return this.getRoles().includes('yrB6vc5Ip3r');
-    }
-    return false;
+  isSuperUser = (): boolean => {
+    return Functions.notNull(this.getRoles()) && this.getRoles().includes('yrB6vc5Ip3r');
   }
 
-  isUserManager(): boolean {
+  isUserManager = (): boolean => {
     if (Functions.notNull(this.getRoles())) {
       return this.getRoles().includes('kMykXLnMsfF') || this.isSuperUser();
     }
     return false;
   }
 
-  isAdmin(): boolean {
+  isAdmin = (): boolean => {
     if (Functions.notNull(this.getRoles())) {
       return this.getRoles().includes('FJXxMdr1gIB') || this.isSuperUser();
     }
     return false;
   }
 
-  isDataManager(): boolean {
+  isDataManager = (): boolean => {
     if (Functions.notNull(this.getRoles())) {
       return this.getRoles().includes('KWH2Gl2atF8') || this.isUserManager() || this.isSuperUser() || this.isAdmin();
     }
     return false;
   }
 
-  isSupervisorMentor(): boolean {
+  isSupervisorMentor = (): boolean => {
     if (Functions.notNull(this.getRoles())) {
       return this.getRoles().includes('Vjhs5PHK4lb') || this.isDataManager();
     }
     return false;
   }
 
-  isChws(): boolean {
+  isChws = (): boolean => {
     if (Functions.notNull(this.getRoles())) {
       return this.getRoles().includes('c3WyuK3ibsN') || this.isSuperUser();
     }
     return false;
   }
 
-  onlySeedata(): boolean {
+  onlySeeData = (): boolean => {
     if (Functions.notNull(this.getRoles())) {
       return this.getRoles().includes('STAgD7Z462J')  || this.isSuperUser();
     }

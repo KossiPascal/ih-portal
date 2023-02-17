@@ -29,13 +29,6 @@ export class AppComponent implements OnInit {
   modalVersion!: boolean;
   modalPwaEvent!: any;
   modalPwaPlatform: 'ios' | 'android' | undefined;
-  isAdmin: boolean = false;
-  isSuperUser: boolean = false;
-  isUserManager: boolean = false;
-  isDataManager: boolean = false;
-  isSupervisorMentor: boolean = false;
-  isChws: boolean = false;
-  onlySeedata: boolean = false;
 
   appLogo: any = this.auth.appLogoPath()
   userData: User | null = this.auth.userValue()
@@ -60,19 +53,10 @@ export class AppComponent implements OnInit {
     // if(this.auth.isLoggedIn()) this.sync.syncAllToLocalStorage();
 
   }
-  private roles = new Roles(this.store);
+
+  public roles = new Roles(this.store);
 
   ngOnInit(): void {
-
-    this.isSuperUser = this.roles.isSuperUser();
-    this.isUserManager = this.roles.isUserManager();
-    this.isAdmin = this.roles.isAdmin();
-    this.isDataManager = this.roles.isDataManager();
-    this.isSupervisorMentor = this.roles.isSupervisorMentor();
-    this.isChws = this.roles.isChws();
-    this.onlySeedata = this.roles.onlySeedata();
-
-
 
     const appTitle = this.titleService.getTitle();
     this.checkForAppNewVersion = true;
