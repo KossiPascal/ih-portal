@@ -33,7 +33,7 @@ export class AppComponent implements OnInit {
   appLogo: any = this.auth.appLogoPath()
   userData: User | null = this.auth.userValue()
   checkForAppNewVersion: boolean = true;
-
+  isAppUpdateFound:boolean = false;
 
   @HostBinding('attr.app-version')
   appVersion: any;
@@ -123,6 +123,8 @@ export class AppComponent implements OnInit {
       .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
       .subscribe(() => {
         this.sw.checkForUpdate().then((updateFound) => {
+          console.log('Update available: ',updateFound);
+          this.isAppUpdateFound = updateFound;
           if (updateFound) this.checkForAvailableVersion();
         });
       });

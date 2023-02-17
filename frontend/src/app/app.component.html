@@ -8,14 +8,12 @@
     </div>
   </div> -->
   
-  <div class="modal fade" id="modal-update-version">
+  <div *ngIf="isAppUpdateFound" class="modal fade" id="modal-update-version">
     <div class="modal-dialog">
       <div class="modal-content bg-default">
         <div class="modal-header">
           <strong>Mise à jour de l'Application</strong>
-          <span id="active-update-modal" (click)="ShowUpdateVersionModal()" data-toggle="modal"
-            data-target="#modal-update-version"></span>
-  
+          <span id="active-update-modal" (click)="ShowUpdateVersionModal()" data-toggle="modal" data-target="#modal-update-version"></span>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -29,9 +27,7 @@
           <button (click)="UpdateVersion()" type="button" class="btn btn-info swalDefaultSuccess">Oui mettre à jour</button>
         </div>
       </div>
-      <!-- /.modal-content -->
     </div>
-    <!-- /.modal-dialog -->
   </div>
   
   
