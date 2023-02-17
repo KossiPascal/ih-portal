@@ -123,15 +123,19 @@ export class AppComponent implements OnInit {
       .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
       .subscribe(() => {
         this.sw.checkForUpdate().then((updateFound) => {
-          console.log('Update available: ',updateFound);
           this.isAppUpdateFound = updateFound;
-          if (updateFound) this.checkForAvailableVersion();
+          // if (updateFound) this.checkForAvailableVersion();
+          this.checkForAvailableVersion();
         });
       });
   }
 
   private checkForAvailableVersion(): void {
+    console.log('Update is available: ',this.isAppUpdateFound);
     this.sw.activateUpdate().then((activate) => {
+
+      console.log('is active update: ',activate);
+      
       if (activate) {
         this.sw.versionUpdates.subscribe(evt => {
           switch (evt.type) {
