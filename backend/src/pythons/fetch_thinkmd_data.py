@@ -6,7 +6,7 @@ from datetime import datetime
 from operator import indexOf
 import pandas as pd  
 import csv
-from functions import createExtractFolderIfNotExist, createFile, deleteFile, dhisApi, extractFolder, extractPath, getData, getDhis2OrgUnit, getMatchDataElementUid, getOtherData, getOutPutData, getOutPutDataFromFile, getVal, getValue, matchDhis2Data, signIn
+from functions import extractFolder, createExtractFolderIfNotExist, createFile, deleteFile, dhisApi, extractPath, getData, getDhis2OrgUnit, getMatchDataElementUid, getOtherData, getOutPutData, getOutPutDataFromFile, getVal, getValue, matchDhis2Data, signIn
 
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
@@ -44,7 +44,7 @@ def insertOrUpdateDataToDhis2(data, KWARG):
             outPutData['Dhis2Import']['ErrorMsg'] = " "+str(err)
         return [None, None]
 
-def UploadThinkMdDataToDhis2(KWARG):
+def GenerateThinkMdDataToPushDhis2(KWARG):
     # #get data lenght
     # file0 = open(extractPath("output"+"_"+str(str(KWARG['user']))+".csv"))
     # datalenght = len(list(csv.reader(file0))) -1
@@ -59,160 +59,163 @@ def UploadThinkMdDataToDhis2(KWARG):
     headers = fileData['head']
     csvreader = fileData['body']
 
-    with createFile(extractFolder(), "thinkMd_output"+"_"+str(KWARG['user'])+"_output") as result:
-        result.write("site,reported_date,district,asc_code,total_vad,total_vad_pcime_c,total_suivi_pcime_c,reference_femmes_pf,reference_pcime,reference_femmes_enceinte_postpartum,total_vad_femmes_enceinte,total_vad_femmes_postpartum,total_home_visit,total_diarrhee_pcime_soins,total_paludisme_pcime_soins,total_pneumonie_pcime_soins,total_malnutrition_pcime_soins,prompt_diarrhee_24h_pcime_soins,prompt_diarrhee_48h_pcime_soins,prompt_diarrhee_72h_pcime_soins,prompt_paludisme_24h_pcime_soins,prompt_paludisme_48h_pcime_soins,prompt_paludisme_72h_pcime_soins,prompt_pneumonie_24h_pcime_soins,prompt_pneumonie_48h_pcime_soins,prompt_pneumonie_72h_pcime_soins,total_vad_femme_enceinte_NC_soins,total_vad_femme_postpartum_NC,total_test_de_grossesse_domicile,total_vad_family_planning\n")
-        i = 0
-        response = ['','']
 
-        for row in csvreader:
-            data_source = ""
-            reported_date = ""
-            code_asc = ""
-            district = ""
-            total_vad_pcime_c = ""
-            total_suivi_pcime_c = ""
-            total_vad = ""
-            total_vad_femmes_enceintes_NC = ""
-            reference_femmes_pf = ""
-            prompt_diarrhee_24h_pcime_soins = ""
-            prompt_diarrhee_48h_pcime_soins = ""
-            prompt_diarrhee_72h_pcime_soins = ""
-            prompt_paludisme_24h_pcime_soins = ""
-            prompt_paludisme_48h_pcime_soins = ""
-            prompt_paludisme_72h_pcime_soins = ""
-            prompt_pneumonie_24h_pcime_soins = ""
-            prompt_pneumonie_48h_pcime_soins = ""
-            prompt_pneumonie_72h_pcime_soins = ""
-            total_vad_femmes_enceinte = ""
-            reference_femmes_enceinte_postpartum = ""
-            reference_pcime = ""
-            total_diarrhee_pcime_soins = ""
-            total_vad_femmes_postpartum = ""
-            total_malnutrition_pcime_soins = ""
-            total_paludisme_pcime_soins = ""
-            total_pneumonie_pcime_soins = ""
-            total_vad_femme_postpartum_NC = ""
-            total_recherche_active = ""
-            total_test_de_grossesse_domicile = ""
-            program = ""
-            orgUnit = ""
-            eventDate = ""
-            status = ""
-            completedDate = ""
-            total_vad_family_planning = ""
+    with createFile(extractFolder(), "thinkMd_output_for_dhis2"+"_"+str(KWARG['user'])+"_output", ".json") as dhis2result:
+        with createFile(extractFolder(), "thinkMd_output"+"_"+str(KWARG['user'])+"_output") as result:
+            result.write("site,reported_date,district,asc_code,total_vad,total_vad_pcime_c,total_suivi_pcime_c,reference_femmes_pf,reference_pcime,reference_femmes_enceinte_postpartum,total_vad_femmes_enceinte,total_vad_femmes_postpartum,total_home_visit,total_diarrhee_pcime_soins,total_paludisme_pcime_soins,total_pneumonie_pcime_soins,total_malnutrition_pcime_soins,prompt_diarrhee_24h_pcime_soins,prompt_diarrhee_48h_pcime_soins,prompt_diarrhee_72h_pcime_soins,prompt_paludisme_24h_pcime_soins,prompt_paludisme_48h_pcime_soins,prompt_paludisme_72h_pcime_soins,prompt_pneumonie_24h_pcime_soins,prompt_pneumonie_48h_pcime_soins,prompt_pneumonie_72h_pcime_soins,total_vad_femme_enceinte_NC_soins,total_vad_femme_postpartum_NC,total_test_de_grossesse_domicile,total_vad_family_planning\n")
 
-            for j in range(0,len(headers)):
-                data_source += getVal("FW6z2Ha2GNr", headers[j], row[j])
-                reported_date += getVal("lbHrQBTbY1d", headers[j], row[j])
-                code_asc += getVal("JkMyqI3e6or", headers[j], row[j])
-                district += getVal("JC752xYegbJ", headers[j], row[j])
-                total_vad_pcime_c += getVal("lvW5Kj1cisa", headers[j], row[j])
-                total_suivi_pcime_c+= getVal("M6WRPsREqsZ", headers[j], row[j])
-                total_vad += getVal("oeDKJi4BICh", headers[j], row[j])
-                total_vad_femmes_enceintes_NC += getVal("PrN89trdUGm", headers[j], row[j])
-                reference_femmes_pf += getVal("wdg7jjP9ZRg", headers[j], row[j])
-                prompt_diarrhee_24h_pcime_soins += getVal("qNxNXSwDAaI", headers[j], row[j])
-                prompt_diarrhee_48h_pcime_soins += getVal("S1zPDVOIVLZ", headers[j], row[j])
-                prompt_diarrhee_72h_pcime_soins += getVal("nW3O5ULr75J", headers[j], row[j])
-                prompt_paludisme_24h_pcime_soins += getVal("NUpARMZ383s", headers[j], row[j])
-                prompt_paludisme_48h_pcime_soins += getVal("yQa48SF9bua", headers[j], row[j])
-                prompt_paludisme_72h_pcime_soins += getVal("NzKjJuAniNx", headers[j], row[j])
-                prompt_pneumonie_24h_pcime_soins += getVal("AA2We0Ao5sv", headers[j], row[j])
-                prompt_pneumonie_48h_pcime_soins += getVal("PYwikai4k2J", headers[j], row[j])
-                prompt_pneumonie_72h_pcime_soins += getVal("rgjFO0bDVUL", headers[j], row[j])
-                total_vad_femmes_enceinte += getVal("WR9u3cGJn9W", headers[j], row[j])
-                reference_femmes_enceinte_postpartum += getVal("Pl6qRNgjd3a", headers[j], row[j])
-                reference_pcime += getVal("DicYcTqr9xT", headers[j], row[j])
-                total_diarrhee_pcime_soins += getVal("caef2rf638P", headers[j], row[j])
-                total_vad_femmes_postpartum += getVal("Q0BQtUdJOCy", headers[j], row[j])
-                total_malnutrition_pcime_soins += getVal("dLYksBMOqST", headers[j], row[j])
-                total_paludisme_pcime_soins += getVal("jp2i3vN3VJk", headers[j], row[j])
-                total_pneumonie_pcime_soins += getVal("LZ3R8fj9CGG", headers[j], row[j])
-                total_vad_femme_postpartum_NC += getVal("O9EZVn3C3pF", headers[j], row[j])
-                total_recherche_active += getVal("lsBS60uQPtc", headers[j], row[j])
-                total_test_de_grossesse_domicile += getVal("lopdYxQrgyj", headers[j], row[j])
-                total_vad_family_planning+= getVal("AzwUzgh0nd7", headers[j], row[j])
-                program += getVal("program", headers[j], row[j])
-                orgUnit += getVal("orgUnit", headers[j], row[j])
-                eventDate += getVal("eventDate", headers[j], row[j])
-                status += getVal("status", headers[j], row[j])
-                completedDate += getVal("completedDate", headers[j], row[j])
+
+            dhis2DictionaryData = []
+            for row in csvreader:
+                data_source = ""
+                reported_date = ""
+                code_asc = ""
+                district = ""
+                total_vad_pcime_c = ""
+                total_suivi_pcime_c = ""
+                total_vad = ""
+                total_vad_femmes_enceintes_NC = ""
+                reference_femmes_pf = ""
+                prompt_diarrhee_24h_pcime_soins = ""
+                prompt_diarrhee_48h_pcime_soins = ""
+                prompt_diarrhee_72h_pcime_soins = ""
+                prompt_paludisme_24h_pcime_soins = ""
+                prompt_paludisme_48h_pcime_soins = ""
+                prompt_paludisme_72h_pcime_soins = ""
+                prompt_pneumonie_24h_pcime_soins = ""
+                prompt_pneumonie_48h_pcime_soins = ""
+                prompt_pneumonie_72h_pcime_soins = ""
+                total_vad_femmes_enceinte = ""
+                reference_femmes_enceinte_postpartum = ""
+                reference_pcime = ""
+                total_diarrhee_pcime_soins = ""
+                total_vad_femmes_postpartum = ""
+                total_malnutrition_pcime_soins = ""
+                total_paludisme_pcime_soins = ""
+                total_pneumonie_pcime_soins = ""
+                total_vad_femme_postpartum_NC = ""
+                total_recherche_active = ""
+                total_test_de_grossesse_domicile = ""
+                program = ""
+                orgUnit = ""
+                eventDate = ""
+                status = ""
+                completedDate = ""
+                total_vad_family_planning = ""
+
+                for j in range(0,len(headers)):
+                    data_source += getVal("FW6z2Ha2GNr", headers[j], row[j])
+                    reported_date += getVal("lbHrQBTbY1d", headers[j], row[j])
+                    code_asc += getVal("JkMyqI3e6or", headers[j], row[j])
+                    district += getVal("JC752xYegbJ", headers[j], row[j])
+                    total_vad_pcime_c += getVal("lvW5Kj1cisa", headers[j], row[j])
+                    total_suivi_pcime_c+= getVal("M6WRPsREqsZ", headers[j], row[j])
+                    total_vad += getVal("oeDKJi4BICh", headers[j], row[j])
+                    total_vad_femmes_enceintes_NC += getVal("PrN89trdUGm", headers[j], row[j])
+                    reference_femmes_pf += getVal("wdg7jjP9ZRg", headers[j], row[j])
+                    prompt_diarrhee_24h_pcime_soins += getVal("qNxNXSwDAaI", headers[j], row[j])
+                    prompt_diarrhee_48h_pcime_soins += getVal("S1zPDVOIVLZ", headers[j], row[j])
+                    prompt_diarrhee_72h_pcime_soins += getVal("nW3O5ULr75J", headers[j], row[j])
+                    prompt_paludisme_24h_pcime_soins += getVal("NUpARMZ383s", headers[j], row[j])
+                    prompt_paludisme_48h_pcime_soins += getVal("yQa48SF9bua", headers[j], row[j])
+                    prompt_paludisme_72h_pcime_soins += getVal("NzKjJuAniNx", headers[j], row[j])
+                    prompt_pneumonie_24h_pcime_soins += getVal("AA2We0Ao5sv", headers[j], row[j])
+                    prompt_pneumonie_48h_pcime_soins += getVal("PYwikai4k2J", headers[j], row[j])
+                    prompt_pneumonie_72h_pcime_soins += getVal("rgjFO0bDVUL", headers[j], row[j])
+                    total_vad_femmes_enceinte += getVal("WR9u3cGJn9W", headers[j], row[j])
+                    reference_femmes_enceinte_postpartum += getVal("Pl6qRNgjd3a", headers[j], row[j])
+                    reference_pcime += getVal("DicYcTqr9xT", headers[j], row[j])
+                    total_diarrhee_pcime_soins += getVal("caef2rf638P", headers[j], row[j])
+                    total_vad_femmes_postpartum += getVal("Q0BQtUdJOCy", headers[j], row[j])
+                    total_malnutrition_pcime_soins += getVal("dLYksBMOqST", headers[j], row[j])
+                    total_paludisme_pcime_soins += getVal("jp2i3vN3VJk", headers[j], row[j])
+                    total_pneumonie_pcime_soins += getVal("LZ3R8fj9CGG", headers[j], row[j])
+                    total_vad_femme_postpartum_NC += getVal("O9EZVn3C3pF", headers[j], row[j])
+                    total_recherche_active += getVal("lsBS60uQPtc", headers[j], row[j])
+                    total_test_de_grossesse_domicile += getVal("lopdYxQrgyj", headers[j], row[j])
+                    total_vad_family_planning+= getVal("AzwUzgh0nd7", headers[j], row[j])
+                    program += getVal("program", headers[j], row[j])
+                    orgUnit += getVal("orgUnit", headers[j], row[j])
+                    eventDate += getVal("eventDate", headers[j], row[j])
+                    status += getVal("status", headers[j], row[j])
+                    completedDate += getVal("completedDate", headers[j], row[j])
+                
+                chwsData = {
+                    "orgUnit": orgUnit,
+                    "reported_date": reported_date,
+                    "code_asc": code_asc,
+                    "district": district,
+                    "data_source": 'thinkmd',
+                    "total_vad": total_vad,
+                    "total_vad_pcime_c": total_vad_pcime_c,
+                    "total_suivi_pcime_c": total_suivi_pcime_c,
+                    "total_vad_femmes_enceintes_NC": total_vad_femmes_enceintes_NC,
+                    "reference_femmes_pf": reference_femmes_pf,
+                    "prompt_diarrhee_24h_pcime_soins": prompt_diarrhee_24h_pcime_soins,
+                    "prompt_diarrhee_48h_pcime_soins": prompt_diarrhee_48h_pcime_soins,
+                    "prompt_diarrhee_72h_pcime_soins": prompt_diarrhee_72h_pcime_soins,
+                    "prompt_paludisme_24h_pcime_soins": prompt_paludisme_24h_pcime_soins,
+                    "prompt_paludisme_48h_pcime_soins": prompt_paludisme_48h_pcime_soins,
+                    "prompt_paludisme_72h_pcime_soins": prompt_paludisme_72h_pcime_soins,
+                    "prompt_pneumonie_24h_pcime_soins": prompt_pneumonie_24h_pcime_soins,
+                    "prompt_pneumonie_48h_pcime_soins": prompt_pneumonie_48h_pcime_soins,
+                    "prompt_pneumonie_72h_pcime_soins": prompt_pneumonie_72h_pcime_soins,
+                    "total_vad_femmes_enceinte": total_vad_femmes_enceinte,
+                    "reference_femmes_enceinte_postpartum": reference_femmes_enceinte_postpartum,
+                    "reference_pcime": reference_pcime,
+                    "total_diarrhee_pcime_soins": total_diarrhee_pcime_soins,
+                    "total_vad_femmes_postpartum": total_vad_femmes_postpartum,
+                    "total_malnutrition_pcime_soins": total_malnutrition_pcime_soins,
+                    "total_paludisme_pcime_soins": total_paludisme_pcime_soins,
+                    "total_pneumonie_pcime_soins": total_pneumonie_pcime_soins,
+                    "total_vad_femme_postpartum_NC": total_vad_femme_postpartum_NC,
+                    "total_recherche_active": total_recherche_active,
+                    "total_test_de_grossesse_domicile": total_test_de_grossesse_domicile,
+                    "total_vad_family_planning": total_vad_family_planning,
+                }
+                
+                if KWARG['InsertIntoDhis2'] == True:
+                    dhis2DictionaryData.append(chwsData)
+
+                result.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
+                    getDhis2OrgUnit(chwsData["orgUnit"], False), # get Name
+                    chwsData["reported_date"], 
+                    chwsData["district"],
+                    chwsData["code_asc"], # get Name
+                    chwsData["total_vad"],
+                    chwsData["total_vad_pcime_c"],
+                    chwsData["total_suivi_pcime_c"],
+                    chwsData["reference_femmes_pf"],
+                    chwsData["reference_pcime"],
+                    chwsData["reference_femmes_enceinte_postpartum"], 
+                    chwsData["total_vad_femmes_enceinte"], 
+                    chwsData["total_vad_femmes_postpartum"], 
+                    chwsData["total_recherche_active"],
+                    chwsData["total_diarrhee_pcime_soins"],
+                    chwsData["total_paludisme_pcime_soins"],
+                    chwsData["total_pneumonie_pcime_soins"],
+                    chwsData["total_malnutrition_pcime_soins"],
+                    chwsData["prompt_diarrhee_24h_pcime_soins"],
+                    chwsData["prompt_diarrhee_48h_pcime_soins"],
+                    chwsData["prompt_diarrhee_72h_pcime_soins"],
+                    chwsData["prompt_paludisme_24h_pcime_soins"],
+                    chwsData["prompt_paludisme_48h_pcime_soins"],
+                    chwsData["prompt_paludisme_72h_pcime_soins"],
+                    chwsData["prompt_pneumonie_24h_pcime_soins"],
+                    chwsData["prompt_pneumonie_48h_pcime_soins"],
+                    chwsData["prompt_pneumonie_72h_pcime_soins"],
+                    chwsData["total_vad_femmes_enceintes_NC"],
+                    chwsData["total_vad_femme_postpartum_NC"],
+                    chwsData["total_test_de_grossesse_domicile"],
+                    chwsData["total_vad_family_planning"]),)
             
-            chwsData = {
-                "orgUnit": orgUnit,
-                "reported_date": reported_date,
-                "code_asc": code_asc,
-                "district": district,
-                "data_source": 'thinkmd',
-                "total_vad": total_vad,
-                "total_vad_pcime_c": total_vad_pcime_c,
-                "total_suivi_pcime_c": total_suivi_pcime_c,
-                "total_vad_femmes_enceintes_NC": total_vad_femmes_enceintes_NC,
-                "reference_femmes_pf": reference_femmes_pf,
-                "prompt_diarrhee_24h_pcime_soins": prompt_diarrhee_24h_pcime_soins,
-                "prompt_diarrhee_48h_pcime_soins": prompt_diarrhee_48h_pcime_soins,
-                "prompt_diarrhee_72h_pcime_soins": prompt_diarrhee_72h_pcime_soins,
-                "prompt_paludisme_24h_pcime_soins": prompt_paludisme_24h_pcime_soins,
-                "prompt_paludisme_48h_pcime_soins": prompt_paludisme_48h_pcime_soins,
-                "prompt_paludisme_72h_pcime_soins": prompt_paludisme_72h_pcime_soins,
-                "prompt_pneumonie_24h_pcime_soins": prompt_pneumonie_24h_pcime_soins,
-                "prompt_pneumonie_48h_pcime_soins": prompt_pneumonie_48h_pcime_soins,
-                "prompt_pneumonie_72h_pcime_soins": prompt_pneumonie_72h_pcime_soins,
-                "total_vad_femmes_enceinte": total_vad_femmes_enceinte,
-                "reference_femmes_enceinte_postpartum": reference_femmes_enceinte_postpartum,
-                "reference_pcime": reference_pcime,
-                "total_diarrhee_pcime_soins": total_diarrhee_pcime_soins,
-                "total_vad_femmes_postpartum": total_vad_femmes_postpartum,
-                "total_malnutrition_pcime_soins": total_malnutrition_pcime_soins,
-                "total_paludisme_pcime_soins": total_paludisme_pcime_soins,
-                "total_pneumonie_pcime_soins": total_pneumonie_pcime_soins,
-                "total_vad_femme_postpartum_NC": total_vad_femme_postpartum_NC,
-                "total_recherche_active": total_recherche_active,
-                "total_test_de_grossesse_domicile": total_test_de_grossesse_domicile,
-                "total_vad_family_planning": total_vad_family_planning,
-            }
+        # Serializing json
+        json_object = json.dumps(dhis2DictionaryData, indent=4)
+        # Writing to sample.json
+        dhis2result.write(json_object)
 
-            if KWARG['InsertIntoDhis2'] == True:
-                response = insertOrUpdateDataToDhis2(chwsData, KWARG)
-                if response[0] == '200':
-                    pass
-                else:
-                    pass
-            else:
-                pass
 
-            result.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
-                getDhis2OrgUnit(chwsData["orgUnit"], False), # get Name
-                chwsData["reported_date"], 
-                chwsData["district"],
-                chwsData["code_asc"], # get Name
-                chwsData["total_vad"],
-                chwsData["total_vad_pcime_c"],
-                chwsData["total_suivi_pcime_c"],
-                chwsData["reference_femmes_pf"],
-                chwsData["reference_pcime"],
-                chwsData["reference_femmes_enceinte_postpartum"], 
-                chwsData["total_vad_femmes_enceinte"], 
-                chwsData["total_vad_femmes_postpartum"], 
-                chwsData["total_recherche_active"],
-                chwsData["total_diarrhee_pcime_soins"],
-                chwsData["total_paludisme_pcime_soins"],
-                chwsData["total_pneumonie_pcime_soins"],
-                chwsData["total_malnutrition_pcime_soins"],
-                chwsData["prompt_diarrhee_24h_pcime_soins"],
-                chwsData["prompt_diarrhee_48h_pcime_soins"],
-                chwsData["prompt_diarrhee_72h_pcime_soins"],
-                chwsData["prompt_paludisme_24h_pcime_soins"],
-                chwsData["prompt_paludisme_48h_pcime_soins"],
-                chwsData["prompt_paludisme_72h_pcime_soins"],
-                chwsData["prompt_pneumonie_24h_pcime_soins"],
-                chwsData["prompt_pneumonie_48h_pcime_soins"],
-                chwsData["prompt_pneumonie_72h_pcime_soins"],
-                chwsData["total_vad_femmes_enceintes_NC"],
-                chwsData["total_vad_femme_postpartum_NC"],
-                chwsData["total_test_de_grossesse_domicile"],
-                chwsData["total_vad_family_planning"]),)
-        
+
 
     if outPutData['Error'] == 0 and outPutData['Dhis2Import']['ErrorCount'] == 0:
         outPutData['success'] = 'true'
@@ -225,7 +228,9 @@ def UploadThinkMdDataToDhis2(KWARG):
     except:
         pass
 
-def flushThinkMdDataToDhis2(KWARG):
+
+
+def getThinkMdDataFromCloud(KWARG):
     try:
         bigin = datetime.now()
         server = TSC.Server("https://{}".format(KWARG['thinkmd_host']), use_server_version=True)
@@ -306,7 +311,7 @@ def flushThinkMdDataToDhis2(KWARG):
             data.to_csv(extractPath("output"+"_"+str(KWARG['user'])+".csv"), index=False)
             deleteFile(extractPath("brut"+"_"+str(KWARG['user'])+".csv"))
             deleteFile(extractPath("results"+"_"+str(KWARG['user'])+".csv"))
-            UploadThinkMdDataToDhis2(KWARG)
+            GenerateThinkMdDataToPushDhis2(KWARG)
         else:
             outPutData['Error'] +=1
             if 'noDataOnApp' not in outPutData['ErrorMsg']:
@@ -324,7 +329,6 @@ def flushThinkMdDataToDhis2(KWARG):
 
 
 def generateDataFromFinalFile(KWARG):
-
     if KWARG['type'] == 'thinkMd_only':
         try:
             allData = getOutPutDataFromFile("thinkMd_output"+"_"+str(KWARG['user'])+"_output")
@@ -333,12 +337,6 @@ def generateDataFromFinalFile(KWARG):
             for row in finalBody:
                 rowData = []
                 for r in row:
-                    # # ---------------------------
-                    # if indexOf(row,r) == 0:
-                    #     rowData.append(str(getDhis2OrgUnit(r, False)).replace("'", '’'))
-                    # else:
-                    #     rowData.append(str(r).replace("'", '’'))
-                    # # ---------------------------
                     rowData.append(str(r).replace("'", '’'))
                 outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
         except:
@@ -351,4 +349,4 @@ KWARGS = json.loads(sys.argv[1])
 
 if KWARGS['type'] == 'thinkMd_only':
     createExtractFolderIfNotExist()
-    flushThinkMdDataToDhis2(KWARGS)
+    getThinkMdDataFromCloud(KWARGS)

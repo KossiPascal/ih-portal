@@ -80,89 +80,7 @@
       <!-- Preloader -->
       <div class="preloader flex-column justify-content-center align-items-center">
         <!-- <img class="animation__shake" src="assets/logo/logo.png" alt="Integrate Health" height="60" width="60"> -->
-        <style>
-          @-webkit-keyframes spin {
-            0% {
-              transform: rotate(0)
-            }
-  
-            100% {
-              transform: rotate(360deg)
-            }
-          }
-  
-          @-moz-keyframes spin {
-            0% {
-              -moz-transform: rotate(0)
-            }
-  
-            100% {
-              -moz-transform: rotate(360deg)
-            }
-          }
-  
-          @keyframes spin {
-            0% {
-              transform: rotate(0)
-            }
-  
-            100% {
-              transform: rotate(360deg)
-            }
-          }
-  
-          .spinner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1003;
-            background: #343a40;
-            /* opacity: 0.5; */
-            overflow: hidden
-          }
-  
-          .spinner div:first-child {
-            display: block;
-            position: relative;
-            left: 50%;
-            top: 50%;
-            width: 150px;
-            height: 150px;
-            margin: -75px 0 0 -75px;
-            border-radius: 50%;
-            box-shadow: 0 3px 3px 0 rgba(255, 56, 106, 1);
-            transform: translate3d(0, 0, 0);
-            animation: spin 2s linear infinite
-          }
-  
-          .spinner div:first-child:after,
-          .spinner div:first-child:before {
-            content: '';
-            position: absolute;
-            border-radius: 50%
-          }
-  
-          .spinner div:first-child:before {
-            top: 5px;
-            left: 5px;
-            right: 5px;
-            bottom: 5px;
-            box-shadow: 0 3px 3px 0 rgb(255, 228, 32);
-            -webkit-animation: spin 3s linear infinite;
-            animation: spin 3s linear infinite
-          }
-  
-          .spinner div:first-child:after {
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            bottom: 15px;
-            box-shadow: 0 3px 3px 0 rgba(61, 175, 255, 1);
-            animation: spin 1.5s linear infinite
-          }
-        </style>
+ 
         <div id="nb-global-spinner" class="spinner">
           <div class="blob blob-0"></div>
           <div class="blob blob-1"></div>
@@ -217,14 +135,13 @@
           </li>
   
           <!-- Messages Dropdown Menu -->
-          <li *ngIf="isSuperUser" class="nav-item dropdown">
+          <!-- <li *ngIf="isSuperUser" class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
               <i class="far fa-comments"></i>
               <span class="badge badge-danger navbar-badge">3</span>
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
               <a href="#" class="dropdown-item">
-                <!-- Message Start -->
                 <div class="media">
                   <img src="assets/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 mr-3 img-circle">
                   <div class="media-body">
@@ -236,11 +153,9 @@
                     <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
                   </div>
                 </div>
-                <!-- Message End -->
               </a>
               <div class="dropdown-divider"></div>
               <a href="#" class="dropdown-item">
-                <!-- Message Start -->
                 <div class="media">
                   <img src="assets/img/user8-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
                   <div class="media-body">
@@ -252,11 +167,9 @@
                     <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
                   </div>
                 </div>
-                <!-- Message End -->
               </a>
               <div class="dropdown-divider"></div>
               <a href="#" class="dropdown-item">
-                <!-- Message Start -->
                 <div class="media">
                   <img src="assets/img/user3-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
                   <div class="media-body">
@@ -268,12 +181,11 @@
                     <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
                   </div>
                 </div>
-                <!-- Message End -->
               </a>
               <div class="dropdown-divider"></div>
               <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
             </div>
-          </li>
+          </li> -->
   
   
           <!-- Notifications Dropdown Menu -->
@@ -402,19 +314,13 @@
                  with font-awesome or any other icon font library -->
               <li *ngIf="isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">
-                  <i class="nav-icon far fa-plus-square"></i>
+                  <i class="nav-icon fas fa-sync fa-spin"></i>
                   <p>
                     Admin
                     <i class="right fas fa-angle-left"></i>
                   </p>
                 </a>
                 <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a routerLink="fetch/sync" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Sync OrgUnit & Data</p>
-                    </a>
-                  </li>
                   <li class="nav-item">
                     <a routerLink="users" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
@@ -429,34 +335,58 @@
                   </li>
                 </ul>
               </li>
-  
-              <li class="nav-item">
-                <a routerLink="chws/" class="nav-link">
-                  <i class="nav-icon fas fa-tachometer-alt"></i>
-                  <p>Manage Chws</p>
+
+             
+              <li *ngIf="isDataManager" class="nav-item">
+                <a routerLink="fetch/sync" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Sync OrgUnits & Data</p>
                 </a>
               </li>
   
-              <li class="nav-item">
+              <li *ngIf="isDataManager" class="nav-item">
+                <a [routerLink]="[ '/fetch/data','dataToDhis2']" class="nav-link">
+                  <i class="nav-icon fas fa-th"></i>
+                  <p>
+                    Données vers Dhis2
+                    <!-- <span class="right badge badge-danger">New</span> -->
+                  </p>
+                </a>
+              </li>
+
+
+              <p style="color: white;">_____________________________________</p>
+
+              <li *ngIf="isSupervisorMentor || isChws" class="nav-item">
                 <a routerLink="dashboards/dash1" class="nav-link">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
-                  <p>Dashboard 1</p>
+                  <p>Tonoudayo Dashboard 1</p>
                 </a>
               </li>
   
-              <li class="nav-item">
+              <li *ngIf="isSupervisorMentor || isChws" class="nav-item">
                 <a routerLink="dashboards/dash2" class="nav-link">
                   <i class="nav-icon fas fa-chart-pie"></i>
-                  <p>Dashboard 2</p>
+                  <p>Tonoudayo Dashboard 2</p>
                 </a>
               </li>
   
-              <li class="nav-item">
+              <li *ngIf="isDataManager" class="nav-item">
                 <a routerLink="dashboards/dash3" class="nav-link">
                   <i class="nav-icon fas fa-chart-line"></i>
-                  <p>Dashboard 3</p>
+                  <p>Tonoudayo Dashboard 3</p>
                 </a>
               </li>
+
+
+  
+              <li *ngIf="isSupervisorMentor" class="nav-item">
+                <a routerLink="chws/" class="nav-link">
+                  <i class="nav-icon fas fa-plus-square"></i>
+                  <p>Tonoudayo Gestion ASC</p>
+                </a>
+              </li>
+              <p style="color: white;">_____________________________________</p>
   
               <!-- <li class="nav-item">
                 <a href="#" class="nav-link">
@@ -487,19 +417,19 @@
                   </li>
                 </ul>
               </li> -->
-  
-              <li class="nav-item">
-                <a [routerLink]="[ '/fetch/data','dataToDhis2']" class="nav-link">
-                  <i class="nav-icon fas fa-th"></i>
+
+            
+              <li *ngIf="isSupervisorMentor" class="nav-item">
+                <a [routerLink]="[ '/fetch/data','weeklyData']" class="nav-link">
+                  <i class="nav-icon fas fa-book"></i>
                   <p>
-                    Apps To Dhis2
-                    <!-- <span class="right badge badge-danger">New</span> -->
+                    ThinkMd par semaine
                   </p>
                 </a>
               </li>
   
               
-              <li class="nav-item">
+              <li *ngIf="isSuperUser" class="nav-item">
                 <a routerLink="docs" class="nav-link">
                   <i class="nav-icon fas fa-file"></i>
                   <p>
@@ -508,7 +438,7 @@
                 </a>
               </li>
   
-  
+              <p style="color: white;">_____________________________________</p>
   
               <!-- <li *ngIf="isSuperUser" class="nav-item">
                 <a href="#" class="nav-link">

@@ -6,7 +6,6 @@ const express = require('express');
 const databaseRouter = express.Router();
 
 
-
 databaseRouter.post('/postgres/entities', Middelware.authMiddleware,databaseEntitiesList);
 
 databaseRouter.post('/postgres/truncate',

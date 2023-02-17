@@ -3,10 +3,13 @@ import { FormGroup, FormControl, Validators, AbstractControl, ValidationErrors, 
 import { Router } from '@angular/router';
 import { Districts, Chws, Sites, Zones, FilterParams, ChwsDataFormDb } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
+import { AppStorageService } from '@ih-app/services/cookie.service';
 import { DatabaseUtilService } from '@ih-app/services/database-utils.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import { Functions } from '@ih-app/shared/functions';
+import { Roles } from '@ih-app/shared/roles';
 import { User } from '@ih-models/User';
+import { async } from 'rxjs';
 // import usersDb from '@ih-databases/users.json'; 
 
 declare var $: any;
@@ -43,6 +46,14 @@ export class DatabaseUtilsComponent implements OnInit {
   EntitiesForm!: FormGroup;
   initEntity: string[] = [];
 
+
+  constructor(private store: AppStorageService, private sync: SyncService, private auth: AuthService, private dbUtils: DatabaseUtilService, private router: Router) {
+    if(!this.roles.isSuperUser()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+   }
+  
+  
+  private roles = new Roles(this.store);
+
   createEntitiesFilterFormGroup(): FormGroup {
     return new FormGroup({
       entities: new FormControl([], [Validators.required]),
@@ -64,9 +75,6 @@ export class DatabaseUtilsComponent implements OnInit {
       type: new FormControl("", [Validators.required]),
     });
   }
-
-
-  constructor(private sync: SyncService, private auth: AuthService, private dbUtils: DatabaseUtilService, private router: Router) { }
 
   ngOnInit(): void {
     this.EntitiesForm = this.createEntitiesFilterFormGroup();

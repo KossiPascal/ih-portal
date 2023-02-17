@@ -41,7 +41,7 @@ export class RegisterComponent implements OnInit {
       .subscribe((res: Configs) => {
         if (res.showRegisterPage !== true) {
           const redirectUrl = Functions.getSavedUrl();
-          if (redirectUrl!='') {
+          if (redirectUrl) {
             location.href = redirectUrl
           } else {
             this.router.navigate(["auths/login"]);
@@ -51,7 +51,7 @@ export class RegisterComponent implements OnInit {
         }
       }, (err: any) => {
           const redirectUrl = Functions.getSavedUrl();
-          if (redirectUrl!='') {
+          if (redirectUrl) {
             location.href = redirectUrl
           } else {
             this.router.navigate(["auths/login"]);
@@ -106,7 +106,7 @@ export class RegisterComponent implements OnInit {
           if (res.status === 200) {
             this.message = 'Registed successfully !'
             const redirectUrl = Functions.getSavedUrl();
-            if (redirectUrl!='') {
+            if (redirectUrl) {
               location.href = redirectUrl
             } else {
               this.router.navigate(["auths/login"]);

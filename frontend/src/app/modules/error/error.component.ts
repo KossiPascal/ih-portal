@@ -27,15 +27,15 @@ const errors:any = {
 export class ErrorComponent implements OnInit {
   error:any; 
 
-  constructor(private route: ActivatedRoute, private router:Router, private authService:AuthService) { }
+  constructor(private route: ActivatedRoute, private router:Router, private auth:AuthService) { }
 
   ngOnInit() {
     this.error = errors[this.route.snapshot.params['code']] || errors['404'];
   }
 
   returnBack(){
-    location.href = this.authService.defaultRedirectUrl;
-  //   this.router.navigate([this.authService.defaultRedirectUrl])
+    location.href = this.auth.userValue()?.defaultRedirectUrl!;
+  //   this.router.navigate([this.auth.userValue()?.defaultRedirectUrl])
   // .then(() => {
   //   window.location.reload();
   // });

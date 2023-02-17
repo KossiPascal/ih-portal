@@ -1,14 +1,40 @@
 import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository } from "../entity/Sync";
 import { CouchDbFetchData, Dhis2DataFormat } from "../utils/appInterface";
-import { Dhis2SyncConfig, Functions, isNotNull, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder } from "../utils/functions";
+import { Dhis2SyncConfig, Functions, isNotNull, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders } from "../utils/functions";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import https from 'https';
+import { DataIndicators } from "../entity/DataAggragate";
 
 const fetch = require('node-fetch');
+const request = require('request');
 
 require('dotenv').config({ path: sslFolder('.env') });
 
+
+
+export async function getDhis2Chws(req: Request, res: Response, next: NextFunction) {
+    if (!validationResult(req).isEmpty()) {
+        return res.status(201).json({ status: 201, data: 'Error when getting chws from dhis2' });
+    }
+    try {
+        const link = `https://${process.env.DHIS_HOST}/api/options`;
+        const params = `.json?paging=false&filter=optionSet.id:eq:uOKgQa2W8tn&fields=id,code,name,optionSet&order=created:desc`;
+        request({
+            url: link + params,
+            method: 'GET',
+            headers: httpHeaders('Basic ' + req.body.dhisusersession)
+        }, async function (err: any, response: any, body: any) {
+            if (err) return res.status(201).json({ status: 201, data: 'Error when getting chws from dhis2' });
+            const jsonBody = JSON.parse(body);
+            if (jsonBody.hasOwnProperty('options')) return res.status(200).json({ status: 200, data: jsonBody["options"] });
+            return res.status(201).json({ status: 201, data: 'Error when getting chws from dhis2' });
+        });
+    } catch (err: any) {
+        return res.status(201).json({ status: 201, data: err.toString() });
+    }
+
+}
 
 export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: NextFunction) {
 
@@ -543,5 +569,199 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
 }
 
 
+export async function insertOrUpdateDataToDhis2(req: Request, res: Response, next: NextFunction) {
+    const { dhisusersession, chwsDataToDhis2 } = req.body;
+
+    const chwsData = chwsDataToDhis2 as DataIndicators;
+
+    try {
+        if (isNotNull(chwsData)) {
+            var jsonData = matchDhis2Data(chwsData);
+            const date = getValue(jsonData["dataValues"], "lbHrQBTbY1d");  // reported_date
+            const srce = getValue(jsonData["dataValues"], "FW6z2Ha2GNr");  // data_source
+            const dist = getValue(jsonData["dataValues"], "JC752xYegbJ");  // district
+            const chw = getValue(jsonData["dataValues"], "JkMyqI3e6or");  // code_asc
+            const site = jsonData['orgUnit'];
+            const program = jsonData['program'];
+            const data_filter = "JC752xYegbJ:EQ:" + dist + ",JkMyqI3e6or:like:" + chw + ",lbHrQBTbY1d:EQ:" + date + ",FW6z2Ha2GNr:like:" + srce;
+            const fields = "event,eventDate,dataValues[dataElement, value]";
+            const headers = httpHeaders('Basic ' + dhisusersession);
+            const link = `https://${process.env.DHIS_HOST}/api/events`;
+            const params = `.json?paging=false&program=${program}&orgUnit=${site}&filter=${data_filter}&fields=${fields}&order=created:desc`;
+
+            await request({
+                url: link + params,
+                method: 'GET',
+                headers: headers
+            }, async function (err: any, response1: any, body: any) {
+                if (err) return res.status(201).json({ status: 201, data: err.toString(), chw:chw });
+                const jsonBody = JSON.parse(body);
+                if (jsonBody.hasOwnProperty('events')) {
+                    var reqData: Dhis2DataFormat[] = jsonBody["events"] as Dhis2DataFormat[];
+                    const dataId = reqData.length == 1 ? reqData[0].event : ''
+
+                    await request({
+                      url: reqData .length == 1 ? `${link}/${dataId}` : link,
+                      cache: 'no-cache',
+                      mode: "cors",
+                      credentials: "include",
+                      referrerPolicy: 'no-referrer',
+                      method: reqData .length == 1 ? 'PUT' : 'POST',
+                      body: JSON.stringify(jsonData),
+                      headers: headers
+                    }, async function (err: any, response2: any, body: any) {
+                        if (err) return res.status(201).json({ status: 201, data: err.toString(), chw:chw });
+                        if (response2.statusCode != 200) return res.status(201).json({status:  201, data: `Error Found, retry!`, chw:chw })
+                        return res.status(200).json({status: 200 , data: reqData .length == 1 ? `Updated` : `Created`})
+                    });
+
+                } else {
+                    return res.status(201).json({ status: 201, data: 'Connection Error! Retry', chw:chw  });
+                }
+            });
+        } else {
+            return res.status(201).json({ status: 201, data: 'No Data Available!', chw:''  });
+        }
+    } catch (err:any) {
+        return res.status(201).json({ status: 201, data: err.toString(), chw:'' });
+    }
+}
+
+
+
+export function matchDhis2Data(datas: DataIndicators) {
+
+    var dataValues = [
+        {
+            "dataElement": "FW6z2Ha2GNr",  // source de données
+            "value": datas["data_source"],
+        },
+        {
+            "dataElement": "lbHrQBTbY1d",  // report_date
+            "value": datas["reported_date"],
+        },
+        {
+            "dataElement": "JkMyqI3e6or",  // list des ASC
+            "value": datas["code_asc"],
+        },
+        {
+            "dataElement": "JC752xYegbJ",  // admin_org_unit_district
+            "value": datas["district"],
+        },
+        {
+            "dataElement": "lvW5Kj1cisa", // "Nombre d'enfant 0 à 5 ans pris en charge à domicile
+            "value": datas["total_vad_pcime_c"],
+        },
+        {
+            "dataElement": "M6WRPsREqsZ",  // "Total Vad PCIME Suivi
+            "value": datas["total_suivi_pcime_c"],
+        },
+        {
+            "dataElement": "oeDKJi4BICh",  // total_vad
+            "value": datas["total_vad"],
+        },
+        {
+            "dataElement": "PrN89trdUGm", // "Nombre de femme enceinte nouveau cas
+            "value": datas["total_vad_femmes_enceintes_NC"],
+        },
+        {
+            "dataElement": "wdg7jjP9ZRg", // "Nombre de femmes référée pour plannification familiale
+            "value": datas["reference_femmes_pf"],
+        },
+        {
+            "dataElement": "qNxNXSwDAaI", // "promptitude diarrhée 24h
+            "value": datas["prompt_diarrhee_24h_pcime_soins"],
+        },
+        {
+            "dataElement": "S1zPDVOIVLZ",  // "promptitude diarrhee 48h
+            "value": datas["prompt_diarrhee_48h_pcime_soins"],
+        },
+        {
+            "dataElement": "nW3O5ULr75J", // "promptitude diarrhée 72h
+            "value": datas["prompt_diarrhee_72h_pcime_soins"],
+        },
+        {
+            "dataElement": "NUpARMZ383s", // "promptitude paludisme 24h
+            "value": datas["prompt_paludisme_24h_pcime_soins"],
+        },
+        {
+            "dataElement": "yQa48SF9bua", // "promptitude paludisme 48h
+            "value": datas["prompt_paludisme_48h_pcime_soins"],
+        },
+        {
+            "dataElement": "NzKjJuAniNx", // "promptitude paludisme 72h
+            "value": datas["prompt_paludisme_72h_pcime_soins"],
+        },
+        {
+            "dataElement": "AA2We0Ao5sv", // "promptitude pneumonie 24h
+            "value": datas["prompt_pneumonie_24h_pcime_soins"],
+        },
+        {
+            "dataElement": "PYwikai4k2J", // "promptitude pneumonie 48h
+            "value": datas["prompt_pneumonie_48h_pcime_soins"],
+        },
+        {
+            "dataElement": "rgjFO0bDVUL", // "promptitude pneumonie 72h
+            "value": datas["prompt_pneumonie_72h_pcime_soins"],
+        },
+        {
+            "dataElement": "WR9u3cGJn9W", // "total consultation femme enceinte
+            "value": datas["total_vad_femmes_enceinte"],
+        },
+        {
+            "dataElement": "Pl6qRNgjd3a", // "total de femmes référées par les asc
+            "value": datas["reference_femmes_enceinte_postpartum"],
+        },
+        {
+            "dataElement": "DicYcTqr9xT", // "Total de référence pcime
+            "value": datas["reference_pcime"],
+        },
+        {
+            "dataElement": "caef2rf638P", // "total diarrhee pcime
+            "value": datas["total_diarrhee_pcime_soins"],
+        },
+        {
+            "dataElement": "Q0BQtUdJOCy", // "Total femmes en postpartum
+            "value": datas["total_vad_femmes_postpartum"],
+        },
+        {
+            "dataElement": "dLYksBMOqST", // "total malnutrition pcime
+            "value": datas["total_malnutrition_pcime_soins"],
+        },
+        {
+            "dataElement": "jp2i3vN3VJk", // "total paludisme pcime
+            "value": datas["total_paludisme_pcime_soins"],
+        },
+        {
+            "dataElement": "LZ3R8fj9CGG", // "total pneumonie pcime
+            "value": datas["total_pneumonie_pcime_soins"],
+        },
+        {
+            "dataElement": "O9EZVn3C3pF", // "Total postpartum nouveau cas
+            "value": datas["total_vad_femme_postpartum_NC"],
+        },
+        {
+            "dataElement": "lsBS60uQPtc", // "Total recherche active
+            "value": datas["total_recherche_active"],
+        },
+        {
+            "dataElement": "lopdYxQrgyj", // "Total test de grossesse administrée
+            "value": datas["total_test_de_grossesse_domicile"],
+        },
+        {
+            "dataElement": "AzwUzgh0nd7",  // "Total Vad Pf
+            "value": datas["total_vad_family_planning"],
+        }
+    ]
+
+    return {
+        "program": "aaw8nwnmmcC",
+        "orgUnit": datas["orgUnit"],  // "PgoyKuRs20z",
+        "eventDate": datas["reported_date"] + "T00:00:00.000",  // "2021-05-07T00:00:00.000",
+        "status": "COMPLETED",
+        "completedDate": datas["reported_date"] + "T00:00:00.000",  // "2021-05-07T00:00:00.000",
+        "dataValues": dataValues
+    };
+}
 
 

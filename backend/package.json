@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "1.0.0",
+  "version": "1.0.14",
   "description": "portal-backend",
   "main": "index.js",
   "scripts": {
@@ -39,6 +39,7 @@
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "couchdb-delete": "^2.0.1",
+    "csv-parser": "^3.0.0",
     "esm": "*",
     "express": "^4.18.1",
     "express-bearer-token": "^2.4.0",

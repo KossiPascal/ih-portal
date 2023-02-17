@@ -6,8 +6,8 @@ import { AuthService } from '@ih-app/services/auth.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import * as moment from 'moment';
 import { DateUtils, Functions } from '@ih-app/shared/functions';
-
-
+import { Roles } from '@ih-app/shared/roles';
+import { AppStorageService } from '@ih-app/services/cookie.service';
 
 @Component({
   selector: 'app-sync',
@@ -35,21 +35,18 @@ export class SyncOrgUnitDataComponent implements OnInit {
 
   start_date_error: boolean = false;
   end_date_error: boolean = false;
-
-
   LoadingMsg: string = "Loading..."
-
   Districts$: Districts[] = [];
   Sites$: Sites[] = [];
-
-
   sites$: Sites[] = [];
-
   initDate!: { start_date: string, end_date: string };
 
-
-
-  constructor(private sync: SyncService, private http: HttpClient, private authService: AuthService) { }
+  constructor(private store: AppStorageService, private sync: SyncService, private http: HttpClient, private auth: AuthService) { 
+    if(!this.roles.isSuperUser()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+    
+  }
+  
+  private roles = new Roles(this.store);
 
   ngOnInit(): void {
     this.initDate = DateUtils.startEnd21and20Date();

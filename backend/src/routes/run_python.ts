@@ -1,64 +1,69 @@
+'use strict';
 import { spawn } from "child_process";
 import { Request, Response } from "express";
 import express = require("express");
+import { insertOrUpdateDataToDhis2 } from "../controllers/fetchFormCloud";
+import { DataIndicators } from "../entity/DataAggragate";
 import { Middelware } from "../middleware/auth";
-import { isNotNull, sslFolder } from "../utils/functions";
+import { extractFolder, Functions, isNotNull, srcFolder, sslFolder } from "../utils/functions";
 var path = require('path');
 const pyRouter = express.Router();
 // const utf8 = require('utf8');
+const fs = require("fs");
+const csv = require("csv-parser");
 
 require('dotenv').config({ path: sslFolder('.env') });
 
- 
+
 var basename = path.dirname(__dirname)
 const regex = /('(?=(,\s*')))|('(?=:))|((?<=([:,]\s*))')|((?<={)')|('(?=}))/g;
 
 var errorToSend: any = {};
 
 
-function formatData(data:any){
+function formatData(data: any) {
     // utf8.decode(utf8.encode(`${data}`));
     return `${data}`.replace(regex, '"')
-                    .replace('======================','')
-                    .replace('=====================','')
-                    .replace('===================','')
-                    .replace('==================','')
-                    .replace('=================','')
-                    .replace('================','')
-                    .replace('===============','')
-                    .replace('==============','')
-                    .replace('=============','')
-                    .replace('============','')
-                    .replace('===========','')
-                    .replace('==========','')
-                    .replace('=========','')
-                    .replace('========','')
-                    .replace('=======','')
-                    .replace('======','')
-                    .replace('=====','')
-                    .replace('====','')
-                    .replace('===','')
-                    .replace('==','')
-                    .replace('=','')
-                    .replace('           ','')
-                    .replace('          ','')
-                    .replace('         ','')
-                    .replace('        ','')
-                    .replace('       ','')
-                    .replace('      ','')
-                    .replace('     ','')
-                    .replace('    ','')
-                    .replace('   ','')
-                    .replace('  ','')
-                    .replace(' ','');
+        .replace('======================', '')
+        .replace('=====================', '')
+        .replace('===================', '')
+        .replace('==================', '')
+        .replace('=================', '')
+        .replace('================', '')
+        .replace('===============', '')
+        .replace('==============', '')
+        .replace('=============', '')
+        .replace('============', '')
+        .replace('===========', '')
+        .replace('==========', '')
+        .replace('=========', '')
+        .replace('========', '')
+        .replace('=======', '')
+        .replace('======', '')
+        .replace('=====', '')
+        .replace('====', '')
+        .replace('===', '')
+        .replace('==', '')
+        .replace('=', '')
+        .replace('           ', '')
+        .replace('          ', '')
+        .replace('         ', '')
+        .replace('        ', '')
+        .replace('       ', '')
+        .replace('      ', '')
+        .replace('     ', '')
+        .replace('    ', '')
+        .replace('   ', '')
+        .replace('  ', '')
+        .replace(' ', '');
 }
 
-function dataToReturn(data:any){
+function dataToReturn(data: any) {
     return isNotNull(data) ? data : {};
 }
 
 
-pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, (req: Request, res: Response) => {
+pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, async (req: Request, res: Response) => {
     var dataToSend: string = '{}';
     req.body['type'] = 'thinkMd_only'
     const user = `${req.body['user']}`;
@@ -78,12 +83,38 @@ pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, (req: Request, res
     const python = spawn('python3', [basename + '/pythons/fetch_thinkmd_data.py', JSON.stringify(req.body),]);
 
     python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data); });
-    python.stderr.on('data', (data) => { 
-        errorToSend[`${user}`]['ErrorCount'] += 1; 
-        errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
+    python.stderr.on('data', (data) => {
+        errorToSend[`${user}`]['ErrorCount'] += 1;
+        errorToSend[`${user}`]['ErrorData'].push(formatData(data));
     });
     python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err; });
-    python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
+    python.on('close', async (code) => {
+        let brutOutPut = `{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}, "DataFordhis2":[]}`
+        try {
+            let ThinkMdOutPutData = JSON.parse(brutOutPut);
+            if (req.body.InsertIntoDhis2 == true &&
+                ThinkMdOutPutData.errorToSend.ErrorCount == 0 &&
+                ThinkMdOutPutData.errorToSend.ErrorData.length <= 0 &&
+                ThinkMdOutPutData.dataToSend.success == 'true' &&
+                ThinkMdOutPutData.dataToSend.Error == 0 &&
+                Object.values(ThinkMdOutPutData.dataToSend.Data.body).length > 0) {
+                // const csvOutputFile = `${srcFolder()}/pythons/extracts/thinkMd_output_for_dhis2_${user}_output.csv`;
+                // fs.createReadStream(csvOutputFile).pipe(csv()).on("data", (data:any) => { console.log(data) });
+                const jsonOutputFile = extractFolder(`thinkMd_output_for_dhis2_${user}_output.json`);
+                let rawdata = fs.readFileSync(jsonOutputFile);
+                ThinkMdOutPutData.DataFordhis2 = JSON.parse(rawdata) as DataIndicators[];
+            }
+            return res.jsonp(ThinkMdOutPutData);
+        } catch (error) {
+            return res.jsonp(brutOutPut);
+        }
+
+
+
+
+
+
+    });
     python.on('end', (msg) => console.log(`Finish`));
 });
 
@@ -100,14 +131,14 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
     req.body['thinkmd_token_username'] = process.env.TSC_TOKEN_NAME;
     req.body['thinkmd_token'] = process.env.TSC_TOKEN_CODE;
 
-    req.body['dhis2_host'] = process.env.DHIS_HOST;
+    // req.body['dhis2_host'] = process.env.DHIS_HOST;
 
     const python = spawn('python3', [basename + '/pythons/thinkmd_weekly_data.py', JSON.stringify(req.body),]);
 
-    python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data);});
-    python.stderr.on('data', (data) => { 
-        errorToSend[`${user}`]['ErrorCount'] += 1; 
-        errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
+    python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data); });
+    python.stderr.on('data', (data) => {
+        errorToSend[`${user}`]['ErrorCount'] += 1;
+        errorToSend[`${user}`]['ErrorData'].push(formatData(data));
     });
     python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err; });
     python.on('close', (code) => res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`));
@@ -121,7 +152,7 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
 //     errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
 //     req.body['medic_password'] = process.env.COUCH_PASS;
-    
+
 //     const python = spawn('python3', [basename + '/pythons/fetch_medic_data.py', JSON.stringify(req.body),]);
 
 //     python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data) });

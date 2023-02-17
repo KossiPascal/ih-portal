@@ -21,7 +21,7 @@ export class LoginComponent implements OnInit {
   LoadingMsg: string = "Loading...";
   showRegisterPage:boolean = false;
 
-  constructor(private store:AppStorageService, private auth: AuthService, private router: Router, private http: HttpClient, private conf:ConfigService) { }
+  constructor(private store:AppStorageService, private auth: AuthService, private conf:ConfigService) { }
 
   ngOnInit(): void {
     this.getConfigs;
@@ -73,9 +73,8 @@ export class LoginComponent implements OnInit {
           if (res.status === 200) {
             this.message = 'Login successfully !';
             this.store.set("user", JSON.stringify(res.data));
-            const redirectUrl = Functions.getSavedUrl();
-            // this.router.navigate([redirectUrl || this.auth.defaultRedirectUrl]);
-            location.href = redirectUrl || this.auth.defaultRedirectUrl;
+            // this.router.navigate([redirectUrl || this.auth.userValue()?.defaultRedirectUrl]);
+            location.href = Functions.getSavedUrl() ?? this.auth.userValue()?.defaultRedirectUrl!;
           } else {
             this.message = res.data;
             this.isLoading = false;

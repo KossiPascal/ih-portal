@@ -1,6 +1,6 @@
 import { getChwsDataWithParams, deleteChwsData, fetchIhChtDataPerChw } from "../controllers/dataFromDB";
 import { getChws, getDistricts, getFamilies, getPatients, getSites, getZones } from "../controllers/orgUnitsFromDB ";
-import { fetchChwsDataFromCouchDb, fetchChwsDataFromDhis2, fetchOrgUnitsFromCouchDb } from "../controllers/fetchFormCloud";
+import { fetchChwsDataFromCouchDb, fetchChwsDataFromDhis2, fetchOrgUnitsFromCouchDb, getDhis2Chws, insertOrUpdateDataToDhis2 } from "../controllers/fetchFormCloud";
 import { Middelware } from "../middleware/auth";
 
 const express = require('express');
@@ -59,16 +59,16 @@ syncRouter.post(
 
 
 
-syncRouter.post('/chws', Middelware.authMiddleware,getChws);
+
+syncRouter.post('/dhis2/chws', Middelware.authMiddleware,getDhis2Chws);
+syncRouter.post('/app/chws', Middelware.authMiddleware,getChws);
 syncRouter.post('/districts', Middelware.authMiddleware,getDistricts);
 syncRouter.post('/sites', Middelware.authMiddleware,getSites);
 syncRouter.post('/zones', Middelware.authMiddleware,getZones);
 syncRouter.post('/families', Middelware.authMiddleware,getFamilies);
 syncRouter.post('/patients', Middelware.authMiddleware,getPatients);
 
-
-
-
+syncRouter.post('/dhis2/insert_or_update', Middelware.authMiddleware,insertOrUpdateDataToDhis2);
 
 
 export = syncRouter;

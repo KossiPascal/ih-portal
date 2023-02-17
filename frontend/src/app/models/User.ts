@@ -8,6 +8,7 @@ export interface User {
   token?: string
   dhisusersession:string
   userLogo?:any
+  defaultRedirectUrl:string
 }
 
 

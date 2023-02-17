@@ -31,42 +31,42 @@ export class Roles {
 
   isUserManager(): boolean {
     if (Functions.notNull(this.getRoles())) {
-      return this.getRoles().includes('kMykXLnMsfF');
-    }
-    return false;
-  }
-
-  isDataManager(): boolean {
-    if (Functions.notNull(this.getRoles())) {
-      return this.getRoles().includes('KWH2Gl2atF8');
-    }
-    return false;
-  }
-
-  isSupervisorMentor(): boolean {
-    if (Functions.notNull(this.getRoles())) {
-      return this.getRoles().includes('Vjhs5PHK4lb');
-    }
-    return false;
-  }
-
-  isChws(): boolean {
-    if (Functions.notNull(this.getRoles())) {
-      return this.getRoles().includes('c3WyuK3ibsN');
-    }
-    return false;
-  }
-
-  onlySeedata(): boolean {
-    if (Functions.notNull(this.getRoles())) {
-      return this.getRoles().includes('STAgD7Z462J');
+      return this.getRoles().includes('kMykXLnMsfF') || this.isSuperUser();
     }
     return false;
   }
 
   isAdmin(): boolean {
     if (Functions.notNull(this.getRoles())) {
-      return this.getRoles().includes('FJXxMdr1gIB');
+      return this.getRoles().includes('FJXxMdr1gIB') || this.isSuperUser();
+    }
+    return false;
+  }
+
+  isDataManager(): boolean {
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('KWH2Gl2atF8') || this.isUserManager() || this.isSuperUser() || this.isAdmin();
+    }
+    return false;
+  }
+
+  isSupervisorMentor(): boolean {
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('Vjhs5PHK4lb') || this.isDataManager();
+    }
+    return false;
+  }
+
+  isChws(): boolean {
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('c3WyuK3ibsN') || this.isSuperUser();
+    }
+    return false;
+  }
+
+  onlySeedata(): boolean {
+    if (Functions.notNull(this.getRoles())) {
+      return this.getRoles().includes('STAgD7Z462J')  || this.isSuperUser();
     }
     return false;
   }

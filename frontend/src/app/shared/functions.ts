@@ -26,8 +26,8 @@ export class Functions {
       sessionStorage.setItem("redirect_url", link);
   }
 
-  static getSavedUrl():string{
-    const link = sessionStorage.getItem('redirect_url') ?? '';
+  static getSavedUrl():string | null{
+    const link = sessionStorage.getItem('redirect_url');
     sessionStorage.removeItem("redirect_url");
     return link;
   }

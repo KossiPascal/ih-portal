@@ -1,9 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Chws, CompareData, Dhis2Sync, Districts, FilterParams, ChwsDataFormDb, Sites } from '@ih-app/models/Sync';
+import { AuthService } from '@ih-app/services/auth.service';
+import { AppStorageService } from '@ih-app/services/cookie.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import { Consts } from '@ih-app/shared/constantes';
 import { Functions, DateUtils } from '@ih-app/shared/functions';
+import { Roles } from '@ih-app/shared/roles';
+import { async } from 'rxjs';
 
 // declare var $: any;
 // declare var initJsGridTable: any;
@@ -17,7 +21,12 @@ declare var initDataTable: any;
   ]
 })
 export class Dashboard1Component implements OnInit {
-  constructor(private sync: SyncService) { }
+  constructor(private store: AppStorageService, private auth: AuthService, private sync: SyncService) {
+    if(!this.roles.isSupervisorMentor()  && !this.roles.isChws()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+   }
+  
+  
+  private roles = new Roles(this.store);
 
   aggradateDataForm!: FormGroup;
   initDate!: { start_date: string, end_date: string };
@@ -32,25 +41,17 @@ export class Dashboard1Component implements OnInit {
     });
   }
 
-
   bodyData: CompareData[] = [];
-
   ChwsDataFromDb$: ChwsDataFormDb[] = [];
-
   Districts$: Districts[] = [];
   Chws$: Chws[] = [];
   Sites$: Sites[] = [];
-
   chws$: Chws[] = [];
   sites$: Sites[] = [];
-
   initMsg!: string;
   isLoading!: boolean;
-
   dhis2Params!: Dhis2Sync;
-
   responseMessage: string = '';
-
 
   identifyBodyData(index: number, item: CompareData) {
     return item.Code;
@@ -77,8 +78,8 @@ export class Dashboard1Component implements OnInit {
         this.sync.getChwsList().subscribe(async (_c$: { status: number, data: Chws[] }) => {
           if (_c$.status == 200) {
             this.Chws$ = _c$.data;
-            this.chws$ = _c$.data;
           }
+          this.genarateChws();
           // this.initDataFilted();
           this.isLoading = false;
         }, (err: any) => {
@@ -133,7 +134,7 @@ export class Dashboard1Component implements OnInit {
     // const sources: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sources) as string[];
     const districts: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.districts) as string[];
     const sites: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sites) as string[];
-    const chws: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
+    // const chws: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
 
     var params: FilterParams = {
       // sources: sources,
@@ -141,7 +142,7 @@ export class Dashboard1Component implements OnInit {
       end_date: endDate,
       districts: districts,
       sites: sites,
-      chws: chws,
+      // chws: chws,
     }
     return params;
   }
@@ -149,6 +150,7 @@ export class Dashboard1Component implements OnInit {
   initDataFilted(params?: FilterParams): void {
     this.initMsg = 'Loading Data ...';
     this.isLoading = true;
+    this.genarateChws();
     this.sync.getAllChwsDataWithParams(params ?? this.ParamsToFilter()).subscribe((res: { status: number, data: any }) => {
       if (res.status == 200) {
         this.ChwsDataFromDb$ = res.data;

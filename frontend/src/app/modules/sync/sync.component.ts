@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Chws, DataFromPython, Dhis2Sync, Districts, FilterParams, OrgUnitImport, Sites } from '@ih-app/models/Sync';
+import { Chws, DataFromPython, Districts, Sites } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import * as moment from 'moment';
@@ -9,8 +9,10 @@ import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { KeyValue } from '@angular/common';
 import { DateUtils, Functions } from '@ih-app/shared/functions';
 import { ActivatedRoute } from '@angular/router'
-import dist from 'dexie-relationships';
 import { DataIndicators } from '@ih-app/models/DataAggragate';
+import { AppStorageService } from '@ih-app/services/cookie.service';
+import { Roles } from '@ih-app/shared/roles';
+import { async } from 'rxjs';
 
 declare var $: any;
 declare var initDataTable: any;
@@ -29,9 +31,9 @@ export class SyncComponent implements OnInit {
   ThinkMdWeeklyForm!: FormGroup;
   tab1_messages: DataFromPython | null = null;
   tab1_messages_error: string | null = null;
-  tab3_messages: {chw:Chws, data:DataIndicators}[] = [];
-  tab3_error_messages:string = '';
-  tab3_no_data_found:boolean = false;
+  tab3_messages: { chw: Chws, data: DataIndicators | any }[] = [];
+  tab3_error_messages: string = '';
+  tab3_no_data_found: boolean = false;
   tab4_messages: DataFromPython | null = null;
   tab4_messages_error: string | null = null;
   dates: moment.Moment[] = [];
@@ -39,7 +41,7 @@ export class SyncComponent implements OnInit {
   is_weekly_date_error: boolean = false;
   weekly_date_error_Msg: string = '';
 
-  // activePage: any = '';
+  activePage: any = '';
 
   loading1: boolean = false;
   loading3: boolean = false;
@@ -52,15 +54,40 @@ export class SyncComponent implements OnInit {
   Districts$: Districts[] = [];
   Sites$: Sites[] = [];
   Chws$: Chws[] = [];
+  Dhis2Chws$: any[] = [];
 
   chws$: Chws[] = [];
   sites$: Sites[] = [];
 
-  constructor(private route: ActivatedRoute, private sync: SyncService, private http: HttpClient, private authService: AuthService) { }
+  Tab1Dhis2Import: { ErrorCount: number, ErrorMsg: string, Created: number, Updated: number, Deleted: number } = {
+    ErrorCount: 0,
+    ErrorMsg: '',
+    Created: 0,
+    Updated: 0,
+    Deleted: 0
+  }
+
+  Tab3Dhis2Import: { ErrorCount: number, ErrorMsg: string, Created: number, Updated: number, Deleted: number } = {
+    ErrorCount: 0,
+    ErrorMsg: '',
+    Created: 0,
+    Updated: 0,
+    Deleted: 0
+  }
+
+
+  constructor(private store: AppStorageService, private auth: AuthService, private route: ActivatedRoute, private sync: SyncService) { }
+  
+
+  private roles = new Roles(this.store);
 
   ngOnInit(): void {
-    // this.route.params.subscribe(params => this.activePage = params['cible']);
-    this.initAllData();
+    this.route.params.subscribe(params => this.activePage = params['cible']);
+
+    if (this.activePage === 'dataToDhis2' &&  !this.roles.isDataManager() || 
+        this.activePage === 'weeklyData' && !this.roles.isSupervisorMentor()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+
+        this.initAllData();
     this.thinkmdToDhis2Form = this.createThinkmdFormGroup();
     this.ihChtToDhis2Form = this.createIhChtFormGroup();
     this.ThinkMdWeeklyForm = this.createThinkmdWeeklyFormGroup();
@@ -72,8 +99,8 @@ export class SyncComponent implements OnInit {
       start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
       useToken: new FormControl(true),
       InsertIntoDhis2: new FormControl(false, []),
-      dhis2_username: new FormControl(""),
-      dhis2_password: new FormControl(""),
+      // dhis2_username: new FormControl(""),
+      // dhis2_password: new FormControl(""),
     });
   }
   createDhis2ChwsDataFormGroup(): FormGroup {
@@ -90,8 +117,8 @@ export class SyncComponent implements OnInit {
       weekly_Choosen_Dates: new FormControl(""),
       useToken: new FormControl(true),
       InsertIntoDhis2: new FormControl(false, []),
-      dhis2_username: new FormControl(""),
-      dhis2_password: new FormControl(""),
+      // dhis2_username: new FormControl(""),
+      // dhis2_password: new FormControl(""),
     });
   }
 
@@ -101,7 +128,7 @@ export class SyncComponent implements OnInit {
       end_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
       districts: new FormControl("", [Validators.required]),
       sites: new FormControl("", [Validators.required]),
-      chws: new FormControl(""),
+      // chws: new FormControl(""),
       InsertIntoDhis2: new FormControl(false, []),
       // dhis2_username: new FormControl(""),
       // dhis2_password: new FormControl(""),
@@ -110,7 +137,7 @@ export class SyncComponent implements OnInit {
 
 
   capitaliseDataGiven(str: any, inputSeparator?: string, outPutSeparator?: string): string {
-    return Functions.capitaliseDataGiven(str,inputSeparator, outPutSeparator);
+    return Functions.capitaliseDataGiven(str, inputSeparator, outPutSeparator);
   }
 
   async initAllData() {
@@ -128,6 +155,13 @@ export class SyncComponent implements OnInit {
           this.genarateChws();
           this.loading3 = false;
           this.LoadingMsg = '';
+          this.sync.getDhis2Chws().subscribe(async (_ch$: { status: number, data: any[] }) => {
+            if (_ch$.status == 200) this.Dhis2Chws$ = _ch$.data
+            this.loading3 = false;
+          }, (err: any) => {
+            this.loading3 = false;
+            console.log(err.error);
+          });
         }, (err: any) => {
           this.loading3 = false;
           console.log(err.error);
@@ -178,7 +212,7 @@ export class SyncComponent implements OnInit {
       sources: ['Tonoudayo'],
       districts: Functions.returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.districts),
       sites: Functions.returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.sites),
-      chws: Functions.returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.chws),
+      // chws: Functions.returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.chws),
       InsertIntoDhis2: this.ihChtToDhis2Form.value.InsertIntoDhis2,
       // dhis2_username: this.ihChtToDhis2Form.value.dhis2_username,
       // dhis2_password: this.ihChtToDhis2Form.value.dhis2_password
@@ -265,17 +299,48 @@ export class SyncComponent implements OnInit {
       this.loading1 = true;
       this.tab1_messages = null;
       this.tab1_messages_error = null;
+      this.Tab1Dhis2Import = { ErrorCount: 0, ErrorMsg: '', Created: 0, Updated: 0, Deleted: 0 };
       // this.thinkmdToDhis2Form.value['useToken'] = true;
-      this.sync
-        .thinkmdToDhis2Script(this.thinkmdToDhis2Form.value).subscribe((response: any) => {
-          this.loading1 = false;
-          try {
-            this.tab1_messages = JSON.parse(response);
-          } catch (error) {
-            this.tab1_messages_error = response.toString();
+      this.sync.thinkmdToDhis2Script(this.thinkmdToDhis2Form.value).subscribe((response: any) => {
+
+        try {
+          var respData: DataFromPython | null = response;
+          if (this.thinkmdToDhis2Form.value.InsertIntoDhis2 == true && respData?.DataFordhis2) {
+            var t1 = 0;
+            var t2 = 0;
+            for (let i = 0; i < respData?.DataFordhis2.length; i++) {
+              t1++;
+              var chwsData = respData?.DataFordhis2[i] as DataIndicators;
+              this.sync.insertOrUpdateDhis2Data(chwsData).subscribe((resp: { status: number, data: any }) => {
+                t2++;
+                if (resp.status == 200) {
+                  if (resp.data == 'Created') this.Tab1Dhis2Import.Created! += 1;
+                  if (resp.data == 'Updated') this.Tab1Dhis2Import.Updated! += 1;
+                  if (resp.data == 'Deleted') this.Tab1Dhis2Import.Deleted! += 1;
+                } else {
+                  if (resp.data == 'ErrorCount') this.Tab1Dhis2Import.ErrorCount! += 1;
+                  if (resp.data == 'ErrorMsg') this.Tab1Dhis2Import.ErrorMsg! += 1;
+                }
+
+                if (t1 == t2) {
+                  this.tab1_messages = respData;
+                  this.loading1 = false;
+                }
+
+              }, (err: any) => { this.loading1 = false; this.tab1_messages_error = err.toString(); console.log(err.error) });
+
+            }
+
+          } else {
+            this.tab1_messages = respData;
+            this.loading1 = false;
           }
-          // console.log(response);
-        }, (err: any) => { this.loading1 = false; this.tab1_messages_error = err.toString(); console.log(err.error) });
+        } catch (error) {
+          this.loading1 = false;
+          this.tab1_messages_error = response.toString();
+        }
+
+      }, (err: any) => { this.loading1 = false; this.tab1_messages_error = err.toString(); console.log(err.error) });
 
     }
   }
@@ -286,50 +351,92 @@ export class SyncComponent implements OnInit {
       this.end_date_error = false;
       this.loading3 = true;
       this.tab3_messages = [];
-      this.tab3_error_messages = ''; 
+      this.tab3_error_messages = '';
       this.tab3_no_data_found = false;
-      this.sync
-        .ihChtDataPerChw(this.ParamsToFilter()).subscribe((_resp: {status:number, data: {chw:Chws, data:DataIndicators}[]|any}) => {
-          // this.loading3 = false;
-          if (_resp.status == 200) {
-            this.tab3_messages = _resp.data;
-            this.tab3_no_data_found = this.tab3_messages.length <= 0;
-          } else {
-            this.tab3_error_messages = _resp.data.toString();
+      this.Tab3Dhis2Import = { ErrorCount: 0, ErrorMsg: '', Created: 0, Updated: 0, Deleted: 0 };
+      this.sync.ihChtDataPerChw(this.ParamsToFilter()).subscribe((_resp: { status: number, data: { chw: Chws, data: DataIndicators }[] | any }) => {
+        // this.loading3 = false;
+        if (_resp.status == 200) {
+          var respData = _resp.data as { chw: Chws, data: DataIndicators }[];
+
+          try {
+            if (this.ihChtToDhis2Form.value.InsertIntoDhis2 == true && respData.length > 0) {
+              var s1 = 0;
+              var s2 = 0;
+              for (let i = 0; i < respData.length; i++) {
+                s1++;
+                this.sync.insertOrUpdateDhis2Data(respData[i].data).subscribe((_dhisResp: { status: number, data: any, chw: string }) => {
+                  s2++;
+                  if (_dhisResp.status == 200) {
+                    if (_dhisResp.data == 'Created') this.Tab3Dhis2Import.Created! += 1;
+                    if (_dhisResp.data == 'Updated') this.Tab3Dhis2Import.Updated! += 1;
+                    if (_dhisResp.data == 'Deleted') this.Tab3Dhis2Import.Deleted! += 1;
+                  } else {
+                    if (_dhisResp.data == 'ErrorCount') this.Tab3Dhis2Import.ErrorCount! += 1;
+                    if (_dhisResp.data == 'ErrorMsg') this.Tab3Dhis2Import.ErrorMsg! += '\n\n' + _dhisResp.data;
+                  }
+
+                  if (s1 == s2) {
+                    this.loading3 = false;
+                    this.tab3_messages = respData;
+                    this.tab3_no_data_found = respData.length <= 0;
+                  }
+                }, (err: any) => { this.loading3 = false; this.tab3_error_messages = err.toString(); console.log(err.error) });
+
+              }
+
+            } else {
+              this.loading3 = false;
+              this.tab3_messages = respData;
+              this.tab3_no_data_found = respData.length <= 0;
+            }
+          } catch (error) {
+            this.loading3 = false;
             this.tab3_no_data_found = true;
+            this.tab3_error_messages = _resp.data.toString();
           }
+
+        } else {
           this.loading3 = false;
-        }, (err: any) => { 
-          this.tab3_no_data_found = false;this.loading3 = false; this.tab3_error_messages = err.toString()});
+          this.tab3_no_data_found = true;
+          this.tab3_error_messages = _resp.data.toString();
+        }
+      }, (err: any) => {
+        this.tab3_no_data_found = false; this.loading3 = false; this.tab3_error_messages = err.toString()
+      });
     }
   }
 
-
-
   runThinkMdWeekly(): void {
-    this.addToDateList();
-    if (this.weekly_Choosen_Dates.length > 1 && this.WeeklyDateIsValid()) {
-      this.is_weekly_date_error = false;
-      this.weekly_date_error_Msg = '';
-      this.loading4 = true;
-      this.tab4_messages = null;
-      this.tab4_messages_error = null;
-      this.sync.syncThinkMdWeeklyChwsData(this.ThinkMdWeeklyForm.value).subscribe((response: any) => {
-        this.loading4 = false;
-        try {
-          this.tab4_messages = JSON.parse(response);
-        } catch (error) {
-          this.tab4_messages_error = response.toString();
+    if (this.Dhis2Chws$.length > 0) {
+      this.addToDateList();
+      if (this.weekly_Choosen_Dates.length > 1 && this.WeeklyDateIsValid()) {
+        this.is_weekly_date_error = false;
+        this.weekly_date_error_Msg = '';
+        this.loading4 = true;
+        this.tab4_messages = null;
+        this.tab4_messages_error = null;
+        this.ThinkMdWeeklyForm.value['chws'] = this.Dhis2Chws$;
+
+        this.sync.syncThinkMdWeeklyChwsData(this.ThinkMdWeeklyForm.value).subscribe((response: any) => {
+          this.loading4 = false;
+          try {
+            this.tab4_messages = JSON.parse(response);
+          } catch (error) {
+            this.tab4_messages_error = response.toString();
+          }
+          // console.log(response);
+        }, (err: any) => { this.loading4 = false; this.tab4_messages_error = err.toString(); console.log(err.error) });
+      } else {
+        this.is_weekly_date_error = true;
+        if (this.weekly_Choosen_Dates.length <= 1) {
+          this.weekly_date_error_Msg = 'Vous devez choisir au moins 2 dates';
+        } else if (!this.WeeklyDateIsValid()) {
+          this.weekly_date_error_Msg = 'Toutes les dates doivent être un Lundi de la semaine';
         }
-        // console.log(response);
-      }, (err: any) => { this.loading4 = false; this.tab4_messages_error = err.toString(); console.log(err.error) });
-    } else {
-      this.is_weekly_date_error = true;
-      if (this.weekly_Choosen_Dates.length <= 1) {
-        this.weekly_date_error_Msg = 'Vous devez choisir au moins 2 dates';
-      } else if (!this.WeeklyDateIsValid()) {
-        this.weekly_date_error_Msg = 'Toutes les dates doivent être un Lundi de la semaine';
       }
+    } else {
+      this.tab4_messages_error = 'Impossible de récupérer les données du dhis2! Veuillez rafraichir la page et rééssayer!';
     }
   }
 

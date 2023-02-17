@@ -1,3 +1,4 @@
+import { DataIndicators } from "./DataAggragate"
 
 export interface AggragateData {
   label: string
@@ -44,6 +45,7 @@ export interface Sync {
 }
 
 export interface DataFromPython {
+  DataFordhis2:DataIndicators[]
   errorToSend: {
     ErrorCount: number
     ErrorData: any[]
@@ -53,13 +55,7 @@ export interface DataFromPython {
     success: string
     Error: number
     ErrorMsg: any
-    Dhis2Import: {
-      ErrorCount: number
-      ErrorMsg: string
-      Created: number
-      Updated: number
-      Deleted: number
-    }
+
     Data: {
       head: any
       body: any
@@ -122,6 +118,7 @@ export interface FilterParams {
   type?: any
   user?: string
   dhisusersession?: string
+  params?:any
 }
 
 export interface ChwsDataFormDb {

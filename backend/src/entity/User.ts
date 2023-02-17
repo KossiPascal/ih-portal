@@ -8,6 +8,7 @@ export class User {
     isActive!: boolean;
     expiresIn?: any;
     dhisusersession?: any;
+    defaultRedirectUrl!:string;
 
     token() {
         return genarateToken({ id: this.id, username: this.username, roles: this.roles, isActive: this.isActive });

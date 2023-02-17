@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '@ih-app/services/auth.service';
+import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Functions } from '@ih-app/shared/functions';
+import { Roles } from '@ih-app/shared/roles';
 import { User } from '@ih-models/User';
 // import usersDb from '@ih-databases/users.json'; 
 
@@ -19,15 +21,7 @@ export class UserComponent implements OnInit {
   }
   users$: User[] = [];
 
-  roles$: string[] = [
-    'super_admin',
-    'can_manage_user',
-    'admin',
-    'visitor',
-    'can_send_dhis2',
-    'can_only_see'
-  ];
-
+  roles$: string[] = [];
 
   userForm!: FormGroup;
   isLoginForm: boolean = false;
@@ -38,8 +32,12 @@ export class UserComponent implements OnInit {
   message: string = '';
 
 
-  constructor(private auth: AuthService, private router: Router) { }
+  constructor(private store: AppStorageService, private auth: AuthService, private router: Router) { 
+    if(!this.roles.isSuperUser()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+  }
 
+  private roles = new Roles(this.store);
+  
   ngOnInit(): void {
     this.getUsers();
     this.userForm = this.createFormGroup();

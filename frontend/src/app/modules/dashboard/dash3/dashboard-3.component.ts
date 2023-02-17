@@ -7,6 +7,10 @@ import { ChtOutPutData, DataIndicators } from '@ih-app/models/DataAggragate';
 
 import { IndexDbService } from '@ih-app/services/index-db.service'; // db index start
 import { DateUtils, Functions } from '@ih-app/shared/functions';
+import { AuthService } from '@ih-app/services/auth.service';
+import { AppStorageService } from '@ih-app/services/cookie.service';
+import { Roles } from '@ih-app/shared/roles';
+import { async } from 'rxjs';
 // import { liveQuery } from 'dexie';
 
 
@@ -16,7 +20,13 @@ import { DateUtils, Functions } from '@ih-app/shared/functions';
   templateUrl: `./dashboard-3.component.html`
 })
 export class Dashboard3Component implements OnInit {
-  constructor(private db: IndexDbService, private sync: SyncService) { }
+  constructor(private store: AppStorageService, private auth: AuthService, private db: IndexDbService, private sync: SyncService) {
+    if(!this.roles.isDataManager()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+   }
+
+  
+
+private roles = new Roles(this.store);
 
   aggradateDataForm!: FormGroup;
   // initDate!: { start_date: string, end_date: string };

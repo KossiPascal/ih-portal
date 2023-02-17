@@ -6,6 +6,7 @@ import { Router } from "@angular/router";
 import { DateUtils, Functions } from '@ih-app/shared/functions';
 import { AuthService } from "./auth.service";
 import { IndexDbService } from "./index-db.service";
+import { DataIndicators } from "@ih-app/models/DataAggragate";
 
 @Injectable({
   providedIn: "root",
@@ -141,7 +142,13 @@ export class SyncService {
       params!.dhisusersession = user?.dhisusersession!;
     }
     const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/chws`, sendParams, Functions.customHttpHeaders(this.auth));
+    return this.http.post(`${Functions.backenUrl()}/sync/app/chws`, sendParams, Functions.customHttpHeaders(this.auth));
+  }
+
+  getDhis2Chws(): any {
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    return this.http.post(`${Functions.backenUrl()}/sync/dhis2/chws`, { user: user?.id, dhisusersession: user?.dhisusersession }, Functions.customHttpHeaders(this.auth));
   }
 
   getFamilyList(params?: FilterParams): any {
@@ -224,6 +231,12 @@ export class SyncService {
     return this.http.post(`${Functions.backenUrl()}/sync/ih_cht_data_per_chw`, sendParams, Functions.customHttpHeaders(this.auth));
   }
 
+  insertOrUpdateDhis2Data(chwsDataToDhis2: DataIndicators): any {
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    const sendParams = { chwsDataToDhis2: chwsDataToDhis2, user: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/dhis2/insert_or_update`, sendParams, Functions.customHttpHeaders(this.auth));
+  }
 
 
   getDataByReportsDateView(syncData: Sync) {

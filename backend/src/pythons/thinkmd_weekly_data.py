@@ -66,7 +66,10 @@ def getThinkMdWeeklyDataFromDhis2(ARGS):
 
         allData = []
         chwsFounded = {}
-        allChws = getChwsFromDhis2(ARGS)
+
+        # allChws = getChwsFromDhis2(ARGS)
+
+        allChws = ARGS['chws']
 
         SelectedDates = []
         for row in csvreader:

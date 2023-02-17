@@ -31,7 +31,7 @@
                   <label>District</label>
                   <select *ngIf="Districts$.length > 0" (change)="genarateSites()" class="form-control"
                     multiple="multiple" formControlName="districts">
-                    <option value=""></option>
+                    <!-- <option value=""></option> -->
                     <option *ngFor="let dist of Districts$" value="{{dist.id}}">
                       {{ dist.name }}
                     </option>
@@ -45,7 +45,7 @@
                   <label>Site</label>
                   <select *ngIf="sites$.length > 0" (change)="genarateChws()" class="form-control" multiple="multiple"
                     formControlName="sites">
-                    <option value=""></option>
+                    <!-- <option value=""></option> -->
                     <option *ngFor="let site of sites$" value="{{site.id}}">
                       {{ site.name }}
                     </option>
@@ -58,7 +58,7 @@
                 <div class="form-group">
                   <label>ASC</label>
                   <select *ngIf="chws$.length > 0" class="form-control" multiple="multiple" formControlName="chws">
-                    <option value=""></option>
+                    <!-- <option value=""></option> -->
                     <option *ngFor="let chw of chws$" value="{{chw.id}}">
                       {{chw.name}}
                     </option>
@@ -71,7 +71,7 @@
                 <div class="form-group">
                   <label>Source</label>
                   <select class="form-control" formControlName="sources">
-                    <option value=""></option>
+                    <!-- <option value=""></option> -->
                     <option *ngFor="let source of Sources$" value="{{source}}">
                       {{ source }}
                     </option>

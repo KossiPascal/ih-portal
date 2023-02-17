@@ -13,8 +13,6 @@ Functions
 })
 export class AuthService {
 
-  public defaultRedirectUrl = 'dashboards';
-
   constructor(private store:AppStorageService, private router: Router, private http: HttpClient) { }
 
   private roles = new Roles(this.store);
@@ -101,11 +99,11 @@ export class AuthService {
     }
   }
 
-  alreadyAuthenticate(redirecUrl: string = this.defaultRedirectUrl) {
+  alreadyAuthenticate(redirecUrl?: string) {
     if (this.isLoggedIn()) {
       console.log(`You are already authenticated !`);
       // this.router.navigate([this.defaultRedirectUrl]);
-      location.href = redirecUrl;
+      location.href = redirecUrl??this.userValue()?.defaultRedirectUrl!;
       // window.location.replace(document.referrer);
     }
   }

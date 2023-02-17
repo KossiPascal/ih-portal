@@ -264,8 +264,11 @@ export function projectFolderParent(): string {
     return path.dirname(projectFolder())//  ih-portal parent
 }
 export function sslFolder(file_Name_with_extension: string): string {
-    // return `${this.projectFolderParent()}/ssl/${file_Name_with_extension}`;
-    return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/ssl/${file_Name_with_extension}`
+    return `${projectFolderParent()}/ssl/${file_Name_with_extension}`;
+    // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/ssl/${file_Name_with_extension}`
+}
+export function extractFolder(file_Name_with_extension: string): string {
+    return `${projectFolderParent()}/extracts/${file_Name_with_extension}`;
 }
 
 export function JsonDbFolder(file_Name_without_extension: string): string {
@@ -565,9 +568,16 @@ export function genarateToken(data: { id: any, username: string, roles: string[]
 
 export function generateUserMapData(userFound: User, dhisusersession: string): any {
     userFound.dhisusersession = dhisusersession,
+    userFound.defaultRedirectUrl = userDefaultRedirectUrl(userFound);
         userFound.expiresIn = JSON.stringify((moment().add(Functions.Utils().expiredIn, 'seconds')).valueOf())
     return userFound.toMap();
 }
+
+
+function userDefaultRedirectUrl(roles:User):string{
+    return 'dashboards';
+}
+
 
 // export function generateAuthSuccessData(userFound:User): UserValue {
 //     var user: UserValue = {

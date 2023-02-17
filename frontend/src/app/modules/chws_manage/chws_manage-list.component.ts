@@ -1,13 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Router } from '@angular/router';
+import { icon } from '@fortawesome/fontawesome-svg-core';
 import { Chws, Districts, FilterParams, Sites, Zones } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
+import { AppStorageService } from '@ih-app/services/cookie.service';
 import { DatabaseUtilService } from '@ih-app/services/database-utils.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import { Functions } from '@ih-app/shared/functions';
+import { Roles } from '@ih-app/shared/roles';
 import { f } from '@ih-assets/plugins/dropzone/dropzone-amd-module';
 import { User } from '@ih-models/User';
+import { async } from 'rxjs';
 // import usersDb from '@ih-databases/users.json'; 
 
 declare var $: any;
@@ -40,7 +44,13 @@ export class ChwsManageComponent implements OnInit {
   chw!: Chws | null;
   message: string = '';
 
-  constructor(private db: DatabaseUtilService, private auth: AuthService, private sync: SyncService, private router: Router) { }
+  constructor(private store: AppStorageService,private db: DatabaseUtilService, private auth: AuthService, private sync: SyncService, private router: Router) {
+    if(!this.roles.isSupervisorMentor()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+   }
+
+    
+
+private roles = new Roles(this.store);
 
   ngOnInit(): void {
     this.initAllData();

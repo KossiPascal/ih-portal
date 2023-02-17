@@ -44,6 +44,12 @@ export interface ChtOutPutData {
 
 
 export interface DataIndicators {
+    orgUnit?: string
+    reported_date?: string
+    code_asc?: string
+    district?: string
+    data_source?: string
+    
     total_vad: number
     total_vad_pcime_c: number
     total_suivi_pcime_c: number
