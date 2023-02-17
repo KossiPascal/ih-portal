@@ -23,11 +23,10 @@ configRouter.post('/', async (req: Request, res: Response, next: NextFunction) =
 
 configRouter.post('/appVersion', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    return res.status(res.statusCode).json(Functions.appVersion());
+    return res.status(200).json(Functions.appVersion());
   }
   catch (err: any) {
-    if (!err.statusCode) err.statusCode = 500;
-    return res.status(err.statusCode).end();
+    return res.status(500).end();
   }
 });
 

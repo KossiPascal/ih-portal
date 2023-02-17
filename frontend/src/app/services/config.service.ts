@@ -16,9 +16,7 @@ export class ConfigService {
     }
 
     appVersion(): any {
-        if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
-        const user = this.auth.userValue()!;
-        return this.http.post(`${Functions.backenUrl()}/configs/appVersion`, {userId:user.id, dhisusersession: user.dhisusersession}, Functions.HttpHeaders(this.auth));
+        return this.http.post(`${Functions.backenUrl()}/configs/appVersion`, {getversion:true}, Functions.HttpHeaders(this.auth));
     }
 
     NewUserToken(): any {

@@ -57,9 +57,7 @@ export class AppComponent implements OnInit {
   public roles = new Roles(this.store);
 
   ngOnInit(): void {
-
    this.UpdateVersion(false);
-
     const appTitle = this.titleService.getTitle();
     this.checkForAppNewVersion = true;
 
@@ -107,7 +105,7 @@ export class AppComponent implements OnInit {
         this.appVersion = newVersion;
         if(reload) this.clickModal('close-update-modal');
         if(reload) window.location.reload();
-    }, (err: any) => { console.log(err.error) });
+    }, (err: any) => { console.log(err.toString()) });
   }
 
 
