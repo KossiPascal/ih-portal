@@ -2,7 +2,10 @@
 <div class="page-title card card-primary card-outline">
     <!-- <button (click)="CreateUser()"></button> -->
     <div class="card-body">
-        <span style="float: left;" class="fas fa-user"> List ds ASC remplaçantes</span> <br><br><br>
+        <span style="float: left;" class="fas fa-user"> List des ASC remplaçantes</span> <br><br><br>
+
+
+        <b *ngIf="message!=''" class="login-box-msg"><strong>{{ message }}</strong></b>
 
         <div class="overlay-wrapper">
             <div *ngIf="isLoading1" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>

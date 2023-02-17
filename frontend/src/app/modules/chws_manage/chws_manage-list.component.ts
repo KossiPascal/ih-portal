@@ -97,6 +97,7 @@ private roles = new Roles(this.store);
   }
 
   EditChwsZone(chw: Chws) {
+    this.message = '';
     this.isEditMode = true;
     this.replacementChwsForm = this.createReplacementChwsFormGroup(chw);
     this.selectedChw(chw);
@@ -108,6 +109,7 @@ private roles = new Roles(this.store);
 
   updateChwsFacilityIdAndContactPlace() {
     this.isLoading2 = true;
+    this.message = '';
     return this.db.updateUserFacilityContactPlace(this.replacementChwsForm.value).subscribe((res: any) => {
       this.message = res.message;
       this.getReplacementChws();
