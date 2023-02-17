@@ -58,6 +58,8 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
 
+   this.UpdateVersion(false);
+
     const appTitle = this.titleService.getTitle();
     this.checkForAppNewVersion = true;
 
@@ -98,13 +100,13 @@ export class AppComponent implements OnInit {
     this.clickModal('active-update-modal')
   }
 
-  UpdateVersion() {
+  UpdateVersion(reload:boolean = true) {
     this.conf.appVersion().subscribe((newVersion: any) => {
-        this.ShowUpdateVersionModal()
+      if(reload)this.ShowUpdateVersionModal()
         localStorage.setItem('appVersion', newVersion);
         this.appVersion = newVersion;
-        this.clickModal('close-update-modal');
-        window.location.reload();
+        if(reload) this.clickModal('close-update-modal');
+        if(reload) window.location.reload();
     }, (err: any) => { console.log(err.error) });
   }
 
