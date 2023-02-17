@@ -531,7 +531,7 @@ def flushIhChtDataToDhis2(KWARG,fileName = "cht_output",data_type = "Consultatio
 
     if fileName == defaultFileName:
         # deleteFile(extractPath(fileName+".csv"))
-        fileName0 = fileName+"_"+str(KWARG['user'])+"_output"
+        fileName0 = fileName+"_"+str(KWARG['userId'])+"_output"
     else:
         fileName0 = fileName
 

@@ -17,6 +17,14 @@ import { AppStorageService } from '@ih-app/services/cookie.service';
 })
 export class SyncOrgUnitDataComponent implements OnInit {
 
+  isAdmin: boolean = false;
+  isSuperUser: boolean = false;
+  isUserManager: boolean = false;
+  isDataManager: boolean = false;
+  isSupervisorMentor: boolean = false;
+  isChws: boolean = false;
+  onlySeedata: boolean = false;
+
   chwsDataForm!: FormGroup;
   dhis2ChwsDataForm!: FormGroup;
   orgUnitAndPersonForm!: FormGroup;
@@ -49,6 +57,15 @@ export class SyncOrgUnitDataComponent implements OnInit {
   private roles = new Roles(this.store);
 
   ngOnInit(): void {
+
+    this.isSuperUser = this.roles.isSuperUser();
+    this.isUserManager = this.roles.isUserManager();
+    this.isAdmin = this.roles.isAdmin();
+    this.isDataManager = this.roles.isDataManager();
+    this.isSupervisorMentor = this.roles.isSupervisorMentor();
+    this.isChws = this.roles.isChws();
+    this.onlySeedata = this.roles.onlySeedata();
+    
     this.initDate = DateUtils.startEnd21and20Date();
     this.sync.getDistrictsList().subscribe(async (_d$: { status: number, data: Districts[] }) => {
       if (_d$.status == 200) {

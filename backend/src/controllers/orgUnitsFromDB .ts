@@ -105,7 +105,7 @@ export async function getChws(req: Request, res: Response, next: NextFunction, o
     
     try {
         const _chwRepo = await getChwsSyncRepository();
-        const user: string[] = req.body.user;
+        const userId: string = req.body.userId;
         var chws: Chws[] = [];
         var chws = await _chwRepo.find({
             where: {

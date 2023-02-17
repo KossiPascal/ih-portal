@@ -16,6 +16,8 @@ export interface Sync {
   InsertIntoDhis2: boolean
   dhisusersession: string
 
+  userId?: string
+
   // thinkmd_host: string
   // thinkmd_site: string
   // useToken: string
@@ -40,8 +42,6 @@ export interface Sync {
 
   // port: number
   // ssl_verification: boolean
-
-  user?: string
 }
 
 export interface DataFromPython {
@@ -116,7 +116,7 @@ export interface FilterParams {
   patients?: string[]
   families?: string[]
   type?: any
-  user?: string
+  userId?: string
   dhisusersession?: string
   params?:any
 }
@@ -210,7 +210,7 @@ export interface Dhis2Sync {
   fields?: string[]
   username?: string
   password?: string
-  user?: string
+  userId?: string
   dhisusersession?: string
 }
 
@@ -223,7 +223,7 @@ export interface SyncOrgUnit {
   family: boolean
   patient: boolean
   chw: boolean
-  user: string 
+  userId: string 
   dhisusersession?: string
 }
 

@@ -30,7 +30,7 @@ export class RegisterComponent implements OnInit {
     this.showRegisterPage = this.roles.isUserManager() ?? false;
     this.getConfigs();
     if (!this.showRegisterPage) {
-      this.auth.alreadyAuthenticate();
+      this.auth.alreadyLogin();
     }
     this.authForm = this.createFormGroup();
   }
@@ -125,7 +125,7 @@ export class RegisterComponent implements OnInit {
       // console.log('Register User ' + JSON.stringify(user));
       // await custumRequest('post', this.http, this, `/auth/register`, user).then((res) => res).catch((err) => err);
     } else {
-      this.auth.alreadyAuthenticate();
+      this.auth.alreadyLogin();
     }
   }
 

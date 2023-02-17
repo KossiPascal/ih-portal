@@ -114,9 +114,9 @@ def addOrSubtractDay(date, day, sub=False):
 def datetimeToString(date, type='en'):
     # year = date.strftime("%Y") | month = date.strftime("%m") | day = date.strftime("%d")
     # time = date.strftime("%H:%M:%S") | return date.strftime("%m/%d/%Y, %H:%M:%S")
-    if type == 'en':
-        return date.strftime("%Y-%m-%d")
-    return date.strftime("%d/%m/%Y")
+    if type == 'fr':
+        return date.strftime("%d/%m/%Y")
+    return date.strftime("%Y-%m-%d")
 
 
 def stringToDate(date):
@@ -125,9 +125,9 @@ def stringToDate(date):
     return datetime.strptime(date, '%Y-%m-%d')
 
 
-def addDayToStringDate(date, day):
+def addDayToStringDate(date, day, type='en'):
     # print(datetimeToString(addOrSubtractDay(stringToDate(date),day)))
-    return datetimeToString(addOrSubtractDay(stringToDate(date), day))
+    return datetimeToString(addOrSubtractDay(stringToDate(date), day), type)
 
 
 def nextMondayDate(date):
@@ -194,10 +194,17 @@ def chwRemplacante(chwname):
     return ''
 
 
-def convertDate(dateString):
+def convertDate(dateString, fullWeek=False):
     if dateString == 'All':
         return 'Total'
-    return dateString[6:]+'/'+dateString[4:-2]+'/'+dateString[:-4]
+    dateFr = dateString[6:]+'/'+dateString[4:-2]+'/'+dateString[:-4]
+    dateEn = dateString[:-4]+'-'+dateString[4:-2]+'-'+  dateString[6:]
+    if fullWeek == True:
+        return dateFr + ' - ' + addDayToStringDate(dateEn, 6, 'fr')
+    else:
+        return dateFr
+
+    
 
 
 def getChwsFromDhis2(KWARG):

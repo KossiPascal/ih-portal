@@ -82,22 +82,22 @@ export class SyncService {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params!.user = user?.id;
+      params!.userId = user?.id;
       params!.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/get/data`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/get/data`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
   syncDhis2ChwsData(params: Dhis2Sync): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params.user = user?.id;
+      params.userId = user?.id;
       params.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/dhis2/data`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/dhis2/data`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
 
@@ -105,72 +105,72 @@ export class SyncService {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params!.user = user?.id;
+      params!.userId = user?.id;
       params!.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/districts`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/districts`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
   getSitesList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params!.user = user?.id;
+      params!.userId = user?.id;
       params!.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/sites`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/sites`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
   getZonesList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params!.user = user?.id;
+      params!.userId = user?.id;
       params!.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/zones`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/zones`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
   getChwsList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params!.user = user?.id;
+      params!.userId = user?.id;
       params!.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/app/chws`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/app/chws`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
   getDhis2Chws(): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
-    return this.http.post(`${Functions.backenUrl()}/sync/dhis2/chws`, { user: user?.id, dhisusersession: user?.dhisusersession }, Functions.customHttpHeaders(this.auth));
+    return this.http.post(`${Functions.backenUrl()}/sync/dhis2/chws`, { userId: user?.id, dhisusersession: user?.dhisusersession }, Functions.HttpHeaders(this.auth));
   }
 
   getFamilyList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params!.user = user?.id;
+      params!.userId = user?.id;
       params!.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/families`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/families`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
   getPatientsList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params!.user = user?.id;
+      params!.userId = user?.id;
       params!.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/patients`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/patients`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
   syncCouchDbChwsData(params: Sync): any {
@@ -178,22 +178,22 @@ export class SyncService {
     const user = this.auth.userValue();
     // if (params.ssl_verification !== true) console.log(this.sslMsg);
     if (Functions.notNull(params)) {
-      params.user = user?.id;
+      params.userId = user?.id;
       params.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/fetch/data`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/fetch/data`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
   syncThinkMdWeeklyChwsData(params: Sync): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params.user = user?.id;
+      params.userId = user?.id;
       params.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/python/thinkmd_weekly`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/python/thinkmd_weekly`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
 
@@ -201,11 +201,11 @@ export class SyncService {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params.user = user?.id;
+      params.userId = user?.id;
       params.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/fetch/orgunits`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/fetch/orgunits`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
 
@@ -213,29 +213,29 @@ export class SyncService {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params.user = user?.id;
+      params.userId = user?.id;
       params.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/python/thinkmd_to_dhis2`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/python/thinkmd_to_dhis2`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
   ihChtDataPerChw(params: any): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
     if (Functions.notNull(params)) {
-      params.user = user?.id;
+      params.userId = user?.id;
       params.dhisusersession = user?.dhisusersession!;
     }
-    const sendParams = Functions.notNull(params) ? params : { user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/ih_cht_data_per_chw`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = Functions.notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/ih_cht_data_per_chw`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
   insertOrUpdateDhis2Data(chwsDataToDhis2: DataIndicators): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
-    const sendParams = { chwsDataToDhis2: chwsDataToDhis2, user: user?.id, dhisusersession: user?.dhisusersession };
-    return this.http.post(`${Functions.backenUrl()}/sync/dhis2/insert_or_update`, sendParams, Functions.customHttpHeaders(this.auth));
+    const sendParams = { chwsDataToDhis2: chwsDataToDhis2, userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/dhis2/insert_or_update`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
 

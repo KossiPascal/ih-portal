@@ -51,7 +51,7 @@ export class Functions {
     // const jwtBearerToken = jwt.sign({}, RSA_PRIVATE_KEY, {algorithm: 'RS256', expiresIn: 120,subject: userId}
 
 
-    static Utils(): { expiredIn: string, secretOrPrivateKey: string } {
+    static Utils = (roles:string[]): { expiredIn: string, secretOrPrivateKey: string } => {
         return {
             expiredIn: '7200',//2h
             secretOrPrivateKey: 'kossi-secretfortoken',
@@ -563,13 +563,13 @@ export class Dhis2SyncConfig {
 }
 
 export function genarateToken(data: { id: any, username: string, roles: string[], isActive: any }) {
-    return jwt.sign({ id: `${data.id}`, username: data.username, roles: `${data.roles}`, isActive: `${data.isActive}` }, Functions.Utils().secretOrPrivateKey, { expiresIn: `${Functions.Utils().expiredIn}s` });
+    return jwt.sign({ id: `${data.id}`, username: data.username, roles: `${data.roles}`, isActive: `${data.isActive}` }, Functions.Utils(data.roles).secretOrPrivateKey, { expiresIn: `${Functions.Utils(data.roles).expiredIn}s` });
 }
 
 export function generateUserMapData(userFound: User, dhisusersession: string): any {
-    userFound.dhisusersession = dhisusersession,
+    userFound.dhisusersession = dhisusersession;
     userFound.defaultRedirectUrl = userDefaultRedirectUrl(userFound);
-        userFound.expiresIn = JSON.stringify((moment().add(Functions.Utils().expiredIn, 'seconds')).valueOf())
+    userFound.expiresIn = JSON.stringify((moment().add(Functions.Utils(userFound.roles).expiredIn, 'seconds')).valueOf());
     return userFound.toMap();
 }
 

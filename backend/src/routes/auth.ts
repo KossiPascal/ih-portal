@@ -1,8 +1,6 @@
-import { body } from 'express-validator';
-import { User } from "../entity/User";
+
 import { AuthController } from "../controllers/auth";
-import { NextFunction, Request, Response, Router} from 'express';
-import { getConfigRepository } from '../entity/Configs';
+import { Router} from 'express';
 
 const authRouter = Router();
 

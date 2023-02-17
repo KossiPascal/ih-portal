@@ -12,21 +12,19 @@ export class ConfigService {
     getConfigs(): any {
         if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
         const user = this.auth.userValue()!;
-        return this.http.post(`${Functions.backenUrl()}/configs`, {userId:user.id, dhisusersession: user.dhisusersession}, Functions.customHttpHeaders(this.auth));
+        return this.http.post(`${Functions.backenUrl()}/configs`, {userId:user.id, dhisusersession: user.dhisusersession}, Functions.HttpHeaders(this.auth));
     }
 
     appVersion(): any {
         if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
         const user = this.auth.userValue()!;
-        return this.http.post(`${Functions.backenUrl()}/configs/appVersion`, {userId:user.id, dhisusersession: user.dhisusersession}, Functions.customHttpHeaders(this.auth));
+        return this.http.post(`${Functions.backenUrl()}/configs/appVersion`, {userId:user.id, dhisusersession: user.dhisusersession}, Functions.HttpHeaders(this.auth));
     }
 
     NewUserToken(): any {
         if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
         const user = this.auth.userValue()!;
-        return this.http.post(`${Functions.backenUrl()}/configs/newToken`, {userId:user.id, dhisusersession: user.dhisusersession},Functions.customHttpHeaders(this.auth));
+        return this.http.post(`${Functions.backenUrl()}/configs/newToken`, {userId:user.id, dhisusersession: user.dhisusersession},Functions.HttpHeaders(this.auth));
     }
-
-    
       
 } 

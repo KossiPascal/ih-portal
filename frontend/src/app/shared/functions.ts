@@ -103,7 +103,7 @@ export class Functions {
   }
 
 
-  static customHttpHeaders(auth: AuthService): { headers: HttpHeaders } {
+  static HttpHeaders(auth: AuthService): { headers: HttpHeaders } {
     return {
       headers: new HttpHeaders({
         Authorization: auth.userValue()!=null ? `Bearer ${auth.userValue()!.token}` : ''
@@ -116,6 +116,10 @@ export class Functions {
     return /^-?[\d.]+(?:e-?\d+)?$/.test(n); 
   }
 }
+
+
+
+
 
 export class DateUtils {
   static isGreater(d1: any, d2: any): boolean {

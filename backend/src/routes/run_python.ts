@@ -2,10 +2,9 @@
 import { spawn } from "child_process";
 import { Request, Response } from "express";
 import express = require("express");
-import { insertOrUpdateDataToDhis2 } from "../controllers/fetchFormCloud";
 import { DataIndicators } from "../entity/DataAggragate";
 import { Middelware } from "../middleware/auth";
-import { extractFolder, Functions, isNotNull, srcFolder, sslFolder } from "../utils/functions";
+import { extractFolder, isNotNull, sslFolder } from "../utils/functions";
 var path = require('path');
 const pyRouter = express.Router();
 // const utf8 = require('utf8');
@@ -66,8 +65,8 @@ function dataToReturn(data: any) {
 pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, async (req: Request, res: Response) => {
     var dataToSend: string = '{}';
     req.body['type'] = 'thinkMd_only'
-    const user = `${req.body['user']}`;
-    errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
+    const userId = `${req.body['userId']}`;
+    errorToSend[`${userId}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
     req.body['thinkmd_host'] = process.env.TSC_HOST;
     req.body['thinkmd_site'] = process.env.TSC_SITE;
@@ -84,12 +83,12 @@ pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, async (req: Reques
 
     python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data); });
     python.stderr.on('data', (data) => {
-        errorToSend[`${user}`]['ErrorCount'] += 1;
-        errorToSend[`${user}`]['ErrorData'].push(formatData(data));
+        errorToSend[`${userId}`]['ErrorCount'] += 1;
+        errorToSend[`${userId}`]['ErrorData'].push(formatData(data));
     });
-    python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err; });
+    python.on('error', function (err) { errorToSend[`${userId}`]['ConsoleError'] = err; });
     python.on('close', async (code) => {
-        let brutOutPut = `{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}, "DataFordhis2":[]}`
+        let brutOutPut = `{"errorToSend": ${JSON.stringify(errorToSend[`${userId}`])},"dataToSend": ${dataToReturn(dataToSend)}, "DataFordhis2":[]}`
         try {
             let ThinkMdOutPutData = JSON.parse(brutOutPut);
             if (req.body.InsertIntoDhis2 == true &&
@@ -98,9 +97,9 @@ pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, async (req: Reques
                 ThinkMdOutPutData.dataToSend.success == 'true' &&
                 ThinkMdOutPutData.dataToSend.Error == 0 &&
                 Object.values(ThinkMdOutPutData.dataToSend.Data.body).length > 0) {
-                // const csvOutputFile = `${srcFolder()}/pythons/extracts/thinkMd_output_for_dhis2_${user}_output.csv`;
+                // const csvOutputFile = `${srcFolder()}/pythons/extracts/thinkMd_output_for_dhis2_${userId}_output.csv`;
                 // fs.createReadStream(csvOutputFile).pipe(csv()).on("data", (data:any) => { console.log(data) });
-                const jsonOutputFile = extractFolder(`thinkMd_output_for_dhis2_${user}_output.json`);
+                const jsonOutputFile = extractFolder(`thinkMd_output_for_dhis2_${userId}_output.json`);
                 let rawdata = fs.readFileSync(jsonOutputFile);
                 ThinkMdOutPutData.DataFordhis2 = JSON.parse(rawdata) as DataIndicators[];
             }
@@ -123,8 +122,8 @@ pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, async (req: Reques
 pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: Response) => {
     var dataToSend: string = '{}';
     req.body['type'] = 'thinkMd_weekly';
-    const user = `${req.body['user']}`;
-    errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
+    const userId = `${req.body['userId']}`;
+    errorToSend[`${userId}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
     req.body['thinkmd_host'] = process.env.TSC_HOST;
     req.body['thinkmd_site'] = process.env.TSC_SITE;
@@ -137,19 +136,19 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
 
     python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data); });
     python.stderr.on('data', (data) => {
-        errorToSend[`${user}`]['ErrorCount'] += 1;
-        errorToSend[`${user}`]['ErrorData'].push(formatData(data));
+        errorToSend[`${userId}`]['ErrorCount'] += 1;
+        errorToSend[`${userId}`]['ErrorData'].push(formatData(data));
     });
-    python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err; });
-    python.on('close', (code) => res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`));
+    python.on('error', function (err) { errorToSend[`${userId}`]['ConsoleError'] = err; });
+    python.on('close', (code) => res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${userId}`])},"dataToSend": ${dataToReturn(dataToSend)}}`));
     python.on('end', (msg) => console.log(`Finish`));
 });
 
 // pyRouter.post('/medic_to_dhis2', Middelware.authMiddleware, (req: Request, res: Response) => {
 //     var dataToSend: string = '{}';
 //     req.body['type'] = 'medic_only';
-//     const user = `${req.body['user']}`;
-//     errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
+//     const userId = `${req.body['userId']}`;
+//     errorToSend[`${userId}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
 //     req.body['medic_password'] = process.env.COUCH_PASS;
 
@@ -157,11 +156,11 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
 
 //     python.stdout.on('data', (data) => { if (dataToSend === '{}') dataToSend = formatData(data) });
 //     python.stderr.on('data', (data) => { 
-//         errorToSend[`${user}`]['ErrorCount'] += 1; 
-//         errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
+//         errorToSend[`${userId}`]['ErrorCount'] += 1; 
+//         errorToSend[`${userId}`]['ErrorData'].push(formatData(data)); 
 //     });
-//     python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err; });
-//     python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
+//     python.on('error', function (err) { errorToSend[`${userId}`]['ConsoleError'] = err; });
+//     python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${userId}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
 //     python.on('end', (msg) => console.log(`Finish`));
 // });
 
@@ -169,8 +168,8 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
 // pyRouter.post('/ih_cht_to_dhis2', Middelware.authMiddleware, (req: Request, res: Response) => {
 //     var dataToSend: string = '{}';
 //     req.body['type'] = 'cht_only';
-//     const user = `${req.body['user']}`;
-//     errorToSend[`${user}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
+//     const userId = `${req.body['userId']}`;
+//     errorToSend[`${userId}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
 //     if (req.body['dhis2_password'] === '' || req.body['dhis2_password'] === null) req.body['dhis2_password'] = process.env.DHIS_PASS;
 //     if (req.body['cht_password'] === '' || req.body['cht_password'] === null) req.body['cht_password'] = process.env.CHT_PASS;
@@ -181,11 +180,11 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
 //         console.log(dataToSend)
 //      });
 //     python.stderr.on('data', (data) => { 
-//         errorToSend[`${user}`]['ErrorCount'] += 1; 
-//         errorToSend[`${user}`]['ErrorData'].push(formatData(data)); 
+//         errorToSend[`${userId}`]['ErrorCount'] += 1; 
+//         errorToSend[`${userId}`]['ErrorData'].push(formatData(data)); 
 //     });
-//     python.on('error', function (err) { errorToSend[`${user}`]['ConsoleError'] = err; });
-//     python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${user}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
+//     python.on('error', function (err) { errorToSend[`${userId}`]['ConsoleError'] = err; });
+//     python.on('close', (code) => { res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${userId}`])},"dataToSend": ${dataToReturn(dataToSend)}}`); });
 //     python.on('end', (msg) => console.log(`Finish`));
 // });
 

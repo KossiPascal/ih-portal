@@ -67,71 +67,56 @@ export class AuthService {
   }
 
   getAllUsers(): any {
-    if (this.isLoggedIn()) {
-      return this.http.get(`${Functions.backenUrl()}/user/all`, Functions.customHttpHeaders(this));
-    } else {
-      this.logout();
-    }
+    if (!this.isLoggedIn() || this.userValue() == null) this.logout();
+    const user = this.userValue();
+    const sendParams = { userId: user?.id, dhisusersession: user?.dhisusersession };
+
+      return this.http.post(`${Functions.backenUrl()}/user/all`, sendParams, Functions.HttpHeaders(this));
   }
 
   getUserBy(id: string): any {
-    if (this.isLoggedIn()) {
-      return this.http.get(`${Functions.backenUrl()}/user/${id}`, Functions.customHttpHeaders(this));
-    } else {
-      this.logout();
-    }
+    if (!this.isLoggedIn() || this.userValue() == null) this.logout();
+    const user = this.userValue();
+    const sendParams = { userId: user?.id, dhisusersession: user?.dhisusersession };
+
+      return this.http.post(`${Functions.backenUrl()}/user/${id}`, sendParams, Functions.HttpHeaders(this));
   }
 
   updateUser(user: User): any {
-    if (this.isLoggedIn()) {
-      return this.http.post(`${Functions.backenUrl()}/user/update`, user, Functions.customHttpHeaders(this));
-    } else {
-      this.logout();
-    }
+    if (!this.isLoggedIn() || this.userValue() == null) this.logout();
+    const thisuser = this.userValue();
+    const sendParams = { userId: thisuser?.id, dhisusersession: thisuser?.dhisusersession, user_to_update: user };
+
+      return this.http.post(`${Functions.backenUrl()}/user/update`, sendParams, Functions.HttpHeaders(this));
   }
 
 
   deleteUser(user: User): any {
-    if (this.isLoggedIn()) {
-      return this.http.post(`${Functions.backenUrl()}/user/delete`, user, Functions.customHttpHeaders(this));
-    } else {
-      this.logout();
-    }
+    if (!this.isLoggedIn() || this.userValue() == null) this.logout();
+    const thisuser = this.userValue();
+    const sendParams = { userId: thisuser?.id, dhisusersession: thisuser?.dhisusersession , user_to_delete: user};
+
+    return this.http.post(`${Functions.backenUrl()}/user/delete`, sendParams, Functions.HttpHeaders(this));
   }
 
-  alreadyAuthenticate(redirecUrl?: string) {
-    if (this.isLoggedIn()) {
-      console.log(`You are already authenticated !`);
-      // this.router.navigate([this.defaultRedirectUrl]);
-      location.href = redirecUrl??this.userValue()?.defaultRedirectUrl!;
-      // window.location.replace(document.referrer);
-    }
+  alreadyLogin(redirecUrl?: string) {
+    if (this.isLoggedIn()) location.href = redirecUrl??this.userValue()?.defaultRedirectUrl!;
   }
 
-  // window.location.pathname
+
 
   register(user: User): any {
-    if (!this.isLoggedIn() || this.roles.isSuperUser()) {
-      return this.http.post(`${Functions.backenUrl()}/auth/register`, user, Functions.customHttpHeaders(this));
-    } else {
-      this.alreadyAuthenticate();
-    }
+    const canProcide = !this.isLoggedIn() || this.roles.isSuperUser();
+      return canProcide ? this.http.post(`${Functions.backenUrl()}/auth/register`, user, Functions.HttpHeaders(this)) : this.alreadyLogin();
   }
 
   login(username: string, password: string): any {
-    if (!this.isLoggedIn()) {
-      return this.http.post(`${Functions.backenUrl()}/auth/login`, { username: username, password: password }, Functions.customHttpHeaders(this));
-      // .pipe(map((user) => {
-      //   return user;
-      // }));
-    } else {
-      this.alreadyAuthenticate();
-    }
+      const sendParams = { username: username, password: password };
+      return !this.isLoggedIn() ? this.http.post(`${Functions.backenUrl()}/auth/login`, sendParams, Functions.HttpHeaders(this)) : this.alreadyLogin();
   }
 
   logout() {
     Functions.saveCurrentUrl(this.router);
-
     localStorage.removeItem("user");
     // this.router.navigate(["auths/login"]);
     location.href = 'auths/login';

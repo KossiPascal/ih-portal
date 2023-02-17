@@ -49,18 +49,18 @@ def getThinkMdWeeklyDataFromDhis2(ARGS):
             csv_req_option.vf('Semaine de start string', dateFilter[:-1])
             # csv_req_option.vf('Village corrected', 'Koundoum, Manga')
             server.views.populate_csv(default_view, csv_req_option)
-            with open(f""+extractPath("/week_reports_"+str(ARGS['user'])+".csv"), 'wb') as f:
+            with open(f""+extractPath("/week_reports_"+str(ARGS['userId'])+".csv"), 'wb') as f:
                 f.write(b''.join(default_view.csv))
 
 
         ###############################################################################
 
 
-        # file = open(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
+        # file = open(extractPath("week_reports_"+str(ARGS['userId'])+".csv"))
         # csvreader = csv.reader(file)
         # header = next(csvreader)
 
-        fileData = getOutPutDataFromFile("week_reports_"+str(ARGS['user']))
+        fileData = getOutPutDataFromFile("week_reports_"+str(ARGS['userId']))
         headers = fileData['head']
         csvreader = fileData['body']
 
@@ -87,13 +87,14 @@ def getThinkMdWeeklyDataFromDhis2(ARGS):
 
 
         if len(allData)!=0 and len(chwsFounded) != 0 and len(SelectedDates) !=0:
-            with createFile(extractFolder(), "weekly_thinkmd_medic_data_"+str(ARGS['user'])) as result:
+            with createFile(extractFolder(), "weekly_thinkmd_medic_data_"+str(ARGS['userId'])) as result:
                 oldOrgUnitLine = ''
                 # new = 'Exportation des données par semaine: '+str(SelectedDates).replace(',',' ')[1:][:-1].replace("'All'",'')+'\n\n'
                 new = ''
-                new += 'Site,District,ChwsCode,ChwsName,Type'
+                # new += 'Site,District,ChwsCode,ChwsName,Type'
+                new += 'Code ASC,Nom ASC,Site,District'
                 for i in SelectedDates:
-                    new+=','+convertDate(i)
+                    new+=','+convertDate(i, True)
                 new+='\n' 
                 result.write(new)
                 for c in allChws:
@@ -110,12 +111,12 @@ def getThinkMdWeeklyDataFromDhis2(ARGS):
                         #     result.write(old0)
                         #     result.write(old0)
 
-
-                        old+=newOrgUnitLine
-                        old+=','+c['code']
+                        old+=c['code']
                         name = c['name'].replace(c['code']+' ','')
                         old+=','+name
-                        old+=','+ chwRemplacante(name)
+
+                        old+=','+newOrgUnitLine
+                        # old+=','+ chwRemplacante(name) ==> Type
                         for j in SelectedDates:
                             old+=','+getReportData(allData,c['code'],j)
                         if indx < len(allChws) - 1:
@@ -133,8 +134,8 @@ def getThinkMdWeeklyDataFromDhis2(ARGS):
     # getMedicWeeklyData(ARGS)
 
 def generateThinkMdWeeklyData(ARGS):
-    if pathExist(extractPath("weekly_thinkmd_medic_data_"+str(ARGS['user'])+".csv")):
-        allData = getOutPutDataFromFile("weekly_thinkmd_medic_data_"+str(ARGS['user']))
+    if pathExist(extractPath("weekly_thinkmd_medic_data_"+str(ARGS['userId'])+".csv")):
+        allData = getOutPutDataFromFile("weekly_thinkmd_medic_data_"+str(ARGS['userId']))
         outPutData["Data"]["head"] = allData['head']
         finalBody = allData['body']
         for row in finalBody:
@@ -147,10 +148,10 @@ def generateThinkMdWeeklyData(ARGS):
 
 # def getMedicWeeklyData(ARGS, data_type="TotalVad"):
 
-#     fileName = "week_reports_"+str(ARGS['user'])
+#     fileName = "week_reports_"+str(ARGS['userId'])
 
 #     if pathExist(extractPath(fileName +".csv")):
-#         # dFile = open(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
+#         # dFile = open(extractPath("week_reports_"+str(ARGS['userId'])+".csv"))
 #         # dCsvreader = csv.reader(dFile)
 #         # dHeader = next(dCsvreader)
 
@@ -164,7 +165,7 @@ def generateThinkMdWeeklyData(ARGS):
 #                 if dDate == row[2] and ddDate not in AllSelectedDates:
 #                     AllSelectedDates.append(ddDate)
 
-#         deleteFile(extractPath("week_reports_"+str(ARGS['user'])+".csv"))
+#         deleteFile(extractPath("week_reports_"+str(ARGS['userId'])+".csv"))
 
 #     # try:
 #     #     for anyDate in AllSelectedDates:
@@ -172,11 +173,11 @@ def generateThinkMdWeeklyData(ARGS):
 #     #         ARGS['start_date'] = anyDate
 #     #         ARGS['end_date'] = getNexSundayDate(anyDate)
 
-#     #         flushMedicDataToDhis2(ARGS,"medic_week_reports_"+str(indexOf(AllSelectedDates,anyDate))+"_"+str(ARGS['user']),data_type)
+#     #         flushMedicDataToDhis2(ARGS,"medic_week_reports_"+str(indexOf(AllSelectedDates,anyDate))+"_"+str(ARGS['userId']),data_type)
     
-#     #     file = open(extractPath("medic_week_reports_0"+"_"+str(ARGS['user'])+".csv"))
+#     #     file = open(extractPath("medic_week_reports_0"+"_"+str(ARGS['userId'])+".csv"))
 #     #     csvreader = list(csv.reader(file))
-#     #     with open(extractPath("weekly_thinkmd_medic_data_"+str(ARGS['user'])+".csv"), 'a', newline='') as f_object:  
+#     #     with open(extractPath("weekly_thinkmd_medic_data_"+str(ARGS['userId'])+".csv"), 'a', newline='') as f_object:  
 #     #         merge_result = []
 #     #         oldOrgUnitLine = ''
 #     #         writer_object = csv.writer(f_object)
@@ -185,7 +186,7 @@ def generateThinkMdWeeklyData(ARGS):
 #     #             index = indexOf(AllSelectedDates,anyDate)
 #     #             for bigrow in csvreader:
 #     #                 if index > 0:
-#     #                     file0 = open(extractPath("medic_week_reports_"+str(index)+"_"+str(ARGS['user'])+".csv"))
+#     #                     file0 = open(extractPath("medic_week_reports_"+str(index)+"_"+str(ARGS['userId'])+".csv"))
 #     #                     csvRead = list(csv.reader(file0))
 #     #                     for r in csvRead:
 #     #                         p = 0
@@ -221,7 +222,7 @@ def generateThinkMdWeeklyData(ARGS):
 #     #     #         result.write(f)
 #     #     file.close()
 #     #     for i in range(50):
-#     #         deleteFile(extractPath("medic_week_reports_"+str(i)+"_"+str(ARGS['user'])+".csv"))
+#     #         deleteFile(extractPath("medic_week_reports_"+str(i)+"_"+str(ARGS['userId'])+".csv"))
 #     # except Exception as err:
 #     #     outPutData['Error'] +=1
 #     #     if 'server_error' not in outPutData['ErrorMsg']:

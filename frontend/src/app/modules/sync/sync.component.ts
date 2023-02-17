@@ -26,6 +26,14 @@ declare var initDataTable: any;
 })
 export class SyncComponent implements OnInit {
 
+  isAdmin: boolean = false;
+  isSuperUser: boolean = false;
+  isUserManager: boolean = false;
+  isDataManager: boolean = false;
+  isSupervisorMentor: boolean = false;
+  isChws: boolean = false;
+  onlySeedata: boolean = false;
+
   thinkmdToDhis2Form!: FormGroup;
   ihChtToDhis2Form!: FormGroup;
   ThinkMdWeeklyForm!: FormGroup;
@@ -54,10 +62,11 @@ export class SyncComponent implements OnInit {
   Districts$: Districts[] = [];
   Sites$: Sites[] = [];
   Chws$: Chws[] = [];
-  Dhis2Chws$: any[] = [];
+  Dhis2Chws$: { code: string, name: string, siteId: string}[] = [];
 
   chws$: Chws[] = [];
   sites$: Sites[] = [];
+  dhis2Chws$: { code: string, name: string, siteId: string}[] = [];
 
   Tab1Dhis2Import: { ErrorCount: number, ErrorMsg: string, Created: number, Updated: number, Deleted: number } = {
     ErrorCount: 0,
@@ -77,17 +86,25 @@ export class SyncComponent implements OnInit {
 
 
   constructor(private store: AppStorageService, private auth: AuthService, private route: ActivatedRoute, private sync: SyncService) { }
-  
+
 
   private roles = new Roles(this.store);
 
   ngOnInit(): void {
     this.route.params.subscribe(params => this.activePage = params['cible']);
 
-    if (this.activePage === 'dataToDhis2' &&  !this.roles.isDataManager() || 
-        this.activePage === 'weeklyData' && !this.roles.isSupervisorMentor()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+    this.isSuperUser = this.roles.isSuperUser();
+    this.isUserManager = this.roles.isUserManager();
+    this.isAdmin = this.roles.isAdmin();
+    this.isDataManager = this.roles.isDataManager();
+    this.isSupervisorMentor = this.roles.isSupervisorMentor();
+    this.isChws = this.roles.isChws();
+    this.onlySeedata = this.roles.onlySeedata();
 
-        this.initAllData();
+    if (this.activePage === 'dataToDhis2' && !this.roles.isDataManager() ||
+      this.activePage === 'weeklyData' && !this.roles.isSupervisorMentor()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+
+    this.initAllData();
     this.thinkmdToDhis2Form = this.createThinkmdFormGroup();
     this.ihChtToDhis2Form = this.createIhChtFormGroup();
     this.ThinkMdWeeklyForm = this.createThinkmdWeeklyFormGroup();
@@ -99,8 +116,8 @@ export class SyncComponent implements OnInit {
       start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
       useToken: new FormControl(true),
       InsertIntoDhis2: new FormControl(false, []),
-      // dhis2_username: new FormControl(""),
-      // dhis2_password: new FormControl(""),
+      districts: new FormControl("", [Validators.required]),
+      sites: new FormControl("", [Validators.required]),
     });
   }
   createDhis2ChwsDataFormGroup(): FormGroup {
@@ -148,20 +165,27 @@ export class SyncComponent implements OnInit {
       this.LoadingMsg = 'Chargement des Sites ...';
       this.sync.getSitesList().subscribe(async (_s$: { status: number, data: Sites[] }) => {
         if (_s$.status == 200) this.Sites$ = _s$.data;
-        this.genarateSites()
+        this.genarateSites(this.ihChtToDhis2Form)
         this.LoadingMsg = 'Chargement des ASC ...';
         this.sync.getChwsList().subscribe(async (_c$: { status: number, data: Chws[] }) => {
           if (_c$.status == 200) this.Chws$ = _c$.data;
-          this.genarateChws();
+          this.genarateChws(this.ihChtToDhis2Form);
+          for (let i = 0; i < this.Chws$.length; i++) {
+            const ch = this.Chws$[i];
+            this.Dhis2Chws$.push({ code: ch.external_id, name: ch.name, siteId:ch.site.id });
+          }
+          this.genarateWeekyDataChws();
           this.loading3 = false;
           this.LoadingMsg = '';
-          this.sync.getDhis2Chws().subscribe(async (_ch$: { status: number, data: any[] }) => {
-            if (_ch$.status == 200) this.Dhis2Chws$ = _ch$.data
-            this.loading3 = false;
-          }, (err: any) => {
-            this.loading3 = false;
-            console.log(err.error);
-          });
+          // this.sync.getDhis2Chws().subscribe(async (_ch$: { status: number, data: any[] }) => {
+          //   if (_ch$.status == 200) this.Dhis2Chws$ = _ch$.data
+
+          //   console.log(this.Dhis2Chws$)
+          //   this.loading3 = false;
+          // }, (err: any) => {
+          //   this.loading3 = false;
+          //   console.log(err.error);
+          // });
         }, (err: any) => {
           this.loading3 = false;
           console.log(err.error);
@@ -173,12 +197,12 @@ export class SyncComponent implements OnInit {
 
     });
   }
-  genarateSites() {
+  genarateSites(cibleForm: FormGroup) {
     this.sites$ = [];
     this.chws$ = [];
-    const dist: string[] = Functions.returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.districts);
-    this.ihChtToDhis2Form.value["sites"] = "";
-    this.ihChtToDhis2Form.value["chws"] = [];
+    const dist: string[] = Functions.returnEmptyArrayIfNul(cibleForm.value.districts);
+    cibleForm.value["sites"] = "";
+    cibleForm.value["chws"] = [];
 
     if (Functions.notNull(dist)) {
       for (let d = 0; d < this.Sites$.length; d++) {
@@ -190,10 +214,10 @@ export class SyncComponent implements OnInit {
     }
   }
 
-  genarateChws() {
-    const sites: string[] = Functions.returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.sites);
+  genarateChws(cibleForm: FormGroup) {
+    const sites: string[] = Functions.returnEmptyArrayIfNul(cibleForm.value.sites);
     this.chws$ = [];
-    this.ihChtToDhis2Form.value["chws"] = [];
+    cibleForm.value["chws"] = [];
     if (Functions.notNull(sites)) {
       for (let d = 0; d < this.Chws$.length; d++) {
         const chws = this.Chws$[d];
@@ -201,6 +225,19 @@ export class SyncComponent implements OnInit {
       }
     } else {
       this.chws$ = [];
+    }
+  }
+
+  genarateWeekyDataChws() {
+    const dhis2Sites: string[] = Functions.returnEmptyArrayIfNul(this.ThinkMdWeeklyForm.value.sites);
+    this.dhis2Chws$ = [];
+    if (Functions.notNull(dhis2Sites)) {
+      for (let d = 0; d < this.Dhis2Chws$.length; d++) {
+        const chs = this.Dhis2Chws$[d];
+        if (Functions.notNull(chs)) if (dhis2Sites.includes(chs.siteId)) this.dhis2Chws$.push(chs)
+      }
+    } else {
+      this.dhis2Chws$ = this.Dhis2Chws$;
     }
   }
 
@@ -408,7 +445,7 @@ export class SyncComponent implements OnInit {
   }
 
   runThinkMdWeekly(): void {
-    if (this.Dhis2Chws$.length > 0) {
+    if (this.dhis2Chws$.length > 0) {
       this.addToDateList();
       if (this.weekly_Choosen_Dates.length > 1 && this.WeeklyDateIsValid()) {
         this.is_weekly_date_error = false;
@@ -416,7 +453,7 @@ export class SyncComponent implements OnInit {
         this.loading4 = true;
         this.tab4_messages = null;
         this.tab4_messages_error = null;
-        this.ThinkMdWeeklyForm.value['chws'] = this.Dhis2Chws$;
+        this.ThinkMdWeeklyForm.value['chws'] = this.dhis2Chws$;
 
         this.sync.syncThinkMdWeeklyChwsData(this.ThinkMdWeeklyForm.value).subscribe((response: any) => {
           this.loading4 = false;
@@ -438,6 +475,10 @@ export class SyncComponent implements OnInit {
     } else {
       this.tab4_messages_error = 'Impossible de récupérer les données du dhis2! Veuillez rafraichir la page et rééssayer!';
     }
+  }
+
+  dateTransform(date:string):string{
+    return DateUtils.getDateInFormat(date,0, 'fr')
   }
 
 

@@ -23,7 +23,8 @@ export class User {
             "isActive": this.isActive,
             "expiresIn": this.expiresIn,
             "token":this.token(),
-            "dhisusersession": this.dhisusersession
+            "dhisusersession": this.dhisusersession,
+            "defaultRedirectUrl": this.defaultRedirectUrl
         }
     }
 }

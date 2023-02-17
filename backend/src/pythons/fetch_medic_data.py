@@ -531,7 +531,7 @@ def flushMedicDataToDhis2(KWARG,fileName = "medic_output",data_type = "Consultat
 
     if fileName == defaultFileName:
         # deleteFile(extractPath(fileName+".csv"))
-        fileName0 = fileName+"_"+str(KWARG['user'])+"_output"
+        fileName0 = fileName+"_"+str(KWARG['userId'])+"_output"
     else:
         fileName0 = fileName
 

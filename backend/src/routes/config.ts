@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response, Router } from 'express';
+import { User } from '../entity/User';
 import { JsonDatabase } from '../json-data-source';
-import { Functions } from '../utils/functions';
+import { userLoginStatus, getMe } from '../utils/dhis2-api-functions';
+import { Functions, generateUserMapData } from '../utils/functions';
 
 const configRouter = Router();
 
@@ -31,9 +33,37 @@ configRouter.post('/appVersion', async (req: Request, res: Response, next: NextF
 
 configRouter.post('/newToken', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.body.userId;
+    const userId = req.body.userId;
     const dhisusersession = req.body.dhisusersession;
-    const _repoUser = new JsonDatabase('users');
+    try {
+      if (dhisusersession) {
+        await userLoginStatus(dhisusersession)
+          .then(r => {
+            if (r == true) {
+              getMe(dhisusersession).then((user: User) => {
+                if (user.isActive !== true) {
+                  return res.status(201).json({ status: 201, data: "You don't have permission to login!" });
+                }
+                const userData = generateUserMapData(user, dhisusersession);
+                const _repoUser = new JsonDatabase('users');
+                _repoUser.save(userData);
+
+                return res.status(200).json({ status: 200, data: userData });
+              }).catch(err => res.status(201).json({ status: 201, data: 'No user found with this crediential, retry!' }))
+
+            } else {
+              return res.status(201).json({ status: 201, data: 'Problem found when trying to connect' });
+            }
+          }).catch(err => res.status(201).json({ status: 201, data: 'Error When getting user informations, retry!' }));
+      } else {
+        return res.status(201).json({ status: 201, data: 'crediential error' });
+      }
+    }
+    catch (err: any) {
+      return res.status(201).json({ status: 201, data: `${err}` });
+    }
+
+
     // console.log(id);
     // console.log(dhisusersession);
     // var users: User[] = (Object.values(_repoUser.getBy(id)) as User[]);
@@ -44,7 +74,7 @@ configRouter.post('/newToken', async (req: Request, res: Response, next: NextFun
     //   var user = generateUserMapData(users[0], dhisusersession);
     //   return res.status(200).json({ status: 200, data: user });
     // };
-    
+
     // const repository = await getUserRepository();
     // const userFound = await repository.findOneBy({ id: id });
 

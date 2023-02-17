@@ -46,22 +46,22 @@ def insertOrUpdateDataToDhis2(data, KWARG):
 
 def GenerateThinkMdDataToPushDhis2(KWARG):
     # #get data lenght
-    # file0 = open(extractPath("output"+"_"+str(str(KWARG['user']))+".csv"))
+    # file0 = open(extractPath("output"+"_"+str(str(KWARG['userId']))+".csv"))
     # datalenght = len(list(csv.reader(file0))) -1
     # file0.close()
     
     # #Fecth data
-    # file = open(extractPath("output"+"_"+str(KWARG['user'])+".csv"))
+    # file = open(extractPath("output"+"_"+str(KWARG['userId'])+".csv"))
     # csvreader = csv.reader(file)
     # headers = next(csvreader)
 
-    fileData = getOutPutDataFromFile("output"+"_"+str(KWARG['user']))
+    fileData = getOutPutDataFromFile("output"+"_"+str(KWARG['userId']))
     headers = fileData['head']
     csvreader = fileData['body']
 
 
-    with createFile(extractFolder(), "thinkMd_output_for_dhis2"+"_"+str(KWARG['user'])+"_output", ".json") as dhis2result:
-        with createFile(extractFolder(), "thinkMd_output"+"_"+str(KWARG['user'])+"_output") as result:
+    with createFile(extractFolder(), "thinkMd_output_for_dhis2"+"_"+str(KWARG['userId'])+"_output", ".json") as dhis2result:
+        with createFile(extractFolder(), "thinkMd_output"+"_"+str(KWARG['userId'])+"_output") as result:
             result.write("site,reported_date,district,asc_code,total_vad,total_vad_pcime_c,total_suivi_pcime_c,reference_femmes_pf,reference_pcime,reference_femmes_enceinte_postpartum,total_vad_femmes_enceinte,total_vad_femmes_postpartum,total_home_visit,total_diarrhee_pcime_soins,total_paludisme_pcime_soins,total_pneumonie_pcime_soins,total_malnutrition_pcime_soins,prompt_diarrhee_24h_pcime_soins,prompt_diarrhee_48h_pcime_soins,prompt_diarrhee_72h_pcime_soins,prompt_paludisme_24h_pcime_soins,prompt_paludisme_48h_pcime_soins,prompt_paludisme_72h_pcime_soins,prompt_pneumonie_24h_pcime_soins,prompt_pneumonie_48h_pcime_soins,prompt_pneumonie_72h_pcime_soins,total_vad_femme_enceinte_NC_soins,total_vad_femme_postpartum_NC,total_test_de_grossesse_domicile,total_vad_family_planning\n")
 
 
@@ -224,7 +224,7 @@ def GenerateThinkMdDataToPushDhis2(KWARG):
 
     # file.close()
     try:
-        deleteFile(extractPath("output"+"_"+str(KWARG['user'])+".csv"))
+        deleteFile(extractPath("output"+"_"+str(KWARG['userId'])+".csv"))
     except:
         pass
 
@@ -234,9 +234,9 @@ def getThinkMdDataFromCloud(KWARG):
     try:
         bigin = datetime.now()
         server = TSC.Server("https://{}".format(KWARG['thinkmd_host']), use_server_version=True)
-        deleteFile(extractPath("brut"+"_"+str(KWARG['user'])+".csv"))
-        deleteFile(extractPath("results"+"_"+str(KWARG['user'])+".csv"))
-        deleteFile(extractPath("output"+"_"+str(KWARG['user'])+".csv"))
+        deleteFile(extractPath("brut"+"_"+str(KWARG['userId'])+".csv"))
+        deleteFile(extractPath("results"+"_"+str(KWARG['userId'])+".csv"))
+        deleteFile(extractPath("output"+"_"+str(KWARG['userId'])+".csv"))
 
         with signIn(server,KWARG):
             
@@ -258,15 +258,15 @@ def getThinkMdDataFromCloud(KWARG):
             date = str(KWARG['end_date']).split('-') #[2022,01,20]
             csv_req_option.vf('Mois corrigé SI', str(date[0])+str(date[1]))
             server.views.populate_csv(default_view, csv_req_option)
-            with open(f""+extractPath("brut"+"_"+str(KWARG['user'])+".csv"), 'wb') as f:
+            with open(f""+extractPath("brut"+"_"+str(KWARG['userId'])+".csv"), 'wb') as f:
                 f.write(b''.join(default_view.csv))
         
         #################################################################################################""
 
-        # file = open(extractPath("brut"+"_"+str(KWARG['user'])+".csv"), 'r')
+        # file = open(extractPath("brut"+"_"+str(KWARG['userId'])+".csv"), 'r')
         # csvreader = csv.reader(file)
         # header = next(csvreader)
-        fileData = getOutPutDataFromFile("brut"+"_"+str(KWARG['user']))
+        fileData = getOutPutDataFromFile("brut"+"_"+str(KWARG['userId']))
         headers = fileData['head']
         csvreader = fileData['body']
 
@@ -282,7 +282,7 @@ def getThinkMdDataFromCloud(KWARG):
                 title.append(row[1])
         
         if len(allData)!=0 and len(code) != 0 and len(title) !=0:
-            with createFile(extractFolder(), "results"+"_"+str(KWARG['user'])) as result:
+            with createFile(extractFolder(), "results"+"_"+str(KWARG['userId'])) as result:
                 new = 'lbHrQBTbY1d,JC752xYegbJ,orgUnit,JkMyqI3e6or' #reported_date, district, orgUnit, codeASC
                 for i in title:
                     new+=','+getMatchDataElementUid(i, indexOf(title,i))
@@ -302,15 +302,15 @@ def getThinkMdDataFromCloud(KWARG):
 
             #########################################################################################
             
-            data = pd.read_csv(extractPath("results"+"_"+str(KWARG['user'])+".csv"))
+            data = pd.read_csv(extractPath("results"+"_"+str(KWARG['userId'])+".csv"))
             for i in range(0,len(title)):
                 try:
                     data.drop('Error'+str(i), inplace=True, axis=1)
                 except:
                     pass
-            data.to_csv(extractPath("output"+"_"+str(KWARG['user'])+".csv"), index=False)
-            deleteFile(extractPath("brut"+"_"+str(KWARG['user'])+".csv"))
-            deleteFile(extractPath("results"+"_"+str(KWARG['user'])+".csv"))
+            data.to_csv(extractPath("output"+"_"+str(KWARG['userId'])+".csv"), index=False)
+            deleteFile(extractPath("brut"+"_"+str(KWARG['userId'])+".csv"))
+            deleteFile(extractPath("results"+"_"+str(KWARG['userId'])+".csv"))
             GenerateThinkMdDataToPushDhis2(KWARG)
         else:
             outPutData['Error'] +=1
@@ -331,7 +331,7 @@ def getThinkMdDataFromCloud(KWARG):
 def generateDataFromFinalFile(KWARG):
     if KWARG['type'] == 'thinkMd_only':
         try:
-            allData = getOutPutDataFromFile("thinkMd_output"+"_"+str(KWARG['user'])+"_output")
+            allData = getOutPutDataFromFile("thinkMd_output"+"_"+str(KWARG['userId'])+"_output")
             outPutData["Data"]["head"] = allData['head']
             finalBody = allData['body']
             for row in finalBody:
