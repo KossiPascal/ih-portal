@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import express = require("express");
 import { DataIndicators } from "../entity/DataAggragate";
 import { Middelware } from "../middleware/auth";
+import { DataFromPython } from "../utils/appInterface";
 import { extractFolder, isNotNull, sslFolder } from "../utils/functions";
 var path = require('path');
 const pyRouter = express.Router();
@@ -140,7 +141,15 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
         errorToSend[`${userId}`]['ErrorData'].push(formatData(data));
     });
     python.on('error', function (err) { errorToSend[`${userId}`]['ConsoleError'] = err; });
-    python.on('close', (code) => res.jsonp(`{"errorToSend": ${JSON.stringify(errorToSend[`${userId}`])},"dataToSend": ${dataToReturn(dataToSend)}}`));
+    python.on('close', (code) => {
+        let brutOutPut = `{"errorToSend": ${JSON.stringify(errorToSend[`${userId}`])},"dataToSend": ${dataToReturn(dataToSend)}}`;
+        try {
+            let rawdata = JSON.parse(brutOutPut) as DataFromPython;
+            return res.jsonp(rawdata);
+        } catch (error) {
+            return res.jsonp(brutOutPut);
+        }
+    });
     python.on('end', (msg) => console.log(`Finish`));
 });
 

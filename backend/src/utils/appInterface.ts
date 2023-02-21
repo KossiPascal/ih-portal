@@ -1,6 +1,22 @@
 import { Moment } from "moment";
 
+export interface DataFromPython {
+  errorToSend: {
+    ErrorCount: number
+    ErrorData: any[]
+    ConsoleError: string
+  }
+  dataToSend: {
+    success: string
+    Error: number
+    ErrorMsg: any
 
+    Data: {
+      head: any
+      body: any
+    }
+  }
+}
 
 export interface Sync {
   id: any;
