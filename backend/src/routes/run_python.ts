@@ -149,7 +149,7 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
         // } catch (error) {
         //     return res.jsonp(brutOutPut);
         // }
-        return res.jsonp(brutOutPut);
+        return res.jsonp(brutOutPut.replace('\\',''));
     });
     python.on('end', (msg) => console.log(`Finish`));
 });
