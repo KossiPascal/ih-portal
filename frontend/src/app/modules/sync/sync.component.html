@@ -618,21 +618,18 @@
                                         <table id="weekly_thinkMd_datatable" class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
-                                                    <th *ngFor="let data of tab4_messages?.dataToSend?.Data?.body[0] | keyvalue">
+                                                    <th *ngFor="let data of tab4_messages?.dataToSend?.Data?.head">
                                                         {{ capitaliseData(data, '_') }}
                                                     </th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr
-                                                    *ngFor="let data of tab4_messages?.dataToSend?.Data?.body">
-                                                    <td *ngFor="let item of data | keyvalue" class="{{ genarateColor(item) }}">
-                                                        {{ item.value }}
+                                                    *ngFor="let data of tab4_messages?.dataToSend?.Data?.body | keyvalue">
+                                                    <td *ngFor="let item of getItemAsArray(data)"
+                                                        class="{{ genarateColor(item) }}">
+                                                        {{ item }}
                                                     </td>
-
-                                                    <!-- <td *ngFor="let item of getItemAsArray(data)" class="{{ genarateColor(item) }}">
-                                                        {{ data }}
-                                                    </td> -->
                                                 </tr>
                                             </tbody>
                                         </table>
