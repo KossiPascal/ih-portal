@@ -339,7 +339,7 @@
                                                             <label>District</label>
                                                             <select (change)="genarateSites();" class="form-control"
                                                                 formControlName="districts" multiple="multiple">
-                                                                <option value=""></option>
+                                                                <!-- <option value=""></option> -->
                                                                 <option *ngFor="let dist of Districts$"
                                                                     value="{{dist.id}}">
                                                                     {{ dist.name }}
@@ -353,7 +353,7 @@
                                                             <label>Site</label>
                                                             <select class="form-control" formControlName="sites"
                                                                 multiple="multiple">
-                                                                <option value=""></option>
+                                                                <!-- <option value=""></option> -->
                                                                 <option *ngFor="let site of sites$"
                                                                     value="{{site.external_id}}">
                                                                     {{ site.name }}
