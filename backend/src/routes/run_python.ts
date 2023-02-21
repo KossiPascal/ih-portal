@@ -149,7 +149,16 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
         // } catch (error) {
         //     return res.jsonp(brutOutPut);
         // }
-        return res.jsonp(brutOutPut.replace('\\',''));
+        var out1 = brutOutPut.replace('\\','');
+        var out2 = out1.replace('\\','');
+        .replace("'", '`')
+                t2 = t1.replace("'", '`');
+                t3 = t2.replace("’", '`');
+                t4 = t3.replace("’", '`');
+                t5 = t4.replace('\\','');
+                t6 = t5.replace('\\','');
+        var out = out2.replace('\\','');
+        return res.jsonp(out);
     });
     python.on('end', (msg) => console.log(`Finish`));
 });

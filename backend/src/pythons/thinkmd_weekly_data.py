@@ -141,7 +141,13 @@ def generateThinkMdWeeklyData(ARGS):
         for row in finalBody:
             rowData = []
             for r in row:
-                rowData.append(str(r).replace("'", '`').replace("’", '`'))
+                t1 = str(r).replace("'", '`')
+                t2 = t1.replace("'", '`')
+                t3 = t2.replace("’", '`')
+                t4 = t3.replace("’", '`')
+                t5 = t4.replace('\\','')
+                t6 = t5.replace('\\','')
+                rowData.append(t6)
             outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
     print(str(outPutData).replace("'", '"'))
 
