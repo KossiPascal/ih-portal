@@ -143,12 +143,14 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
     python.on('error', function (err) { errorToSend[`${userId}`]['ConsoleError'] = err; });
     python.on('close', (code) => {
         let brutOutPut = `{"errorToSend": ${JSON.stringify(errorToSend[`${userId}`])},"dataToSend": ${dataToReturn(dataToSend)}}`;
-        try {
-            let rawdata = JSON.parse(brutOutPut) as DataFromPython;
-            return res.jsonp(rawdata);
-        } catch (error) {
-            return res.jsonp(brutOutPut);
-        }
+        // try {
+        //     let rawdata = JSON.parse(brutOutPut) as DataFromPython;
+        //     return res.jsonp(rawdata);
+        // } catch (error) {
+        //     return res.jsonp(brutOutPut);
+        // }
+
+        return res.jsonp(brutOutPut);
     });
     python.on('end', (msg) => console.log(`Finish`));
 });

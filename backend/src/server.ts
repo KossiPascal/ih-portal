@@ -57,6 +57,7 @@ const app = express()
   .set('trust proxy', 1)
   .set("view engine", "ejs")
   .set('json spaces', 2)
+  .set('content-type', 'application/json; charset=utf-8')
   .use(session({
     secret: 'session',
     cookie: {
