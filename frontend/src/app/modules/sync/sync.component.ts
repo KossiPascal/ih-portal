@@ -156,7 +156,13 @@ export class SyncComponent implements OnInit {
           this.genarateChws(this.ihChtToDhis2Form);
           for (let i = 0; i < this.Chws$.length; i++) {
             const ch = this.Chws$[i];
-            this.Dhis2Chws$.push({ code: ch.external_id, name: `${ch.name}`.replace("'", '`').replace("’", '`'), siteId:ch.site.id });
+
+            var name0 = `${ch.name}`.replace("'", '`')
+            var name1 = name0.toString().replace("’", '`')
+            var name2 = name1.replace('’', '`')
+            var name = name2.replace("'", '`')
+
+            this.Dhis2Chws$.push({ code: ch.external_id, name: name, siteId:ch.site.id });
           }
           this.genarateWeekyDataChws();
           this.loading3 = false;
