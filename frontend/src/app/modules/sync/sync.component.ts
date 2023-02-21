@@ -441,6 +441,7 @@ export class SyncComponent implements OnInit {
 
         this.sync.syncThinkMdWeeklyChwsData(this.ThinkMdWeeklyForm.value).subscribe((response: any) => {
           this.loading4 = false;
+          console.log(response);
           try {
             this.tab4_messages = JSON.parse(response);
           } catch (error) {
