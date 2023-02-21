@@ -143,7 +143,6 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
     python.on('error', function (err) { errorToSend[`${userId}`]['ConsoleError'] = err; });
     python.on('close', (code) => {
         let brutOutPut = `{"errorToSend": ${JSON.stringify(errorToSend[`${userId}`])},"dataToSend": ${dataToReturn(dataToSend)}}`;
-        console.log(brutOutPut);
         try {
             let rawdata = JSON.parse(brutOutPut) as DataFromPython;
             return res.jsonp(rawdata);
