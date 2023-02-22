@@ -21,12 +21,12 @@ import { async } from 'rxjs';
 })
 export class Dashboard3Component implements OnInit {
   constructor(private store: AppStorageService, private auth: AuthService, private db: IndexDbService, private sync: SyncService) {
-    if(!this.roles.isDataManager()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
-   }
+    if (!this.roles.isDataManager()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+  }
 
-  
 
-private roles = new Roles(this.store);
+
+  private roles = new Roles(this.store);
 
   aggradateDataForm!: FormGroup;
   // initDate!: { start_date: string, end_date: string };
@@ -36,8 +36,8 @@ private roles = new Roles(this.store);
       // start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
       // end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
       // sources: new FormControl(this.initSources),
-      districts: new FormControl(""),
-      sites: new FormControl(""),
+      districts: new FormControl("", [Validators.required]),
+      sites: new FormControl("", [Validators.required]),
       chws: new FormControl(""),
     });
   }
@@ -73,28 +73,30 @@ private roles = new Roles(this.store);
     this.isLoading = false;
     // this.initDate = DateUtils.startEnd21and20Date();
     this.aggradateDataForm = this.createDataFilterFormGroup();
-    this.initAllData();
+    this.initAllData(true);
   }
 
-  async initAllData() {
+  async initAllData(firstInit: boolean = false) {
     this.isLoading = true;
     const filter: FilterParams = this.ParamsToFilter();
 
     // if (Functions.notNull(filter.start_date) && Functions.notNull(filter.end_date)) {
-      this.initMsg = 'Chargement des Districts ...';
-      this.sync.getDistrictsList(filter).subscribe(async (_d$: { status: number, data: Districts[] }) => {
-        if (_d$.status == 200) this.Districts$ = _d$.data;
-        this.initMsg = 'Chargement des Sites ...';
-        this.sync.getSitesList(filter).subscribe(async (_s$: { status: number, data: Sites[] }) => {
-          if (_s$.status == 200) this.Sites$ = _s$.data;
-          this.genarateSites()
-          this.initMsg = 'Chargement des Zones ...';
-          this.sync.getZonesList(filter).subscribe(async (_z$: { status: number, data: Zones[] }) => {
-            if (_z$.status == 200) this.Zones$ = _z$.data;
-            this.initMsg = 'Chargement des ASC ...';
-            this.sync.getChwsList(filter).subscribe(async (_c$: { status: number, data: Chws[] }) => {
-              if (_c$.status == 200) this.Chws$ = _c$.data;
-              this.genarateChws()
+    this.initMsg = 'Chargement des Districts ...';
+    this.sync.getDistrictsList(filter).subscribe(async (_d$: { status: number, data: Districts[] }) => {
+      if (_d$.status == 200) this.Districts$ = _d$.data;
+      this.initMsg = 'Chargement des Sites ...';
+      this.sync.getSitesList(filter).subscribe(async (_s$: { status: number, data: Sites[] }) => {
+        if (_s$.status == 200) this.Sites$ = _s$.data;
+        this.genarateSites()
+        this.initMsg = 'Chargement des ASC ...';
+        this.sync.getChwsList(filter).subscribe(async (_c$: { status: number, data: Chws[] }) => {
+          if (_c$.status == 200) this.Chws$ = _c$.data;
+          this.genarateChws()
+
+          if (firstInit == false) {
+            this.initMsg = 'Chargement des Zones ...';
+            this.sync.getZonesList(filter).subscribe(async (_z$: { status: number, data: Zones[] }) => {
+              if (_z$.status == 200) this.Zones$ = _z$.data;
               this.initMsg = 'Chargement des Familles ...';
               this.sync.getFamilyList(filter).subscribe(async (_f$: { status: number, data: Families[] }) => {
                 if (_f$.status == 200) this.Families$ = _f$.data;
@@ -114,10 +116,9 @@ private roles = new Roles(this.store);
               this.isLoading = false;
               console.log(err.error);
             });
-          }, (err: any) => {
+          } else {
             this.isLoading = false;
-            console.log(err.error);
-          });
+          }
         }, (err: any) => {
           this.isLoading = false;
           console.log(err.error);
@@ -125,10 +126,14 @@ private roles = new Roles(this.store);
       }, (err: any) => {
         this.isLoading = false;
         console.log(err.error);
-      });  
-      // } else {
-      //   this.isLoading = false;
-      // }
+      });
+    }, (err: any) => {
+      this.isLoading = false;
+      console.log(err.error);
+    });
+    // } else {
+    //   this.isLoading = false;
+    // }
 
   }
 
@@ -140,7 +145,7 @@ private roles = new Roles(this.store);
     // const sources: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sources);
     this.sites$ = [];
     this.chws$ = [];
-    const dist:string = this.aggradateDataForm.value["districts"];
+    const dist: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.districts);
     this.aggradateDataForm.value["sites"] = "";
     this.aggradateDataForm.value["chws"] = [];
 
@@ -155,7 +160,7 @@ private roles = new Roles(this.store);
   }
 
   genarateChws() {
-    const sites: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sites);
+    const sites: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.sites);
     this.chws$ = [];
     this.aggradateDataForm.value["chws"] = [];
     if (Functions.notNull(sites)) {
@@ -172,8 +177,8 @@ private roles = new Roles(this.store);
     // const startDate: string = this.aggradateDataForm.value.start_date;
     // const endDate: string = this.aggradateDataForm.value.end_date;
     // const sources: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sources) as string[];
-    const districts: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.districts) as string[];
-    const sites: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sites) as string[];
+    const districts: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.districts);
+    const sites: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.sites);
     const chws: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
 
     var params: FilterParams = {
@@ -220,9 +225,9 @@ private roles = new Roles(this.store);
     for (let i = 0; i < this.Families$!.length; i++) {
       const family = this.Families$![i];
       if (Functions.notNull(districts) && Functions.notNull(sites) && Functions.notNull(chws)) {
-          if (districts?.includes(family.site.district.id) && sites?.includes(family.site.id) && chws?.includes(family.zone.chw_id)) this.familiesChwsCount++;
+        if (districts?.includes(family.site.district.id) && sites?.includes(family.site.id) && chws?.includes(family.zone.chw_id)) this.familiesChwsCount++;
       } else if (Functions.notNull(districts) && Functions.notNull(sites) && !Functions.notNull(chws)) {
-          if (districts?.includes(family.site.district.id) && sites?.includes(family.site.id)) this.familiesChwsCount++;
+        if (districts?.includes(family.site.district.id) && sites?.includes(family.site.id)) this.familiesChwsCount++;
       } else if (Functions.notNull(districts) && !Functions.notNull(sites) && !Functions.notNull(chws)) {
         if (districts?.includes(family.site.district.id)) this.familiesChwsCount++;
       } else {
@@ -233,9 +238,9 @@ private roles = new Roles(this.store);
     for (let i = 0; i < this.Patients$!.length; i++) {
       const patient = this.Patients$![i];
       if (Functions.notNull(districts) && Functions.notNull(sites) && Functions.notNull(chws)) {
-          if (districts?.includes(patient.site.district.id) && sites?.includes(patient.site.id) && chws?.includes(patient.zone.chw_id)) this.patientsChwsCount++;
+        if (districts?.includes(patient.site.district.id) && sites?.includes(patient.site.id) && chws?.includes(patient.zone.chw_id)) this.patientsChwsCount++;
       } else if (Functions.notNull(districts) && Functions.notNull(sites) && !Functions.notNull(chws)) {
-          if (districts?.includes(patient.site.district.id) && sites?.includes(patient.site.id)) this.patientsChwsCount++;
+        if (districts?.includes(patient.site.district.id) && sites?.includes(patient.site.id)) this.patientsChwsCount++;
       } else if (Functions.notNull(districts) && !Functions.notNull(sites) && !Functions.notNull(chws)) {
         if (districts?.includes(patient.site.district.id)) this.patientsChwsCount++;
       } else {
@@ -246,9 +251,9 @@ private roles = new Roles(this.store);
     for (let i = 0; i < this.Zones$!.length; i++) {
       const zone = this.Zones$![i];
       if (Functions.notNull(districts) && Functions.notNull(sites) && Functions.notNull(chws)) {
-          if (districts?.includes(zone.site.district.id) && sites?.includes(zone.site.id) && chws?.includes(zone.chw_id)) this.zonesChwsCount++;
+        if (districts?.includes(zone.site.district.id) && sites?.includes(zone.site.id) && chws?.includes(zone.chw_id)) this.zonesChwsCount++;
       } else if (Functions.notNull(districts) && Functions.notNull(sites) && !Functions.notNull(chws)) {
-          if (districts?.includes(zone.site.district.id) && sites?.includes(zone.site.id)) this.zonesChwsCount++;
+        if (districts?.includes(zone.site.district.id) && sites?.includes(zone.site.id)) this.zonesChwsCount++;
       } else if (Functions.notNull(districts) && !Functions.notNull(sites) && !Functions.notNull(chws)) {
         if (districts?.includes(zone.site.district.id)) this.zonesChwsCount++;
       } else {
@@ -259,9 +264,9 @@ private roles = new Roles(this.store);
     for (let i = 0; i < this.Chws$!.length; i++) {
       const asc = this.Chws$![i];
       if (Functions.notNull(districts) && Functions.notNull(sites) && Functions.notNull(chws)) {
-          if (districts?.includes(asc.site.district.id) && sites?.includes(asc.site.id) && chws?.includes(asc.zone.chw_id)) this.chwsCount++;
+        if (districts?.includes(asc.site.district.id) && sites?.includes(asc.site.id) && chws?.includes(asc.zone.chw_id)) this.chwsCount++;
       } else if (Functions.notNull(districts) && Functions.notNull(sites) && !Functions.notNull(chws)) {
-          if (districts?.includes(asc.site.district.id) && sites?.includes(asc.site.id)) this.chwsCount++;
+        if (districts?.includes(asc.site.district.id) && sites?.includes(asc.site.id)) this.chwsCount++;
       } else if (Functions.notNull(districts) && !Functions.notNull(sites) && !Functions.notNull(chws)) {
         if (districts?.includes(asc.site.district.id)) this.chwsCount++;
       } else {
