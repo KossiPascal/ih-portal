@@ -581,13 +581,13 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
             const srce = getValue(jsonData["dataValues"], "FW6z2Ha2GNr");  // data_source
             const dist = getValue(jsonData["dataValues"], "JC752xYegbJ");  // district
             const chw = getValue(jsonData["dataValues"], "JkMyqI3e6or");  // code_asc
-            const site = jsonData['orgUnit'];
+            const sit = jsonData['orgUnit'];
             const program = jsonData['program'];
             const data_filter = "JC752xYegbJ:EQ:" + dist + ",JkMyqI3e6or:like:" + chw + ",lbHrQBTbY1d:EQ:" + date + ",FW6z2Ha2GNr:like:" + srce;
             const fields = "event,eventDate,dataValues[dataElement, value]";
             const headers = httpHeaders('Basic ' + dhisusersession);
             const link = `https://${process.env.DHIS_HOST}/api/events`;
-            const params = `.json?paging=false&program=${program}&orgUnit=${site}&filter=${data_filter}&fields=${fields}&order=created:desc`;
+            const params = `.json?paging=false&program=${program}&orgUnit=${sit}&filter=${data_filter}&fields=${fields}&order=created:desc`;
 
             await request({
                 url: link + params,
@@ -620,7 +620,8 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
                         return res.status(201).json({ status: 201, data: 'Connection Error! Retry', chw:chw  });
                     }
                 } catch (error) {
-                    console.log(link + params);
+                    console.log('------------------------------');
+                    console.log(chwsDataToDhis2);
                 }
             });
         } else {
