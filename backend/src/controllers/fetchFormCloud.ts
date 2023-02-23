@@ -595,28 +595,32 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
                 headers: headers
             }, async function (err: any, response1: any, body: any) {
                 if (err) return res.status(201).json({ status: 201, data: err.toString(), chw:chw });
-                const jsonBody = JSON.parse(body);
-                if (jsonBody.hasOwnProperty('events')) {
-                    var reqData: Dhis2DataFormat[] = jsonBody["events"] as Dhis2DataFormat[];
-                    const dataId = reqData.length == 1 ? reqData[0].event : ''
-
-                    await request({
-                      url: reqData .length == 1 ? `${link}/${dataId}` : link,
-                      cache: 'no-cache',
-                      mode: "cors",
-                      credentials: "include",
-                      referrerPolicy: 'no-referrer',
-                      method: reqData .length == 1 ? 'PUT' : 'POST',
-                      body: JSON.stringify(jsonData),
-                      headers: headers
-                    }, async function (err: any, response2: any, body: any) {
-                        if (err) return res.status(201).json({ status: 201, data: err.toString(), chw:chw });
-                        if (response2.statusCode != 200) return res.status(201).json({status:  201, data: `Error Found, retry!`, chw:chw })
-                        return res.status(200).json({status: 200 , data: reqData .length == 1 ? `Updated` : `Created`})
-                    });
-
-                } else {
-                    return res.status(201).json({ status: 201, data: 'Connection Error! Retry', chw:chw  });
+                try {
+                    const jsonBody = JSON.parse(body);
+                    if (jsonBody.hasOwnProperty('events')) {
+                        var reqData: Dhis2DataFormat[] = jsonBody["events"] as Dhis2DataFormat[];
+                        const dataId = reqData.length == 1 ? reqData[0].event : ''
+    
+                        await request({
+                          url: reqData .length == 1 ? `${link}/${dataId}` : link,
+                          cache: 'no-cache',
+                          mode: "cors",
+                          credentials: "include",
+                          referrerPolicy: 'no-referrer',
+                          method: reqData .length == 1 ? 'PUT' : 'POST',
+                          body: JSON.stringify(jsonData),
+                          headers: headers
+                        }, async function (err: any, response2: any, body: any) {
+                            if (err) return res.status(201).json({ status: 201, data: err.toString(), chw:chw });
+                            if (response2.statusCode != 200) return res.status(201).json({status:  201, data: `Error Found, retry!`, chw:chw })
+                            return res.status(200).json({status: 200 , data: reqData .length == 1 ? `Updated` : `Created`})
+                        });
+    
+                    } else {
+                        return res.status(201).json({ status: 201, data: 'Connection Error! Retry', chw:chw  });
+                    }
+                } catch (error) {
+                    console.log(error);
                 }
             });
         } else {
