@@ -204,6 +204,15 @@ export class SyncComponent implements OnInit {
     }
   }
 
+  getExternalIdByName(nameOrId: string): string{
+    for (let i = 0; i < this.Chws$.length; i++) {
+      const ch = this.Chws$[i];
+      if (nameOrId == ch.name) return ch.external_id;
+      
+    }
+    return nameOrId;
+  }
+
   genarateChws(cibleForm: FormGroup) {
     const sites: string[] = Functions.returnEmptyArrayIfNul(cibleForm.value.sites);
     this.chws$ = [];
@@ -342,6 +351,8 @@ export class SyncComponent implements OnInit {
               
               t1++;
               var chwsData = respData?.DataFordhis2[i] as DataIndicators;
+              const nOrId = chwsData.orgUnit;
+              chwsData.orgUnit = this.getExternalIdByName(nOrId!);
               console.log(chwsData.orgUnit);
               this.sync.insertOrUpdateDhis2Data(chwsData).subscribe((resp: { status: number, data: any }) => {
                 t2++;
