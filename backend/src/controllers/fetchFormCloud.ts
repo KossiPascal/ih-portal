@@ -620,9 +620,7 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
                         return res.status(201).json({ status: 201, data: 'Connection Error! Retry', chw:chw  });
                     }
                 } catch (error) {
-                    console.log(body);
-                    console.log('-----------------------------------');
-                    console.log(error);
+                    console.log(link + params);
                 }
             });
         } else {
