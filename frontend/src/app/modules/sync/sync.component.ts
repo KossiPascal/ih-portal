@@ -332,12 +332,17 @@ export class SyncComponent implements OnInit {
 
         try {
           var respData: DataFromPython | null = response;
+
           if (this.thinkmdToDhis2Form.value.InsertIntoDhis2 == true && respData?.DataFordhis2) {
+
+            
             var t1 = 0;
             var t2 = 0;
             for (let i = 0; i < respData?.DataFordhis2.length; i++) {
+              
               t1++;
               var chwsData = respData?.DataFordhis2[i] as DataIndicators;
+              console.log(chwsData.orgUnit);
               this.sync.insertOrUpdateDhis2Data(chwsData).subscribe((resp: { status: number, data: any }) => {
                 t2++;
                 if (resp.status == 200) {
