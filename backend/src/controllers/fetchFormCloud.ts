@@ -621,6 +621,7 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
                     }
                 } catch (error) {
                     console.log(body);
+                    console.log('-----------------------------------');
                     console.log(error);
                 }
             });
