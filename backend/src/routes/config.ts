@@ -67,7 +67,7 @@ configRouter.post('/newToken', async (req: Request, res: Response, next: NextFun
     // console.log(dhisusersession);
     // var users: User[] = (Object.values(_repoUser.getBy(id)) as User[]);
 
-    // if (!isNotNull(users)) {
+    // if (!notNull(users)) {
     //   return res.status(201).json({ status: 201, data: 'No User Found' });
     // } else {
     //   var user = generateUserMapData(users[0], dhisusersession);

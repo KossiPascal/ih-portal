@@ -1,7 +1,9 @@
-import { sslFolder, JsonDbFolder } from "./utils/functions";
+import { JsonDbFolder } from "./utils/functions";
 const JSONFileStorage = require('node-json-file-storage');
+import path from "path";
 
-require('dotenv').config({ path: sslFolder('.env') });
+// require('dotenv').config({ path: sslFolder('.env') });
+require('dotenv').config({ path: `${path.dirname(path.dirname(path.dirname(__dirname)))}/ssl/.env` });
 const { DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS } = process.env
 
 // const districts_uri = 

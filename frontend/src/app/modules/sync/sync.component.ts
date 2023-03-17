@@ -7,7 +7,7 @@ import { SyncService } from '@ih-app/services/sync.service';
 import * as moment from 'moment';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { KeyValue } from '@angular/common';
-import { DateUtils, Functions } from '@ih-app/shared/functions';
+import { DateUtils, Functions, notNull } from '@ih-app/shared/functions';
 import { ActivatedRoute } from '@angular/router'
 import { DataIndicators } from '@ih-app/models/DataAggragate';
 import { AppStorageService } from '@ih-app/services/cookie.service';
@@ -194,10 +194,10 @@ export class SyncComponent implements OnInit {
     cibleForm.value["sites"] = "";
     cibleForm.value["chws"] = [];
 
-    if (Functions.notNull(dist)) {
+    if (notNull(dist)) {
       for (let d = 0; d < this.Sites$.length; d++) {
         const site = this.Sites$[d];
-        if (Functions.notNull(site)) if (dist.includes(site.district.id)) this.sites$.push(site)
+        if (notNull(site)) if (dist.includes(site.district.id)) this.sites$.push(site)
       }
     } else {
       this.sites$ = [];
@@ -217,10 +217,10 @@ export class SyncComponent implements OnInit {
     const sites: string[] = Functions.returnEmptyArrayIfNul(cibleForm.value.sites);
     this.chws$ = [];
     cibleForm.value["chws"] = [];
-    if (Functions.notNull(sites)) {
+    if (notNull(sites)) {
       for (let d = 0; d < this.Chws$.length; d++) {
         const chws = this.Chws$[d];
-        if (Functions.notNull(chws)) if (sites.includes(chws.site.id)) this.chws$.push(chws)
+        if (notNull(chws)) if (sites.includes(chws.site.id)) this.chws$.push(chws)
       }
     } else {
       this.chws$ = [];
@@ -230,10 +230,10 @@ export class SyncComponent implements OnInit {
   genarateWeekyDataChws() {
     const dhis2Sites: string[] = Functions.returnEmptyArrayIfNul(this.ThinkMdWeeklyForm.value.sites);
     this.dhis2Chws$ = [];
-    if (Functions.notNull(dhis2Sites)) {
+    if (notNull(dhis2Sites)) {
       for (let d = 0; d < this.Dhis2Chws$.length; d++) {
         const chs = this.Dhis2Chws$[d];
-        if (Functions.notNull(chs)) if (dhis2Sites.includes(chs.siteId)) this.dhis2Chws$.push(chs)
+        if (notNull(chs)) if (dhis2Sites.includes(chs.siteId)) this.dhis2Chws$.push(chs)
       }
     } else {
       this.dhis2Chws$ = this.Dhis2Chws$;

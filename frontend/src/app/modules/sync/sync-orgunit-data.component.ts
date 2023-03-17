@@ -5,7 +5,7 @@ import { Districts, OrgUnitImport, Sites } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import * as moment from 'moment';
-import { DateUtils, Functions } from '@ih-app/shared/functions';
+import { DateUtils, Functions, notNull } from '@ih-app/shared/functions';
 import { Roles } from '@ih-app/shared/roles';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 
@@ -72,8 +72,8 @@ export class SyncOrgUnitDataComponent implements OnInit {
 
   createOrgUnitAndPersonFormGroup(): FormGroup {
     return new FormGroup({
-      // start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
-      // end_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      end_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
       site: new FormControl(true, [Validators.required]),
       zone: new FormControl(true, [Validators.required]),
       family: new FormControl(true, [Validators.required]),
@@ -104,10 +104,10 @@ export class SyncOrgUnitDataComponent implements OnInit {
     this.sites$ = [];
     const dist: string[] = Functions.returnEmptyArrayIfNul(this.dhis2ChwsDataForm.value.districts);
     this.dhis2ChwsDataForm.value.sites = "";
-    if (Functions.notNull(dist)) {
+    if (notNull(dist)) {
       for (let d = 0; d < this.Sites$.length; d++) {
         const site = this.Sites$[d];
-        if (Functions.notNull(site)) if (dist.includes(site.district.id)) this.sites$.push(site)
+        if (notNull(site)) if (dist.includes(site.district.id)) this.sites$.push(site)
       }
     } else {
       this.sites$ = [];

@@ -23,6 +23,7 @@ export async function getMe(dhisuserAuthorization: string): Promise<User> {
 	await fetch(getBaseUrl() + "me", option)
 		.then((response: any) => response.json())
 		.then(async (res: any) => {
+                                
 			try {
 				var allUserRole = [];
 			if (res.hasOwnProperty('userCredentials')) {
@@ -34,12 +35,24 @@ export async function getMe(dhisuserAuthorization: string): Promise<User> {
 						}
 					}
 				}
+
 				userFound.id = user["id"];
 				userFound.username = user["username"];
 				userFound.fullname = user["name"];
 				userFound.isActive = user["disabled"] == false;
 				userFound.roles = allUserRole;
 			}
+
+			if (res.hasOwnProperty('userGroups')) {
+				var userGroups = [];
+				for (let item in res["userGroups"]) {
+					if (res["userGroups"][item].hasOwnProperty("id")) {
+						userGroups.push(res["userGroups"][item]["id"]);
+					}
+				}
+				userFound.groups = userGroups;
+			}
+
 			} catch (err) {
 				console.log(err);
 			}

@@ -7,7 +7,7 @@ import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { DatabaseUtilService } from '@ih-app/services/database-utils.service';
 import { SyncService } from '@ih-app/services/sync.service';
-import { Functions } from '@ih-app/shared/functions';
+import { Functions, notNull } from '@ih-app/shared/functions';
 import { Roles } from '@ih-app/shared/roles';
 import { f } from '@ih-assets/plugins/dropzone/dropzone-amd-module';
 import { User } from '@ih-models/User';
@@ -62,7 +62,7 @@ private roles = new Roles(this.store);
     this.sync.getDistrictsList().subscribe((_distResp: { status: number, data: Districts[] }) => {
       if (_distResp.status == 200) this.District$ = _distResp.data;
       this.sync.getSitesList().subscribe((_siteResp: { status: number, data: Sites[] }) => {
-        if (_distResp.status == 200) this.Sites$ = _siteResp.data;
+        if (_siteResp.status == 200) this.Sites$ = _siteResp.data;
       }, (err: any) => console.log(err.error));
     }, (err: any) => console.log(err.error));
   }
@@ -155,10 +155,10 @@ private roles = new Roles(this.store);
     const district: string[] = Functions.returnDataAsArray(this.filterForm.value.districts);
     this.sites$ = [];
     // this.replacementChws$ = [];
-    if (Functions.notNull(district)) {
+    if (notNull(district)) {
       for (let d = 0; d < this.Sites$.length; d++) {
         const site = this.Sites$[d];
-        if (Functions.notNull(site)) if (district.includes(site.district.id)) this.sites$.push(site)
+        if (notNull(site)) if (district.includes(site.district.id)) this.sites$.push(site)
       }
     } else {
       this.sites$ = [];

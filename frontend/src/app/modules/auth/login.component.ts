@@ -7,6 +7,7 @@ import { Configs, User } from '@ih-app/models/User';
 import { Functions } from '@ih-app/shared/functions';
 import { ConfigService } from '@ih-app/services/config.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
+import { Roles } from '@ih-app/shared/roles';
 
 
 @Component({
@@ -72,10 +73,15 @@ export class LoginComponent implements OnInit {
         .subscribe((res: {status:number, data:User|string}) => {
           if (res.status === 200) {
             this.message = 'Login successfully !';
-            console.log(res.data)
             this.store.set("user", JSON.stringify(res.data));
             // this.router.navigate([redirectUrl || this.auth.userValue()?.defaultRedirectUrl]);
-            location.href = Functions.getSavedUrl() ?? this.auth.userValue()?.defaultRedirectUrl!;
+            var roles = new Roles(this.store);
+
+            if (roles.isChws()) {
+              location.href = this.auth.userValue()?.defaultRedirectUrl!;
+            } else {
+              location.href = Functions.getSavedUrl() ?? this.auth.userValue()?.defaultRedirectUrl!;
+            }
           } else {
             this.message = res.data;
             this.isLoading = false;

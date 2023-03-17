@@ -2,10 +2,10 @@ import path from "path";
 import https from "https";
 import http from "http";
 import { CouchDbFetchData, Dhis2Sync, MailConfig } from "./appInterface";
-import * as jwt from 'jsonwebtoken';
-import { User } from "../entity/User";
+import { token, toMap, User, jwSecretKey } from "../entity/User";
 import moment from "moment";
 import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws } from "../entity/Sync";
+
 const nodemailer = require("nodemailer");
 const smtpTransport = require('nodemailer-smtp-transport');
 
@@ -51,12 +51,7 @@ export class Functions {
     // const jwtBearerToken = jwt.sign({}, RSA_PRIVATE_KEY, {algorithm: 'RS256', expiresIn: 120,subject: userId}
 
 
-    static Utils = (): { expiredIn: string, secretOrPrivateKey: string } => {
-        return {
-            expiredIn: '7200',//2h
-            secretOrPrivateKey: 'kossi-secretfortoken',
-        }
-    }
+
 
     static date_to_milisecond = (stringDate: string, start: boolean = true): string => {
         if (stringDate != "") {
@@ -273,6 +268,7 @@ export function extractFolder(file_Name_with_extension: string): string {
 
 export function JsonDbFolder(file_Name_without_extension: string): string {
     const fileName: string = file_Name_without_extension.trim().replace(' ', '-').split('.')[0];
+    // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/IhJsonStorage/${fileName}.json`
     return `${projectFolderParent()}/IhJsonStorage/${fileName}.json`
 }
 
@@ -443,8 +439,8 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
 
     var couchArg = ['include_docs=true', 'returnDocs=true', 'attachments=false', 'binary=false', 'reduce=false'];
     couchArg.push(`descending=${params.descending == true}`);
-    if (isNotNull(params.startKey)) couchArg.push(`key=[${params.startKey}]`);
-    if (isNotNull(params.endKey)) couchArg.push(`endkey=[${params.endKey}]`);
+    if (notNull(params.startKey)) couchArg.push(`key=[${params.startKey}]`);
+    if (notNull(params.endKey)) couchArg.push(`endkey=[${params.endKey}]`);
 
     var options = {
         host: process.env.CHT_HOST ?? '',
@@ -502,7 +498,7 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
 //     }
 // };
 
-export function isNotNull(data: any): boolean {
+export function notNull(data: any): boolean {
     return data != '' && data != null && data != undefined && data.length != 0;
 }
 
@@ -516,9 +512,9 @@ export class Dhis2SyncConfig {
         var link: string = `/api/${cibleName}.json?paging=false`;
         if (param.program != null && param.program != '') link += `&program=${param.program}`;
 
-        if (isNotNull(param.orgUnit)) link += `&orgUnit=${param.orgUnit}`;
-        if (isNotNull(param.filter)) link += `&filter=${param.filter?.join('&filter=')}`;
-        if (isNotNull(param.fields)) link += `&fields=${param.fields?.join(',')}`;
+        if (notNull(param.orgUnit)) link += `&orgUnit=${param.orgUnit}`;
+        if (notNull(param.filter)) link += `&filter=${param.filter?.join('&filter=')}`;
+        if (notNull(param.fields)) link += `&fields=${param.fields?.join(',')}`;
 
         link += `&order=created:${param.order ?? 'desc'}`;
         this.host = host;
@@ -554,7 +550,7 @@ export class Dhis2SyncConfig {
             credentials: "include",
             referrerPolicy: 'no-referrer',
             method: method,
-            body: isNotNull(data) ? JSON.stringify(data) : undefined,
+            body: notNull(data) ? JSON.stringify(data) : undefined,
             headers: this.headers
         };
         return option;
@@ -562,21 +558,28 @@ export class Dhis2SyncConfig {
 
 }
 
-export function genarateToken(data: { id: any, username: string, roles: string[], isActive: any }) {
-    return jwt.sign({ id: `${data.id}`, username: data.username, roles: `${data.roles}`, isActive: `${data.isActive}` }, Functions.Utils().secretOrPrivateKey, { expiresIn: `${Functions.Utils().expiredIn}s` });
-}
-
 export function generateUserMapData(userFound: User, dhisusersession: string): any {
     userFound.dhisusersession = dhisusersession;
     userFound.defaultRedirectUrl = userDefaultRedirectUrl(userFound);
-    userFound.expiresIn = JSON.stringify((moment().add(Functions.Utils().expiredIn, 'seconds')).valueOf());
-    return userFound.toMap();
+    userFound.token = token(userFound);
+    userFound.expiresIn = JSON.stringify((moment().add(jwSecretKey({user:userFound}).expiredIn, 'seconds')).valueOf());
+    return toMap(userFound);
 }
 
 
-function userDefaultRedirectUrl(roles:User):string{
-    return 'dashboards';
+function userDefaultRedirectUrl(user:User):string{
+    return isChws(user) ? 'dashboards/dash2' : 'dashboards';
 }
+
+export function isChws(user:User): boolean{
+    if (notNull(user.roles)) {
+      return user.roles.includes('c3WyuK3ibsN');
+    }
+    if (notNull(user.groups)) {
+      return user.groups.includes('enIOT8b8taV');
+    }
+    return false;
+  }
 
 
 // export function generateAuthSuccessData(userFound:User): UserValue {
@@ -669,7 +672,7 @@ export function getDataValuesAsMap(dataValues: { dataElement: string, value: any
 
     for (let i = 0; i < dataValues.length; i++) {
         const data = dataValues[i];
-        if (isNotNull(excludeDataElement)) {
+        if (notNull(excludeDataElement)) {
             if (!excludeDataElement!.includes(data.dataElement)) {
                 finalData[data.dataElement] = data.value;
             }

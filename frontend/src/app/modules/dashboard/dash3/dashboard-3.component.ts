@@ -6,7 +6,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ChtOutPutData, DataIndicators } from '@ih-app/models/DataAggragate';
 
 import { IndexDbService } from '@ih-app/services/index-db.service'; // db index start
-import { DateUtils, Functions } from '@ih-app/shared/functions';
+import { DateUtils, Functions, notNull } from '@ih-app/shared/functions';
 import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Roles } from '@ih-app/shared/roles';
@@ -21,23 +21,24 @@ import { async } from 'rxjs';
 })
 export class Dashboard3Component implements OnInit {
   constructor(private store: AppStorageService, private auth: AuthService, private db: IndexDbService, private sync: SyncService) {
-    if (!this.roles.isDataManager()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+    if (!this.roles.isSupervisorMentor()  && !this.roles.isChws()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
   }
 
 
 
-  private roles = new Roles(this.store);
+  public roles = new Roles(this.store);
 
   aggradateDataForm!: FormGroup;
   // initDate!: { start_date: string, end_date: string };
+  chwOU:Chws | null = null;
 
   createDataFilterFormGroup(): FormGroup {
     return new FormGroup({
       // start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
       // end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
       // sources: new FormControl(this.initSources),
-      districts: new FormControl("", [Validators.required]),
-      sites: new FormControl("", [Validators.required]),
+      districts: new FormControl("", !this.roles.isChws() ? [Validators.required] : []),
+      sites: new FormControl("", !this.roles.isChws() ? [Validators.required] : []),
       chws: new FormControl(""),
     });
   }
@@ -63,6 +64,7 @@ export class Dashboard3Component implements OnInit {
   sitesChwsCount: number = 0;
   zonesChwsCount: number = 0;
   patientsChwsCount: number = 0;
+  patientsCibleChwsCount: number = 0;
   familiesChwsCount: number = 0;
   chwsCount: number = 0;
 
@@ -70,28 +72,36 @@ export class Dashboard3Component implements OnInit {
   // sites$ = liveQuery(() => this.db.getAllByParams(this.db.sites,{}));
 
   ngOnInit(): void {
+    this.chwOU = this.auth.chwsOrgUnit();
+    if (this.roles.isChws() && (this.chwOU==null || !notNull(this.chwOU))) {
+      location.href = 'chws/select_orgunit';
+    }
     this.isLoading = false;
     // this.initDate = DateUtils.startEnd21and20Date();
     this.aggradateDataForm = this.createDataFilterFormGroup();
-    this.initAllData(true);
+    if (!this.roles.isChws()) {
+      this.initAllData(true);
+    } else {
+      this.initAllData(false);
+    }
   }
 
   async initAllData(firstInit: boolean = false) {
     this.isLoading = true;
     const filter: FilterParams = this.ParamsToFilter();
 
-    // if (Functions.notNull(filter.start_date) && Functions.notNull(filter.end_date)) {
+    // if (notNull(filter.start_date) && notNull(filter.end_date)) {
     this.initMsg = 'Chargement des Districts ...';
     this.sync.getDistrictsList(filter).subscribe(async (_d$: { status: number, data: Districts[] }) => {
       if (_d$.status == 200) this.Districts$ = _d$.data;
       this.initMsg = 'Chargement des Sites ...';
       this.sync.getSitesList(filter).subscribe(async (_s$: { status: number, data: Sites[] }) => {
         if (_s$.status == 200) this.Sites$ = _s$.data;
-        this.genarateSites()
+        // this.genarateSites()
         this.initMsg = 'Chargement des ASC ...';
         this.sync.getChwsList(filter).subscribe(async (_c$: { status: number, data: Chws[] }) => {
           if (_c$.status == 200) this.Chws$ = _c$.data;
-          this.genarateChws()
+          // this.genarateChws()
 
           if (firstInit == false) {
             this.initMsg = 'Chargement des Zones ...';
@@ -149,10 +159,10 @@ export class Dashboard3Component implements OnInit {
     this.aggradateDataForm.value["sites"] = "";
     this.aggradateDataForm.value["chws"] = [];
 
-    if (Functions.notNull(dist)) {
+    if (notNull(dist)) {
       for (let d = 0; d < this.Sites$.length; d++) {
         const site = this.Sites$[d];
-        if (Functions.notNull(site)) if (dist.includes(site.district.id)) this.sites$.push(site)
+        if (notNull(site)) if (dist.includes(site.district.id)) this.sites$.push(site)
       }
     } else {
       this.sites$ = [];
@@ -163,10 +173,10 @@ export class Dashboard3Component implements OnInit {
     const sites: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.sites);
     this.chws$ = [];
     this.aggradateDataForm.value["chws"] = [];
-    if (Functions.notNull(sites)) {
+    if (notNull(sites)) {
       for (let d = 0; d < this.Chws$.length; d++) {
         const chws = this.Chws$[d];
-        if (Functions.notNull(chws)) if (sites.includes(chws.site.id)) this.chws$.push(chws)
+        if (notNull(chws)) if (sites.includes(chws.site.id)) this.chws$.push(chws)
       }
     } else {
       this.chws$ = [];
@@ -177,10 +187,21 @@ export class Dashboard3Component implements OnInit {
     // const startDate: string = this.aggradateDataForm.value.start_date;
     // const endDate: string = this.aggradateDataForm.value.end_date;
     // const sources: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sources) as string[];
-    const districts: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.districts);
-    const sites: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.sites);
-    const chws: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
+    var districts: string[] = [];
+    var sites: string[] = [];
+    var chws: string[] = [];
 
+    if (!this.roles.isChws()) {
+      districts = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.districts);
+      sites = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.sites);
+      chws = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
+    } else{
+      if (this.chwOU!=null && notNull(this.chwOU)) {
+        districts = Functions.returnDataAsArray(this.chwOU.site.district.id);
+        sites = Functions.returnDataAsArray(this.chwOU.site.id);
+        chws = Functions.returnDataAsArray(this.chwOU.id);
+      }
+    }
     var params: FilterParams = {
       // start_date: startDate,
       // end_date: endDate,
@@ -193,6 +214,7 @@ export class Dashboard3Component implements OnInit {
   }
 
   initDataFilted(params?: FilterParams): void {
+
     this.isLoading = true;
     const { start_date, end_date, chws, sites, districts } = params ?? this.ParamsToFilter();
 
@@ -200,35 +222,66 @@ export class Dashboard3Component implements OnInit {
     this.sitesChwsCount = 0;
     this.familiesChwsCount = 0;
     this.patientsChwsCount = 0;
+    this.patientsCibleChwsCount = 0;
     this.zonesChwsCount = 0;
     this.chwsCount = 0;
     this.allAggragateData = [];
 
-    for (let i = 0; i < this.Districts$!.length; i++) {
-      const dist = this.Districts$![i];
-      if (Functions.notNull(districts)) {
-        if (districts?.includes(dist.id)) this.districtsChwsCount++;
-      } else {
-        this.districtsChwsCount++;
+    if (!this.roles.isChws()) {
+      for (let i = 0; i < this.Districts$!.length; i++) {
+        const dist = this.Districts$![i];
+        if (notNull(districts)) {
+          if (districts?.includes(dist.id)) this.districtsChwsCount++;
+        } else {
+          this.districtsChwsCount++;
+        }
       }
-    }
+  
+      for (let i = 0; i < this.Sites$!.length; i++) {
+        const site = this.Sites$![i];
+        if (notNull(districts) && notNull(sites)) {
+          if (districts?.includes(site.district.id) && sites?.includes(site.id)) this.sitesChwsCount++;
+        } else if(notNull(districts) && !notNull(sites)){
+          if (districts?.includes(site.district.id)) this.sitesChwsCount++;
+        }else {
+          this.sitesChwsCount++;
+        }
+      }
 
-    for (let i = 0; i < this.Sites$!.length; i++) {
-      const site = this.Sites$![i];
-      if (Functions.notNull(districts)) {
-        if (districts?.includes(site.district.id)) this.sitesChwsCount++;
-      } else {
-        this.sitesChwsCount++;
+      for (let i = 0; i < this.Zones$!.length; i++) {
+        const zone = this.Zones$![i];
+        if (notNull(districts) && notNull(sites) && notNull(chws)) {
+          if (districts?.includes(zone.site.district.id) && sites?.includes(zone.site.id) && chws?.includes(zone.chw_id)) this.zonesChwsCount++;
+        } else if (notNull(districts) && notNull(sites) && !notNull(chws)) {
+          if (districts?.includes(zone.site.district.id) && sites?.includes(zone.site.id)) this.zonesChwsCount++;
+        } else if (notNull(districts) && !notNull(sites) && !notNull(chws)) {
+          if (districts?.includes(zone.site.district.id)) this.zonesChwsCount++;
+        } else {
+          this.zonesChwsCount++;
+        }
+      }
+
+      for (let i = 0; i < this.Chws$!.length; i++) {
+        const asc = this.Chws$![i];
+        if (notNull(districts) && notNull(sites) && notNull(chws)) {
+          if (districts?.includes(asc.site.district.id) && sites?.includes(asc.site.id) && chws?.includes(asc.zone.chw_id)) this.chwsCount++;
+        } else if (notNull(districts) && notNull(sites) && !notNull(chws)) {
+          if (districts?.includes(asc.site.district.id) && sites?.includes(asc.site.id)) this.chwsCount++;
+        } else if (notNull(districts) && !notNull(sites) && !notNull(chws)) {
+          if (districts?.includes(asc.site.district.id)) this.chwsCount++;
+        } else {
+          this.chwsCount++;
+        }
       }
     }
 
     for (let i = 0; i < this.Families$!.length; i++) {
       const family = this.Families$![i];
-      if (Functions.notNull(districts) && Functions.notNull(sites) && Functions.notNull(chws)) {
+      if (notNull(districts) && notNull(sites) && notNull(chws)) {
         if (districts?.includes(family.site.district.id) && sites?.includes(family.site.id) && chws?.includes(family.zone.chw_id)) this.familiesChwsCount++;
-      } else if (Functions.notNull(districts) && Functions.notNull(sites) && !Functions.notNull(chws)) {
+      } else if (notNull(districts) && notNull(sites) && !notNull(chws)) {
         if (districts?.includes(family.site.district.id) && sites?.includes(family.site.id)) this.familiesChwsCount++;
-      } else if (Functions.notNull(districts) && !Functions.notNull(sites) && !Functions.notNull(chws)) {
+      } else if (notNull(districts) && !notNull(sites) && !notNull(chws)) {
         if (districts?.includes(family.site.district.id)) this.familiesChwsCount++;
       } else {
         this.familiesChwsCount++;
@@ -237,57 +290,48 @@ export class Dashboard3Component implements OnInit {
 
     for (let i = 0; i < this.Patients$!.length; i++) {
       const patient = this.Patients$![i];
-      if (Functions.notNull(districts) && Functions.notNull(sites) && Functions.notNull(chws)) {
-        if (districts?.includes(patient.site.district.id) && sites?.includes(patient.site.id) && chws?.includes(patient.zone.chw_id)) this.patientsChwsCount++;
-      } else if (Functions.notNull(districts) && Functions.notNull(sites) && !Functions.notNull(chws)) {
-        if (districts?.includes(patient.site.district.id) && sites?.includes(patient.site.id)) this.patientsChwsCount++;
-      } else if (Functions.notNull(districts) && !Functions.notNull(sites) && !Functions.notNull(chws)) {
-        if (districts?.includes(patient.site.district.id)) this.patientsChwsCount++;
+      const isInCible = DateUtils.isInCible({birth_date:patient.date_of_birth, sex:patient.sex});
+
+      if (notNull(districts) && notNull(sites) && notNull(chws)) {
+        if (districts?.includes(patient.site.district.id) && sites?.includes(patient.site.id) && chws?.includes(patient.zone.chw_id)){
+          this.patientsChwsCount++;
+          if (isInCible) this.patientsCibleChwsCount++;
+        }
+      } else if (notNull(districts) && notNull(sites) && !notNull(chws)) {
+        if (districts?.includes(patient.site.district.id) && sites?.includes(patient.site.id)){
+          this.patientsChwsCount++;
+          if (isInCible) this.patientsCibleChwsCount++;
+        }
+      } else if (notNull(districts) && !notNull(sites) && !notNull(chws)) {
+        if (districts?.includes(patient.site.district.id)){
+          this.patientsChwsCount++;
+          if (isInCible) this.patientsCibleChwsCount++;
+        }
       } else {
         this.patientsChwsCount++;
-      }
-    }
-
-    for (let i = 0; i < this.Zones$!.length; i++) {
-      const zone = this.Zones$![i];
-      if (Functions.notNull(districts) && Functions.notNull(sites) && Functions.notNull(chws)) {
-        if (districts?.includes(zone.site.district.id) && sites?.includes(zone.site.id) && chws?.includes(zone.chw_id)) this.zonesChwsCount++;
-      } else if (Functions.notNull(districts) && Functions.notNull(sites) && !Functions.notNull(chws)) {
-        if (districts?.includes(zone.site.district.id) && sites?.includes(zone.site.id)) this.zonesChwsCount++;
-      } else if (Functions.notNull(districts) && !Functions.notNull(sites) && !Functions.notNull(chws)) {
-        if (districts?.includes(zone.site.district.id)) this.zonesChwsCount++;
-      } else {
-        this.zonesChwsCount++;
-      }
-    }
-
-    for (let i = 0; i < this.Chws$!.length; i++) {
-      const asc = this.Chws$![i];
-      if (Functions.notNull(districts) && Functions.notNull(sites) && Functions.notNull(chws)) {
-        if (districts?.includes(asc.site.district.id) && sites?.includes(asc.site.id) && chws?.includes(asc.zone.chw_id)) this.chwsCount++;
-      } else if (Functions.notNull(districts) && Functions.notNull(sites) && !Functions.notNull(chws)) {
-        if (districts?.includes(asc.site.district.id) && sites?.includes(asc.site.id)) this.chwsCount++;
-      } else if (Functions.notNull(districts) && !Functions.notNull(sites) && !Functions.notNull(chws)) {
-        if (districts?.includes(asc.site.district.id)) this.chwsCount++;
-      } else {
-        this.chwsCount++;
+        if (isInCible) this.patientsCibleChwsCount++;
       }
     }
 
 
-    let total_district: AggragateData = { label: Functions.capitaliseDataGiven('total_site_enregistre', '_', ' '), count: this.districtsChwsCount, icon: "ion-stats-bars", color: "bg-info", detailUrl: "/dashboards/dash1" };
-    let total_site: AggragateData = { label: Functions.capitaliseDataGiven('total_site_enregistre', '_', ' '), count: this.sitesChwsCount, icon: "ion-stats-bars", color: "bg-success", detailUrl: "/dashboards/dash1" };
-    let total_ASC: AggragateData = { label: Functions.capitaliseDataGiven('total_ASC_enregistre', '_', ' '), count: this.chwsCount, icon: "ion-person-add", color: "bg-warning", detailUrl: "/dashboards/dash1" };
-    let total_famille: AggragateData = { label: Functions.capitaliseDataGiven('total_famille_enregistre', '_', ' '), count: this.familiesChwsCount, icon: "ion-pie-graph", color: "bg-danger", detailUrl: "/dashboards/dash1" };
-    let total_patient: AggragateData = { label: Functions.capitaliseDataGiven('total_patient_enregistre', '_', ' '), count: this.patientsChwsCount, icon: "ion-bag", color: "bg-primary", detailUrl: "/dashboards/dash1" };
-    let total_zone: AggragateData = { label: Functions.capitaliseDataGiven('total_zone_enregistre', '_', ' '), count: this.zonesChwsCount, icon: "ion-bag", color: "bg-success", detailUrl: "/dashboards/dash1" };
+    let total_district: AggragateData = { label: Functions.capitaliseDataGiven('total_district_enregistre', '_', ' '), count: this.districtsChwsCount, icon: "ion-stats-bars", color: "bg-info", detailUrl: "/dashboards/dash1" };
+    let total_site: AggragateData = { label: Functions.capitaliseDataGiven('total_site_enregistre', '_', ' '), count: this.sitesChwsCount, icon: "ion-stats-bars", color: "bg-info", detailUrl: "/dashboards/dash1" };
 
-    this.allAggragateData.push(total_district);
-    this.allAggragateData.push(total_site);
-    this.allAggragateData.push(total_ASC);
+    let total_ASC: AggragateData = { label: Functions.capitaliseDataGiven('total_ASC_enregistre', '_', ' '), count: this.chwsCount, icon: "ion-pie-graph", color: "bg-primary", detailUrl: "/dashboards/dash1" };
+    let total_zone: AggragateData = { label: Functions.capitaliseDataGiven('total_zone_enregistre', '_', ' '), count: this.zonesChwsCount, icon: "ion-pie-graph", color: "bg-primary", detailUrl: "/dashboards/dash1" };
+
+    let total_famille: AggragateData = { label: Functions.capitaliseDataGiven('total_famille_enregistre', '_', ' '), count: this.familiesChwsCount, icon: "ion-person-add", color: "bg-danger", detailUrl: "/dashboards/dash1" };
+    let total_patient: AggragateData = { label: Functions.capitaliseDataGiven('total_patient_enregistre', '_', ' '), count: this.patientsChwsCount, icon: "ion-person-add", color: "bg-success", detailUrl: "/dashboards/dash1" };
+
+    let total_patient_cible: AggragateData = { label: Functions.capitaliseDataGiven('total_patient_cible', '_', ' '), count: this.patientsCibleChwsCount, icon: "ion-person-add", color: "bg-warning", detailUrl: "/dashboards/dash1" };
+    
+    if(!this.roles.isChws()) this.allAggragateData.push(total_district);
+    if(!this.roles.isChws()) this.allAggragateData.push(total_site);
+    if(!this.roles.isChws()) this.allAggragateData.push(total_ASC);
+    if(!this.roles.isChws()) this.allAggragateData.push(total_zone);
     this.allAggragateData.push(total_famille);
     this.allAggragateData.push(total_patient);
-    this.allAggragateData.push(total_zone);
+    this.allAggragateData.push(total_patient_cible);
 
 
     this.initMsg = '';

@@ -1,7 +1,6 @@
 // import "reflect-metadata"
 import { DataSource } from "typeorm"
 import path from "path";
-import { sslFolder } from "./utils/functions";
 // import { sslFolder } from "./utils/functions";
 
 

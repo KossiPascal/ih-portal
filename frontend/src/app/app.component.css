@@ -120,3 +120,38 @@
   box-shadow: 0 3px 3px 0 rgba(61, 175, 255, 1);
   animation: spin 1.5s linear infinite
 }
+
+.dropdowndivider0 {
+  height: 0;
+  margin: .5rem 0;
+  overflow: hidden;
+  border-top: 1px solid #e9ecef
+}
+
+.dropdowndivider1 {
+  height: 0;
+  margin: .5rem 0;
+  overflow: hidden;
+  border-top: 2px solid #e9ecef
+}
+
+.dropdowndivider2 {
+  height: 0;
+  margin: .5rem 0;
+  overflow: hidden;
+  border-top: 10px solid #e9ecef
+}
+
+.dropdowndivider3 {
+  height: 0;
+  margin: .5rem 0;
+  overflow: hidden;
+  border-top: 20px solid #e9ecef
+}
+
+.dropdowndivider3 {
+  height: 0;
+  margin: .5rem 0;
+  overflow: hidden;
+  border-top: 30px solid #e9ecef
+}

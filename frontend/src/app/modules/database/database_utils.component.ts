@@ -6,7 +6,7 @@ import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { DatabaseUtilService } from '@ih-app/services/database-utils.service';
 import { SyncService } from '@ih-app/services/sync.service';
-import { Functions } from '@ih-app/shared/functions';
+import { Functions, notNull } from '@ih-app/shared/functions';
 import { Roles } from '@ih-app/shared/roles';
 import { User } from '@ih-models/User';
 import { async } from 'rxjs';
@@ -226,10 +226,10 @@ export class DatabaseUtilsComponent implements OnInit {
     const dist: string = this.dataListToDeleteForm.value.districts;
     this.dataListToDeleteForm.value.sites = "";
     this.dataListToDeleteForm.value.chws = "";
-    if (Functions.notNull(dist)) {
+    if (notNull(dist)) {
       for (let d = 0; d < this.Sites$.length; d++) {
         const site = this.Sites$[d];
-        if (Functions.notNull(site)) if (dist == site.district.id) this.sites$.push(site)
+        if (notNull(site)) if (dist == site.district.id) this.sites$.push(site)
       }
     } else {
       this.sites$ = [];
@@ -243,10 +243,10 @@ export class DatabaseUtilsComponent implements OnInit {
     const site: string = this.dataListToDeleteForm.value.sites;
     this.dataListToDeleteForm.value.zones = "";
     this.dataListToDeleteForm.value.chws = "";
-    if (Functions.notNull(site)) {
+    if (notNull(site)) {
       for (let z = 0; z < this.Zones$.length; z++) {
         const zone = this.Zones$[z];
-        if (Functions.notNull(site)) if (site == zone.site.id) this.zones$.push(zone)
+        if (notNull(site)) if (site == zone.site.id) this.zones$.push(zone)
       }
     } else {
       this.zones$ = [];
@@ -258,10 +258,10 @@ export class DatabaseUtilsComponent implements OnInit {
     this.chws$ = [];
     const zone: string = this.dataListToDeleteForm.value.zones;
     this.dataListToDeleteForm.value.chws = "";
-    if (Functions.notNull(zone)) {
+    if (notNull(zone)) {
       for (let d = 0; d < this.Chws$.length; d++) {
         const chws = this.Chws$[d];
-        if (Functions.notNull(chws)) if (zone == chws.zone.id) this.chws$.push(chws)
+        if (notNull(chws)) if (zone == chws.zone.id) this.chws$.push(chws)
       }
     } else {
       this.chws$ = [];

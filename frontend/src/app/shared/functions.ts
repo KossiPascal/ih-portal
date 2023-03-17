@@ -4,19 +4,26 @@ import { AuthService } from "@ih-services/auth.service";
 // import { envs } from '@ih-backendEnv/env';
 // const httpOptions: { headers: HttpHeaders } = {headers: new HttpHeaders({ "Content-Type": "application/json" }),};
 
+export function notNull(data: any): boolean {
+  return data != '' && data != null && data != undefined && typeof data != undefined && data.length != 0; // && Object.keys(data).length != 0;
+}
 
 export class Functions {
 
+  static range(size:number, startAt:number = 0) {
+    return [...Array(size).keys()].map(i => i + startAt);
+}
+
   static returnEmptyArrayIfNul(data: any): string[] {
-    return Functions.notNull(data) ? data : [];
+    return notNull(data) ? data : [];
   }
 
   static returnDataAsArray(data: any): string[] {
-    return Functions.notNull(data) ? [data] : [];
+    return notNull(data) ? [data] : [];
   }
 
   static convertToArray(data: any): string[] {
-    return Functions.notNull(data) ? [data] : [];
+    return notNull(data) ? [data] : [];
   }
 
   static saveCurrentUrl(router: Router):void{
@@ -58,9 +65,7 @@ export class Functions {
   }
 
 
-  static notNull(data: any): boolean {
-    return data != '' && data != null && data != undefined && typeof data != undefined && data.length != 0; // && Object.keys(data).length != 0;
-  }
+
 
   static capitaliseDataGiven(str: any, inputSeparator: string = ' ', outPutSeparator: string = ' '): string {
     const arr = str.toString().split(inputSeparator);
@@ -122,6 +127,58 @@ export class Functions {
 
 
 export class DateUtils {
+
+  static getAgeInMilliseconds(birth_date?:string) {
+    if (birth_date != null) {
+      return new Date(Date.now() - (new Date(birth_date)).getTime());
+    }
+    return null;
+  }
+
+  static getAgeInYear(birth_date:string, withUtc:boolean = true) {
+    var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
+    if (ageInMs != null) {
+      const year = withUtc ? ageInMs.getUTCFullYear() : ageInMs.getFullYear();
+      return Math.abs(year - 1970);
+      // return Math.round(ageInMs.getTime() / (1000 * 60 * 60 * 24 *365));
+    }
+    return null;
+  }
+  
+  static getAgeInMonths(birth_date:string, round:boolean = false) {
+    var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
+    if (ageInMs != null) {
+      const ageInMonth = ageInMs.getTime() / (1000 * 60 * 60 * 24 * 30);
+      return round ? Math.round(ageInMonth) : ageInMonth;
+    }
+    return null;
+  }
+  static getAgeInDays(birth_date:string) {
+    var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
+    if (ageInMs!=null) {
+      return ageInMs.getTime() / (1000 * 60 * 60 * 24);
+    }
+    return null;
+  }
+  
+  static isChildUnder5(birth_date:string):boolean{
+    var childAge = DateUtils.getAgeInMonths(birth_date);
+    if (childAge != null) {
+      return childAge < 60;
+    }
+    return false;
+  }
+
+  static isFemaleInCible(data:{birth_date:string, sex:string}){
+    const year = DateUtils.getAgeInYear(data.birth_date!);
+    if (year != null) return year >= 5 && year < 60 && data.sex == 'F';
+    return false;
+  }
+
+  static isInCible(data:{birth_date:string, sex:string}):boolean{
+    return DateUtils.isChildUnder5(data.birth_date) || DateUtils.isFemaleInCible(data);
+  }
+
   static isGreater(d1: any, d2: any): boolean {
     try {
       let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();

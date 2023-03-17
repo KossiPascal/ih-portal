@@ -1,12 +1,13 @@
-<!-- Main content -->
-
-<section class="content">
+<section class="content-header">
   <div class="container-fluid">
     <div class="card card-warning">
+
+      <h1 style="text-align: center;text-transform: uppercase;">Effectifs Des Patients</h1>
+      
       <div class="overlay-wrapper">
         <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i> <div class="text-bold pt-2"> {{initMsg}}</div></div>
       
-      <div class="card-header">
+      <div *ngIf="!roles.isChws()" class="card-header">
         <form [formGroup]="aggradateDataForm" (ngSubmit)="initAllData()" novalidate>
           <div class="row">
 

@@ -12,6 +12,7 @@ import { ConfigService } from './services/config.service';
 import { Roles } from './shared/roles';
 import { User } from './models/User';
 import { AppStorageService } from './services/cookie.service';
+import { Chws } from './models/Sync';
 
 declare var $: any;
 @Component({
@@ -32,8 +33,11 @@ export class AppComponent implements OnInit {
 
   appLogo: any = this.auth.appLogoPath()
   userData: User | null = this.auth.userValue()
+  chwOU: Chws | null = null;
   checkForAppNewVersion: boolean = true;
   isAppUpdateFound:boolean = false;
+ 
+  separation:string = '_____________________________________';
 
   @HostBinding('attr.app-version')
   appVersion: any;
@@ -57,6 +61,7 @@ export class AppComponent implements OnInit {
   public roles = new Roles(this.store);
 
   ngOnInit(): void {
+    this.chwOU = this.auth.chwsOrgUnit();
    this.UpdateVersion(false);
     const appTitle = this.titleService.getTitle();
     this.checkForAppNewVersion = true;

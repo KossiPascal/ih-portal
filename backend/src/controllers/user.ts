@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction, Router } from 'express';
 import { User } from '../entity/User';
 import { JsonDatabase } from '../json-data-source';
-import { isNotNull } from '../utils/functions';
 
 export class UserController {
 
@@ -44,7 +43,7 @@ export class UserController {
             // const user = await repo.findOneBy({ id: req.body.id });
 
             // if (user) {
-            //     if (req.body.editPassword && isNotNull(req.body.password)) {
+            //     if (req.body.editPassword && notNull(req.body.password)) {
             //         req.body.password = await user.hashPassword(req.body.password);
             //     } else {
             //         delete req.body.password;
@@ -53,7 +52,7 @@ export class UserController {
             //     delete req.body.id;
             //     delete req.body.editPassword;
 
-            //     req.body.roles = isNotNull(req.body.roles)?`[${req.body.roles}]`:'[]'
+            //     req.body.roles = notNull(req.body.roles)?`[${req.body.roles}]`:'[]'
 
             //     const userUpdated = await repo.update({ id: user.id, }, req.body);
 

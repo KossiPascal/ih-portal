@@ -1,8 +1,9 @@
-<!-- Main content -->
-
-<section class="content">
+<section class="content-header">
   <div class="container-fluid">
     <div class="card card-info">
+      
+      <h1 style="text-align: center;text-transform: uppercase;">Données Détaillées Par ASC</h1>
+      
       <div class="overlay-wrapper">
         <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
           <div class="text-bold pt-2"> {{initMsg}}</div>
@@ -26,7 +27,7 @@
                 </div>
               </div>
 
-              <div class="col-sm-2 col-6">
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>District</label>
                   <select *ngIf="Districts$.length > 0" (change)="genarateSites()" class="form-control"
@@ -40,7 +41,7 @@
                 </div>
               </div>
 
-              <div class="col-sm-2 col-6">
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>Site</label>
                   <select *ngIf="sites$.length > 0" (change)="genarateChws()" class="form-control" multiple="multiple"
@@ -54,7 +55,7 @@
                 </div>
               </div>
 
-              <div class="col-sm-2 col-6">
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>ASC</label>
                   <select *ngIf="chws$.length > 0" class="form-control" multiple="multiple" formControlName="chws">
@@ -67,13 +68,25 @@
                 </div>
               </div>
 
-              <div *ngIf="Sources$.length > 0" class="col-sm-2 col-6">
+              <div *ngIf="Sources$.length > 0 && !roles.isChws()" class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>Source</label>
                   <select class="form-control" formControlName="sources">
-                    <!-- <option value=""></option> -->
+                    <option value="">Tout</option>
                     <option *ngFor="let source of Sources$" value="{{source}}">
                       {{ source }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div *ngIf="days$.length > 0" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Nbre Jour d'activité</label>
+                  <select style="font-size: 20px;" class="form-control" formControlName="day" (change)="initDataFilted()">
+                    <!-- <option value=""></option> -->
+                    <option *ngFor="let day of days$" value="{{day}}">
+                      {{ day }}
                     </option>
                   </select>
                 </div>
@@ -118,7 +131,7 @@
           </h2>
       </div>
 
-        <div *ngIf="data_error_messages==''  && ChwsDataFromDb$.length > 0" class="card card-info">
+        <div *ngIf="data_error_messages==''  && FinalChwsOutputData$.length > 0" class="card card-info">
           <div class="card">
             <div class="card-header">
               <h3 class="card-title">Données par ASC</h3>
@@ -133,8 +146,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let data of ChwsDataFromDb$; let i=index" (click)="seeSelectedChwData(data)"
-                    data-toggle="modal" data-target="#modal-default">
+                  <tr *ngFor="let data of FinalChwsOutputData$; let i=index">
                     <td>
                       <span style="font-size: 18px;" class="custom-badge"> <b>{{ data.chw.name }}</b> </span><br>
                       <span class="custom-badge">{{ data.chw.external_id }}</span><br>
@@ -144,10 +156,17 @@
 
                     <td>
                       <span style="font-size: 20px;">~ </span><span style="font-size: 35px;padding: 1px;"
-                        class="custom-action badge bg-warning"> {{
-                        (data.data.total_vad/18).toFixed((data.data.total_vad/18)<1 ? 1 : 0) }} </span>
+                        class="custom-action badge {{ getVadPerDay(data).class }}"> {{ getVadPerDay(data).val }} </span>
                           <br>
                           <span class="info"><strong>Actions/Jr</strong></span>
+                    </td>
+
+                    
+
+                    <td>
+                      <button style="margin-top: 10px;" class="btn btn-info" (click)="seeSelectedChwData(data)"
+                      data-toggle="modal" data-target="#modal-default">Détails</button>
+                      
                     </td>
                   </tr>
                 </tbody>

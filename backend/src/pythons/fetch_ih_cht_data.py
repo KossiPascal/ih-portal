@@ -97,7 +97,7 @@ def countDataFound(KWARG):
             if between(createdAt, KWARG['start_date'], KWARG['end_date']) and chwsFound(row.doc) and districtFound(row.doc) and record(row.doc):
                 asc = chwsFound(row.doc, "code")
                 field = row.doc["fields"]
-                if formView(row.doc, "home_visit"):
+                if formView(row.doc, "home_visit") or formView(row.doc, "death_report"):
                     if asc not in total_home_visit:
                         total_home_visit[asc] = {"asc": asc, "nbr": 1}
                     else:

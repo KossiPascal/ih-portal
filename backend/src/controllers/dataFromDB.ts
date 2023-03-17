@@ -3,7 +3,7 @@ import { validationResult } from 'express-validator';
 import { Between, In } from "typeorm";
 import { ChtOutPutData, DataIndicators } from "../entity/DataAggragate";
 import { getChwsDataSyncRepository, ChwsData, Chws } from "../entity/Sync";
-import { DateUtils, isNotNull, sslFolder } from "../utils/functions";
+import { DateUtils, notNull, sslFolder } from "../utils/functions";
 import { getChws } from "./orgUnitsFromDB ";
 
 const request = require('request');
@@ -28,14 +28,14 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
 
     var allSync: ChwsData[] = await repository.find({
       where: {
-        id: isNotNull(req.body.id) ? req.body.id : isNotNull(req.params.id) ? req.params.id : undefined,
-        reported_date: isNotNull(req.body.start_date) && isNotNull(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
-        form: isNotNull(req.body.forms) ? In(req.body.forms) : undefined,
-        source: isNotNull(req.body.sources) ? In(req.body.sources) : undefined,
-        district: isNotNull(req.body.districts) ? { id: In(req.body.districts) } : undefined,
-        site: isNotNull(req.body.sites) ? { id: In(req.body.sites) } : undefined,
-        zone: isNotNull(req.body.zones) ? { id: In(req.body.zones) } : undefined,
-        chw: isNotNull(req.body.chws) ? { id: In(req.body.chws) } : undefined
+        id: notNull(req.body.id) ? req.body.id : notNull(req.params.id) ? req.params.id : undefined,
+        reported_date: notNull(req.body.start_date) && notNull(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
+        form: notNull(req.body.forms) ? In(req.body.forms) : undefined,
+        source: notNull(req.body.sources) ? In(req.body.sources) : undefined,
+        district: notNull(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+        site: notNull(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+        zone: notNull(req.body.zones) ? { id: In(req.body.zones) } : undefined,
+        chw: notNull(req.body.chws) ? { id: In(req.body.chws) } : undefined
       }
     });
 
@@ -66,6 +66,9 @@ export async function fetchIhChtDataPerChw(req: Request, res: Response, next: Ne
     return res.status(chwsData.status).json({ status: 201, data: 'No data found !' });
   }
 }
+
+
+
 
 
 function getAllAboutData(ChwsDataFromDb$: ChwsData[], Chws$: Chws[], req: Request, res: Response): { chw: Chws, data: DataIndicators }[] {
@@ -136,14 +139,14 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], Chws$: Chws[], req: Reques
       const site: string = data.site != null ? data.site.id != null && data.site.id != '' ? data.site.id : '' : '';
       const chw: string = data.chw != null ? data.chw.id != null && data.chw.id != '' ? data.chw.id : '' : '';
 
-      const idSourceValid: boolean = isNotNull(source) && isNotNull(sources) && sources?.includes(source) || !isNotNull(sources);
-      const idDistrictValid: boolean = isNotNull(district) && isNotNull(districts) && districts?.includes(district) || !isNotNull(districts);
-      const idSiteValid: boolean = isNotNull(site) && isNotNull(sites) && sites?.includes(site) || !isNotNull(sites);
-      const idChwValid: boolean = isNotNull(chw) && isNotNull(chws) && chws?.includes(chw) || !isNotNull(chws);
-      const isDateValid: boolean = isNotNull(start_date) && isNotNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
+      const idSourceValid: boolean = notNull(source) && notNull(sources) && sources?.includes(source) || !notNull(sources);
+      const idDistrictValid: boolean = notNull(district) && notNull(districts) && districts?.includes(district) || !notNull(districts);
+      const idSiteValid: boolean = notNull(site) && notNull(sites) && sites?.includes(site) || !notNull(sites);
+      const idChwValid: boolean = notNull(chw) && notNull(chws) && chws?.includes(chw) || !notNull(chws);
+      const isDateValid: boolean = notNull(start_date) && notNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
 
       if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
-        if (form === "home_visit") outPutData.total_home_visit[chw].count += 1
+        if (form!=undefined && ["death_report", "home_visit"].includes(form)) outPutData.total_home_visit[chw].count += 1
         if (form === "pcime_c_asc") {
           outPutData.total_pcime_soins[chw].count += 1
           if (field["group_review.s_have_you_refer_child"] == "yes") outPutData.total_reference_pcime_soins[chw].count += 1

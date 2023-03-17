@@ -1,5 +1,6 @@
-<div (mousedown)="pageTouched($event)"  (mouseenter)="pageTouched($event)" (mouseup)="pageTouched($event)" (mouseleave)="pageTouched($event)"  (click)="pageTouched($event)" class="box">
-  
+<div (mousedown)="pageTouched($event)" (mouseenter)="pageTouched($event)" (mouseup)="pageTouched($event)"
+  (mouseleave)="pageTouched($event)" (click)="pageTouched($event)" class="box">
+
   <!-- <div class="row my-1">
     <div class="col text-end"> Status:</div>
     <div class="col">
@@ -7,13 +8,14 @@
       <span class="badge bg-"></span>
     </div>
   </div> -->
-  
+
   <div *ngIf="isAppUpdateFound" class="modal fade" id="modal-update-version">
     <div class="modal-dialog">
       <div class="modal-content bg-default">
         <div class="modal-header">
           <strong>Mise à jour de l'Application</strong>
-          <span id="active-update-modal" (click)="ShowUpdateVersionModal()" data-toggle="modal" data-target="#modal-update-version"></span>
+          <span id="active-update-modal" (click)="ShowUpdateVersionModal()" data-toggle="modal"
+            data-target="#modal-update-version"></span>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -23,24 +25,26 @@
           <p>Voulez-vous procéder à la mise à jour ?</p>
         </div>
         <div class="modal-footer justify-content-between">
-          <button id="close-update-modal" type="button" class="btn btn-default" data-dismiss="modal">Non annuler</button>
-          <button (click)="UpdateVersion()" type="button" class="btn btn-info swalDefaultSuccess">Oui mettre à jour</button>
+          <button id="close-update-modal" type="button" class="btn btn-default" data-dismiss="modal">Non
+            annuler</button>
+          <button (click)="UpdateVersion()" type="button" class="btn btn-info swalDefaultSuccess">Oui mettre à
+            jour</button>
         </div>
       </div>
     </div>
   </div>
-  
-  
+
+
   <div *ngIf="roles.isSuperUser()">
-  
+
     <div class="w-100 btn btn-success onlinemsg">
       <span class="badge bg-success" *ngIf="isOnline">Ok</span> You are Online
     </div>
-  
+
     <div class="w-100 btn btn-danger offlinemsg">
       <span class="badge bg-danger" *ngIf="!isOnline">Ooops!</span> You are Offline
     </div>
-  
+
     <!-- <div class="" *ngIf="modalVersion">
       <div class="alert alert-secondary m-2">
         <button type="button" class="btn-close" aria-label="Close" (click)="closeVersion()">Ignore</button>
@@ -48,7 +52,7 @@
           now</a>
       </div>
     </div> -->
-  
+
     <!-- <div class="w-100 position-absolute bottom-0" *ngIf="modalPwaPlatform === 'android' || modalPwaPlatform === 'ios'">
       <div class="alert alert-secondary m-2">
         <button type="button" class="btn-close position-absolute top-0 end-0 m-1" aria-label="Close"
@@ -66,17 +70,17 @@
         </div>
       </div>
     </div> -->
-  
+
   </div>
-  
-  
+
+
   <div *ngIf="isAuthenticated && !errorFound">
-  
+
     <div class="wrapper">
       <!-- Preloader -->
       <div class="preloader flex-column justify-content-center align-items-center">
         <!-- <img class="animation__shake" src="assets/logo/logo.png" alt="Integrate Health" height="60" width="60"> -->
- 
+
         <div id="nb-global-spinner" class="spinner">
           <div class="blob blob-0"></div>
           <div class="blob blob-1"></div>
@@ -86,17 +90,26 @@
           <div class="blob blob-5"></div>
         </div>
       </div>
-  
+
       <!-- Navbar -->
       <nav class="main-header navbar navbar-expand navbar-white navbar-light">
         <!-- Left navbar links -->
         <ul class="navbar-nav">
-          <li class="nav-item">
+
+          <li *ngIf="!roles.isChws()" class="nav-item">
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
           </li>
-  
-  
-  
+
+          <li *ngIf="roles.isChws()" class="nav-item">
+            <!-- Brand Logo -->
+            <span class="brand-link" style="text-align: center;">
+              <span class="brand-text font-weight-light">
+                <img src="{{appLogo}}" alt="Integrate Health" class="" style="opacity: .8; width: 150px!important;">
+              </span>
+            </span>
+          </li>
+
+
           <!-- <li  routerLink="dashboards/dash1" class="nav-link">Dashboard 1</a>
           </li>class="nav-item d-none d-sm-inline-block">
             <a
@@ -105,18 +118,19 @@
             <a routerLink="dashboards/dash2" class="nav-link">Dashboard 2</a>
           </li> -->
         </ul>
-  
+
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
           <!-- Navbar Search -->
-          <li class="nav-item">
+          <li *ngIf="!roles.isChws() && !roles.isOnlySupervisorMentor()" class="nav-item">
             <a class="nav-link" data-widget="navbar-search" href="#" role="button">
               <i class="fas fa-search"></i>
             </a>
             <div class="navbar-search-block">
               <form class="form-inline">
                 <div class="input-group input-group-sm">
-                  <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
+                  <input class="form-control form-control-navbar" type="search" placeholder="Search"
+                    aria-label="Search">
                   <div class="input-group-append">
                     <button class="btn btn-navbar" type="submit">
                       <i class="fas fa-search"></i>
@@ -129,7 +143,7 @@
               </form>
             </div>
           </li>
-  
+
           <!-- Messages Dropdown Menu -->
           <!-- <li *ngIf="roles.isSuperUser()" class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
@@ -150,7 +164,7 @@
                   </div>
                 </div>
               </a>
-              <div class="dropdown-divider"></div>
+              <div class="dropdowndivider1"></div>
               <a href="#" class="dropdown-item">
                 <div class="media">
                   <img src="assets/img/user8-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
@@ -164,7 +178,7 @@
                   </div>
                 </div>
               </a>
-              <div class="dropdown-divider"></div>
+              <div class="dropdowndivider1"></div>
               <a href="#" class="dropdown-item">
                 <div class="media">
                   <img src="assets/img/user3-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
@@ -178,83 +192,108 @@
                   </div>
                 </div>
               </a>
-              <div class="dropdown-divider"></div>
+              <div class="dropdowndivider1"></div>
               <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
             </div>
           </li> -->
-  
-  
-          <!-- Notifications Dropdown Menu -->
+
+
+
+          <!-- <li *ngIf="roles.isChws()" class="nav-item">
+            
+        </li> -->
+
+
+
+
+
+
+
+
+          
           <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#">
-              <i class="fas fa-th-large"></i>
+            <a class="nav-link" data-toggle="dropdown" href="#" style="text-align: center; color: blue !important;display: inline-block;">
+              <!-- <i style="font-size: 25px;" class="fas fa-th-large"></i> -->
               <!-- <span class="badge badge-warning navbar-badge">Infos</span> -->
-            </a>
+                  <img style="margin-top: -12px;" src="{{ userData?.userLogo }}" width="50" class="img-circle elevation-2" alt="User Image">
+                 
+              <span style="margin-left: 5px;" >{{ roles.isChws() ? chwOU?.name: userData?.fullname }}</span>
+                
+                </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-  
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-  
-              <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+
+              <div *ngIf="roles.isAdmin()" class="dropdowndivider1"></div>
+
+              <a *ngIf="roles.isAdmin()" class="nav-link" data-widget="fullscreen" href="#" role="button">
                 <i class="fas fa-expand-arrows-alt"></i> Aggrandir / réduire
               </a>
-  
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-  
+
+              <div *ngIf="roles.isSuperUser()" class="dropdowndivider1"></div>
               <a *ngIf="roles.isSuperUser()" class="nav-link" data-widget="control-sidebar" data-slide="true" href="#"
                 role="button">
                 <i class="fas far fa-bell"></i> Menu de controle
               </a>
-  
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-  
-              <a class="nav-link" routerLink="/cache/list"
+
+              <div class="dropdowndivider0"></div>
+
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash1"
                 role="button">
+                <i style="margin-right: 10px;" class="fas far fa-info"></i> Activité Des ASC
+              </a>
+
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash2"
+                role="button">
+                <i style="margin-right: 10px;" class="fas far fa-info"></i> Données Détaillées Par ASC
+              </a>
+
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash3"
+                role="button">
+                <i style="margin-right: 10px;" class="fas far fa-info"></i> Effectifs Des Patients
+              </a>
+
+              <div *ngIf="roles.isSupervisorMentor()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor()" class="nav-link" routerLink="chws/" role="button">
+                <i style="margin-right: 10px;" class="fas far fa-info"></i> Gestion ASC Remplaçantes
+              </a>
+
+              <div *ngIf="roles.isSupervisorMentor()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor()" class="nav-link" [routerLink]="[ '/fetch/data','weeklyData']"
+                role="button">
+                <i style="margin-right: 10px;" class="fas far fa-info"></i> Données ThinkMd par semaine
+              </a>
+              
+
+              <div *ngIf="!roles.isChws()" class="dropdowndivider1"></div>
+              <a *ngIf="!roles.isChws()" class="nav-link" routerLink="/cache/list" role="button">
                 <i class="fas far fa-bell"></i> Cache Cleaner
               </a>
-  
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-  
+
+              <div class="dropdowndivider3"></div>
               <a href="#" class="nav-link" data-toggle="modal" data-target="#modal-logout">
                 <i class="fa fa-sign-out-alt"></i> Se déconnecter
               </a>
-  
+
+              <div *ngIf="roles.isSuperUser()" class="dropdowndivider2"></div>
+
               <div *ngIf="roles.isSuperUser()">
                 <p>{{ 'HOME.TITLE' | translate }}</p>
                 <p>{{ 'HOME.SELECT' | translate }}</p>
-                  
               </div>
-  
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-divider"></div>
-  
+
+              <div class="dropdowndivider1"></div>
+
               <!-- <a clas   -->
             </div>
           </li>
-  
-  
-          <li class="nav-item">
+
+
+
+          <!-- Notifications Dropdown Menu -->
+
+          <li *ngIf="roles.isAdmin()" class="nav-item">
             <form class="form-inline nav-link">
               <div class="input-group input-group-sm">
                 <select #langSelect (change)="translate.use(langSelect.value)">
@@ -264,21 +303,21 @@
               </div>
             </form>
           </li>
-  
+
         </ul>
       </nav>
       <!-- /.navbar -->
-  
-  
+
+
       <!-- Main Sidebar Container -->
-      <aside class="main-sidebar sidebar-dark-primary elevation-4">
+      <aside *ngIf="!roles.isChws()" class="main-sidebar sidebar-dark-primary elevation-4">
         <!-- Brand Logo -->
         <a href="#" class="brand-link" style="text-align: center;">
           <span class="brand-text font-weight-light">
             <img src="{{appLogo}}" alt="Integrate Health" class="" style="opacity: .8; width: 150px!important;">
           </span>
         </a>
-  
+
         <!-- Sidebar -->
         <div class="sidebar">
           <!-- Sidebar user panel (optional) -->
@@ -287,10 +326,10 @@
               <img src="{{ userData?.userLogo }}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
-              <a href="#" class="d-block">{{ userData?.fullname }}</a>
+              <a href="#" class="d-block">{{ roles.isChws() ? chwOU?.name: userData?.fullname }}</a>
             </div>
           </div>
-  
+
           <!-- SidebarSearch Form -->
           <div class="form-inline">
             <div class="input-group" data-widget="sidebar-search">
@@ -302,12 +341,13 @@
               </div>
             </div>
           </div>
-  
+
           <!-- Sidebar Menu -->
           <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
               <!-- Add icons to the links using the .nav-icon class
                  with font-awesome or any other icon font library -->
+              <br>
               <li *ngIf="roles.isSuperUser()" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-sync fa-spin"></i>
@@ -332,14 +372,16 @@
                 </ul>
               </li>
 
-             
+
+              <p *ngIf="roles.isSuperUser()" style="color: white;">{{ separation }}</p>
+
               <li *ngIf="roles.isDataManager()" class="nav-item">
                 <a routerLink="fetch/sync" class="nav-link">
                   <!-- <i class="far fa-circle nav-icon"></i> -->
                   <p>Sync OrgUnits & Data</p>
                 </a>
               </li>
-  
+
               <li *ngIf="roles.isDataManager()" class="nav-item">
                 <a [routerLink]="[ '/fetch/data','dataToDhis2']" class="nav-link">
                   <!-- <i class="nav-icon fas fa-th"></i> -->
@@ -351,7 +393,7 @@
               </li>
 
 
-              <p style="color: white;">_____________________________________</p>
+              <p *ngIf="roles.isDataManager()" style="color: white;">{{ separation }}</p>
 
               <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
                 <a routerLink="dashboards/dash1" class="nav-link">
@@ -359,32 +401,42 @@
                   <p>Activité Des ASC</p>
                 </a>
               </li>
-  
+
+
               <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
                 <a routerLink="dashboards/dash2" class="nav-link">
                   <!-- <i class="nav-icon fas fa-chart-pie"></i> -->
                   <p>Données Détaillées Par ASC</p>
                 </a>
               </li>
-  
-              <li *ngIf="roles.isDataManager()" class="nav-item">
+
+              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
                 <a routerLink="dashboards/dash3" class="nav-link">
                   <!-- <i class="nav-icon fas fa-chart-line"></i> -->
                   <p>Effectifs Des Patients</p>
                 </a>
               </li>
 
-              <p style="color: white;">_____________________________________</p>
+              <p *ngIf="roles.isSupervisorMentor() || roles.isChws()" style="color: white;">{{ separation }}</p>
 
-  
+              <li *ngIf="roles.isChws()" class="nav-item">
+                <a routerLink="chws/select_orgunit" class="nav-link">
+                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
+                  <p>Choisir ASC</p>
+                </a>
+              </li>
+
+              <p *ngIf="roles.isChws()" style="color: white;">{{ separation }}</p>
+
+
               <li *ngIf="roles.isSupervisorMentor()" class="nav-item">
                 <a routerLink="chws/" class="nav-link">
                   <!-- <i class="nav-icon fas fa-plus-square"></i> -->
                   <p>Gestion ASC Remplaçantes</p>
                 </a>
               </li>
-              <p style="color: white;">_____________________________________</p>
-  
+              <p *ngIf="roles.isSupervisorMentor()" style="color: white;">{{ separation }}</p>
+
               <!-- <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -415,7 +467,7 @@
                 </ul>
               </li> -->
 
-            
+
               <li *ngIf="roles.isSupervisorMentor()" class="nav-item">
                 <a [routerLink]="[ '/fetch/data','weeklyData']" class="nav-link">
                   <!-- <i class="nav-icon fas fa-book"></i> -->
@@ -424,8 +476,8 @@
                   </p>
                 </a>
               </li>
-  
-              
+
+
               <li *ngIf="roles.isSuperUser()" class="nav-item">
                 <a routerLink="docs" class="nav-link">
                   <i class="nav-icon fas fa-file"></i>
@@ -434,9 +486,9 @@
                   </p>
                 </a>
               </li>
-  
-              <p style="color: white;">_____________________________________</p>
-  
+
+              <p *ngIf="roles.isSupervisorMentor()" style="color: white;">{{ separation }}</p>
+
               <!-- <li *ngIf="roles.isSuperUser()" class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-chart-pie"></i>
@@ -970,21 +1022,22 @@
                   <p>Informational</p>
                 </a>
               </li> -->
-  
-  
-  
+
+
+
             </ul>
           </nav>
           <!-- /.sidebar-menu -->
 
-<h3 *ngIf="appVersionExist()" style="margin-top: 50px; text-align: center ;font-size: large; color: white;">Version: {{ appVersion }} </h3>
+          <h3 *ngIf="appVersionExist()" style="margin-top: 50px; text-align: center ;font-size: large; color: white;">
+            Version: {{ appVersion }} </h3>
         </div>
         <!-- /.sidebar -->
       </aside>
       <!-- Content Wrapper. Contains page content -->
       <div class="content-wrapper iframe-mode" data-widget="iframe" data-loading-screen="750">
-  
-  
+
+
         <!-- <h2>
     Now {{time}}
     
@@ -1009,7 +1062,7 @@
         <!-- Control sidebar content goes here -->
       </aside>
     </div>
-  
+
     <!-- MESSAGE BOX-->
     <!-- <div class="message-box animated fadeIn" data-sound="alert" id="mb-signout">
       <div class="mb-container">
@@ -1028,8 +1081,8 @@
         </div>
       </div>
     </div> -->
-  
-  
+
+
     <div class="modal fade" id="modal-logout">
       <div class="modal-dialog">
         <div class="modal-content bg-secondary">
@@ -1047,28 +1100,26 @@
       <!-- /.modal-dialog -->
     </div>
     <!-- END MESSAGE BOX-->
-  
-  
-  
+
+
+
     <!-- START PRELOADS -->
     <audio id="audio-alert" src="assets/audio/alert.mp3" preload="auto"></audio>
     <audio id="audio-fail" src="assets/audio/fail.mp3" preload="auto"></audio>
     <!-- END PRELOADS -->
   </div>
-  
+
   <div *ngIf="!isAuthenticated || errorFound">
     <ng-container *ngTemplateOutlet="template"></ng-container>
   </div>
-  
+
   <ng-template #template>
     <router-outlet></router-outlet>
   </ng-template>
-  
+
   <!-- <ng-template #trigger>
     template to trigger changes...
   </ng-template> -->
-  
-  
-  </div>
-  
-  
+
+
+</div>

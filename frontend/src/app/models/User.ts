@@ -3,6 +3,7 @@ export interface User {
   username: string
   fullname: string
   roles:string[]
+  groups:string[]
   isActive: boolean
   expiresIn?:any
   token?: string

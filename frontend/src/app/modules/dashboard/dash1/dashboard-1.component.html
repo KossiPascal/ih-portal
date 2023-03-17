@@ -1,28 +1,33 @@
-  <section class="content-header">
-    <div class="container-fluid">
-      <div class="card card-info">
-        <div class="overlay-wrapper">
-          <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i> <div class="text-bold pt-2"> {{initMsg}}</div></div>
-        
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="card card-info">
+
+      <h1 style="text-align: center;text-transform: uppercase;">Activité Des ASC</h1>
+      
+      <div class="overlay-wrapper">
+        <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
+          <div class="text-bold pt-2"> {{initMsg}}</div>
+        </div>
+
         <div class="card-header">
           <form [formGroup]="aggradateDataForm" (ngSubmit)="initDataFilted()" novalidate>
             <div class="row">
-  
+
               <div class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>Date Début</label>
-                  <input type="date" class="form-control" formControlName="start_date"/>
-                </div>
-              </div>
-  
-              <div class="col-sm-2 col-6">
-                <div class="form-group">
-                  <label>Date Fin</label>
-                  <input type="date" class="form-control" formControlName="end_date"/>
+                  <input type="date" class="form-control" formControlName="start_date" />
                 </div>
               </div>
 
               <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Fin</label>
+                  <input type="date" class="form-control" formControlName="end_date" />
+                </div>
+              </div>
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>District</label>
                   <select (change)="genarateSites()" class="form-control" formControlName="districts">
@@ -33,8 +38,8 @@
                   </select>
                 </div>
               </div>
-  
-              <div class="col-sm-2 col-6">
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>Site</label>
                   <select (change)="genarateChws()" class="form-control" formControlName="sites">
@@ -45,101 +50,130 @@
                   </select>
                 </div>
               </div>
-  
+
               <div class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>.</label>
-                  <button [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control"> 
-                          OK <span class="fa fa-floppy-o fa-right"></span>
+                  <button [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control">
+                    OK <span class="fa fa-floppy-o fa-right"></span>
                   </button>
                 </div>
               </div>
-  
+
             </div>
-            <div class="row">
 
-
+            <div *ngIf="!roles.isChws()" class="row">
               <div class="col-sm-4">
                 <div class="form-group">
-                    <label>.</label>
-                    <div class="form-check">
-                        <input style="font-size: 20px;" id="withRatio" class="form-check-input"
-                            type="checkbox" formControlName="withRatio">
-                        <label class="form-check-label"
-                            for="withRatio"> <b>Avec Ratio</b> </label>
-                    </div>
+                  <label>.</label>
+                  <div class="form-check">
+                    <input style="font-size: 20px;" id="withRatio" class="form-check-input" type="checkbox"
+                      formControlName="withRatio">
+                    <label class="form-check-label" for="withRatio"> <b>Avec Ratio</b> </label>
+                  </div>
                 </div>
+              </div>
             </div>
-            </div>
+
           </form>
         </div>
-  
-      </div>
+
       </div>
     </div>
-  </section>  
-  
-  <section *ngIf="bodyData.length > 0" class="content">
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">
-          <button type="button" (click)="initTable()">Generate Table</button>
-        </h3>
-      </div>
-      <!-- /.card-header -->
-      <div class="card-body">
-        <table id="compare_data" class="table table-bordered table-hover" >
-          <thead>
-            <tr class="bg-primary">
-              <th rowspan="2" style="width: 50px">Code ASC</th>
-              <th rowspan="2" style="width: 150px">Nom ASC</th>
-              <th colspan="2" style="width: 50px">Pcime</th>
-              <th colspan="2" style="width: 50px">Maternel & PF</th>
-              <th colspan="2" style="width: 50px">Consultation</th>
-              <th colspan="2" style="width: 50px">Recherche</th>
-              <th colspan="2" style="width: 50px">Total</th>
-              <th *ngIf="this.aggradateDataForm.value.withRatio == true" rowspan="2" style="width: 50px">Diff</th>
-              <th *ngIf="this.aggradateDataForm.value.withRatio == true" rowspan="2" style="width: 50px">Ratio</th>
-            </tr>
-            <tr class="bg-primary">
-              <th style="width: 50px">APPLI</th>
-              <th style="width: 50px">DHIS2</th>
+  </div>
+</section>
 
-              <th style="width: 50px">APPLI</th>
-              <th style="width: 50px">DHIS2</th>
+<section *ngIf="bodyData.length > 0 && roles.isSupervisorMentor()" class="content">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <button type="button" (click)="initTable()">Generate Table</button>
+      </h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+      <table id="compare_data" class="table table-bordered table-hover">
+        <thead>
+          <tr class="bg-primary">
+            <th rowspan="2" style="width: 50px">Code ASC</th>
+            <th rowspan="2" style="width: 150px">Nom ASC</th>
+            <th *ngIf="!isRatioChecked()" colspan="2" style="width: 50px">Pcime</th>
+            <th *ngIf="isRatioChecked()" colspan="4" style="width: 50px">Pcime</th>
+            <th *ngIf="!isRatioChecked()" colspan="2" style="width: 50px">Maternel</th>
+            <th *ngIf="isRatioChecked()" colspan="4" style="width: 50px">Maternel</th>
+            <th *ngIf="!isRatioChecked()" colspan="2" style="width: 50px">PF</th>
+            <th *ngIf="isRatioChecked()" colspan="4" style="width: 50px">PF</th>
+            <!-- <th colspan="2" style="width: 50px">Consultation</th>
+            <th colspan="2" style="width: 50px">Consultation</th> -->
+            <th *ngIf="!isRatioChecked()" colspan="2" style="width: 50px">Recherche</th>
+            <th *ngIf="isRatioChecked()" colspan="4" style="width: 50px">Recherche</th>
+            <th *ngIf="!isRatioChecked()" colspan="2" style="width: 50px">Total</th>
+            <th *ngIf="isRatioChecked()" colspan="4" style="width: 50px">Total</th>
+          </tr>
+          <tr class="bg-primary">
+            <th style="width: 50px">APPLI</th>
+            <th style="width: 50px">DHIS2</th>
+            <th *ngIf="isRatioChecked()" style="width: 50px">Diff</th>
+            <th *ngIf="isRatioChecked()" style="width: 50px">Ratio</th>
 
-              <th style="width: 50px">APPLI</th>
-              <th style="width: 50px">DHIS2</th>
+            <th style="width: 50px">APPLI</th>
+            <th style="width: 50px">DHIS2</th>
+            <th *ngIf="isRatioChecked()" style="width: 50px">Diff</th>
+            <th *ngIf="isRatioChecked()" style="width: 50px">Ratio</th>
 
-              <th style="width: 50px">APPLI</th>
-              <th style="width: 50px">DHIS2</th>
+            <th style="width: 50px">APPLI</th>
+            <th style="width: 50px">DHIS2</th>
+            <th *ngIf="isRatioChecked()" style="width: 50px">Diff</th>
+            <th *ngIf="isRatioChecked()" style="width: 50px">Ratio</th>
 
-              <th style="width: 50px">APPLI</th>
-              <th style="width: 50px">DHIS2</th>
-            </tr>
-          </thead>
+            <th style="width: 50px">APPLI</th>
+            <th style="width: 50px">DHIS2</th>
+            <th *ngIf="isRatioChecked()" style="width: 50px">Diff</th>
+            <th *ngIf="isRatioChecked()" style="width: 50px">Ratio</th>
 
-          <tbody>
-            <tr *ngFor="let item of bodyData; trackBy:identifyBodyData">
-              <td class="info" >{{ item.Code }}</td>
-              <td class="info" >{{ item.Name }}</td>
-              <td class="warning">{{ item.Pcime }}</td>
-              <td class="warning">{{ item.PcimeDhis2 }}</td>
-              <td class="primary" >{{ item.MaternellePf }}</td>
-              <td class="primary" >{{ item.MaternellePfDhis2 }}</td>
-              <td class="warning">{{ item.Consultation }}</td>
-              <td class="warning">{{ item.ConsultationDhis }}</td>
-              <td class="primary" >{{ item.Recherche }}</td>
-              <td class="primary" >{{ item.RechercheDhis }}</td>
-              <td class="final">{{ item.Total }}</td>
-              <td class="final">{{ item.TotalDhis }}</td>
-              <td *ngIf="this.aggradateDataForm.value.withRatio == true" class="line" class=""> <strong>{{ item.TotalDiff }}</strong> </td>
-              <td *ngIf="this.aggradateDataForm.value.withRatio == true" class="bg-{{ item.Ratio.color }}">{{ item.Ratio.value }} %</td>
-            </tr>
-          </tbody>
-        </table> 
-      </div>
-      <!-- <div class="card-footer clearfix">
+            <!-- <th style="width: 50px">APPLI</th>
+            <th style="width: 50px">DHIS2</th> -->
+
+            <th style="width: 50px">APPLI</th>
+            <th style="width: 50px">DHIS2</th>
+            <th *ngIf="isRatioChecked()" style="width: 50px">Diff</th>
+            <th *ngIf="isRatioChecked()" style="width: 50px">Ratio</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of bodyData; trackBy:identifyBodyData">
+            <td class="info">{{ item.Code }}</td>
+            <td class="info">{{ item.Name }}</td>
+            <td class="warning">{{ item.Pcime }}</td>
+            <td class="warning">{{ item.PcimeDhis2 }}</td>
+            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Pcime,item.PcimeDhis2,false).value}}</strong> </td>
+            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Pcime,item.PcimeDhis2).color }}">{{getRatio(item.Pcime,item.PcimeDhis2).value }} %</td>
+            <td class="primary">{{ item.Maternelle }}</td>
+            <td class="primary">{{ item.MaternelleDhis2 }}</td>
+            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Maternelle,item.MaternelleDhis2,false).value}}</strong> </td>
+            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Maternelle,item.MaternelleDhis2).color }}">{{getRatio(item.Maternelle,item.MaternelleDhis2).value }} %</td>
+            <td class="warning">{{ item.Pf }}</td>
+            <td class="warning">{{ item.PfDhis2 }}</td>
+            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Pf,item.PfDhis2,false).value}}</strong> </td>
+            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Pf,item.PfDhis2).color }}">{{getRatio(item.Pf,item.PfDhis2).value }} %</td>
+            <!-- <td class="warning">{{ item.Consultation }}</td>
+            <td class="warning">{{ item.ConsultationDhis }}</td>
+            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Consultation,item.ConsultationDhis,false).value}}</strong> </td>
+            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Consultation,item.ConsultationDhis).color }}">{{getRatio(item.Consultation,item.ConsultationDhis).value }} %</td> -->
+            <td class="primary">{{ item.Recherche }}</td>
+            <td class="primary">{{ item.RechercheDhis }}</td>
+            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Recherche,item.RechercheDhis,false).value}}</strong> </td>
+            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Recherche,item.RechercheDhis).color }}">{{getRatio(item.Recherche,item.RechercheDhis).value }} %</td>
+            <td class="final">{{ item.Total }}</td>
+            <td class="final">{{ item.TotalDhis }}</td>
+            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Total,item.TotalDhis,false).value}}</strong> </td>
+            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Total,item.TotalDhis).color }}">{{getRatio(item.Total,item.TotalDhis).value }} %</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- <div class="card-footer clearfix">
         <ul class="pagination pagination-sm m-0 float-right">
           <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
           <li class="page-item"><a class="page-link" href="#">1</a></li>
@@ -148,5 +182,76 @@
           <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
         </ul>
       </div> -->
+  </div>
+</section>
+
+
+
+<section *ngIf="bodyData.length > 0 && roles.isChws()" class="content">
+  <div class="card">
+    
+    <div class="card-body">
+      <table id="compare_data" class="table table-bordered table-hover">
+
+        <tbody *ngFor="let item of bodyData; trackBy:identifyBodyData">
+          <tr><th colspan="3"> {{ item.Name }} ( {{ item.Code }} )</th></tr>
+            
+          <tr class="bg-primary">
+              <th rowspan="2" style="width: 100px; padding-top: 35px;"> Pcime</th>
+              <th style="width: 150px">Application</th>
+              <th style="font-size: 25px; text-align: center;">{{ item.Pcime }}</th>
+            </tr>
+            <tr class="bg-primary">
+              <td>Fiche récape</td>
+              <th style="font-size: 25px; text-align: center;">{{ item.PcimeDhis2 }}</th>
+            </tr>
+
+
+            <tr class="bg-warning">
+              <th rowspan="2" style="width: 100px; padding-top: 35px;"> Maternel</th>
+              <th>Application</th>
+              <th style="font-size: 25px; text-align: center;">{{ item.Maternelle }}</th>
+            </tr>
+            <tr class="bg-warning">
+              <td>Fiche récape</td>
+              <th style="font-size: 25px; text-align: center;">{{ item.MaternelleDhis2 }}</th>
+            </tr>
+ 
+
+            <tr class="bg-info">
+              <th rowspan="2" style="width: 100px; padding-top: 35px;"> PF</th>
+              <th>Application</th>
+              <th style="font-size: 25px; text-align: center;">{{ item.Pf }}</th>
+            </tr>
+            <tr class="bg-info">
+              <td>Fiche récape</td>
+              <th style="font-size: 25px; text-align: center;">{{ item.PfDhis2 }}</th>
+            </tr>
+
+
+            <tr class="bg-danger">
+              <th rowspan="2" style="width: 100px; padding-top: 35px;"> Recherche</th>
+              <th>Application</th>
+              <th style="font-size: 25px; text-align: center;">{{ item.Recherche }}</th>
+            </tr>
+            <tr class="bg-danger">
+              <td>Fiche récape</td>
+              <th style="font-size: 25px; text-align: center;">{{ item.RechercheDhis }}</th>
+            </tr>
+
+
+            <tr class="bg-success">
+              <th rowspan="2" style="width: 100px; padding-top: 35px;"> Total</th>
+              <th>Application</th>
+              <th style="font-size: 25px; text-align: center;">{{ item.Total }}</th>
+            </tr>
+            <tr class="bg-success">
+              <td>Fiche récape</td>
+              <th style="font-size: 25px; text-align: center;">{{ item.TotalDhis }}</th>
+            </tr>
+
+        </tbody>
+      </table>
     </div>
-  </section>
+  </div>
+</section>

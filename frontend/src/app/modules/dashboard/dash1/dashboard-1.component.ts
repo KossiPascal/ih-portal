@@ -5,7 +5,7 @@ import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import { Consts } from '@ih-app/shared/constantes';
-import { Functions, DateUtils } from '@ih-app/shared/functions';
+import { Functions, DateUtils, notNull } from '@ih-app/shared/functions';
 import { Roles } from '@ih-app/shared/roles';
 import { async } from 'rxjs';
 
@@ -22,14 +22,15 @@ declare var initDataTable: any;
 })
 export class Dashboard1Component implements OnInit {
   constructor(private store: AppStorageService, private auth: AuthService, private sync: SyncService) {
-    if(!this.roles.isSupervisorMentor()  && !this.roles.isChws()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
-   }
-  
-  
-  private roles = new Roles(this.store);
+    if (!this.roles.isSupervisorMentor() && !this.roles.isChws()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+  }
+
+
+  public roles = new Roles(this.store);
 
   aggradateDataForm!: FormGroup;
   initDate!: { start_date: string, end_date: string };
+  chwOU: Chws | null = null;
 
   createDataFilterFormGroup(): FormGroup {
     return new FormGroup({
@@ -37,7 +38,7 @@ export class Dashboard1Component implements OnInit {
       end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
       districts: new FormControl(""),
       sites: new FormControl(""),
-      withRatio:new FormControl(false, [Validators.required]),
+      withRatio: new FormControl(false, [Validators.required]),
     });
   }
 
@@ -58,10 +59,18 @@ export class Dashboard1Component implements OnInit {
   }
 
   ngOnInit(): void {
+    this.chwOU = this.auth.chwsOrgUnit();
+    if (this.roles.isChws() && (this.chwOU == null || !notNull(this.chwOU))) {
+      location.href = 'chws/select_orgunit';
+    }
     this.isLoading = false;
     this.initDate = DateUtils.startEnd21and20Date();
     this.aggradateDataForm = this.createDataFilterFormGroup();
-    this.initAllData();
+    if (!this.roles.isChws()) {
+      this.initAllData();
+    } else {
+      this.initDataFilted();
+    }
 
   }
 
@@ -104,10 +113,10 @@ export class Dashboard1Component implements OnInit {
     this.aggradateDataForm.value["sites"] = "";
     this.aggradateDataForm.value["chws"] = [];
 
-    if (Functions.notNull(dist)) {
+    if (notNull(dist)) {
       for (let d = 0; d < this.Sites$.length; d++) {
         const site = this.Sites$[d];
-        if (Functions.notNull(site)) if (dist.includes(site.district.id)) this.sites$.push(site)
+        if (notNull(site)) if (dist.includes(site.district.id)) this.sites$.push(site)
       }
     } else {
       this.sites$ = [];
@@ -118,10 +127,10 @@ export class Dashboard1Component implements OnInit {
     const sites: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sites);
     this.chws$ = [];
     this.aggradateDataForm.value["chws"] = [];
-    if (Functions.notNull(sites)) {
+    if (notNull(sites)) {
       for (let d = 0; d < this.Chws$.length; d++) {
         const chws = this.Chws$[d];
-        if (Functions.notNull(chws)) if (sites.includes(chws.site.id)) this.chws$.push(chws)
+        if (notNull(chws)) if (sites.includes(chws.site.id)) this.chws$.push(chws)
       }
     } else {
       this.chws$ = this.Chws$;
@@ -131,10 +140,24 @@ export class Dashboard1Component implements OnInit {
   ParamsToFilter(): FilterParams {
     const startDate: string = this.aggradateDataForm.value.start_date;
     const endDate: string = this.aggradateDataForm.value.end_date;
-    // const sources: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sources) as string[];
-    const districts: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.districts) as string[];
-    const sites: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sites) as string[];
-    // const chws: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
+
+    var districts: string[] = [];
+    var sites: string[] = [];
+    var chws: string[] = [];
+
+    if (!this.roles.isChws()) {
+      // const sources: string[] = Functions.returnDataAsArray(this.aggradateDataForm.value.sources) as string[];
+      districts = Functions.returnDataAsArray(this.aggradateDataForm.value.districts);
+      sites = Functions.returnDataAsArray(this.aggradateDataForm.value.sites);
+      // const chws: string[] = Functions.returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
+    } else {
+      if (this.chwOU != null && notNull(this.chwOU)) {
+        districts = Functions.returnDataAsArray(this.chwOU.site.district.id);
+        sites = Functions.returnDataAsArray(this.chwOU.site.id);
+        chws = Functions.returnDataAsArray(this.chwOU.id);
+      }
+    }
+
 
     var params: FilterParams = {
       // sources: sources,
@@ -142,7 +165,7 @@ export class Dashboard1Component implements OnInit {
       end_date: endDate,
       districts: districts,
       sites: sites,
-      // chws: chws,
+      chws: chws,
     }
     return params;
   }
@@ -169,17 +192,26 @@ export class Dashboard1Component implements OnInit {
   getAllAboutData(params: FilterParams) {
     const { start_date, end_date, sites } = params;
 
-    var outPutData: any = {}
 
-    for (let i = 0; i < this.chws$!.length; i++) {
-      const ascId = this.chws$![i].id;
-      if (Functions.notNull(ascId)) {
+    const selectedChws: Chws[] = this.roles.isChws() && this.chwOU != null ? [this.chwOU] : this.chws$;
+
+    var outPutData: any = {}
+    for (let i = 0; i < selectedChws.length; i++) {
+      const ascId = selectedChws[i].id;
+      if (notNull(ascId)) {
         if (!outPutData.hasOwnProperty(ascId)) outPutData[ascId] = {
           chwId: ascId,
           app_total_child_followup: 0,
           dhis_total_child_followup: 0,
-          app_total_num_fp_followup: 0,
-          dhis_total_num_fp_followup: 0,
+          app_total_mum_fp_followup: 0,
+          dhis_total_mum_fp_followup: 0,
+
+          app_total_mum_followup: 0,
+          dhis_total_mum_followup: 0,
+
+          app_total_fp_followup: 0,
+          dhis_total_fp_followup: 0,
+
           app_total_active_research: 0,
           dhis_total_active_research: 0,
           app_total_consultation_followup: 0,
@@ -195,22 +227,78 @@ export class Dashboard1Component implements OnInit {
       const data: ChwsDataFormDb = this.ChwsDataFromDb$[index];
       if (data != null) {
         const form = data.form;
-        const asc: string = data.chw != null ? Functions.notNull(data.chw.id) ? data.chw.id : '' : '';
-        const site: string = data.site != null ? Functions.notNull(data.site.id) ? data.site.id : '' : '';
-        const idSiteValid: boolean = Functions.notNull(site) && Functions.notNull(sites) && sites?.includes(site) || !Functions.notNull(sites);
-        const isDateValid: boolean = Functions.notNull(start_date) && Functions.notNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
+        const field = data.fields;;
+        const asc: string = data.chw != null ? notNull(data.chw.id) ? data.chw.id : '' : '';
+        const site: string = data.site != null ? notNull(data.site.id) ? data.site.id : '' : '';
+        const idSiteValid: boolean = notNull(site) && notNull(sites) && sites?.includes(site) || !notNull(sites);
+        const isDateValid: boolean = notNull(start_date) && notNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
 
         if (idSiteValid && isDateValid && outPutData.hasOwnProperty(asc)) {
           if (data.source == 'dhis2') {
             if (form === "PCIME") outPutData[asc].dhis_total_child_followup += 1
-            if (form === "Maternelle" || form === "PF") outPutData[asc].dhis_total_num_fp_followup += 1
+            if (form === "Maternelle") outPutData[asc].dhis_total_mum_followup += 1
+            if (form === "PF") outPutData[asc].dhis_total_fp_followup += 1
+            if (form === "Maternelle" || form === "PF") outPutData[asc].dhis_total_mum_fp_followup += 1
             if (form === "Recherche") outPutData[asc].dhis_total_active_research += 1
             if (form !== "Recherche") outPutData[asc].dhis_total_consultation_followup += 1
             outPutData[asc].dhis_total_home_visit += 1
           } else if (data.source == 'Tonoudayo') {
             if (Consts.child_forms.includes(form)) outPutData[asc].app_total_child_followup += 1
-            if (Consts.num_fp_forms.includes(form)) outPutData[asc].app_total_num_fp_followup += 1
-            if (form === "home_visit") outPutData[asc].app_total_active_research += 1
+
+            if (Consts.mum_forms.includes(form)){
+              if (form == `pregnancy_family_planning`) {
+
+                if (data.fields.hasOwnProperty("s_reg_pregnancy_screen")) {
+                  if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_urine_result")) {
+                    if (field.s_reg_pregnancy_screen.s_reg_urine_result == "positive") {
+                      outPutData[asc].app_total_mum_followup += 1
+                    }
+                  }
+
+                  if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_why_urine_test_not_done")) {
+                    if (field.s_reg_pregnancy_screen.s_reg_why_urine_test_not_done == "already_pregnant") {
+                      outPutData[asc].app_total_mum_followup += 1
+                    }
+                  }
+                }
+                
+              } else {
+                outPutData[asc].app_total_mum_followup += 1
+              }
+            }
+            if (Consts.fp_forms.includes(form)) {
+              if (form == `pregnancy_family_planning`) {
+
+                var isPregnant:boolean = false;
+
+                if (data.fields.hasOwnProperty("s_reg_pregnancy_screen")) {
+                  if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_urine_result")) {
+                    isPregnant = field.s_reg_pregnancy_screen.s_reg_urine_result == "positive";
+                  }
+
+                  if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_why_urine_test_not_done")) {
+                    isPregnant = field.s_reg_pregnancy_screen.s_reg_why_urine_test_not_done == "already_pregnant";
+                  }
+
+                  if (!isPregnant) {
+                    outPutData[asc].app_total_fp_followup += 1
+                  }
+
+                } else {
+                  outPutData[asc].app_total_fp_followup += 1
+                }
+              } else {
+                outPutData[asc].app_total_fp_followup += 1
+              }
+            }
+
+
+
+            if (Consts.mum_fp_forms.includes(form)) outPutData[asc].app_total_mum_fp_followup += 1
+
+
+
+            if (["death_report","home_visit"].includes(form)) outPutData[asc].app_total_active_research += 1
             if (Consts.consultations_followup_forms.includes(form)) outPutData[asc].app_total_consultation_followup += 1
             if (Consts.home_actions_forms.includes(form)) outPutData[asc].app_total_home_visit += 1
           }
@@ -262,8 +350,12 @@ export class Dashboard1Component implements OnInit {
         chwId: string,
         app_total_child_followup: 0,
         dhis_total_child_followup: 0,
-        app_total_num_fp_followup: 0,
-        dhis_total_num_fp_followup: 0,
+        app_total_mum_fp_followup: 0,
+        dhis_total_mum_fp_followup: 0,
+        app_total_mum_followup: 0,
+        dhis_total_mum_followup: 0,
+        app_total_fp_followup: 0,
+        dhis_total_fp_followup: 0,
         app_total_active_research: number,
         dhis_total_active_research: number,
         app_total_consultation_followup: number,
@@ -276,16 +368,21 @@ export class Dashboard1Component implements OnInit {
         Name: this.getChwInfos(vals.chwId).name,
         Pcime: vals.app_total_child_followup,
         PcimeDhis2: vals.dhis_total_child_followup,
-        MaternellePf: vals.app_total_num_fp_followup,
-        MaternellePfDhis2: vals.dhis_total_num_fp_followup,
+
+        Maternelle: vals.app_total_mum_followup,
+        MaternelleDhis2: vals.dhis_total_mum_followup,
+
+        Pf: vals.app_total_fp_followup,
+        PfDhis2: vals.dhis_total_fp_followup,
+
+        MaternellePf: vals.app_total_mum_fp_followup,
+        MaternellePfDhis2: vals.dhis_total_mum_fp_followup,
         Recherche: vals.app_total_active_research,
         RechercheDhis: vals.dhis_total_active_research,
         Consultation: vals.app_total_consultation_followup,
         ConsultationDhis: vals.dhis_total_consultation_followup,
         Total: vals.app_total_home_visit,
         TotalDhis: vals.dhis_total_home_visit,
-        TotalDiff: this.getRatio(vals.app_total_home_visit, vals.dhis_total_home_visit, false).value,
-        Ratio: this.getRatio(vals.app_total_home_visit, vals.dhis_total_home_visit)
       });
     });
 
@@ -301,6 +398,10 @@ export class Dashboard1Component implements OnInit {
       }
     }
     return false;
+  }
+
+  isRatioChecked():boolean{
+    return this.aggradateDataForm.value.withRatio == true;
   }
 
   getRatio(val1: number, val2: number, isRatio: boolean = true): { value: number, color: string } {
@@ -324,13 +425,16 @@ export class Dashboard1Component implements OnInit {
 
   getChwInfos(chwId: string, byCode: boolean = false): Chws {
     var ascs!: Chws;
-    for (let i = 0; i < this.chws$!.length; i++) {
-      const asc: Chws = this.chws$![i];
-      if (Functions.notNull(asc)) {
+
+
+    const selectedChws: Chws[] = this.roles.isChws() && this.chwOU != null ? [this.chwOU] : this.chws$;
+    for (let i = 0; i < selectedChws.length; i++) {
+      const asc: Chws = selectedChws[i];
+      if (notNull(asc)) {
         if (byCode == true) {
-          if (Functions.notNull(asc.external_id) && asc.external_id == chwId) return asc;
+          if (notNull(asc.external_id) && asc.external_id == chwId) return asc;
         } else {
-          if (Functions.notNull(asc.id) && asc.id == chwId) return asc;
+          if (notNull(asc.id) && asc.id == chwId) return asc;
         }
       }
     }

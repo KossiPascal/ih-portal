@@ -1,36 +1,61 @@
-import { genarateToken, isNotNull } from '../utils/functions';
+import * as jwt from 'jsonwebtoken';
+import { JsonDatabase } from '../json-data-source';
+import { isChws, notNull } from '../utils/functions';
 
 export class User {
     id!: string;
     username!: string;
     fullname!: string;
     roles!: string[];
+    groups!: string[];
     isActive!: boolean;
     expiresIn?: any;
     dhisusersession?: any;
     defaultRedirectUrl!:string;
+    token!:string;
+}
 
-    token() {
-        return genarateToken({ id: this.id, username: this.username, roles: this.roles, isActive: this.isActive });
-    }
 
-    toMap() {
-        return {
-            "id": this.id,
-            "username": this.username,
-            "fullname": this.fullname,
-            "roles": this.roles,
-            "isActive": this.isActive,
-            "expiresIn": this.expiresIn,
-            "token":this.token(),
-            "dhisusersession": this.dhisusersession,
-            "defaultRedirectUrl": this.defaultRedirectUrl
-        }
+export function toMap(user: User){
+    return {
+        id: user.id,
+        username: user.username,
+        fullname: user.fullname,
+        roles: user.roles,
+        groups: user.groups,
+        isActive: user.isActive,
+        expiresIn: user.expiresIn,
+        token:token(user),
+        dhisusersession: user.dhisusersession,
+        defaultRedirectUrl: user.defaultRedirectUrl
     }
 }
 
 
+export function token(user: User) {
+    return jwt.sign({ id: `${user.id}`, username: user.username, roles: user.roles, groups: user.groups, isActive: user.isActive }, jwSecretKey({user:user}).secretOrPrivateKey, { expiresIn: `${jwSecretKey({user:user}).expiredIn}s` });
+}
 
+
+export function jwSecretKey(data:{userId?:string, user?:User}): { expiredIn: string, secretOrPrivateKey: string } {
+    var userIsChws:boolean = false;
+    if (notNull(data.user)) {
+        userIsChws = isChws(data.user!);
+    } else if (notNull(data.userId)) {
+        const _repoUser = new JsonDatabase('users');
+        const jData = _repoUser.getBy(data.userId!) as User;
+        if (notNull(jData)) {
+            userIsChws = isChws(jData);
+        }
+    }
+
+    const second1 = 1000 * 60 * 60 * 24 * 366;
+    const second2 = 1000 * 60 * 60 * 24 * 366;
+    return {
+        expiredIn: userIsChws ? `${second1}` : `${second2}`,
+        secretOrPrivateKey: 'kossi-secretfortoken',
+    }
+}
 
 
 
@@ -44,7 +69,7 @@ export class User {
 // import * as bcrypt from 'bcryptjs';
 // import { response } from 'express';
 // import { Utils } from "../utils/utils";
-// import { genarateToken, isNotNull } from "../utils/functions";
+// import { token, isNotNull } from "../utils/functions";
 
 
 
@@ -101,7 +126,7 @@ export class User {
 //     }
   
 //     token() {
-//       return genarateToken({id:this.id, name:this.username, role:this.roles, isActive:this.isActive});
+//       return token({id:this.id, name:this.username, role:this.roles, isActive:this.isActive});
 //     }
 
 
@@ -121,7 +146,7 @@ export class User {
 //       user.fullname = data.fullname??'';
 //       user.email = data.email??'';
 //       user.password = data.password??'';
-//       user.roles = isNotNull(data.roles)?`[${data.roles}]`:'[]';
+//       user.roles = notNull(data.roles)?`[${data.roles}]`:'[]';
 //       user.isActive = data.isActive??false;
 //       user.isSuperAdmin = data.isSuperAdmin??false;
 //     return user;

@@ -183,6 +183,8 @@ export interface Patients {
   source: string
   name: string
   external_id: string
+  date_of_birth: string
+  sex: string
   role: string
   site: Sites
   zone: Zones
@@ -234,12 +236,16 @@ export interface CompareData {
   PcimeDhis2: number
   MaternellePf: number
   MaternellePfDhis2: number
+  Maternelle: number
+  MaternelleDhis2: number
+  Pf: number
+  PfDhis2: number
   Recherche: number
   RechercheDhis: number
   Consultation: number
   ConsultationDhis: number
   Total: number
   TotalDhis: number
-  TotalDiff: number
-  Ratio: { value: number, color: string }
+  // TotalDiff: number
+  // Ratio: { value: number, color: string }
 }

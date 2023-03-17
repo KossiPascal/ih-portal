@@ -1,6 +1,6 @@
 import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository } from "../entity/Sync";
 import { CouchDbFetchData, Dhis2DataFormat } from "../utils/appInterface";
-import { Dhis2SyncConfig, Functions, isNotNull, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders } from "../utils/functions";
+import { Dhis2SyncConfig, Functions, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders, notNull } from "../utils/functions";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import https from 'https';
@@ -8,6 +8,10 @@ import { DataIndicators } from "../entity/DataAggragate";
 
 const fetch = require('node-fetch');
 const request = require('request');
+
+
+const _sepation = `\n\n\n\n__________\n\n\n\n`;
+
 
 require('dotenv').config({ path: sslFolder('.env') });
 
@@ -62,13 +66,13 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
             try {
                 var jsonBody: Dhis2DataFormat[] = jsonDatas["events"] as Dhis2DataFormat[];
 
-                if (isNotNull(jsonBody)) {
+                if (notNull(jsonBody)) {
                     var len = jsonBody.length;
                     var done: number = 0;
                     for (let i = 0; i < len; i++) {
                         done++;
                         const row: Dhis2DataFormat = jsonBody[i];
-                        if (isNotNull(row)) {
+                        if (notNull(row)) {
                             if (row.dataValues.length > 0) {
                                 const siteId: any = await getSiteByDhis2Uid(row.orgUnit);
                                 var districtId = undefined;
@@ -79,7 +83,7 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
                                 }
                                 const chwsId: any = await getChwsByDhis2Uid(getValue(row.dataValues, 'JkMyqI3e6or'));
                                 const dateVal = getValue(row.dataValues, 'RlquY86kI66');
-                                if (districtId && isNotNull(siteId) && isNotNull(chwsId) && isNotNull(dateVal)) {
+                                if (districtId && notNull(siteId) && notNull(chwsId) && notNull(dateVal)) {
                                     if (!outPutInfo.hasOwnProperty(`Données Total ${siteName}`)) outPutInfo[`Données Total ${siteName}`] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
                                     try {
                                         const _dhis2Sync = new ChwsData();
@@ -96,8 +100,8 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
                                         outPutInfo[`Données Total ${siteName}`]["successCount"] += 1;
                                     } catch (error: any) {
                                         outPutInfo[`Données Total ${siteName}`]["errorCount"] += 1;
-                                        outPutInfo[`Données Total ${siteName}`]["errorElements"] += `\n\n\n\n__________\n\n\n\n${error.toString()}`;
-                                        outPutInfo[`Données Total ${siteName}`]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.event}`;
+                                        outPutInfo[`Données Total ${siteName}`]["errorElements"] += `${_sepation}${error.toString()}`;
+                                        outPutInfo[`Données Total ${siteName}`]["errorIds"] += `${_sepation}${row.event}`;
                                     }
                                 }
                             }
@@ -159,7 +163,6 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
     };
 
     try {
-
         https.get(CouchDbFetchDataOptions(params), async function (res) {
             var body = "";
             res.on('data', (data) => {
@@ -211,8 +214,8 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                             outPutInfo["Données Total"]["successCount"] += 1;
                                         } catch (err: any) {
                                             outPutInfo["Données Total"]["errorCount"] += 1;
-                                            outPutInfo["Données Total"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
-                                            outPutInfo["Données Total"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.doc._id}`;
+                                            outPutInfo["Données Total"]["errorElements"] += `${_sepation}${err.toString()}`;
+                                            outPutInfo["Données Total"]["errorIds"] += `${_sepation}${row.doc._id}`;
 
                                             // outPutInfo["ErrorMsg"] = {}
                                             // outPutInfo["ErrorMsg"]["error"] = err.toString()
@@ -265,10 +268,11 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
         return resp.status(500).json(outPutInfo);
     }
 
+    
     var params: CouchDbFetchData = {
-        viewName: 'contacts_by_type',
-        // startKey: [Functions.date_to_milisecond(req.body.start_date, true)],
-        // endKey: [Functions.date_to_milisecond(req.body.end_date, false)],
+        viewName: 'contacts_by_date', //'contacts_by_type',
+        startKey: [Functions.date_to_milisecond(req.body.start_date, true)],
+        endKey: [Functions.date_to_milisecond(req.body.end_date, false)],
     };
 
     try {
@@ -317,7 +321,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                             const districtId = row.doc.district_external_id;
                                             const districtName = row.doc.district_external_name;
                                             try {
-                                                if (isNotNull(districtId) && isNotNull(districtName)) {
+                                                if (notNull(districtId) && notNull(districtName)) {
                                                     if (!outPutInfo.hasOwnProperty("Districts")) outPutInfo["Districts"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' };
                                                     const _syncDistrict = new Districts();
                                                     _syncDistrict.id = districtId
@@ -334,8 +338,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                                 if (!districtList.includes(districtId)) {
                                                     districtList.push(districtId);
                                                     outPutInfo["Districts"]["errorCount"] += 1;
-                                                    outPutInfo["Districts"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
-                                                    outPutInfo["Districts"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${districtId}`;
+                                                    outPutInfo["Districts"]["errorElements"] += `${_sepation}${err.toString()}`;
+                                                    outPutInfo["Districts"]["errorIds"] += `${_sepation}${districtId}`;
                                                 }
                                             }
                                         }
@@ -350,8 +354,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                         outPutInfo["Sites"]["successCount"] += 1;
                                     } catch (err: any) {
                                         outPutInfo["Sites"]["errorCount"] += 1;
-                                        outPutInfo["Sites"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
-                                        outPutInfo["Sites"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${siteId}`;
+                                        outPutInfo["Sites"]["errorElements"] += `${_sepation}${err.toString()}`;
+                                        outPutInfo["Sites"]["errorIds"] += `${_sepation}${siteId}`;
                                     }
                                 }
                             }
@@ -390,8 +394,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                         outPutInfo["Zones"]["successCount"] += 1;
                                     } catch (err: any) {
                                         outPutInfo["Zones"]["errorCount"] += 1;
-                                        outPutInfo["Zones"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
-                                        outPutInfo["Zones"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.doc._id}`;
+                                        outPutInfo["Zones"]["errorElements"] += `${_sepation}${err.toString()}`;
+                                        outPutInfo["Zones"]["errorIds"] += `${_sepation}${row.doc._id}`;
                                     }
                                 }
                             }
@@ -431,8 +435,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                             outPutInfo["Familles"]["successCount"] += 1;
                                         } catch (err: any) {
                                             outPutInfo["Familles"]["errorCount"] += 1;
-                                            outPutInfo["Familles"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
-                                            outPutInfo["Familles"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.doc._id}`;
+                                            outPutInfo["Familles"]["errorElements"] += `${_sepation}${err.toString()}`;
+                                            outPutInfo["Familles"]["errorIds"] += `${_sepation}${row.doc._id}`;
                                         }
                                     }
                                 }
@@ -460,12 +464,15 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                             if (!outPutInfo.hasOwnProperty("Patients")) outPutInfo["Patients"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '', }
                                             try {
                                                 const _syncPatient = new Patients();
+                                                const sx = row.doc.sex;
                                                 _syncPatient.source = dataSource;
                                                 _syncPatient.id = row.doc._id;
                                                 _syncPatient.rev = row.doc._rev;
                                                 _syncPatient.name = row.doc.name;
                                                 _syncPatient.external_id = row.doc.external_id;
                                                 _syncPatient.role = row.doc.role;
+                                                _syncPatient.date_of_birth = row.doc.date_of_birth;
+                                                _syncPatient.sex = sx == 'male' ? 'M' : sx == 'female' ? 'F' : undefined;
                                                 _syncPatient.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
                                                 _syncPatient.reported_full_date = Functions.milisecond_to_date(row.doc.reported_date, 'fulldate');
                                                 _syncPatient.district = districtId;
@@ -476,8 +483,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                                 outPutInfo["Patients"]["successCount"] += 1;
                                             } catch (err: any) {
                                                 outPutInfo["Patients"]["errorCount"] += 1;;
-                                                outPutInfo["Patients"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
-                                                outPutInfo["Patients"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.doc._id}`;
+                                                outPutInfo["Patients"]["errorElements"] += `${_sepation}${err.toString()}`;
+                                                outPutInfo["Patients"]["errorIds"] += `${_sepation}${row.doc._id}`;
                                                 // console.log(row.doc._id)
                                             }
                                         }
@@ -521,8 +528,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                             outPutInfo["Asc"]["successCount"] += 1;
                                         } catch (err: any) {
                                             outPutInfo["Asc"]["errorCount"] += 1;
-                                            outPutInfo["Asc"]["errorElements"] += `\n\n\n\n__________\n\n\n\n${err.toString()}`;
-                                            outPutInfo["Asc"]["errorIds"] += `\n\n\n\n__________\n\n\n\n${row.doc._id}`;
+                                            outPutInfo["Asc"]["errorElements"] += `${_sepation}${err.toString()}`;
+                                            outPutInfo["Asc"]["errorIds"] += `${_sepation}${row.doc._id}`;
                                         }
                                     }
                                 }
@@ -575,7 +582,7 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
     const chwsData = chwsDataToDhis2 as DataIndicators;
 
     try {
-        if (isNotNull(chwsData)) {
+        if (notNull(chwsData)) {
             var jsonData = matchDhis2Data(chwsData);
             const date = getValue(jsonData["dataValues"], "lbHrQBTbY1d");  // reported_date
             const srce = getValue(jsonData["dataValues"], "FW6z2Ha2GNr");  // data_source

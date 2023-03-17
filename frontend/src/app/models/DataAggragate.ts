@@ -64,6 +64,7 @@ export interface DataIndicators {
     total_paludisme_pcime_soins: number
     total_pneumonie_pcime_soins: number
     total_malnutrition_pcime_soins: number
+
     prompt_diarrhee_24h_pcime_soins: number
     prompt_diarrhee_48h_pcime_soins: number
     prompt_diarrhee_72h_pcime_soins: number
@@ -73,6 +74,7 @@ export interface DataIndicators {
     prompt_pneumonie_24h_pcime_soins: number
     prompt_pneumonie_48h_pcime_soins: number
     prompt_pneumonie_72h_pcime_soins: number
+    
     total_vad_femmes_enceintes_NC: number
     total_vad_femme_postpartum_NC: number
     total_test_de_grossesse_domicile: number

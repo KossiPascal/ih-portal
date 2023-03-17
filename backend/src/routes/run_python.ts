@@ -5,7 +5,7 @@ import express = require("express");
 import { DataIndicators } from "../entity/DataAggragate";
 import { Middelware } from "../middleware/auth";
 import { DataFromPython } from "../utils/appInterface";
-import { extractFolder, isNotNull, sslFolder } from "../utils/functions";
+import { extractFolder, notNull, sslFolder } from "../utils/functions";
 var path = require('path');
 const pyRouter = express.Router();
 // const utf8 = require('utf8');
@@ -59,7 +59,7 @@ function formatData(data: any) {
 }
 
 function dataToReturn(data: any) {
-    return isNotNull(data) ? data : {};
+    return notNull(data) ? data : {};
 }
 
 

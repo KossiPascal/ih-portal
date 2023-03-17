@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { DataList, TodoItem, TodoList } from "@ih-app/models/IndexDb";
 import { Sites, Zones, Families, Patients, Chws, ChwsDataFormDb } from "@ih-app/models/Sync";
 import { User } from "@ih-app/models/User";
-import { Functions } from "@ih-app/shared/functions";
+import { Functions, notNull } from "@ih-app/shared/functions";
 import Dexie, { Table } from 'dexie';
 import relationships from 'dexie-relationships'
 
@@ -145,7 +145,7 @@ export class IndexDbService extends Dexie {
     async createOrUpdate(dbtable: Table, items: any) {
         const id = items.id;
         const found = await this.getById(dbtable, id);
-        if (Functions.notNull(found)) {
+        if (notNull(found)) {
           this.update(dbtable, items);
         } else {
           this.create(dbtable, items);

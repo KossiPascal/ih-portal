@@ -3,9 +3,10 @@ import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { User } from "@ih-models/User";
 import moment from "moment";
-import { Functions } from "@ih-app/shared/functions";
+import { Functions, notNull } from "@ih-app/shared/functions";
 import { Roles } from "../shared/roles";
 import { AppStorageService } from "./cookie.service";
+import { Chws } from "@ih-app/models/Sync";
 
 Functions
 @Injectable({
@@ -19,7 +20,7 @@ export class AuthService {
 
   public userValue(): User | null {
       try {
-        if (Functions.notNull(this.store.get('user'))) {
+        if (notNull(this.store.get('user'))) {
           var userData: User = JSON.parse(this.store.get('user') ?? '');
           userData.userLogo = 'assets/images/default_icon.png';
           // if( typeof(your_variable) === 'string' ) { ... }
@@ -118,8 +119,26 @@ export class AuthService {
   logout() {
     Functions.saveCurrentUrl(this.router);
     localStorage.removeItem("user");
+    localStorage.removeItem("chw_found");
+    localStorage.removeItem("IFrame");
+    
+    
     // this.router.navigate(["auths/login"]);
     location.href = 'auths/login';
   }
+
+
+  
+
+  public chwsOrgUnit(): Chws|null {
+    try {
+      if (notNull(this.store.get('chw_found'))) {
+        return JSON.parse(this.store.get('chw_found') ?? '') as Chws;
+      };
+    } catch (error) {
+      
+    }
+    return null;
+}
 
 }

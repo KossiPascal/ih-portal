@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TodoItem, TodoList } from '@ih-app/models/IndexDb';
 import { AuthService } from '@ih-app/services/auth.service';
 import { IndexDbService } from '@ih-app/services/index-db.service';
-import { Functions } from '@ih-app/shared/functions';
+import { Functions, notNull } from '@ih-app/shared/functions';
 
 import { liveQuery } from 'dexie';
 
@@ -24,8 +24,8 @@ export class IndexDbItemListComponent implements OnInit {
     this.itemsForm = this.createItemsFormGroup();
   }
 
-  isExist(data: any) {
-    return Functions.notNull(data);
+  notNull(data: any) {
+    return notNull(data);
   }
 
   createListFormGroup(): FormGroup {
@@ -58,7 +58,7 @@ export class IndexDbItemListComponent implements OnInit {
   addNewOrUpdateList() {
     const id = this.listForm.value.id;
     const list:TodoList = { id: id, title: this.listForm.value.listName };
-    if (!this.isExist(id)) {
+    if (!this.notNull(id)) {
       this.db.create(this.todoListTable, list).then((v) => this.clearOrEditListInput());
     } else {
       this.db.update(this.todoListTable, list).then((v) => this.clearOrEditListInput());
@@ -79,8 +79,8 @@ export class IndexDbItemListComponent implements OnInit {
 
   clearOrEditListInput(list: any = null) {
     this.listForm.setValue({
-      id: this.isExist(list) ? list.id : null,
-      listName: this.isExist(list) ? list.title : null
+      id: this.notNull(list) ? list.id : null,
+      listName: this.notNull(list) ? list.title : null
     });
   }
 
@@ -99,7 +99,7 @@ export class IndexDbItemListComponent implements OnInit {
     const id = this.itemsForm.value.id;
     const todoListId = this.itemsForm.value.todoListId || (await this.db.getlast(this.todoItemsTable))?.id || 0;
     var items:TodoItem = { id:id, title: this.itemsForm.value.itemName, todoListId:todoListId };
-    if (!this.isExist(id)) {
+    if (!this.notNull(id)) {
       this.db.create(this.todoItemsTable, items).then((v) => this.clearOrEditItemInput());
     } else {
       this.db.update(this.todoItemsTable, items).then((v) => this.clearOrEditItemInput());
@@ -116,9 +116,9 @@ export class IndexDbItemListComponent implements OnInit {
 
   clearOrEditItemInput(item: any = null) {
     this.itemsForm.setValue({
-      id: this.isExist(item) ? item.id : null,
-      itemName: this.isExist(item) ? item.title : null,
-      todoListId: this.isExist(item) ? item.todoListId : null
+      id: this.notNull(item) ? item.id : null,
+      itemName: this.notNull(item) ? item.title : null,
+      todoListId: this.notNull(item) ? item.todoListId : null
     });
   }
 

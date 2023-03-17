@@ -164,6 +164,12 @@ export class Patients {
   @Column({ type: 'varchar', nullable: true })
   role?: string
 
+  @Column({ type: 'varchar', nullable: true })
+  sex?: string
+
+  @Column({ type: 'varchar', nullable: true })
+  date_of_birth?: string
+
   @ManyToOne(() => Districts, district => district.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'district_id', referencedColumnName: 'id' })
   district!: Districts|null

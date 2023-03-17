@@ -12,8 +12,8 @@
           </label>
         </div>
         <div class="col-md-5">
-          <button *ngIf="!isExist(listForm.value.id)" color="accent" [disabled]="!listForm.valid" type="submit" class="btn btn-primary btn-block">Add new list</button>
-          <button *ngIf="isExist(listForm.value.id)" color="accent" [disabled]="!listForm.valid" type="submit" class="btn btn-primary btn-block">Update list</button>
+          <button *ngIf="!notNull(listForm.value.id)" color="accent" [disabled]="!listForm.valid" type="submit" class="btn btn-primary btn-block">Add new list</button>
+          <button *ngIf="notNull(listForm.value.id)" color="accent" [disabled]="!listForm.valid" type="submit" class="btn btn-primary btn-block">Update list</button>
         </div>
       </form>
       <br>
@@ -44,8 +44,8 @@
           </label>
         </div>
         <div class="col-md-5">
-          <button *ngIf="!isExist(itemsForm.value.id)" color="accent" [disabled]="!itemsForm.valid" type="submit" class="btn btn-primary btn-block">Add New Item</button>
-          <button *ngIf="isExist(itemsForm.value.id)" color="accent" [disabled]="!itemsForm.valid" type="submit" class="btn btn-primary btn-block">Update Item</button>
+          <button *ngIf="!notNull(itemsForm.value.id)" color="accent" [disabled]="!itemsForm.valid" type="submit" class="btn btn-primary btn-block">Add New Item</button>
+          <button *ngIf="notNull(itemsForm.value.id)" color="accent" [disabled]="!itemsForm.valid" type="submit" class="btn btn-primary btn-block">Update Item</button>
         </div>
       </form>
       <br>

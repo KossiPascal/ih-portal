@@ -3,7 +3,7 @@ import { FormGroup, FormControl, Validators, AbstractControl, ValidationErrors, 
 import { Router } from '@angular/router';
 import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
-import { Functions } from '@ih-app/shared/functions';
+import { Functions, notNull } from '@ih-app/shared/functions';
 import { Roles } from '@ih-app/shared/roles';
 import { User } from '@ih-models/User';
 // import usersDb from '@ih-databases/users.json'; 
@@ -135,7 +135,7 @@ export class UserComponent implements OnInit {
           return { mismatch: true };
         }
         if (this.isEditMode) {
-          if (Functions.notNull(sourceCtrl.value) && sourceCtrl.value.length < 8 || Functions.notNull(targetCtrl.value) && targetCtrl.value.length < 8) {
+          if (notNull(sourceCtrl.value) && sourceCtrl.value.length < 8 || notNull(targetCtrl.value) && targetCtrl.value.length < 8) {
             return { mismatch: true };
           }
         }
@@ -149,7 +149,7 @@ export class UserComponent implements OnInit {
     if (this.auth.isLoggedIn()) {
 
       if (this.isEditMode) {
-        const editPassword: boolean = Functions.notNull(this.userForm.value.password) && Functions.notNull(this.userForm.value.passwordConfirm);
+        const editPassword: boolean = notNull(this.userForm.value.password) && notNull(this.userForm.value.passwordConfirm);
         this.userForm.value['editPassword'] = editPassword;
         this.userForm.value['id'] = this.user!.id;
       }
