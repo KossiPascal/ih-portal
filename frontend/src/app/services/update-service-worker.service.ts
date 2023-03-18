@@ -62,8 +62,8 @@ export class UpdateServiceWorkerService {
 
   checkForAppNewVersion: boolean = true;
   isAppUpdateFound:boolean = false;
-  
-  private async checkForUpdates(onSuccess: any) {
+
+  async checkForUpdates(onSuccess: any) {
     console.log('Service Worker is Enable: ', this.sw.isEnabled);
     if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion(onSuccess);
     interval(30000)

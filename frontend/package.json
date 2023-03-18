@@ -1,6 +1,6 @@
 {
   "name": "ih-portal",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "scripts": {
     "ng": "ng serve",
     "start": "concurrently \"npm run ng serve\" \"cd ../backend && npm run nodemonserver\"",

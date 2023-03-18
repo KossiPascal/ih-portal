@@ -92,6 +92,7 @@ export class AppComponent implements OnInit {
     // this.checkForUpdates();
 
     this.sw.update(this.ShowUpdateVersionModal());
+    this.sw.checkForUpdates(this.ShowUpdateVersionModal());
     this.appVersion = localStorage.getItem('appVersion');
   }
 
