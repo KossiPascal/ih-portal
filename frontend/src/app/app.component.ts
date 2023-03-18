@@ -89,9 +89,22 @@ export class AppComponent implements OnInit {
     // this.checkForUpdates();
 
     // this.updateSw.update(this.ShowUpdateVersionModal());
-    this.checkForUpdates();
+    // this.checkForUpdates();
     this.appVersion = localStorage.getItem('appVersion');
+
+    this.sw.available.subscribe((event: any) => {
+      this.sw.activateUpdate().then(() => {
+        if(confirm('Mise à jour disponible.')){
+          document.location.reload();
+        }
+      });
+    });
+
   }
+
+
+
+
 
   async checkForUpdates() {
     console.log('Service Worker is Enable: ', this.sw.isEnabled);

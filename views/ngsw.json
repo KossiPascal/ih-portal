@@ -1,6 +1,12 @@
 {
   "configVersion": 1,
-  "timestamp": 1679139733381,
+  "timestamp": 1679141284674,
+  "appData": [
+    "/index.html",
+    "/*.bundle.css",
+    "/*.bundle.js",
+    "/*.chunk.js"
+  ],
   "index": "/index.html",
   "assetGroups": [
     {
@@ -1854,6 +1860,7 @@
         "/main.7d64754bed55490e.js",
         "/main.80b2f4c708c5a39d.js",
         "/main.80e88dbef42ab9a8.js",
+        "/main.82232ba8c657b08d.js",
         "/main.8723b8c963f60464.js",
         "/main.8f093b14b17ac234.js",
         "/main.8f13aa2ef12807ac.js",
@@ -1870,6 +1877,7 @@
         "/main.b966997e9ddfa0b2.js",
         "/main.bc9b982cd716029f.js",
         "/main.bfc382016a0f923f.js",
+        "/main.bfc740fc994dd7a7.js",
         "/main.c87940fb20d2066a.js",
         "/main.c95b47eae1e65188.js",
         "/main.d228096065cd1086.js",
@@ -3761,7 +3769,7 @@
     "/fa-solid-900.d5b0a3566b352ee9.ttf": "eb8914f6b1797b45ee0883e6089d92695d9f9441",
     "/fa-solid-900.e67670b0779338ff.woff": "a22acd7697f36e7d4cc31a853c70e776eac54bb1",
     "/favicon.ico": "b3ad0e1c2a97826d3acc2bf019f78cf73576cc11",
-    "/index.html": "098610b4c228718779adac1f8e9c6533f58ec86c",
+    "/index.html": "44fcf7c9ec1b6318cb5127bdd409fecccd5f9b53",
     "/main.013b7653c1ed2fe0.js": "5df81a27eaec12ed0c00d9fd4039987d420fe944",
     "/main.05aa4021344ee01f.js": "f57d425183c1f5a60b5350a300989e6d31ce9fb0",
     "/main.0dbde67976e6342a.js": "b1508b2da5bb8e3b33a6cb94e66b1b0a3a054140",
@@ -3805,6 +3813,7 @@
     "/main.7d64754bed55490e.js": "6ae03ba29c4a40193e24d1184ab509d0237b880a",
     "/main.80b2f4c708c5a39d.js": "ca0d6bcc4d0fc1535f868ffef74d26c7868d268d",
     "/main.80e88dbef42ab9a8.js": "34a2a49e71d0b3a78958cc42835331d8dc768079",
+    "/main.82232ba8c657b08d.js": "c7cb7484cd88ef2f72e8c3361e5eb4c38a8dc5bd",
     "/main.8723b8c963f60464.js": "e4e103f0ac7909e6580859902f19d80cccacb63b",
     "/main.8f093b14b17ac234.js": "66a3df29884511fcb382e4da7d6b50366f807042",
     "/main.8f13aa2ef12807ac.js": "9ee4c7cf0cf4668210424041d664253637b5dd4a",
@@ -3821,6 +3830,7 @@
     "/main.b966997e9ddfa0b2.js": "fed644bd5c93ed701d7c0d1df945525b34fceb45",
     "/main.bc9b982cd716029f.js": "02be1ed4730e5cfd821f4e704db884f2bac5dd84",
     "/main.bfc382016a0f923f.js": "55a39a6656c2055786d805ee213596c3b67217ae",
+    "/main.bfc740fc994dd7a7.js": "a322cb625f495e6978e0b885b6e55633a155591f",
     "/main.c87940fb20d2066a.js": "e07e34678ac5edaffbf8dfedbda2387687d26de4",
     "/main.c95b47eae1e65188.js": "f4c4273db9233323488ee6f430da03510432f2cb",
     "/main.d228096065cd1086.js": "ec668b8f9bf60df54bec789d68f6f546cc90e04a",

@@ -1,5 +1,7 @@
 {
+  "configVersion": 1,
   "index": "/index.html",
+  "appData": ["/index.html", "/*.bundle.css", "/*.bundle.js", "/*.chunk.js"],
   "assetGroups": [
     {
       "name": "app",
@@ -10,11 +12,10 @@
           "/index.html",
           "/*.css",
           "/*.js",
-          "/*.bundle.css",
-          "/*.bundle.js",
-          "/*.chunk.js",
-          "/assets/**"
-        ],
+          "/assets/**",
+          "/*.bundle.css", 
+          "/*.bundle.js", 
+          "/*.chunk.js"],
         "urls": []
       }
     },
