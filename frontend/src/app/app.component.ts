@@ -61,6 +61,7 @@ export class AppComponent implements OnInit {
     this.chwOU = this.auth.chwsOrgUnit();
    this.UpdateVersion(false);
     const appTitle = this.titleService.getTitle();
+    this.checkForAppNewVersion = true;
 
     this.router
       .events.pipe(
@@ -85,12 +86,14 @@ export class AppComponent implements OnInit {
     this.updateOnlineStatus();
     window.addEventListener('online', this.updateOnlineStatus.bind(this));
     window.addEventListener('offline', this.updateOnlineStatus.bind(this));
+    // this.checkForUpdates();
+
     // this.updateSw.update(this.ShowUpdateVersionModal());
     this.checkForUpdates();
     this.appVersion = localStorage.getItem('appVersion');
   }
 
-  checkForUpdates() {
+  async checkForUpdates() {
     console.log('Service Worker is Enable: ', this.sw.isEnabled);
     if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion();
     interval(30000)
@@ -98,15 +101,14 @@ export class AppComponent implements OnInit {
       .subscribe(() => {
         this.sw.checkForUpdate().then((updateFound) => {
           this.isAppUpdateFound = updateFound;
-          this.checkForAvailableVersion();
-          // if (updateFound) this.checkForAvailableVersion();
+          if (updateFound) this.checkForAvailableVersion();
         });
       });
   }
 
   private checkForAvailableVersion(): void {
-    // this.sw.activateUpdate().then((activate) => {
-    //   if (activate) {
+    this.sw.activateUpdate().then((activate) => {
+      if (activate) {
         this.sw.versionUpdates.subscribe(evt => {
           switch (evt.type) {
             case 'VERSION_DETECTED':
@@ -125,10 +127,10 @@ export class AppComponent implements OnInit {
               break;
           }
         });
-    //   } else {
-    //     // console.log('Service Worker for Update is Inactive');
-    //   }
-    // });
+      } else {
+        // console.log('Service Worker for Update is Inactive');
+      }
+    });
   }
 
   clickModal(btnId: string) {
