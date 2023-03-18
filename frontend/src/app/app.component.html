@@ -100,14 +100,13 @@
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
           </li>
 
-          <li *ngIf="roles.isChws()" class="nav-item">
-            <!-- Brand Logo -->
+          <!-- <li *ngIf="roles.isChws()" class="nav-item">
             <span class="brand-link" style="text-align: center;">
               <span class="brand-text font-weight-light">
                 <img src="{{appLogo}}" alt="Integrate Health" class="" style="opacity: .8; width: 150px!important;">
               </span>
             </span>
-          </li>
+          </li> -->
 
 
           <!-- <li  routerLink="dashboards/dash1" class="nav-link">Dashboard 1</a>
@@ -204,18 +203,12 @@
         </li> -->
 
 
-
-
-
-
-
-
           
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#" style="text-align: center; color: blue !important;display: inline-block;">
               <!-- <i style="font-size: 25px;" class="fas fa-th-large"></i> -->
               <!-- <span class="badge badge-warning navbar-badge">Infos</span> -->
-                  <img style="margin-top: -12px;" src="{{ userData?.userLogo }}" width="50" class="img-circle elevation-2" alt="User Image">
+                  <img style="margin-top: -12px;" src="{{ userData?.userLogo }}" width="40" class="img-circle elevation-2" alt="User Image">
                  
               <span style="margin-left: 5px;" >{{ roles.isChws() ? chwOU?.name: userData?.fullname }}</span>
                 

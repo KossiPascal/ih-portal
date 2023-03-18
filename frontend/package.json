@@ -1,6 +1,6 @@
 {
   "name": "ih-portal",
-  "version": "1.2.13",
+  "version": "1.2.14",
   "scripts": {
     "ng": "ng serve",
     "appreq": "ng build --service-worker=true --build-optimizer=true --optimization=true --configuration=production --aot=true --output-hashing=all",
