@@ -11,6 +11,7 @@ import { Roles } from './shared/roles';
 import { User } from './models/User';
 import { AppStorageService } from './services/cookie.service';
 import { Chws } from './models/Sync';
+import { UpdateServiceWorkerService } from './services/update-service-worker.service';
 
 declare var $: any;
 @Component({
@@ -40,7 +41,7 @@ export class AppComponent implements OnInit {
   appVersion: any;
   updateSubscription?: Subscription;
 
-  constructor(private store: AppStorageService, private conf: ConfigService, public translate: TranslateService, private auth: AuthService, private router: Router, private sw: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(private store: AppStorageService, private conf: ConfigService,private updateSw:UpdateServiceWorkerService, public translate: TranslateService, private auth: AuthService, private router: Router, private sw: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
@@ -56,6 +57,8 @@ export class AppComponent implements OnInit {
   }
 
   public roles = new Roles(this.store);
+
+  
 
   ngOnInit(): void {
     this.chwOU = this.auth.chwsOrgUnit();
@@ -87,11 +90,12 @@ export class AppComponent implements OnInit {
     window.addEventListener('online', this.updateOnlineStatus.bind(this));
     window.addEventListener('offline', this.updateOnlineStatus.bind(this));
     // this.checkForUpdates();
-
-    // this.updateSw.update(this.ShowUpdateVersionModal());
-    // this.checkForUpdates();
+    this.updateSw.update(this.ShowUpdateVersionModal());
     this.appVersion = localStorage.getItem('appVersion');
+  }
 
+
+  updateChecker(){
     this.sw.available.subscribe((event: any) => {
       this.sw.activateUpdate().then(() => {
         if(confirm('Mise à jour disponible.')){
@@ -99,9 +103,7 @@ export class AppComponent implements OnInit {
         }
       });
     });
-
   }
-
 
 
 
