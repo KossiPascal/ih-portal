@@ -52,6 +52,8 @@ export class UpdateServiceWorkerService {
                   console.debug(`Service worker state changed to ${installingWorker.state}!`);
               }
             };
+          } else {
+            console.log(`installingWorker: ${installingWorker}`)
           }
         };
 
