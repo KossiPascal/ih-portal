@@ -43,7 +43,7 @@ export class AppComponent implements OnInit {
   appVersion: any;
   updateSubscription?: Subscription;
 
-  constructor(private store: AppStorageService, private conf: ConfigService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private sw: UpdateServiceWorkerService, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(private store: AppStorageService, private conf: ConfigService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private updateSw: UpdateServiceWorkerService, private sw: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
@@ -91,12 +91,51 @@ export class AppComponent implements OnInit {
     window.addEventListener('offline', this.updateOnlineStatus.bind(this));
     // this.checkForUpdates();
 
-    this.sw.update(this.ShowUpdateVersionModal());
-    this.sw.checkForUpdates(this.ShowUpdateVersionModal());
+    // this.updateSw.update(this.ShowUpdateVersionModal());
+    this.checkForUpdates(this.ShowUpdateVersionModal());
     this.appVersion = localStorage.getItem('appVersion');
   }
 
- 
+  async checkForUpdates(onSuccess: any) {
+    console.log('Service Worker is Enable: ', this.sw.isEnabled);
+    if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion(onSuccess);
+    interval(30000)
+      .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
+      .subscribe(() => {
+        this.sw.checkForUpdate().then((updateFound) => {
+          this.isAppUpdateFound = updateFound;
+          if (updateFound) this.checkForAvailableVersion(onSuccess);
+        });
+      });
+  }
+
+  private checkForAvailableVersion(onSuccess: any): void {
+    this.sw.activateUpdate().then((activate) => {
+      if (activate) {
+        this.sw.versionUpdates.subscribe(evt => {
+          switch (evt.type) {
+            case 'VERSION_DETECTED':
+              // console.log(`Downloading new app version: ${evt.version.hash}`);
+              onSuccess();
+              break;
+            case 'VERSION_READY':
+              // console.log(`Current app version: ${evt.currentVersion.hash}`);
+              // console.log(`Last app version: ${evt.latestVersion.hash}`);
+              break;
+            case 'NO_NEW_VERSION_DETECTED':
+              // console.log(`Current app version: '${evt.version.hash}'`);
+              break;
+            case 'VERSION_INSTALLATION_FAILED':
+              // console.log(`Failed to install app version '${evt.version.hash}': ${evt.error}`);
+              break;
+          }
+        });
+      } else {
+        // console.log('Service Worker for Update is Inactive');
+      }
+    });
+  }
+
   clickModal(btnId: string) {
     $('#' + btnId).trigger('click');
   }
