@@ -11,7 +11,6 @@ import { Roles } from './shared/roles';
 import { User } from './models/User';
 import { AppStorageService } from './services/cookie.service';
 import { Chws } from './models/Sync';
-import { UpdateServiceWorkerService } from './services/update-service-worker.service';
 
 declare var $: any;
 @Component({
@@ -28,6 +27,8 @@ export class AppComponent implements OnInit {
   modalVersion!: boolean;
   modalPwaEvent!: any;
   modalPwaPlatform: 'ios' | 'android' | undefined;
+  private readonly retryFailedUpdateAfterSec = 5 * 60;
+  private existingUpdateLoop?: any;
 
   appLogo: any = this.auth.appLogoPath()
   userData: User | null = this.auth.userValue()
@@ -41,7 +42,7 @@ export class AppComponent implements OnInit {
   appVersion: any;
   updateSubscription?: Subscription;
 
-  constructor(private store: AppStorageService, private conf: ConfigService,private updateSw:UpdateServiceWorkerService, public translate: TranslateService, private auth: AuthService, private router: Router, private sw: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(private store: AppStorageService, private conf: ConfigService, public translate: TranslateService, private auth: AuthService, private router: Router, private sw: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
@@ -90,63 +91,106 @@ export class AppComponent implements OnInit {
     window.addEventListener('online', this.updateOnlineStatus.bind(this));
     window.addEventListener('offline', this.updateOnlineStatus.bind(this));
     // this.checkForUpdates();
-    this.updateSw.update(this.ShowUpdateVersionModal());
+    this.versionUpdateChecker();
     this.appVersion = localStorage.getItem('appVersion');
   }
 
 
-  updateChecker(){
-    this.sw.available.subscribe((event: any) => {
-      this.sw.activateUpdate().then(() => {
-        if(confirm('Mise à jour disponible.')){
-          document.location.reload();
+  versionUpdateChecker() {
+    // This avoids multiple updates retrying in parallel
+    if (this.existingUpdateLoop) {
+      clearTimeout(this.existingUpdateLoop);
+      this.existingUpdateLoop = undefined;
+    }
+
+    window.navigator.serviceWorker.getRegistrations()
+      .then((registrations) => {
+        const registration = registrations && registrations.length && registrations[0];
+        if (!registration) {
+          console.warn('Cannot update service worker - no active workers found');
+          return;
         }
-      });
-    });
-  }
 
-
-
-
-  async checkForUpdates() {
-    console.log('Service Worker is Enable: ', this.sw.isEnabled);
-    if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion();
-    interval(30000)
-      .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
-      .subscribe(() => {
-        this.sw.checkForUpdate().then((updateFound) => {
-          this.isAppUpdateFound = updateFound;
-          if (updateFound) this.checkForAvailableVersion();
-        });
-      });
-  }
-
-  private checkForAvailableVersion(): void {
-    this.sw.activateUpdate().then((activate) => {
-      if (activate) {
-        this.sw.versionUpdates.subscribe(evt => {
-          switch (evt.type) {
-            case 'VERSION_DETECTED':
-              // console.log(`Downloading new app version: ${evt.version.hash}`);
-              this.ShowUpdateVersionModal();
-              break;
-            case 'VERSION_READY':
-              // console.log(`Current app version: ${evt.currentVersion.hash}`);
-              // console.log(`Last app version: ${evt.latestVersion.hash}`);
-              break;
-            case 'NO_NEW_VERSION_DETECTED':
-              // console.log(`Current app version: '${evt.version.hash}'`);
-              break;
-            case 'VERSION_INSTALLATION_FAILED':
-              // console.log(`Failed to install app version '${evt.version.hash}': ${evt.error}`);
-              break;
+        registration.onupdatefound = () => {
+          const installingWorker = registration.installing;
+          if (installingWorker != null) {
+            installingWorker.onstatechange = () => {
+              switch (installingWorker.state) {
+                case 'activated':
+                  registration.onupdatefound = null;
+                  this.isAppUpdateFound = true;
+                  break;
+                case 'redundant':
+                  console.warn(
+                    'Service worker failed to install or marked as redundant. ' +
+                    `Retrying install in ${this.retryFailedUpdateAfterSec}secs.`
+                  );
+                  this.existingUpdateLoop = setTimeout(() => this.versionUpdateChecker(), this.retryFailedUpdateAfterSec * 1000);
+                  registration.onupdatefound = null;
+                  break;
+                default:
+                  console.debug(`Service worker state changed to ${installingWorker.state}!`);
+              }
+            };
           }
-        });
-      } else {
-        // console.log('Service Worker for Update is Inactive');
-      }
-    });
+        };
+
+        registration.update();
+      });
   }
+
+
+
+  // updateChecker(){
+  //   this.sw.available.subscribe((event: any) => {
+  //     this.sw.activateUpdate().then(() => {
+  //       if(confirm('Mise à jour disponible.')){
+  //         document.location.reload();
+  //       }
+  //     });
+  //   });
+  // }
+
+
+  // async checkForUpdates() {
+  //   console.log('Service Worker is Enable: ', this.sw.isEnabled);
+  //   if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion();
+  //   interval(30000)
+  //     .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
+  //     .subscribe(() => {
+  //       this.sw.checkForUpdate().then((updateFound) => {
+  //         this.isAppUpdateFound = updateFound;
+  //         if (updateFound) this.checkForAvailableVersion();
+  //       });
+  //     });
+  // }
+
+  // private checkForAvailableVersion(): void {
+  //   this.sw.activateUpdate().then((activate) => {
+  //     if (activate) {
+  //       this.sw.versionUpdates.subscribe(evt => {
+  //         switch (evt.type) {
+  //           case 'VERSION_DETECTED':
+  //             // console.log(`Downloading new app version: ${evt.version.hash}`);
+  //             this.ShowUpdateVersionModal();
+  //             break;
+  //           case 'VERSION_READY':
+  //             // console.log(`Current app version: ${evt.currentVersion.hash}`);
+  //             // console.log(`Last app version: ${evt.latestVersion.hash}`);
+  //             break;
+  //           case 'NO_NEW_VERSION_DETECTED':
+  //             // console.log(`Current app version: '${evt.version.hash}'`);
+  //             break;
+  //           case 'VERSION_INSTALLATION_FAILED':
+  //             // console.log(`Failed to install app version '${evt.version.hash}': ${evt.error}`);
+  //             break;
+  //         }
+  //       });
+  //     } else {
+  //       // console.log('Service Worker for Update is Inactive');
+  //     }
+  //   });
+  // }
 
   clickModal(btnId: string) {
     $('#' + btnId).trigger('click');
