@@ -55,10 +55,4 @@ export class UpdateServiceWorkerService {
       });
   }
 
-
-  checkForAppNewVersion: boolean = true;
-  isAppUpdateFound:boolean = false;
-
-
-
 }

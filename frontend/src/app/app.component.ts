@@ -3,17 +3,14 @@ import { NavigationEnd, Router, ActivatedRoute } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
 import { filter, map, takeWhile } from 'rxjs/operators';
 import { AuthService } from '@ih-services/auth.service';
-import { Platform } from '@angular/cdk/platform';
 import { TitleService } from '@ih-services/title.service';
 import { interval, Subscription } from 'rxjs';
-import { SyncService } from './services/sync.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService } from './services/config.service';
 import { Roles } from './shared/roles';
 import { User } from './models/User';
 import { AppStorageService } from './services/cookie.service';
 import { Chws } from './models/Sync';
-import { UpdateServiceWorkerService } from './services/update-service-worker.service';
 
 declare var $: any;
 @Component({
@@ -43,7 +40,7 @@ export class AppComponent implements OnInit {
   appVersion: any;
   updateSubscription?: Subscription;
 
-  constructor(private store: AppStorageService, private conf: ConfigService, public translate: TranslateService, private platform: Platform, private sync: SyncService, private auth: AuthService, private router: Router, private updateSw: UpdateServiceWorkerService, private sw: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(private store: AppStorageService, private conf: ConfigService, public translate: TranslateService, private auth: AuthService, private router: Router, private sw: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
@@ -92,31 +89,32 @@ export class AppComponent implements OnInit {
     // this.checkForUpdates();
 
     // this.updateSw.update(this.ShowUpdateVersionModal());
-    this.checkForUpdates(this.ShowUpdateVersionModal());
+    this.checkForUpdates();
     this.appVersion = localStorage.getItem('appVersion');
   }
 
-  async checkForUpdates(onSuccess: any) {
+  async checkForUpdates() {
     console.log('Service Worker is Enable: ', this.sw.isEnabled);
-    if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion(onSuccess);
+    if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion();
     interval(30000)
       .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
       .subscribe(() => {
         this.sw.checkForUpdate().then((updateFound) => {
           this.isAppUpdateFound = updateFound;
-          if (updateFound) this.checkForAvailableVersion(onSuccess);
+          this.checkForAvailableVersion();
+          // if (updateFound) this.checkForAvailableVersion();
         });
       });
   }
 
-  private checkForAvailableVersion(onSuccess: any): void {
-    this.sw.activateUpdate().then((activate) => {
-      if (activate) {
+  private checkForAvailableVersion(): void {
+    // this.sw.activateUpdate().then((activate) => {
+    //   if (activate) {
         this.sw.versionUpdates.subscribe(evt => {
           switch (evt.type) {
             case 'VERSION_DETECTED':
               // console.log(`Downloading new app version: ${evt.version.hash}`);
-              onSuccess();
+              this.ShowUpdateVersionModal();
               break;
             case 'VERSION_READY':
               // console.log(`Current app version: ${evt.currentVersion.hash}`);
@@ -130,10 +128,10 @@ export class AppComponent implements OnInit {
               break;
           }
         });
-      } else {
-        // console.log('Service Worker for Update is Inactive');
-      }
-    });
+    //   } else {
+    //     // console.log('Service Worker for Update is Inactive');
+    //   }
+    // });
   }
 
   clickModal(btnId: string) {
