@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "1.0.30",
+  "version": "1.0.31",
   "description": "portal-backend",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,7 @@
     "server": "ts-node ./dist/src/server.js",
     "prod": "pm2 start ./dist/src/server.js --watch",
     "runProd": "pm2-runtime ./dist/src/server.js",
+    "runProd2": "pm2-runtime ./src/server.ts",
     "nodemonjs": "nodemon --delay 3000ms ./dist/src/server.js",
     "build": "tsc -p .",
     "start1": "nodemon --exec npm run dev",

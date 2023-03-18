@@ -245,58 +245,33 @@ export class Dashboard1Component implements OnInit {
           } else if (data.source == 'Tonoudayo') {
             if (Consts.child_forms.includes(form)) outPutData[asc].app_total_child_followup += 1
 
-            if (Consts.mum_forms.includes(form)){
-              if (form == `pregnancy_family_planning`) {
-
-                if (data.fields.hasOwnProperty("s_reg_pregnancy_screen")) {
-                  if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_urine_result")) {
-                    if (field.s_reg_pregnancy_screen.s_reg_urine_result == "positive") {
-                      outPutData[asc].app_total_mum_followup += 1
-                    }
-                  }
-
-                  if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_why_urine_test_not_done")) {
-                    if (field.s_reg_pregnancy_screen.s_reg_why_urine_test_not_done == "already_pregnant") {
-                      outPutData[asc].app_total_mum_followup += 1
-                    }
-                  }
-                }
-                
-              } else {
+            if (Consts.mum_forms.includes(form) && form != `pregnancy_family_planning`){
                 outPutData[asc].app_total_mum_followup += 1
-              }
             }
-            if (Consts.fp_forms.includes(form)) {
-              if (form == `pregnancy_family_planning`) {
+            if (Consts.fp_forms.includes(form) && form != `pregnancy_family_planning`) {
+              outPutData[asc].app_total_fp_followup += 1
+            }
 
+            if(form == `pregnancy_family_planning`) {
+              if (data.fields.hasOwnProperty("s_reg_pregnancy_screen")) {
                 var isPregnant:boolean = false;
-
-                if (data.fields.hasOwnProperty("s_reg_pregnancy_screen")) {
-                  if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_urine_result")) {
-                    isPregnant = field.s_reg_pregnancy_screen.s_reg_urine_result == "positive";
-                  }
-
-                  if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_why_urine_test_not_done")) {
-                    isPregnant = field.s_reg_pregnancy_screen.s_reg_why_urine_test_not_done == "already_pregnant";
-                  }
-
-                  if (!isPregnant) {
-                    outPutData[asc].app_total_fp_followup += 1
-                  }
-
-                } else {
+                if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_urine_result")) {
+                  isPregnant = field.s_reg_pregnancy_screen.s_reg_urine_result == "positive";
+                }
+                if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_why_urine_test_not_done")) {
+                  isPregnant = field.s_reg_pregnancy_screen.s_reg_why_urine_test_not_done == "already_pregnant";
+                }
+                if (!isPregnant) {
                   outPutData[asc].app_total_fp_followup += 1
+                } else {
+                  outPutData[asc].app_total_mum_followup += 1
                 }
               } else {
                 outPutData[asc].app_total_fp_followup += 1
               }
             }
 
-
-
             if (Consts.mum_fp_forms.includes(form)) outPutData[asc].app_total_mum_fp_followup += 1
-
-
 
             if (["death_report","home_visit"].includes(form)) outPutData[asc].app_total_active_research += 1
             if (Consts.consultations_followup_forms.includes(form)) outPutData[asc].app_total_consultation_followup += 1
