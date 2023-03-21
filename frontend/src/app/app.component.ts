@@ -144,9 +144,9 @@ export class AppComponent implements OnInit {
   updateChecker() {
     if (this.sw.isEnabled) {
       this.sw.available.subscribe(() => {
-        if (confirm("New version available. Load New Version?")) {
-          window.location.reload();
-        }
+        // if (confirm("New version available. Load New Version?")) {
+        //   window.location.reload();
+        // }
         this.ShowUpdateVersionModal();
       });
     }
@@ -195,6 +195,8 @@ export class AppComponent implements OnInit {
   clickModal(btnId: string) {
     $('#' + btnId).trigger('click');
   }
+
+  
 
   ShowUpdateVersionModal() {
     this.checkForAppNewVersion = false;
