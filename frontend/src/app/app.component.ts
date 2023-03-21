@@ -34,7 +34,6 @@ export class AppComponent implements OnInit {
   userData: User | null = this.auth.userValue()
   chwOU: Chws | null = null;
   checkForAppNewVersion: boolean = true;
-  isAppUpdateFound: boolean = false;
 
   separation: string = '_____________________________________';
 
@@ -90,9 +89,9 @@ export class AppComponent implements OnInit {
     this.updateOnlineStatus();
     window.addEventListener('online', this.updateOnlineStatus.bind(this));
     window.addEventListener('offline', this.updateOnlineStatus.bind(this));
-    this.checkForUpdates();
+    // this.checkForUpdates();
     this.versionUpdateChecker();
-    this.updateChecker();
+    // this.updateChecker();
     this.appVersion = localStorage.getItem('appVersion');
   }
 
@@ -119,7 +118,6 @@ export class AppComponent implements OnInit {
               switch (installingWorker.state) {
                 case 'activated':
                   registration.onupdatefound = null;
-                  this.isAppUpdateFound = true;
                   break;
                 case 'redundant':
                   console.warn(
@@ -160,7 +158,6 @@ export class AppComponent implements OnInit {
       .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
       .subscribe(() => {
         this.sw.checkForUpdate().then((updateFound) => {
-          this.isAppUpdateFound = updateFound;
           if (updateFound) this.checkForAvailableVersion();
         });
       });
