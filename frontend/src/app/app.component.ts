@@ -118,6 +118,7 @@ export class AppComponent implements OnInit {
               switch (installingWorker.state) {
                 case 'activated':
                   registration.onupdatefound = null;
+                  this.ShowUpdateVersionModal();
                   break;
                 case 'redundant':
                   console.warn(
