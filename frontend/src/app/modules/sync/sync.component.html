@@ -394,7 +394,7 @@
                                             <tbody>
                                                 <tr *ngFor="let data of tab3_messages">
                                                     <th>{{ data.chw.name }}</th>
-                                                    <th *ngFor="let dt of data.data | keyvalue">{{ dt.value }}</th>
+                                                    <th *ngFor="let dt of data.data | keyvalue">{{ generateCount(dt.value) }}</th>
                                                 </tr>
 
                                             </tbody>

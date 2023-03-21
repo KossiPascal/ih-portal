@@ -62,7 +62,7 @@ def GenerateThinkMdDataToPushDhis2(KWARG):
 
     with createFile(extractFolder(), "thinkMd_output_for_dhis2"+"_"+str(KWARG['userId'])+"_output", ".json") as dhis2result:
         with createFile(extractFolder(), "thinkMd_output"+"_"+str(KWARG['userId'])+"_output") as result:
-            result.write("site,reported_date,district,asc_code,total_vad,total_vad_pcime_c,total_suivi_pcime_c,reference_femmes_pf,reference_pcime,reference_femmes_enceinte_postpartum,total_vad_femmes_enceinte,total_vad_femmes_postpartum,total_home_visit,total_diarrhee_pcime_soins,total_paludisme_pcime_soins,total_pneumonie_pcime_soins,total_malnutrition_pcime_soins,prompt_diarrhee_24h_pcime_soins,prompt_diarrhee_48h_pcime_soins,prompt_diarrhee_72h_pcime_soins,prompt_paludisme_24h_pcime_soins,prompt_paludisme_48h_pcime_soins,prompt_paludisme_72h_pcime_soins,prompt_pneumonie_24h_pcime_soins,prompt_pneumonie_48h_pcime_soins,prompt_pneumonie_72h_pcime_soins,total_vad_femme_enceinte_NC_soins,total_vad_femme_postpartum_NC,total_test_de_grossesse_domicile,total_vad_family_planning\n")
+            result.write("site,reported_date,district,asc_code,total_vad,pcime,suivi_pcime,reference_pf,reference_pcime,reference_femmes_enceinte_postpartum,femmes_enceinte,femmes_postpartum,home_visit,diarrhee_pcime,paludisme_pcime,pneumonie_pcime,malnutrition_pcime,prompt_pcime_diarrhee_24h,prompt_pcime_diarrhee_48h,prompt_pcime_diarrhee_72h,prompt_pcime_paludisme_24h,prompt_pcime_paludisme_48h,prompt_pcime_paludisme_72h,prompt_pcime_pneumonie_24h,prompt_pcime_pneumonie_48h,prompt_pcime_pneumonie_72h,total_vad_femme_enceinte_NC_soins,femme_postpartum_NC,test_de_grossesse,pf\n")
 
 
             dhis2DictionaryData = []
@@ -71,69 +71,69 @@ def GenerateThinkMdDataToPushDhis2(KWARG):
                 reported_date = ""
                 code_asc = ""
                 district = ""
-                total_vad_pcime_c = ""
-                total_suivi_pcime_c = ""
+                pcime = ""
+                suivi_pcime = ""
                 total_vad = ""
-                total_vad_femmes_enceintes_NC = ""
-                reference_femmes_pf = ""
-                prompt_diarrhee_24h_pcime_soins = ""
-                prompt_diarrhee_48h_pcime_soins = ""
-                prompt_diarrhee_72h_pcime_soins = ""
-                prompt_paludisme_24h_pcime_soins = ""
-                prompt_paludisme_48h_pcime_soins = ""
-                prompt_paludisme_72h_pcime_soins = ""
-                prompt_pneumonie_24h_pcime_soins = ""
-                prompt_pneumonie_48h_pcime_soins = ""
-                prompt_pneumonie_72h_pcime_soins = ""
-                total_vad_femmes_enceinte = ""
+                femmes_enceintes_NC = ""
+                reference_pf = ""
+                prompt_pcime_diarrhee_24h = ""
+                prompt_pcime_diarrhee_48h = ""
+                prompt_pcime_diarrhee_72h = ""
+                prompt_pcime_paludisme_24h = ""
+                prompt_pcime_paludisme_48h = ""
+                prompt_pcime_paludisme_72h = ""
+                prompt_pcime_pneumonie_24h = ""
+                prompt_pcime_pneumonie_48h = ""
+                prompt_pcime_pneumonie_72h = ""
+                femmes_enceinte = ""
                 reference_femmes_enceinte_postpartum = ""
                 reference_pcime = ""
-                total_diarrhee_pcime_soins = ""
-                total_vad_femmes_postpartum = ""
-                total_malnutrition_pcime_soins = ""
-                total_paludisme_pcime_soins = ""
-                total_pneumonie_pcime_soins = ""
-                total_vad_femme_postpartum_NC = ""
-                total_recherche_active = ""
-                total_test_de_grossesse_domicile = ""
+                diarrhee_pcime = ""
+                femmes_postpartum = ""
+                malnutrition_pcime = ""
+                paludisme_pcime = ""
+                pneumonie_pcime = ""
+                femme_postpartum_NC = ""
+                home_visit = ""
+                test_de_grossesse = ""
                 program = ""
                 orgUnit = ""
                 eventDate = ""
                 status = ""
                 completedDate = ""
-                total_vad_family_planning = ""
+                pf = ""
 
                 for j in range(0,len(headers)):
                     data_source += getVal("FW6z2Ha2GNr", headers[j], row[j])
                     reported_date += getVal("lbHrQBTbY1d", headers[j], row[j])
                     code_asc += getVal("JkMyqI3e6or", headers[j], row[j])
                     district += getVal("JC752xYegbJ", headers[j], row[j])
-                    total_vad_pcime_c += getVal("lvW5Kj1cisa", headers[j], row[j])
-                    total_suivi_pcime_c+= getVal("M6WRPsREqsZ", headers[j], row[j])
+                    pcime += getVal("lvW5Kj1cisa", headers[j], row[j])
+                    suivi_pcime+= getVal("M6WRPsREqsZ", headers[j], row[j])
                     total_vad += getVal("oeDKJi4BICh", headers[j], row[j])
-                    total_vad_femmes_enceintes_NC += getVal("PrN89trdUGm", headers[j], row[j])
-                    reference_femmes_pf += getVal("wdg7jjP9ZRg", headers[j], row[j])
-                    prompt_diarrhee_24h_pcime_soins += getVal("qNxNXSwDAaI", headers[j], row[j])
-                    prompt_diarrhee_48h_pcime_soins += getVal("S1zPDVOIVLZ", headers[j], row[j])
-                    prompt_diarrhee_72h_pcime_soins += getVal("nW3O5ULr75J", headers[j], row[j])
-                    prompt_paludisme_24h_pcime_soins += getVal("NUpARMZ383s", headers[j], row[j])
-                    prompt_paludisme_48h_pcime_soins += getVal("yQa48SF9bua", headers[j], row[j])
-                    prompt_paludisme_72h_pcime_soins += getVal("NzKjJuAniNx", headers[j], row[j])
-                    prompt_pneumonie_24h_pcime_soins += getVal("AA2We0Ao5sv", headers[j], row[j])
-                    prompt_pneumonie_48h_pcime_soins += getVal("PYwikai4k2J", headers[j], row[j])
-                    prompt_pneumonie_72h_pcime_soins += getVal("rgjFO0bDVUL", headers[j], row[j])
-                    total_vad_femmes_enceinte += getVal("WR9u3cGJn9W", headers[j], row[j])
+                    femmes_enceintes_NC += getVal("PrN89trdUGm", headers[j], row[j])
+                    reference_pf += getVal("wdg7jjP9ZRg", headers[j], row[j])
+                    prompt_pcime_diarrhee_24h += getVal("qNxNXSwDAaI", headers[j], row[j])
+                    prompt_pcime_diarrhee_48h += getVal("S1zPDVOIVLZ", headers[j], row[j])
+                    prompt_pcime_diarrhee_72h += getVal("nW3O5ULr75J", headers[j], row[j])
+                    prompt_pcime_paludisme_24h += getVal("NUpARMZ383s", headers[j], row[j])
+                    prompt_pcime_paludisme_48h += getVal("yQa48SF9bua", headers[j], row[j])
+                    prompt_pcime_paludisme_72h += getVal("NzKjJuAniNx", headers[j], row[j])
+                    prompt_pcime_pneumonie_24h += getVal("AA2We0Ao5sv", headers[j], row[j])
+                    prompt_pcime_pneumonie_48h += getVal("PYwikai4k2J", headers[j], row[j])
+                    prompt_pcime_pneumonie_72h += getVal("rgjFO0bDVUL", headers[j], row[j])
+                    femmes_enceinte += getVal("WR9u3cGJn9W", headers[j], row[j])
                     reference_femmes_enceinte_postpartum += getVal("Pl6qRNgjd3a", headers[j], row[j])
                     reference_pcime += getVal("DicYcTqr9xT", headers[j], row[j])
-                    total_diarrhee_pcime_soins += getVal("caef2rf638P", headers[j], row[j])
-                    total_vad_femmes_postpartum += getVal("Q0BQtUdJOCy", headers[j], row[j])
-                    total_malnutrition_pcime_soins += getVal("dLYksBMOqST", headers[j], row[j])
-                    total_paludisme_pcime_soins += getVal("jp2i3vN3VJk", headers[j], row[j])
-                    total_pneumonie_pcime_soins += getVal("LZ3R8fj9CGG", headers[j], row[j])
-                    total_vad_femme_postpartum_NC += getVal("O9EZVn3C3pF", headers[j], row[j])
-                    total_recherche_active += getVal("lsBS60uQPtc", headers[j], row[j])
-                    total_test_de_grossesse_domicile += getVal("lopdYxQrgyj", headers[j], row[j])
-                    total_vad_family_planning+= getVal("AzwUzgh0nd7", headers[j], row[j])
+                    diarrhee_pcime += getVal("caef2rf638P", headers[j], row[j])
+                    femmes_postpartum += getVal("Q0BQtUdJOCy", headers[j], row[j])
+                    malnutrition_pcime += getVal("dLYksBMOqST", headers[j], row[j])
+                    paludisme_pcime += getVal("jp2i3vN3VJk", headers[j], row[j])
+                    pneumonie_pcime += getVal("LZ3R8fj9CGG", headers[j], row[j])
+                    femme_postpartum_NC += getVal("O9EZVn3C3pF", headers[j], row[j])
+                    home_visit += getVal("lsBS60uQPtc", headers[j], row[j])
+                    test_de_grossesse += getVal("lopdYxQrgyj", headers[j], row[j])
+                    pf+= getVal("AzwUzgh0nd7", headers[j], row[j])
                     program += getVal("program", headers[j], row[j])
                     orgUnit += getVal("orgUnit", headers[j], row[j])
                     eventDate += getVal("eventDate", headers[j], row[j])
@@ -147,31 +147,31 @@ def GenerateThinkMdDataToPushDhis2(KWARG):
                     "district": district,
                     "data_source": 'thinkmd',
                     "total_vad": total_vad,
-                    "total_vad_pcime_c": total_vad_pcime_c,
-                    "total_suivi_pcime_c": total_suivi_pcime_c,
-                    "total_vad_femmes_enceintes_NC": total_vad_femmes_enceintes_NC,
-                    "reference_femmes_pf": reference_femmes_pf,
-                    "prompt_diarrhee_24h_pcime_soins": prompt_diarrhee_24h_pcime_soins,
-                    "prompt_diarrhee_48h_pcime_soins": prompt_diarrhee_48h_pcime_soins,
-                    "prompt_diarrhee_72h_pcime_soins": prompt_diarrhee_72h_pcime_soins,
-                    "prompt_paludisme_24h_pcime_soins": prompt_paludisme_24h_pcime_soins,
-                    "prompt_paludisme_48h_pcime_soins": prompt_paludisme_48h_pcime_soins,
-                    "prompt_paludisme_72h_pcime_soins": prompt_paludisme_72h_pcime_soins,
-                    "prompt_pneumonie_24h_pcime_soins": prompt_pneumonie_24h_pcime_soins,
-                    "prompt_pneumonie_48h_pcime_soins": prompt_pneumonie_48h_pcime_soins,
-                    "prompt_pneumonie_72h_pcime_soins": prompt_pneumonie_72h_pcime_soins,
-                    "total_vad_femmes_enceinte": total_vad_femmes_enceinte,
+                    "pcime": pcime,
+                    "suivi_pcime": suivi_pcime,
+                    "femmes_enceintes_NC": femmes_enceintes_NC,
+                    "reference_pf": reference_pf,
+                    "prompt_pcime_diarrhee_24h": prompt_pcime_diarrhee_24h,
+                    "prompt_pcime_diarrhee_48h": prompt_pcime_diarrhee_48h,
+                    "prompt_pcime_diarrhee_72h": prompt_pcime_diarrhee_72h,
+                    "prompt_pcime_paludisme_24h": prompt_pcime_paludisme_24h,
+                    "prompt_pcime_paludisme_48h": prompt_pcime_paludisme_48h,
+                    "prompt_pcime_paludisme_72h": prompt_pcime_paludisme_72h,
+                    "prompt_pcime_pneumonie_24h": prompt_pcime_pneumonie_24h,
+                    "prompt_pcime_pneumonie_48h": prompt_pcime_pneumonie_48h,
+                    "prompt_pcime_pneumonie_72h": prompt_pcime_pneumonie_72h,
+                    "femmes_enceinte": femmes_enceinte,
                     "reference_femmes_enceinte_postpartum": reference_femmes_enceinte_postpartum,
                     "reference_pcime": reference_pcime,
-                    "total_diarrhee_pcime_soins": total_diarrhee_pcime_soins,
-                    "total_vad_femmes_postpartum": total_vad_femmes_postpartum,
-                    "total_malnutrition_pcime_soins": total_malnutrition_pcime_soins,
-                    "total_paludisme_pcime_soins": total_paludisme_pcime_soins,
-                    "total_pneumonie_pcime_soins": total_pneumonie_pcime_soins,
-                    "total_vad_femme_postpartum_NC": total_vad_femme_postpartum_NC,
-                    "total_recherche_active": total_recherche_active,
-                    "total_test_de_grossesse_domicile": total_test_de_grossesse_domicile,
-                    "total_vad_family_planning": total_vad_family_planning,
+                    "diarrhee_pcime": diarrhee_pcime,
+                    "femmes_postpartum": femmes_postpartum,
+                    "malnutrition_pcime": malnutrition_pcime,
+                    "paludisme_pcime": paludisme_pcime,
+                    "pneumonie_pcime": pneumonie_pcime,
+                    "femme_postpartum_NC": femme_postpartum_NC,
+                    "home_visit": home_visit,
+                    "test_de_grossesse": test_de_grossesse,
+                    "pf": pf,
                 }
                 
                 if KWARG['InsertIntoDhis2'] == True:
@@ -183,31 +183,31 @@ def GenerateThinkMdDataToPushDhis2(KWARG):
                     chwsData["district"],
                     chwsData["code_asc"], # get Name
                     chwsData["total_vad"],
-                    chwsData["total_vad_pcime_c"],
-                    chwsData["total_suivi_pcime_c"],
-                    chwsData["reference_femmes_pf"],
+                    chwsData["pcime"],
+                    chwsData["suivi_pcime"],
+                    chwsData["reference_pf"],
                     chwsData["reference_pcime"],
                     chwsData["reference_femmes_enceinte_postpartum"], 
-                    chwsData["total_vad_femmes_enceinte"], 
-                    chwsData["total_vad_femmes_postpartum"], 
-                    chwsData["total_recherche_active"],
-                    chwsData["total_diarrhee_pcime_soins"],
-                    chwsData["total_paludisme_pcime_soins"],
-                    chwsData["total_pneumonie_pcime_soins"],
-                    chwsData["total_malnutrition_pcime_soins"],
-                    chwsData["prompt_diarrhee_24h_pcime_soins"],
-                    chwsData["prompt_diarrhee_48h_pcime_soins"],
-                    chwsData["prompt_diarrhee_72h_pcime_soins"],
-                    chwsData["prompt_paludisme_24h_pcime_soins"],
-                    chwsData["prompt_paludisme_48h_pcime_soins"],
-                    chwsData["prompt_paludisme_72h_pcime_soins"],
-                    chwsData["prompt_pneumonie_24h_pcime_soins"],
-                    chwsData["prompt_pneumonie_48h_pcime_soins"],
-                    chwsData["prompt_pneumonie_72h_pcime_soins"],
-                    chwsData["total_vad_femmes_enceintes_NC"],
-                    chwsData["total_vad_femme_postpartum_NC"],
-                    chwsData["total_test_de_grossesse_domicile"],
-                    chwsData["total_vad_family_planning"]),)
+                    chwsData["femmes_enceinte"], 
+                    chwsData["femmes_postpartum"], 
+                    chwsData["home_visit"],
+                    chwsData["diarrhee_pcime"],
+                    chwsData["paludisme_pcime"],
+                    chwsData["pneumonie_pcime"],
+                    chwsData["malnutrition_pcime"],
+                    chwsData["prompt_pcime_diarrhee_24h"],
+                    chwsData["prompt_pcime_diarrhee_48h"],
+                    chwsData["prompt_pcime_diarrhee_72h"],
+                    chwsData["prompt_pcime_paludisme_24h"],
+                    chwsData["prompt_pcime_paludisme_48h"],
+                    chwsData["prompt_pcime_paludisme_72h"],
+                    chwsData["prompt_pcime_pneumonie_24h"],
+                    chwsData["prompt_pcime_pneumonie_48h"],
+                    chwsData["prompt_pcime_pneumonie_72h"],
+                    chwsData["femmes_enceintes_NC"],
+                    chwsData["femme_postpartum_NC"],
+                    chwsData["test_de_grossesse"],
+                    chwsData["pf"]),)
             
         # Serializing json
         json_object = json.dumps(dhis2DictionaryData, indent=4)

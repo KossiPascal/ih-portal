@@ -7,7 +7,6 @@ const express = require('express');
 const { body } = require('express-validator');
 const syncRouter = express.Router();
  
-
 syncRouter.post(
   '/fetch/data',
   [
@@ -23,8 +22,6 @@ syncRouter.post(
 
 syncRouter.post('/get/data', Middelware.authMiddleware,getChwsDataWithParams);
 syncRouter.post('/delete/data', Middelware.authMiddleware,deleteChwsData);
-
-
 
 syncRouter.post(
   '/dhis2/data',
@@ -56,9 +53,6 @@ syncRouter.post(
   Middelware.authMiddleware,
   fetchIhChtDataPerChw
 );
-
-
-
 
 syncRouter.post('/dhis2/chws', Middelware.authMiddleware,getDhis2Chws);
 syncRouter.post('/app/chws', Middelware.authMiddleware,getChws);

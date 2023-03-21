@@ -37,7 +37,6 @@ export function httpHeaders(Authorization?: string, withParams: boolean = true) 
 
 export class Functions {
 
-
     // const interval = setInterval(function() {}, 5000);
     // clearInterval(interval); // thanks @Luca D'Amico
     // var minutes = 5, the_interval = minutes * 60 * 1000;
@@ -49,9 +48,6 @@ export class Functions {
     // import * as fs from "fs";
     // const RSA_PRIVATE_KEY = fs.readFileSync('./demos/private.key');
     // const jwtBearerToken = jwt.sign({}, RSA_PRIVATE_KEY, {algorithm: 'RS256', expiresIn: 120,subject: userId}
-
-
-
 
     static date_to_milisecond = (stringDate: string, start: boolean = true): string => {
         if (stringDate != "") {
@@ -189,7 +185,6 @@ export class Functions {
         var addr = server.address();
         var bind = typeof addr === 'string' ? addr : addr!.port;
         for (let i = 0; i < hostnames.length; i++) {
-            888
             console.log(`🚀 ${protocole.toLocaleUpperCase()} Server is available at ${protocole}://${hostnames[i]}:${bind}`)
         }
         console.log('\n');

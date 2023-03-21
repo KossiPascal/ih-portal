@@ -1,26 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Chws, CompareData, Dhis2Sync, Districts, FilterParams, ChwsDataFormDb, Sites } from '@ih-app/models/Sync';
+import { DataIndicators } from '@ih-app/models/DataAggragate';
+import { Chws, CompareData, Dhis2Sync, Districts, FilterParams, Sites } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { SyncService } from '@ih-app/services/sync.service';
-import { Consts } from '@ih-app/shared/constantes';
 import { Functions, DateUtils, notNull } from '@ih-app/shared/functions';
 import { Roles } from '@ih-app/shared/roles';
-import { async } from 'rxjs';
 
-// declare var $: any;
-// declare var initJsGridTable: any;
-declare var initDataTable: any;
+
+declare var sortTable: any;
 
 @Component({
   selector: 'app-dashboard-1',
   templateUrl: `./dashboard-1.component.html`,
   styleUrls: [
     './dashboard-1.component.css'
-  ]
+  ],
 })
 export class Dashboard1Component implements OnInit {
+  sum(arg0: any) {
+    throw new Error('Method not implemented.');
+  }
   constructor(private store: AppStorageService, private auth: AuthService, private sync: SyncService) {
     if (!this.roles.isSupervisorMentor() && !this.roles.isChws()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
   }
@@ -42,8 +43,8 @@ export class Dashboard1Component implements OnInit {
     });
   }
 
-  bodyData: CompareData[] = [];
-  ChwsDataFromDb$: ChwsDataFormDb[] = [];
+  // bodyData: CompareData[] = [];
+  FinalChwsOutputData$: { chw: Chws, data: DataIndicators }[] = [];
   Districts$: Districts[] = [];
   Chws$: Chws[] = [];
   Sites$: Sites[] = [];
@@ -58,6 +59,59 @@ export class Dashboard1Component implements OnInit {
     return item.Code;
   }
 
+
+
+  // initDataTable(tableId, paging = true) {
+  //   $("#" + tableId)
+  //     .DataTable({
+  //       paging: paging,
+  //       searching: false,
+  //       ordering: true,
+  //       info: false,
+  //       responsive: false,
+  //       lengthChange: false,
+  //       autoWidth: false,
+  //       sort: false,
+  //       pageLength: 50,
+  //       destroy: true,
+  //       // "orderMulti": true,
+  //       // "orderCellsTop": true,
+  //       // "orderClasses": false,
+  //       // "stateSave": true,
+  //       // "pageLength": 50,
+
+  //       // "language": {
+  //       //     "aria": {
+  //       //         "sortAscending": " - click/return to sort ascending"
+  //       //     },
+  //       //     "language": {
+  //       //         "lengthMenu": 'Display <select>'+
+  //       //         '<option value="10">10</option>'+
+  //       //         '<option value="20">20</option>'+
+  //       //         '<option value="30">30</option>'+
+  //       //         '<option value="40">40</option>'+
+  //       //         '<option value="50">50</option>'+
+  //       //         '<option value="-1">All</option>'+
+  //       //         '</select> records'
+  //       //     },
+  //       //     "loadingRecords": "Please wait - loading..."
+  //       // },
+
+  //       // "displayStart": 20,
+  //       // "processing": true,
+  //       // "scrollY": "200px",
+  //       // "paginate": false,
+  //       // "retrieve": true,
+  //       // "scrollY": "200",
+  //       // "scrollCollapse": true,
+  //       buttons: ["copy", "csv", "excel", "pdf", "print"],
+  //       // "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+  //     })
+  //     .buttons()
+  //     // .container()
+  //     // .appendTo("#" + tableId + "_wrapper .col-md-6:eq(0)");
+  // }
+
   ngOnInit(): void {
     this.chwOU = this.auth.chwsOrgUnit();
     if (this.roles.isChws() && (this.chwOU == null || !notNull(this.chwOU))) {
@@ -71,8 +125,10 @@ export class Dashboard1Component implements OnInit {
     } else {
       this.initDataFilted();
     }
-
   }
+
+
+
 
   async initAllData() {
     this.isLoading = true;
@@ -105,6 +161,10 @@ export class Dashboard1Component implements OnInit {
     });
   }
 
+
+  sort() {
+    sortTable('export_table');
+  }
 
   genarateSites() {
     this.sites$ = [];
@@ -166,6 +226,7 @@ export class Dashboard1Component implements OnInit {
       districts: districts,
       sites: sites,
       chws: chws,
+      withDhis2Data: true
     }
     return params;
   }
@@ -174,14 +235,14 @@ export class Dashboard1Component implements OnInit {
     this.initMsg = 'Loading Data ...';
     this.isLoading = true;
     this.genarateChws();
-    this.sync.getAllChwsDataWithParams(params ?? this.ParamsToFilter()).subscribe((res: { status: number, data: any }) => {
-      if (res.status == 200) {
-        this.ChwsDataFromDb$ = res.data;
-        this.getAllAboutData(params ?? this.ParamsToFilter());
+
+    this.sync.ihChtDataPerChw(params ?? this.ParamsToFilter()).subscribe((_res$: { status: number, data: { chw: Chws, data: DataIndicators }[] | any }) => {
+      if (_res$.status == 200) {
+        this.FinalChwsOutputData$ = _res$.data;
       } else {
-        this.isLoading = false;
-        this.responseMessage = res.data
+        this.responseMessage = _res$.data
       }
+      this.isLoading = false;
     }, (err: any) => {
       this.isLoading = false;
       console.log(err);
@@ -189,193 +250,17 @@ export class Dashboard1Component implements OnInit {
   }
 
 
-  getAllAboutData(params: FilterParams) {
-    const { start_date, end_date, sites } = params;
+  // getDataValuesElements(data: { dataValues: { dataElement: string, value: any }[], dataElement: string, value: any }): boolean {
+  //   for (let j = 0; j < data.dataValues.length; j++) {
+  //     const vals = data.dataValues[j];
+  //     if (vals.dataElement == data.dataElement && vals.value == data.value) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // }
 
-
-    const selectedChws: Chws[] = this.roles.isChws() && this.chwOU != null ? [this.chwOU] : this.chws$;
-
-    var outPutData: any = {}
-    for (let i = 0; i < selectedChws.length; i++) {
-      const ascId = selectedChws[i].id;
-      if (notNull(ascId)) {
-        if (!outPutData.hasOwnProperty(ascId)) outPutData[ascId] = {
-          chwId: ascId,
-          app_total_child_followup: 0,
-          dhis_total_child_followup: 0,
-          app_total_mum_fp_followup: 0,
-          dhis_total_mum_fp_followup: 0,
-
-          app_total_mum_followup: 0,
-          dhis_total_mum_followup: 0,
-
-          app_total_fp_followup: 0,
-          dhis_total_fp_followup: 0,
-
-          app_total_active_research: 0,
-          dhis_total_active_research: 0,
-          app_total_consultation_followup: 0,
-          dhis_total_consultation_followup: 0,
-          app_total_home_visit: 0,
-          dhis_total_home_visit: 0
-        }
-      }
-    }
-
-
-    for (let index = 0; index < this.ChwsDataFromDb$!.length; index++) {
-      const data: ChwsDataFormDb = this.ChwsDataFromDb$[index];
-      if (data != null) {
-        const form = data.form;
-        const field = data.fields;;
-        const asc: string = data.chw != null ? notNull(data.chw.id) ? data.chw.id : '' : '';
-        const site: string = data.site != null ? notNull(data.site.id) ? data.site.id : '' : '';
-        const idSiteValid: boolean = notNull(site) && notNull(sites) && sites?.includes(site) || !notNull(sites);
-        const isDateValid: boolean = notNull(start_date) && notNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
-
-        if (idSiteValid && isDateValid && outPutData.hasOwnProperty(asc)) {
-          if (data.source == 'dhis2') {
-            if (form === "PCIME") outPutData[asc].dhis_total_child_followup += 1
-            if (form === "Maternelle") outPutData[asc].dhis_total_mum_followup += 1
-            if (form === "PF") outPutData[asc].dhis_total_fp_followup += 1
-            if (form === "Maternelle" || form === "PF") outPutData[asc].dhis_total_mum_fp_followup += 1
-            if (form === "Recherche") outPutData[asc].dhis_total_active_research += 1
-            if (form !== "Recherche") outPutData[asc].dhis_total_consultation_followup += 1
-            outPutData[asc].dhis_total_home_visit += 1
-          } else if (data.source == 'Tonoudayo') {
-            if (Consts.child_forms.includes(form)) outPutData[asc].app_total_child_followup += 1
-
-            if (Consts.mum_forms.includes(form) && form != `pregnancy_family_planning`){
-                outPutData[asc].app_total_mum_followup += 1
-            }
-            if (Consts.fp_forms.includes(form) && form != `pregnancy_family_planning`) {
-              outPutData[asc].app_total_fp_followup += 1
-            }
-
-            if(form == `pregnancy_family_planning`) {
-              if (data.fields.hasOwnProperty("s_reg_pregnancy_screen")) {
-                var isPregnant:boolean = false;
-                if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_urine_result")) {
-                  isPregnant = field.s_reg_pregnancy_screen.s_reg_urine_result == "positive";
-                }
-                if (data.fields.s_reg_pregnancy_screen.hasOwnProperty("s_reg_why_urine_test_not_done")) {
-                  isPregnant = field.s_reg_pregnancy_screen.s_reg_why_urine_test_not_done == "already_pregnant";
-                }
-                if (!isPregnant) {
-                  outPutData[asc].app_total_fp_followup += 1
-                } else {
-                  outPutData[asc].app_total_mum_followup += 1
-                }
-              } else {
-                outPutData[asc].app_total_fp_followup += 1
-              }
-            }
-
-            if (Consts.mum_fp_forms.includes(form)) outPutData[asc].app_total_mum_fp_followup += 1
-
-            if (["death_report","home_visit"].includes(form)) outPutData[asc].app_total_active_research += 1
-            if (Consts.consultations_followup_forms.includes(form)) outPutData[asc].app_total_consultation_followup += 1
-            if (Consts.home_actions_forms.includes(form)) outPutData[asc].app_total_home_visit += 1
-          }
-        }
-      }
-    }
-
-
-    // Object.entries(this.AllDhis2SelectedDataValues).map(([key, value]) => {
-    //   // plW6bCSnXKU [PCIME, Maternelle, PF, Recherche]
-    //   const vals = value as any;
-
-    //   for (let i = 0; i < vals.length; i++) {
-    //     const dataArray = vals[i] as { dataElement: string, value: any }[];
-
-    //     var isResearchFound: boolean = false;
-    //     var isChwFound: boolean = false;
-
-    //     for (let j = 0; j < dataArray.length; j++) {
-    //       const vals = dataArray[j];
-    //       if (vals.dataElement == 'plW6bCSnXKU' && vals.value == 'Recherche') {
-    //         isResearchFound = true;
-    //       }
-    //       if (vals.dataElement == 'JkMyqI3e6or' && vals.value == this.getChwInfos(key).external_id) {
-    //         isChwFound = true;
-    //       }
-    //     }
-
-    //     if (isChwFound) {
-    //       outPutData[key].dhis_total_home_visit += 1;
-    //       if (isResearchFound == true) {
-    //         outPutData[key].dhis_total_active_research += 1
-    //       } else {
-    //         outPutData[key].dhis_total_consultation_followup += 1
-    //       }
-    //     }
-
-    //   }
-
-    // });
-
-
-    this.bodyData = [];
-
-
-
-    Object.entries(outPutData).map(([keys, value]) => {
-      const vals = value as {
-        chwId: string,
-        app_total_child_followup: 0,
-        dhis_total_child_followup: 0,
-        app_total_mum_fp_followup: 0,
-        dhis_total_mum_fp_followup: 0,
-        app_total_mum_followup: 0,
-        dhis_total_mum_followup: 0,
-        app_total_fp_followup: 0,
-        dhis_total_fp_followup: 0,
-        app_total_active_research: number,
-        dhis_total_active_research: number,
-        app_total_consultation_followup: number,
-        dhis_total_consultation_followup: number,
-        app_total_home_visit: number,
-        dhis_total_home_visit: number
-      };
-      this.bodyData.push({
-        Code: this.getChwInfos(vals.chwId).external_id,
-        Name: this.getChwInfos(vals.chwId).name,
-        Pcime: vals.app_total_child_followup,
-        PcimeDhis2: vals.dhis_total_child_followup,
-
-        Maternelle: vals.app_total_mum_followup,
-        MaternelleDhis2: vals.dhis_total_mum_followup,
-
-        Pf: vals.app_total_fp_followup,
-        PfDhis2: vals.dhis_total_fp_followup,
-
-        MaternellePf: vals.app_total_mum_fp_followup,
-        MaternellePfDhis2: vals.dhis_total_mum_fp_followup,
-        Recherche: vals.app_total_active_research,
-        RechercheDhis: vals.dhis_total_active_research,
-        Consultation: vals.app_total_consultation_followup,
-        ConsultationDhis: vals.dhis_total_consultation_followup,
-        Total: vals.app_total_home_visit,
-        TotalDhis: vals.dhis_total_home_visit,
-      });
-    });
-
-    this.isLoading = false;
-
-  }
-
-  getDataValuesElements(data: { dataValues: { dataElement: string, value: any }[], dataElement: string, value: any }): boolean {
-    for (let j = 0; j < data.dataValues.length; j++) {
-      const vals = data.dataValues[j];
-      if (vals.dataElement == data.dataElement && vals.value == data.value) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  isRatioChecked():boolean{
+  isRatioChecked(): boolean {
     return this.aggradateDataForm.value.withRatio == true;
   }
 
@@ -394,27 +279,23 @@ export class Dashboard1Component implements OnInit {
     return { value: finals, color: color }
   }
 
-  initTable() {
-    initDataTable('compare_data', false)
-  }
-
-  getChwInfos(chwId: string, byCode: boolean = false): Chws {
-    var ascs!: Chws;
+  // getChwInfos(chwId: string, byCode: boolean = false): Chws {
+  //   var ascs!: Chws;
 
 
-    const selectedChws: Chws[] = this.roles.isChws() && this.chwOU != null ? [this.chwOU] : this.chws$;
-    for (let i = 0; i < selectedChws.length; i++) {
-      const asc: Chws = selectedChws[i];
-      if (notNull(asc)) {
-        if (byCode == true) {
-          if (notNull(asc.external_id) && asc.external_id == chwId) return asc;
-        } else {
-          if (notNull(asc.id) && asc.id == chwId) return asc;
-        }
-      }
-    }
-    return ascs;
-  }
+  //   const selectedChws: Chws[] = this.roles.isChws() && this.chwOU != null ? [this.chwOU] : this.chws$;
+  //   for (let i = 0; i < selectedChws.length; i++) {
+  //     const asc: Chws = selectedChws[i];
+  //     if (notNull(asc)) {
+  //       if (byCode == true) {
+  //         if (notNull(asc.external_id) && asc.external_id == chwId) return asc;
+  //       } else {
+  //         if (notNull(asc.id) && asc.id == chwId) return asc;
+  //       }
+  //     }
+  //   }
+  //   return ascs;
+  // }
 
 
 }

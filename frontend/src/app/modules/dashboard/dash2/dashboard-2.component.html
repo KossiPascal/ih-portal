@@ -143,20 +143,20 @@
                   <tr>
                     <th>ASC</th>
                     <th>Nbre Action/Jour</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let data of FinalChwsOutputData$; let i=index">
+                  <tr *ngFor="let datas of FinalChwsOutputData$; let i=index">
                     <td>
-                      <span style="font-size: 18px;" class="custom-badge"> <b>{{ data.chw.name }}</b> </span><br>
-                      <span class="custom-badge">{{ data.chw.external_id }}</span><br>
-                      <span style="font-size: 14px;" class="info"><small>Total Action: </small> <b>{{
-                          data.data.total_vad }}</b> </span>
+                      <span style="font-size: 16px;" class="custom-badge"> <b>{{ datas.chw.name }}</b> </span><br>
+                      <span class="custom-badge">{{ datas.chw.external_id }}</span><br>
+                      <span style="font-size: 14px;" class="info"><small>Total Action: </small> <b>{{ sum(datas.data)}}</b> </span>
                     </td>
 
                     <td>
-                      <span style="font-size: 20px;">~ </span><span style="font-size: 35px;padding: 1px;"
-                        class="custom-action badge {{ getVadPerDay(data).class }}"> {{ getVadPerDay(data).val }} </span>
+                      <span style="font-size: 18px;">~ </span><span style="font-size: 33px;padding: 1px;"
+                        class="custom-action badge {{ getVadPerDay(datas).class }}"> {{ getVadPerDay(datas).val }} </span>
                           <br>
                           <span class="info"><strong>Actions/Jr</strong></span>
                     </td>
@@ -164,7 +164,7 @@
                     
 
                     <td>
-                      <button style="margin-top: 10px;" class="btn btn-info" (click)="seeSelectedChwData(data)"
+                      <button style="margin-top: 10px; padding: 2px!important;" class="btn btn-info" (click)="seeSelectedChwData(datas)"
                       data-toggle="modal" data-target="#modal-default">Détails</button>
                       
                     </td>
@@ -197,11 +197,11 @@
           </div>
           <div class="modal-body">
             <div class="row card-body">
-              <div class="col-sm-6 col-6" *ngFor="let data of selectedChwData.data | keyvalue">
-                <div style="border: 1px solid black;" class="small-box bg-info">
+              <div class="{{ showClass(data)}}" *ngFor="let data of selectedChwData.data | keyvalue">
+                <div *ngIf="isNumber(data.value)" style="border: 1px solid black;" class="small-box bg-info">
                   <div class="inner">
-                    <h3 style="font-size: 40px;">{{ data.value }}</h3>
-                    <p><strong>{{ capitaliseDataGiven(data.key, '_', ' ') }}</strong></p>
+                    <h3 style="font-size: 45px;text-align: center;">{{ generateCount(data.value) }}</h3>
+                    <p style="font-size: 20px;text-align: center;"><strong>{{ capitaliseDataGiven(data.key, '_', ' ') }}</strong></p>
                   </div>
                   <div class="icon"> <i class="ion ion-stats-bars"></i> </div>
                 </div>

@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Chws, DataFromPython, Districts, Sites } from '@ih-app/models/Sync';
@@ -12,11 +11,9 @@ import { ActivatedRoute } from '@angular/router'
 import { DataIndicators } from '@ih-app/models/DataAggragate';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Roles } from '@ih-app/shared/roles';
-import { async } from 'rxjs';
 
 declare var $: any;
 declare var initDataTable: any;
-
 
 @Component({
   selector: 'app-sync',
@@ -25,7 +22,6 @@ declare var initDataTable: any;
   encapsulation: ViewEncapsulation.None,
 })
 export class SyncComponent implements OnInit {
-
   thinkmdToDhis2Form!: FormGroup;
   ihChtToDhis2Form!: FormGroup;
   ThinkMdWeeklyForm!: FormGroup;
@@ -40,6 +36,7 @@ export class SyncComponent implements OnInit {
   weekly_Choosen_Dates: string[] = [];
   is_weekly_date_error: boolean = false;
   weekly_date_error_Msg: string = '';
+  initDate!: { start_date: string, end_date: string };
 
   activePage: any = '';
 
@@ -76,13 +73,12 @@ export class SyncComponent implements OnInit {
     Deleted: 0
   }
 
-
   constructor(private store: AppStorageService, private auth: AuthService, private route: ActivatedRoute, private sync: SyncService) { }
-
 
   public roles = new Roles(this.store);
 
   ngOnInit(): void {
+    this.initDate = DateUtils.startEnd21and20Date();
     this.route.params.subscribe(params => this.activePage = params['cible']);
 
     if (this.activePage === 'dataToDhis2' && !this.roles.isDataManager() ||
@@ -94,6 +90,11 @@ export class SyncComponent implements OnInit {
     this.ThinkMdWeeklyForm = this.createThinkmdWeeklyFormGroup();
   }
 
+  generateCount(data: any): any {
+    const dt = data as { tonoudayo: 11, dhis2: 0 };
+    const ct = dt.tonoudayo + dt.dhis2;
+    return !isNaN(ct) ? ct : data;
+  }
 
   createThinkmdWeeklyFormGroup(): FormGroup {
     return new FormGroup({
@@ -104,17 +105,18 @@ export class SyncComponent implements OnInit {
       sites: new FormControl("", [Validators.required]),
     });
   }
+
   createDhis2ChwsDataFormGroup(): FormGroup {
     return new FormGroup({
-      start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
-      end_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
+      end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
       sites: new FormControl(""),
     });
   }
 
   createThinkmdFormGroup(): FormGroup {
     return new FormGroup({
-      end_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
       weekly_Choosen_Dates: new FormControl(""),
       useToken: new FormControl(true),
       InsertIntoDhis2: new FormControl(false, []),
@@ -125,8 +127,8 @@ export class SyncComponent implements OnInit {
 
   createIhChtFormGroup(): FormGroup {
     return new FormGroup({
-      start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
-      end_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
+      end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
       districts: new FormControl("", [Validators.required]),
       sites: new FormControl("", [Validators.required]),
       // chws: new FormControl(""),
@@ -135,7 +137,6 @@ export class SyncComponent implements OnInit {
       // dhis2_password: new FormControl(""),
     });
   }
-
 
   capitaliseDataGiven(str: any, inputSeparator?: string, outPutSeparator?: string): string {
     return Functions.capitaliseDataGiven(str, inputSeparator, outPutSeparator);
@@ -187,6 +188,7 @@ export class SyncComponent implements OnInit {
 
     });
   }
+
   genarateSites(cibleForm: FormGroup) {
     this.sites$ = [];
     this.chws$ = [];
@@ -240,7 +242,6 @@ export class SyncComponent implements OnInit {
     }
   }
 
-
   ParamsToFilter() {
     return {
       start_date: this.ihChtToDhis2Form.value.start_date,
@@ -282,8 +283,6 @@ export class SyncComponent implements OnInit {
     }
     return true;
   }
-
-
 
   startDateError(): string {
     return this.start_date_error ? 'borderError' : '';
@@ -338,17 +337,12 @@ export class SyncComponent implements OnInit {
       this.Tab1Dhis2Import = { ErrorCount: 0, ErrorMsg: '', Created: 0, Updated: 0, Deleted: 0 };
       // this.thinkmdToDhis2Form.value['useToken'] = true;
       this.sync.thinkmdToDhis2Script(this.thinkmdToDhis2Form.value).subscribe((response: any) => {
-
         try {
           var respData: DataFromPython | null = response;
-
           if (this.thinkmdToDhis2Form.value.InsertIntoDhis2 == true && respData?.DataFordhis2) {
-
-            
             var t1 = 0;
             var t2 = 0;
             for (let i = 0; i < respData?.DataFordhis2.length; i++) {
-              
               t1++;
               var chwsData = respData?.DataFordhis2[i] as DataIndicators;
               const nOrId = chwsData.orgUnit;
@@ -371,9 +365,7 @@ export class SyncComponent implements OnInit {
                 }
 
               }, (err: any) => { this.loading1 = false; this.tab1_messages_error = err.toString(); console.log(err.error) });
-
             }
-
           } else {
             this.tab1_messages = respData;
             this.loading1 = false;
@@ -382,9 +374,7 @@ export class SyncComponent implements OnInit {
           this.loading1 = false;
           this.tab1_messages_error = response.toString();
         }
-
       }, (err: any) => { this.loading1 = false; this.tab1_messages_error = err.toString(); console.log(err.error) });
-
     }
   }
 
@@ -401,7 +391,6 @@ export class SyncComponent implements OnInit {
         // this.loading3 = false;
         if (_resp.status == 200) {
           var respData = _resp.data as { chw: Chws, data: DataIndicators }[];
-
           try {
             if (this.ihChtToDhis2Form.value.InsertIntoDhis2 == true && respData.length > 0) {
               var s1 = 0;
@@ -425,9 +414,7 @@ export class SyncComponent implements OnInit {
                     this.tab3_no_data_found = respData.length <= 0;
                   }
                 }, (err: any) => { this.loading3 = false; this.tab3_error_messages = err.toString(); console.log(err.error) });
-
               }
-
             } else {
               this.loading3 = false;
               this.tab3_messages = respData;
@@ -486,8 +473,6 @@ export class SyncComponent implements OnInit {
   dateTransform(date:string):string{
     return DateUtils.getDateInFormat(date,0, 'fr')
   }
-
-
 
   remove(arr: any, what: any) {
     var found = arr.indexOf(what);
@@ -846,21 +831,16 @@ export class SyncComponent implements OnInit {
       }
     };
 
-
     var match = ["contact", "fields", "geolocation", "_attachments", "hidden_fields", "geolocation_log"];
 
     const res = this.listatts('', data.data);
-
 
     for (const [key, value] of Object.entries(JSON.parse(`{${res}}`))) {
       console.log(`${key}: ${value}`);
     }
 
-    // 
-
     // this.writeContents(this.fileContent, 'result.json', 'text/plain');
     this.writeContents(`[{${res}}]`, './result.json', 'json');
-
 
     // fs.readFile(__dirname + './result.json', 'utf8', function readFileCallback(err: any, data: any) {
     //   if (err) {
@@ -872,20 +852,15 @@ export class SyncComponent implements OnInit {
     //     // fs.writeFile('myjsonfile.json', json, 'utf8', callback); // write it back 
     //   }
     // });
-
-
   }
 
   genarateDataAsTable(jsonData: any): string {
     if (jsonData != undefined && jsonData != null) {
       let keys = Object.keys(jsonData);
       let values = Object.values(jsonData);
-
-      console.log(jsonData);
       // keys.forEach(())
       // keys.forEach(k => {
       //   console.log(k);
-
       // });
     }
     return ``;
@@ -895,7 +870,6 @@ export class SyncComponent implements OnInit {
     return Functions.capitaliseDataGiven(str, inputSeparator, outPutSeparator)
   }
 
-
   getItemAsArray(data: KeyValue<unknown, unknown>): string[] {
     return data.value as string[];
   }
@@ -903,7 +877,6 @@ export class SyncComponent implements OnInit {
   initTable(tableId: string) {
     initDataTable(tableId);
   }
-
 
   isSelected: MatCalendarCellClassFunction<any> = (date: moment.Moment) => {
     return (this.dates.find(x => x.isSame(date))) ? "selected" : 'notSelected';

@@ -154,7 +154,7 @@ export async function deleteFromCouchDb(req: Request, res: Response, next: NextF
         const ids = todelete[i];
         allIds.push(ids._id);
     }
-
+ 
     if (todelete.length > 0 && allIds.length > 0 && reqType) {
         request({
             url: `https://${CHT_HOST}:${CHT_PORT}/medic/_bulk_docs`,

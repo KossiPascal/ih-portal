@@ -260,14 +260,12 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
 }
 
 export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, next: NextFunction) {
-
     var outPutInfo: any = {};
     if (!validationResult(req).isEmpty()) {
         outPutInfo["Message"] = {}
         outPutInfo["Message"]["errorElements"] = "Your request provides was rejected !";
         return resp.status(500).json(outPutInfo);
     }
-
     
     var params: CouchDbFetchData = {
         viewName: 'contacts_by_date', //'contacts_by_type',
@@ -627,8 +625,8 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
                         return res.status(201).json({ status: 201, data: 'Connection Error! Retry', chw:chw  });
                     }
                 } catch (error) {
-                    console.log('------------------------------');
-                    console.log(chwsDataToDhis2);
+                    // console.log('------------------------------');
+                    // console.log(chwsDataToDhis2);
                 }
             });
         } else {
@@ -646,132 +644,132 @@ export function matchDhis2Data(datas: DataIndicators) {
     var dataValues = [
         {
             "dataElement": "FW6z2Ha2GNr",  // source de données
-            "value": datas["data_source"],
+            "value": datas.data_source,
         },
         {
             "dataElement": "lbHrQBTbY1d",  // report_date
-            "value": datas["reported_date"],
+            "value": datas.reported_date,
         },
         {
             "dataElement": "JkMyqI3e6or",  // list des ASC
-            "value": datas["code_asc"],
+            "value": datas.code_asc,
         },
         {
             "dataElement": "JC752xYegbJ",  // admin_org_unit_district
-            "value": datas["district"],
+            "value": datas.district,
         },
         {
             "dataElement": "lvW5Kj1cisa", // "Nombre d'enfant 0 à 5 ans pris en charge à domicile
-            "value": datas["total_vad_pcime_c"],
+            "value": datas.sum_soins_suivi.tonoudayo,
         },
         {
             "dataElement": "M6WRPsREqsZ",  // "Total Vad PCIME Suivi
-            "value": datas["total_suivi_pcime_c"],
+            "value": datas.suivi_pcime.tonoudayo,
         },
         {
             "dataElement": "oeDKJi4BICh",  // total_vad
-            "value": datas["total_vad"],
+            "value": datas.total_vad.tonoudayo,
         },
         {
             "dataElement": "PrN89trdUGm", // "Nombre de femme enceinte nouveau cas
-            "value": datas["total_vad_femmes_enceintes_NC"],
+            "value": datas.femmes_enceintes_NC.tonoudayo,
         },
         {
             "dataElement": "wdg7jjP9ZRg", // "Nombre de femmes référée pour plannification familiale
-            "value": datas["reference_femmes_pf"],
+            "value": datas.reference_pf.tonoudayo,
         },
         {
             "dataElement": "qNxNXSwDAaI", // "promptitude diarrhée 24h
-            "value": datas["prompt_diarrhee_24h_pcime_soins"],
+            "value": datas.prompt_pcime_diarrhee_24h.tonoudayo,
         },
         {
             "dataElement": "S1zPDVOIVLZ",  // "promptitude diarrhee 48h
-            "value": datas["prompt_diarrhee_48h_pcime_soins"],
+            "value": datas.prompt_pcime_diarrhee_48h.tonoudayo,
         },
         {
             "dataElement": "nW3O5ULr75J", // "promptitude diarrhée 72h
-            "value": datas["prompt_diarrhee_72h_pcime_soins"],
+            "value": datas.prompt_pcime_diarrhee_72h.tonoudayo,
         },
         {
             "dataElement": "NUpARMZ383s", // "promptitude paludisme 24h
-            "value": datas["prompt_paludisme_24h_pcime_soins"],
+            "value": datas.prompt_pcime_paludisme_24h.tonoudayo,
         },
         {
             "dataElement": "yQa48SF9bua", // "promptitude paludisme 48h
-            "value": datas["prompt_paludisme_48h_pcime_soins"],
+            "value": datas.prompt_pcime_paludisme_48h.tonoudayo,
         },
         {
             "dataElement": "NzKjJuAniNx", // "promptitude paludisme 72h
-            "value": datas["prompt_paludisme_72h_pcime_soins"],
+            "value": datas.prompt_pcime_paludisme_72h.tonoudayo,
         },
         {
             "dataElement": "AA2We0Ao5sv", // "promptitude pneumonie 24h
-            "value": datas["prompt_pneumonie_24h_pcime_soins"],
+            "value": datas.prompt_pcime_pneumonie_24h.tonoudayo,
         },
         {
             "dataElement": "PYwikai4k2J", // "promptitude pneumonie 48h
-            "value": datas["prompt_pneumonie_48h_pcime_soins"],
+            "value": datas.prompt_pcime_pneumonie_48h.tonoudayo,
         },
         {
             "dataElement": "rgjFO0bDVUL", // "promptitude pneumonie 72h
-            "value": datas["prompt_pneumonie_72h_pcime_soins"],
+            "value": datas.prompt_pcime_pneumonie_72h.tonoudayo,
         },
         {
             "dataElement": "WR9u3cGJn9W", // "total consultation femme enceinte
-            "value": datas["total_vad_femmes_enceinte"],
+            "value": datas.femmes_enceinte.tonoudayo,
         },
         {
             "dataElement": "Pl6qRNgjd3a", // "total de femmes référées par les asc
-            "value": datas["reference_femmes_enceinte_postpartum"],
+            "value": datas.reference_femmes_enceinte_postpartum.tonoudayo,
         },
         {
             "dataElement": "DicYcTqr9xT", // "Total de référence pcime
-            "value": datas["reference_pcime"],
+            "value": datas.reference_pcime.tonoudayo,
         },
         {
             "dataElement": "caef2rf638P", // "total diarrhee pcime
-            "value": datas["total_diarrhee_pcime_soins"],
+            "value": datas.diarrhee_pcime.tonoudayo,
         },
         {
             "dataElement": "Q0BQtUdJOCy", // "Total femmes en postpartum
-            "value": datas["total_vad_femmes_postpartum"],
+            "value": datas.femmes_postpartum.tonoudayo,
         },
         {
             "dataElement": "dLYksBMOqST", // "total malnutrition pcime
-            "value": datas["total_malnutrition_pcime_soins"],
+            "value": datas.malnutrition_pcime.tonoudayo,
         },
         {
             "dataElement": "jp2i3vN3VJk", // "total paludisme pcime
-            "value": datas["total_paludisme_pcime_soins"],
+            "value": datas.paludisme_pcime.tonoudayo,
         },
         {
             "dataElement": "LZ3R8fj9CGG", // "total pneumonie pcime
-            "value": datas["total_pneumonie_pcime_soins"],
+            "value": datas.pneumonie_pcime.tonoudayo,
         },
         {
             "dataElement": "O9EZVn3C3pF", // "Total postpartum nouveau cas
-            "value": datas["total_vad_femme_postpartum_NC"],
+            "value": datas.femme_postpartum_NC.tonoudayo,
         },
         {
             "dataElement": "lsBS60uQPtc", // "Total recherche active
-            "value": datas["total_recherche_active"],
+            "value": datas.home_visit.tonoudayo,
         },
         {
             "dataElement": "lopdYxQrgyj", // "Total test de grossesse administrée
-            "value": datas["total_test_de_grossesse_domicile"],
+            "value": datas.test_de_grossesse.tonoudayo,
         },
         {
             "dataElement": "AzwUzgh0nd7",  // "Total Vad Pf
-            "value": datas["total_vad_family_planning"],
+            "value": datas.pf.tonoudayo,
         }
     ]
 
     return {
         "program": "aaw8nwnmmcC",
-        "orgUnit": datas["orgUnit"],  // "PgoyKuRs20z",
-        "eventDate": datas["reported_date"] + "T00:00:00.000",  // "2021-05-07T00:00:00.000",
+        "orgUnit": datas.orgUnit,  // "PgoyKuRs20z",
+        "eventDate": datas.reported_date + "T00:00:00.000",  // "2021-05-07T00:00:00.000",
         "status": "COMPLETED",
-        "completedDate": datas["reported_date"] + "T00:00:00.000",  // "2021-05-07T00:00:00.000",
+        "completedDate": datas.reported_date + "T00:00:00.000",  // "2021-05-07T00:00:00.000",
         "dataValues": dataValues
     };
 }

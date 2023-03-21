@@ -212,7 +212,8 @@ export class DatabaseUtilsComponent implements OnInit {
       sites: Functions.returnDataAsArray(this.dataListToDeleteForm.value.sites) as string[],
       zones: Functions.returnDataAsArray(this.dataListToDeleteForm.value.zones) as string[],
       chws: Functions.returnDataAsArray(this.dataListToDeleteForm.value.chws) as string[],
-      type: this.dataListToDeleteForm.value.type
+      type: this.dataListToDeleteForm.value.type,
+      withDhis2Data:false
     }
     return params;
   }

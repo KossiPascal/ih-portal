@@ -72,6 +72,7 @@ private roles = new Roles(this.store);
     const filter: FilterParams = {
       districts: Functions.returnDataAsArray(this.filterForm.value.districts) as string[],
       sites: Functions.returnDataAsArray(this.filterForm.value.sites) as string[],
+      withDhis2Data:false
     }
     this.sync.getZonesList(filter).subscribe((_zoneResp: { status: number, data: Zones[] }) => {
       if (_zoneResp.status == 200) this.Zones$ = _zoneResp.data;

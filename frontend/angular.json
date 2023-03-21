@@ -80,6 +80,11 @@
             "scripts": [
               "src/assets/plugins/jquery/jquery.min.js",
               "src/assets/plugins/jquery-ui/jquery-ui.min.js",
+              "src/assets/js/jspdf-1.4.1.min.js",
+              "src/assets/js/jspdf.plugin.autotable.min.js",
+              "src/assets/js/tableHTMLExport.js",
+              "src/assets/js/tableExport.min.js",
+              "src/assets/js/jquery_table_to_excel.js",
               "src/assets/js/app.js",
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
               "src/assets/plugins/bootstrap/js/bootstrap.bundle.min.js",

@@ -48,34 +48,34 @@ def countDataFound(KWARG):
     couch = couchdb.Server("https://{}:{}@{}".format(KWARG['medic_username'],KWARG['medic_password'], KWARG['medic_host']))[KWARG['medic_database']]
 
     total_reference_women_emergency_suivi = {}
-    total_femme_enceinte_women_emergency_suivi = {}
-    total_femme_postpartum_women_emergency_suivi = {}
+    femme_enceinte_women_emergency_suivi = {}
+    femme_postpartum_women_emergency_suivi = {}
     total_family_planning_renewal_suivi = {}
     total_reference_family_planning_renewal_suivi = {}
-    total_home_visit = {}
-    total_pcime_soins = {}
-    total_pcime_suivi = {}
-    total_reference_pcime_suivi = {}
-    total_reference_pcime_soins = {}
-    total_diarrhee_pcime_soins = {}
-    total_paludisme_pcime_soins = {}
-    total_pneumonie_pcime_soins = {}
-    total_malnutrition_pcime_soins = {}
-    prompt_diarrhee_24h_pcime_soins = {}
-    prompt_diarrhee_48h_pcime_soins = {}
-    prompt_diarrhee_72h_pcime_soins = {}
-    prompt_paludisme_24h_pcime_soins = {}
-    prompt_paludisme_48h_pcime_soins = {}
-    prompt_paludisme_72h_pcime_soins = {}
-    prompt_pneumonie_24h_pcime_soins = {}
-    prompt_pneumonie_48h_pcime_soins = {}
-    prompt_pneumonie_72h_pcime_soins = {}
+    home_visit = {}
+    soins_pcime = {}
+    suivi_pcime = {}
+    reference_pcime_suivi = {}
+    reference_pcime_soins = {}
+    diarrhee_pcime = {}
+    paludisme_pcime = {}
+    pneumonie_pcime = {}
+    malnutrition_pcime = {}
+    prompt_pcime_diarrhee_24h = {}
+    prompt_pcime_diarrhee_48h = {}
+    prompt_pcime_diarrhee_72h = {}
+    prompt_pcime_paludisme_24h = {}
+    prompt_pcime_paludisme_48h = {}
+    prompt_pcime_paludisme_72h = {}
+    prompt_pcime_pneumonie_24h = {}
+    prompt_pcime_pneumonie_48h = {}
+    prompt_pcime_pneumonie_72h = {}
     total_pregnancy_family_planning = {}
     total_reference_family_planning_soins = {}
     total_reference_femme_enceinte_soins = {}
     total_vad_femme_enceinte_NC_soins = {}
     total_vad_femme_enceinte_soins = {}
-    total_test_de_grossesse_domicile = {}
+    test_de_grossesse = {}
     total_newborn_suivi = {}
     total_reference_newborn = {}
     total_malnutrition_suivi = {}
@@ -84,9 +84,9 @@ def countDataFound(KWARG):
     total_reference_prenatal_suivi = {}
     total_postnatal_suivi = {}
     total_reference_postnatal_suivi = {}
-    total_vad_femme_postpartum_NC = {}
+    femme_postpartum_NC = {}
     total_vad_women_emergency_suivi = {}
-    total_vad_family_planning_NC = {}
+    pf_NC = {}
 
     x = 0
     
@@ -98,128 +98,128 @@ def countDataFound(KWARG):
                 asc = chwsFound(row.doc, "code")
                 field = row.doc["fields"]
                 if formView(row.doc, "home_visit") or formView(row.doc, "death_report"):
-                    if asc not in total_home_visit:
-                        total_home_visit[asc] = {"asc": asc, "nbr": 1}
+                    if asc not in home_visit:
+                        home_visit[asc] = {"asc": asc, "nbr": 1}
                     else:
-                        total_home_visit[asc]["nbr"] += 1
+                        home_visit[asc]["nbr"] += 1
 
                 if formView(row.doc, "pcime_c_asc"):
-                    if asc not in total_pcime_soins:
-                        total_pcime_soins[asc] = {"asc": asc, "nbr": 1}
+                    if asc not in soins_pcime:
+                        soins_pcime[asc] = {"asc": asc, "nbr": 1}
                     else:
-                        total_pcime_soins[asc]["nbr"] += 1
+                        soins_pcime[asc]["nbr"] += 1
 
                     if field["group_review"]["s_have_you_refer_child"] == "yes":  # err medic
-                        if asc not in total_reference_pcime_soins:
-                            total_reference_pcime_soins[asc] = {
+                        if asc not in reference_pcime_soins:
+                            reference_pcime_soins[asc] = {
                                 "asc": asc, "nbr": 1}
                         else:
-                            total_reference_pcime_soins[asc]["nbr"] += 1
+                            reference_pcime_soins[asc]["nbr"] += 1
 
                     if field["has_diarrhea"] == "true":  # err medic
-                        if asc not in total_diarrhee_pcime_soins:
-                            total_diarrhee_pcime_soins[asc] = {
+                        if asc not in diarrhee_pcime:
+                            diarrhee_pcime[asc] = {
                                 "asc": asc, "nbr": 1}
                         else:
-                            total_diarrhee_pcime_soins[asc]["nbr"] += 1
+                            diarrhee_pcime[asc]["nbr"] += 1
 
                         if field["within_24h"] == "true":
-                            if asc not in prompt_diarrhee_24h_pcime_soins:
-                                prompt_diarrhee_24h_pcime_soins[asc] = {
+                            if asc not in prompt_pcime_diarrhee_24h:
+                                prompt_pcime_diarrhee_24h[asc] = {
                                     "asc": asc, "nbr": 1}
                             else:
-                                prompt_diarrhee_24h_pcime_soins[asc]["nbr"] += 1
+                                prompt_pcime_diarrhee_24h[asc]["nbr"] += 1
 
                         if field["within_24h"] == "true" or field["within_48h"] == "true":
-                            if asc not in prompt_diarrhee_48h_pcime_soins:
-                                prompt_diarrhee_48h_pcime_soins[asc] = {
+                            if asc not in prompt_pcime_diarrhee_48h:
+                                prompt_pcime_diarrhee_48h[asc] = {
                                     "asc": asc, "nbr": 1}
                             else:
-                                prompt_diarrhee_48h_pcime_soins[asc]["nbr"] += 1
+                                prompt_pcime_diarrhee_48h[asc]["nbr"] += 1
 
                         if field["within_24h"] == "true" or field["within_48h"] == "true" or field["within_72h"] == "true":
-                            if asc not in prompt_diarrhee_72h_pcime_soins:
-                                prompt_diarrhee_72h_pcime_soins[asc] = {
+                            if asc not in prompt_pcime_diarrhee_72h:
+                                prompt_pcime_diarrhee_72h[asc] = {
                                     "asc": asc, "nbr": 1}
                             else:
-                                prompt_diarrhee_72h_pcime_soins[asc]["nbr"] += 1
+                                prompt_pcime_diarrhee_72h[asc]["nbr"] += 1
 
                     if field["fever_with_malaria"] == "true":
                         # field["s_fever"]["s_fever_child_TDR_result"] == "positive"
-                        if asc not in total_paludisme_pcime_soins:
-                            total_paludisme_pcime_soins[asc] = {
+                        if asc not in paludisme_pcime:
+                            paludisme_pcime[asc] = {
                                 "asc": asc, "nbr": 1}
                         else:
-                            total_paludisme_pcime_soins[asc]["nbr"] += 1
+                            paludisme_pcime[asc]["nbr"] += 1
 
                         if field["within_24h"] == "true":
-                            if asc not in prompt_paludisme_24h_pcime_soins:
-                                prompt_paludisme_24h_pcime_soins[asc] = {
+                            if asc not in prompt_pcime_paludisme_24h:
+                                prompt_pcime_paludisme_24h[asc] = {
                                     "asc": asc, "nbr": 1}
                             else:
-                                prompt_paludisme_24h_pcime_soins[asc]["nbr"] += 1
+                                prompt_pcime_paludisme_24h[asc]["nbr"] += 1
 
                         if field["within_24h"] == "true" or field["within_48h"] == "true":
-                            if asc not in prompt_paludisme_48h_pcime_soins:
-                                prompt_paludisme_48h_pcime_soins[asc] = {
+                            if asc not in prompt_pcime_paludisme_48h:
+                                prompt_pcime_paludisme_48h[asc] = {
                                     "asc": asc, "nbr": 1}
                             else:
-                                prompt_paludisme_48h_pcime_soins[asc]["nbr"] += 1
+                                prompt_pcime_paludisme_48h[asc]["nbr"] += 1
 
                         if field["within_24h"] == "true" or field["within_48h"] == "true" or field["within_72h"] == "true":
-                            if asc not in prompt_paludisme_72h_pcime_soins:
-                                prompt_paludisme_72h_pcime_soins[asc] = {
+                            if asc not in prompt_pcime_paludisme_72h:
+                                prompt_pcime_paludisme_72h[asc] = {
                                     "asc": asc, "nbr": 1}
                             else:
-                                prompt_paludisme_72h_pcime_soins[asc]["nbr"] += 1
+                                prompt_pcime_paludisme_72h[asc]["nbr"] += 1
 
                     if field["has_pneumonia"] == "true":
-                        if asc not in total_pneumonie_pcime_soins:
-                            total_pneumonie_pcime_soins[asc] = {
+                        if asc not in pneumonie_pcime:
+                            pneumonie_pcime[asc] = {
                                 "asc": asc, "nbr": 1}
                         else:
-                            total_pneumonie_pcime_soins[asc]["nbr"] += 1
+                            pneumonie_pcime[asc]["nbr"] += 1
 
                         if field["within_24h"] == "true":
-                            if asc not in prompt_pneumonie_24h_pcime_soins:
-                                prompt_pneumonie_24h_pcime_soins[asc] = {
+                            if asc not in prompt_pcime_pneumonie_24h:
+                                prompt_pcime_pneumonie_24h[asc] = {
                                     "asc": asc, "nbr": 1}
                             else:
-                                prompt_pneumonie_24h_pcime_soins[asc]["nbr"] += 1
+                                prompt_pcime_pneumonie_24h[asc]["nbr"] += 1
 
                         if field["within_24h"] == "true" or field["within_48h"] == "true":
-                            if asc not in prompt_pneumonie_48h_pcime_soins:
-                                prompt_pneumonie_48h_pcime_soins[asc] = {
+                            if asc not in prompt_pcime_pneumonie_48h:
+                                prompt_pcime_pneumonie_48h[asc] = {
                                     "asc": asc, "nbr": 1}
                             else:
-                                prompt_pneumonie_48h_pcime_soins[asc]["nbr"] += 1
+                                prompt_pcime_pneumonie_48h[asc]["nbr"] += 1
 
                         if field["within_24h"] == "true" or field["within_48h"] == "true" or field["within_72h"] == "true":
-                            if asc not in prompt_pneumonie_72h_pcime_soins:
-                                prompt_pneumonie_72h_pcime_soins[asc] = {
+                            if asc not in prompt_pcime_pneumonie_72h:
+                                prompt_pcime_pneumonie_72h[asc] = {
                                     "asc": asc, "nbr": 1}
                             else:
-                                prompt_pneumonie_72h_pcime_soins[asc]["nbr"] += 1
+                                prompt_pcime_pneumonie_72h[asc]["nbr"] += 1
 
                     if field["has_malnutrition"] == "true":
                         # field["s_constant"]["s_constant_child_brachial_perimeter"] < 125:
-                        if asc not in total_malnutrition_pcime_soins:
-                            total_malnutrition_pcime_soins[asc] = {
+                        if asc not in malnutrition_pcime:
+                            malnutrition_pcime[asc] = {
                                 "asc": asc, "nbr": 1}
                         else:
-                            total_malnutrition_pcime_soins[asc]["nbr"] += 1
+                            malnutrition_pcime[asc]["nbr"] += 1
 
                 if formView(row.doc, "pcime_c_followup"):
-                    if asc not in total_pcime_suivi:
-                        total_pcime_suivi[asc] = {"asc": asc, "nbr": 1}
+                    if asc not in suivi_pcime:
+                        suivi_pcime[asc] = {"asc": asc, "nbr": 1}
                     else:
-                        total_pcime_suivi[asc]["nbr"] += 1
+                        suivi_pcime[asc]["nbr"] += 1
                     if field["group_review"]["s_have_you_refer_child"] == "yes":
-                        if asc not in total_reference_pcime_suivi:
-                            total_reference_pcime_suivi[asc] = {
+                        if asc not in reference_pcime_suivi:
+                            reference_pcime_suivi[asc] = {
                                 "asc": asc, "nbr": 1}
                         else:
-                            total_reference_pcime_suivi[asc]["nbr"] += 1
+                            reference_pcime_suivi[asc]["nbr"] += 1
 
                 if formView(row.doc, "newborn_followup"):
                     if asc not in total_newborn_suivi:
@@ -280,11 +280,11 @@ def countDataFound(KWARG):
                                     total_reference_postnatal_suivi[asc]["nbr"] += 1
 
                     if field["follow_up_count"] == "1":
-                        if asc not in total_vad_femme_postpartum_NC:
-                            total_vad_femme_postpartum_NC[asc] = {
+                        if asc not in femme_postpartum_NC:
+                            femme_postpartum_NC[asc] = {
                                 "asc": asc, "nbr": 1}
                         else:
-                            total_vad_femme_postpartum_NC[asc]["nbr"] += 1
+                            femme_postpartum_NC[asc]["nbr"] += 1
 
                 if formView(row.doc, "pregnancy_family_planning"):
                     if asc not in total_pregnancy_family_planning:
@@ -303,11 +303,11 @@ def countDataFound(KWARG):
 
                         if "s_reg_urine_test" in field["s_reg_pregnancy_screen"]:
                             if field["s_reg_pregnancy_screen"]["s_reg_urine_test"] == "yes":
-                                if asc not in total_test_de_grossesse_domicile:
-                                    total_test_de_grossesse_domicile[asc] = {
+                                if asc not in test_de_grossesse:
+                                    test_de_grossesse[asc] = {
                                         "asc": asc, "nbr": 1}
                                 else:
-                                    total_test_de_grossesse_domicile[asc]["nbr"] += 1
+                                    test_de_grossesse[asc]["nbr"] += 1
 
                     if "s_have_you_refer_child" in field["s_summary"]:
                         if field["s_summary"]["s_have_you_refer_child"] == "yes" and not pregnant_1 and not pregnant_2:
@@ -343,10 +343,10 @@ def countDataFound(KWARG):
                     if "s_fam_plan_screen" in field:
                         if "agreed_to_fp" in field["s_fam_plan_screen"]:
                             if field["s_fam_plan_screen"]["agreed_to_fp"] == "yes":
-                                if asc not in total_vad_family_planning_NC:
-                                    total_vad_family_planning_NC[asc] = {"asc": asc, "nbr": 1}
+                                if asc not in pf_NC:
+                                    pf_NC[asc] = {"asc": asc, "nbr": 1}
                                 else:
-                                    total_vad_family_planning_NC[asc]["nbr"] += 1
+                                    pf_NC[asc]["nbr"] += 1
 
                 if formView(row.doc, "women_emergency_followup"):
                     if asc not in total_vad_women_emergency_suivi:
@@ -363,18 +363,18 @@ def countDataFound(KWARG):
                             total_reference_women_emergency_suivi[asc]["nbr"] += 1
 
                     if field["initial"]["woman_status"] == "pregnant":
-                        if asc not in total_femme_enceinte_women_emergency_suivi:
-                            total_femme_enceinte_women_emergency_suivi[asc] = {
+                        if asc not in femme_enceinte_women_emergency_suivi:
+                            femme_enceinte_women_emergency_suivi[asc] = {
                                 "asc": asc, "nbr": 1}
                         else:
-                            total_femme_enceinte_women_emergency_suivi[asc]["nbr"] += 1
+                            femme_enceinte_women_emergency_suivi[asc]["nbr"] += 1
 
                     if field["initial"]["woman_status"] == "postpartum":
-                        if asc not in total_femme_postpartum_women_emergency_suivi:
-                            total_femme_postpartum_women_emergency_suivi[asc] = {
+                        if asc not in femme_postpartum_women_emergency_suivi:
+                            femme_postpartum_women_emergency_suivi[asc] = {
                                 "asc": asc, "nbr": 1}
                         else:
-                            total_femme_postpartum_women_emergency_suivi[asc]["nbr"] += 1
+                            femme_postpartum_women_emergency_suivi[asc]["nbr"] += 1
 
                 if formView(row.doc, "fp_follow_up_renewal"):
                     if asc not in total_family_planning_renewal_suivi:
@@ -401,53 +401,53 @@ def countDataFound(KWARG):
             total_newborn_suivi[i] = {"asc": i, "nbr": 0}
         if i not in total_reference_women_emergency_suivi:
             total_reference_women_emergency_suivi[i] = {"asc": i, "nbr": 0}
-        if i not in total_femme_enceinte_women_emergency_suivi:
-            total_femme_enceinte_women_emergency_suivi[i] = {
+        if i not in femme_enceinte_women_emergency_suivi:
+            femme_enceinte_women_emergency_suivi[i] = {
                 "asc": i, "nbr": 0}
-        if i not in total_femme_postpartum_women_emergency_suivi:
-            total_femme_postpartum_women_emergency_suivi[i] = {
+        if i not in femme_postpartum_women_emergency_suivi:
+            femme_postpartum_women_emergency_suivi[i] = {
                 "asc": i, "nbr": 0}
         if i not in total_family_planning_renewal_suivi:
             total_family_planning_renewal_suivi[i] = {"asc": i, "nbr": 0}
         if i not in total_reference_family_planning_renewal_suivi:
             total_reference_family_planning_renewal_suivi[i] = {
                 "asc": i, "nbr": 0}
-        if i not in total_home_visit:
-            total_home_visit[i] = {"asc": i, "nbr": 0}
-        if i not in total_pcime_soins:
-            total_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in total_pcime_suivi:
-            total_pcime_suivi[i] = {"asc": i, "nbr": 0}
-        if i not in total_reference_pcime_suivi:
-            total_reference_pcime_suivi[i] = {"asc": i, "nbr": 0}
-        if i not in total_reference_pcime_soins:
-            total_reference_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in total_diarrhee_pcime_soins:
-            total_diarrhee_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in total_paludisme_pcime_soins:
-            total_paludisme_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in total_pneumonie_pcime_soins:
-            total_pneumonie_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in total_malnutrition_pcime_soins:
-            total_malnutrition_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in prompt_diarrhee_24h_pcime_soins:
-            prompt_diarrhee_24h_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in prompt_diarrhee_48h_pcime_soins:
-            prompt_diarrhee_48h_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in prompt_diarrhee_72h_pcime_soins:
-            prompt_diarrhee_72h_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in prompt_paludisme_24h_pcime_soins:
-            prompt_paludisme_24h_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in prompt_paludisme_48h_pcime_soins:
-            prompt_paludisme_48h_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in prompt_paludisme_72h_pcime_soins:
-            prompt_paludisme_72h_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in prompt_pneumonie_24h_pcime_soins:
-            prompt_pneumonie_24h_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in prompt_pneumonie_48h_pcime_soins:
-            prompt_pneumonie_48h_pcime_soins[i] = {"asc": i, "nbr": 0}
-        if i not in prompt_pneumonie_72h_pcime_soins:
-            prompt_pneumonie_72h_pcime_soins[i] = {"asc": i, "nbr": 0}
+        if i not in home_visit:
+            home_visit[i] = {"asc": i, "nbr": 0}
+        if i not in soins_pcime:
+            soins_pcime[i] = {"asc": i, "nbr": 0}
+        if i not in suivi_pcime:
+            suivi_pcime[i] = {"asc": i, "nbr": 0}
+        if i not in reference_pcime_suivi:
+            reference_pcime_suivi[i] = {"asc": i, "nbr": 0}
+        if i not in reference_pcime_soins:
+            reference_pcime_soins[i] = {"asc": i, "nbr": 0}
+        if i not in diarrhee_pcime:
+            diarrhee_pcime[i] = {"asc": i, "nbr": 0}
+        if i not in paludisme_pcime:
+            paludisme_pcime[i] = {"asc": i, "nbr": 0}
+        if i not in pneumonie_pcime:
+            pneumonie_pcime[i] = {"asc": i, "nbr": 0}
+        if i not in malnutrition_pcime:
+            malnutrition_pcime[i] = {"asc": i, "nbr": 0}
+        if i not in prompt_pcime_diarrhee_24h:
+            prompt_pcime_diarrhee_24h[i] = {"asc": i, "nbr": 0}
+        if i not in prompt_pcime_diarrhee_48h:
+            prompt_pcime_diarrhee_48h[i] = {"asc": i, "nbr": 0}
+        if i not in prompt_pcime_diarrhee_72h:
+            prompt_pcime_diarrhee_72h[i] = {"asc": i, "nbr": 0}
+        if i not in prompt_pcime_paludisme_24h:
+            prompt_pcime_paludisme_24h[i] = {"asc": i, "nbr": 0}
+        if i not in prompt_pcime_paludisme_48h:
+            prompt_pcime_paludisme_48h[i] = {"asc": i, "nbr": 0}
+        if i not in prompt_pcime_paludisme_72h:
+            prompt_pcime_paludisme_72h[i] = {"asc": i, "nbr": 0}
+        if i not in prompt_pcime_pneumonie_24h:
+            prompt_pcime_pneumonie_24h[i] = {"asc": i, "nbr": 0}
+        if i not in prompt_pcime_pneumonie_48h:
+            prompt_pcime_pneumonie_48h[i] = {"asc": i, "nbr": 0}
+        if i not in prompt_pcime_pneumonie_72h:
+            prompt_pcime_pneumonie_72h[i] = {"asc": i, "nbr": 0}
         if i not in total_pregnancy_family_planning:
             total_pregnancy_family_planning[i] = {"asc": i, "nbr": 0}
         if i not in total_reference_family_planning_soins:
@@ -458,8 +458,8 @@ def countDataFound(KWARG):
             total_vad_femme_enceinte_NC_soins[i] = {"asc": i, "nbr": 0}
         if i not in total_vad_femme_enceinte_soins:
             total_vad_femme_enceinte_soins[i] = {"asc": i, "nbr": 0}
-        if i not in total_test_de_grossesse_domicile:
-            total_test_de_grossesse_domicile[i] = {"asc": i, "nbr": 0}
+        if i not in test_de_grossesse:
+            test_de_grossesse[i] = {"asc": i, "nbr": 0}
         if i not in total_newborn_suivi:
             total_newborn_suivi[i] = {"asc": i, "nbr": 0}
         if i not in total_reference_newborn:
@@ -476,37 +476,37 @@ def countDataFound(KWARG):
             total_postnatal_suivi[i] = {"asc": i, "nbr": 0}
         if i not in total_reference_postnatal_suivi:
             total_reference_postnatal_suivi[i] = {"asc": i, "nbr": 0}
-        if i not in total_vad_femme_postpartum_NC:
-            total_vad_femme_postpartum_NC[i] = {"asc": i, "nbr": 0}
+        if i not in femme_postpartum_NC:
+            femme_postpartum_NC[i] = {"asc": i, "nbr": 0}
         if i not in total_vad_women_emergency_suivi:
             total_vad_women_emergency_suivi[i] = {"asc": i, "nbr": 0}
-        if i not in total_vad_family_planning_NC:
-            total_vad_family_planning_NC[i] = {"asc": i, "nbr": 0}
+        if i not in pf_NC:
+            pf_NC[i] = {"asc": i, "nbr": 0}
 
-    return {"total_home_visit": total_home_visit,
-            "total_pcime_soins": total_pcime_soins,
-            "total_pcime_suivi": total_pcime_suivi,
-            "total_reference_pcime_suivi": total_reference_pcime_suivi,
-            "total_reference_pcime_soins": total_reference_pcime_soins,
-            "total_diarrhee_pcime_soins": total_diarrhee_pcime_soins,
-            "total_paludisme_pcime_soins": total_paludisme_pcime_soins,
-            "total_pneumonie_pcime_soins": total_pneumonie_pcime_soins,
-            "total_malnutrition_pcime_soins": total_malnutrition_pcime_soins,
-            "prompt_diarrhee_24h_pcime_soins": prompt_diarrhee_24h_pcime_soins,
-            "prompt_diarrhee_48h_pcime_soins": prompt_diarrhee_48h_pcime_soins,
-            "prompt_diarrhee_72h_pcime_soins": prompt_diarrhee_72h_pcime_soins,
-            "prompt_paludisme_24h_pcime_soins": prompt_paludisme_24h_pcime_soins,
-            "prompt_paludisme_48h_pcime_soins": prompt_paludisme_48h_pcime_soins,
-            "prompt_paludisme_72h_pcime_soins": prompt_paludisme_72h_pcime_soins,
-            "prompt_pneumonie_24h_pcime_soins": prompt_pneumonie_24h_pcime_soins,
-            "prompt_pneumonie_48h_pcime_soins": prompt_pneumonie_48h_pcime_soins,
-            "prompt_pneumonie_72h_pcime_soins": prompt_pneumonie_72h_pcime_soins,
+    return {"home_visit": home_visit,
+            "soins_pcime": soins_pcime,
+            "suivi_pcime": suivi_pcime,
+            "reference_pcime_suivi": reference_pcime_suivi,
+            "reference_pcime_soins": reference_pcime_soins,
+            "diarrhee_pcime": diarrhee_pcime,
+            "paludisme_pcime": paludisme_pcime,
+            "pneumonie_pcime": pneumonie_pcime,
+            "malnutrition_pcime": malnutrition_pcime,
+            "prompt_pcime_diarrhee_24h": prompt_pcime_diarrhee_24h,
+            "prompt_pcime_diarrhee_48h": prompt_pcime_diarrhee_48h,
+            "prompt_pcime_diarrhee_72h": prompt_pcime_diarrhee_72h,
+            "prompt_pcime_paludisme_24h": prompt_pcime_paludisme_24h,
+            "prompt_pcime_paludisme_48h": prompt_pcime_paludisme_48h,
+            "prompt_pcime_paludisme_72h": prompt_pcime_paludisme_72h,
+            "prompt_pcime_pneumonie_24h": prompt_pcime_pneumonie_24h,
+            "prompt_pcime_pneumonie_48h": prompt_pcime_pneumonie_48h,
+            "prompt_pcime_pneumonie_72h": prompt_pcime_pneumonie_72h,
             "total_pregnancy_family_planning": total_pregnancy_family_planning,
             "total_reference_family_planning_soins": total_reference_family_planning_soins,
             "total_reference_femme_enceinte_soins": total_reference_femme_enceinte_soins,
             "total_vad_femme_enceinte_soins": total_vad_femme_enceinte_soins,
             "total_vad_femme_enceinte_NC_soins": total_vad_femme_enceinte_NC_soins,
-            "total_test_de_grossesse_domicile": total_test_de_grossesse_domicile,
+            "test_de_grossesse": test_de_grossesse,
             "total_newborn_suivi": total_newborn_suivi,
             "total_reference_newborn": total_reference_newborn,
             "total_malnutrition_suivi": total_malnutrition_suivi,
@@ -515,14 +515,14 @@ def countDataFound(KWARG):
             "total_reference_prenatal_suivi": total_reference_prenatal_suivi,
             "total_postnatal_suivi": total_postnatal_suivi,
             "total_reference_postnatal_suivi": total_reference_postnatal_suivi,
-            "total_vad_femme_postpartum_NC": total_vad_femme_postpartum_NC,
+            "femme_postpartum_NC": femme_postpartum_NC,
             "total_vad_women_emergency_suivi": total_vad_women_emergency_suivi,
             "total_reference_women_emergency_suivi": total_reference_women_emergency_suivi,
-            "total_femme_enceinte_women_emergency_suivi": total_femme_enceinte_women_emergency_suivi,
-            "total_femme_postpartum_women_emergency_suivi": total_femme_postpartum_women_emergency_suivi,
+            "femme_enceinte_women_emergency_suivi": femme_enceinte_women_emergency_suivi,
+            "femme_postpartum_women_emergency_suivi": femme_postpartum_women_emergency_suivi,
             "total_family_planning_renewal_suivi": total_family_planning_renewal_suivi,
             "total_reference_family_planning_renewal_suivi": total_reference_family_planning_renewal_suivi,
-            "total_vad_family_planning_NC": total_vad_family_planning_NC
+            "pf_NC": pf_NC
             }
 
 def flushMedicDataToDhis2(KWARG,fileName = "medic_output",data_type = "Consultation"):
@@ -538,17 +538,17 @@ def flushMedicDataToDhis2(KWARG,fileName = "medic_output",data_type = "Consultat
     try:
         all_datas_found = countDataFound(KWARG)
 
-        total_pcime_soins = all_datas_found["total_pcime_soins"]
+        soins_pcime = all_datas_found["soins_pcime"]
         total_pregnancy_family_planning = all_datas_found["total_pregnancy_family_planning"]
-        total_pcime_suivi = all_datas_found["total_pcime_suivi"]
+        suivi_pcime = all_datas_found["suivi_pcime"]
         total_newborn_suivi = all_datas_found["total_newborn_suivi"]
         total_malnutrition_suivi = all_datas_found["total_malnutrition_suivi"]
         total_prenatal_suivi = all_datas_found["total_prenatal_suivi"]
         total_postnatal_suivi = all_datas_found["total_postnatal_suivi"]
         total_vad_women_emergency_suivi = all_datas_found["total_vad_women_emergency_suivi"]
         total_family_planning_renewal_suivi = all_datas_found["total_family_planning_renewal_suivi"]
-        total_reference_pcime_soins = all_datas_found["total_reference_pcime_soins"]
-        total_reference_pcime_suivi = all_datas_found["total_reference_pcime_suivi"]
+        reference_pcime_soins = all_datas_found["reference_pcime_soins"]
+        reference_pcime_suivi = all_datas_found["reference_pcime_suivi"]
         total_reference_newborn = all_datas_found["total_reference_newborn"]
         total_reference_malnutrition_suivi = all_datas_found["total_reference_malnutrition_suivi"]
         total_reference_family_planning_soins = all_datas_found["total_reference_family_planning_soins"]
@@ -558,12 +558,12 @@ def flushMedicDataToDhis2(KWARG,fileName = "medic_output",data_type = "Consultat
         total_reference_postnatal_suivi = all_datas_found["total_reference_postnatal_suivi"]
         total_reference_women_emergency_suivi = all_datas_found["total_reference_women_emergency_suivi"]
         total_vad_femme_enceinte_soins = all_datas_found["total_vad_femme_enceinte_soins"]
-        total_femme_enceinte_women_emergency_suivi = all_datas_found["total_femme_enceinte_women_emergency_suivi"]
-        total_femme_postpartum_women_emergency_suivi = all_datas_found["total_femme_postpartum_women_emergency_suivi"]
+        femme_enceinte_women_emergency_suivi = all_datas_found["femme_enceinte_women_emergency_suivi"]
+        femme_postpartum_women_emergency_suivi = all_datas_found["femme_postpartum_women_emergency_suivi"]
 
         with createFile(extractFolder(), fileName0) as result:
             if fileName == defaultFileName:
-                result.write("site,reported_date,district,asc_code,total_vad,total_vad_pcime_c,total_suivi_pcime_c,reference_femmes_pf,reference_pcime,reference_femmes_enceinte_postpartum,total_vad_femmes_enceinte,total_vad_femmes_postpartum,total_home_visit,total_diarrhee_pcime_soins,total_paludisme_pcime_soins,total_pneumonie_pcime_soins,total_malnutrition_pcime_soins,prompt_diarrhee_24h_pcime_soins,prompt_diarrhee_48h_pcime_soins,prompt_diarrhee_72h_pcime_soins,prompt_paludisme_24h_pcime_soins,prompt_paludisme_48h_pcime_soins,prompt_paludisme_72h_pcime_soins,prompt_pneumonie_24h_pcime_soins,prompt_pneumonie_48h_pcime_soins,prompt_pneumonie_72h_pcime_soins,total_vad_femme_enceinte_NC_soins,total_vad_femme_postpartum_NC,total_test_de_grossesse_domicile,total_vad_family_planning\n")
+                result.write("site,reported_date,district,asc_code,total_vad,pcime,suivi_pcime,reference_pf,reference_pcime,reference_femmes_enceinte_postpartum,femmes_enceinte,femmes_postpartum,home_visit,diarrhee_pcime,paludisme_pcime,pneumonie_pcime,malnutrition_pcime,prompt_pcime_diarrhee_24h,prompt_pcime_diarrhee_48h,prompt_pcime_diarrhee_72h,prompt_pcime_paludisme_24h,prompt_pcime_paludisme_48h,prompt_pcime_paludisme_72h,prompt_pcime_pneumonie_24h,prompt_pcime_pneumonie_48h,prompt_pcime_pneumonie_72h,total_vad_femme_enceinte_NC_soins,femme_postpartum_NC,test_de_grossesse,pf\n")
             else:
                 result.write("Site,District,ChwsCode,ChwsName,Type,"+KWARG['start_date']+"\n")
                 # result.write("ChwsCode,ChwsName,Type,District,Site,total_vad,home_visite,consultation\n")
@@ -572,24 +572,24 @@ def flushMedicDataToDhis2(KWARG,fileName = "medic_output",data_type = "Consultat
             # datalenght = len(chwsFound("chws", "chws_array"))
             for i in chwsFound("chws", "chws_array"):
                 chwsData = {}
-                total_vad  = all_datas_found["total_home_visit"][i]["nbr"] + total_pcime_soins[i]["nbr"] + total_pregnancy_family_planning[i]["nbr"] +  \
-                            total_pcime_suivi[i]["nbr"] + total_newborn_suivi[i]["nbr"] + total_prenatal_suivi[i]["nbr"] + total_postnatal_suivi[i]["nbr"] + \
+                total_vad  = all_datas_found["home_visit"][i]["nbr"] + soins_pcime[i]["nbr"] + total_pregnancy_family_planning[i]["nbr"] +  \
+                            suivi_pcime[i]["nbr"] + total_newborn_suivi[i]["nbr"] + total_prenatal_suivi[i]["nbr"] + total_postnatal_suivi[i]["nbr"] + \
                             total_malnutrition_suivi[i]["nbr"] + total_vad_women_emergency_suivi[i]["nbr"] + total_family_planning_renewal_suivi[i]["nbr"]
                 # if int(total_vad) != 0:
                 if fileName == defaultFileName:
                     found+=1
-                    total_vad_pcime_c = total_pcime_soins[i]["nbr"] + total_pcime_suivi[i]["nbr"] + total_newborn_suivi[i]["nbr"] + total_malnutrition_suivi[i]["nbr"]
-                    total_suivi_pcime_c = total_pcime_suivi[i]["nbr"] + total_newborn_suivi[i]["nbr"] + total_malnutrition_suivi[i]["nbr"]
+                    pcime = soins_pcime[i]["nbr"] + suivi_pcime[i]["nbr"] + total_newborn_suivi[i]["nbr"] + total_malnutrition_suivi[i]["nbr"]
+                    suivi_pcime = suivi_pcime[i]["nbr"] + total_newborn_suivi[i]["nbr"] + total_malnutrition_suivi[i]["nbr"]
 
-                    reference_femmes_pf = total_reference_family_planning_soins[i]["nbr"] + total_reference_family_planning_renewal_suivi[i]["nbr"]
-                    reference_pcime = total_reference_pcime_soins[i]["nbr"] + total_reference_pcime_suivi[i]["nbr"] + total_reference_newborn[i]["nbr"] + \
+                    reference_pf = total_reference_family_planning_soins[i]["nbr"] + total_reference_family_planning_renewal_suivi[i]["nbr"]
+                    reference_pcime = reference_pcime_soins[i]["nbr"] + reference_pcime_suivi[i]["nbr"] + total_reference_newborn[i]["nbr"] + \
                                         total_reference_malnutrition_suivi[i]["nbr"]
                     reference_femmes_enceinte_postpartum = total_reference_femme_enceinte_soins[i]["nbr"] + total_reference_prenatal_suivi[i]["nbr"] + \
                                                             total_reference_postnatal_suivi[i]["nbr"] + total_reference_women_emergency_suivi[i]["nbr"]
-                    total_vad_femmes_enceinte = total_vad_femme_enceinte_soins[i]["nbr"] + total_prenatal_suivi[i]["nbr"] + total_femme_enceinte_women_emergency_suivi[i]["nbr"]
-                    total_vad_femmes_postpartum = total_postnatal_suivi[i]["nbr"] + total_femme_postpartum_women_emergency_suivi[i]["nbr"]
-                    # total_vad_family_planning = all_datas_found["total_vad_family_planning_NC"][i]["nbr"] + total_family_planning_renewal_suivi[i]["nbr"]
-                    total_vad_family_planning = total_vad - (total_vad_pcime_c + total_vad_femmes_enceinte + total_vad_femmes_postpartum + all_datas_found["total_home_visit"][i]["nbr"])
+                    femmes_enceinte = total_vad_femme_enceinte_soins[i]["nbr"] + total_prenatal_suivi[i]["nbr"] + femme_enceinte_women_emergency_suivi[i]["nbr"]
+                    femmes_postpartum = total_postnatal_suivi[i]["nbr"] + femme_postpartum_women_emergency_suivi[i]["nbr"]
+                    # pf = all_datas_found["pf_NC"][i]["nbr"] + total_family_planning_renewal_suivi[i]["nbr"]
+                    pf = total_vad - (pcime + femmes_enceinte + femmes_postpartum + all_datas_found["home_visit"][i]["nbr"])
                     
                     ############################################ 
                     
@@ -600,31 +600,31 @@ def flushMedicDataToDhis2(KWARG,fileName = "medic_output",data_type = "Consultat
                     chwsData["data_source"] = 'medic'
                     
                     chwsData["total_vad"] = total_vad
-                    chwsData["total_vad_pcime_c"] = total_vad_pcime_c
-                    chwsData["total_suivi_pcime_c"] = total_suivi_pcime_c
-                    chwsData["total_vad_femmes_enceinte"] = total_vad_femmes_enceinte
-                    chwsData["total_vad_femmes_postpartum"] = total_vad_femmes_postpartum
-                    chwsData["total_recherche_active"] = all_datas_found["total_home_visit"][i]["nbr"]
-                    chwsData["total_vad_family_planning"] = total_vad_family_planning
-                    chwsData["reference_femmes_pf"] = reference_femmes_pf
+                    chwsData["pcime"] = pcime
+                    chwsData["suivi_pcime"] = suivi_pcime
+                    chwsData["femmes_enceinte"] = femmes_enceinte
+                    chwsData["femmes_postpartum"] = femmes_postpartum
+                    chwsData["home_visit"] = all_datas_found["home_visit"][i]["nbr"]
+                    chwsData["pf"] = pf
+                    chwsData["reference_pf"] = reference_pf
                     chwsData["reference_pcime"] = reference_pcime
                     chwsData["reference_femmes_enceinte_postpartum"] = reference_femmes_enceinte_postpartum
-                    chwsData["total_diarrhee_pcime_soins"] = all_datas_found["total_diarrhee_pcime_soins"][i]["nbr"]
-                    chwsData["total_paludisme_pcime_soins"] = all_datas_found["total_paludisme_pcime_soins"][i]["nbr"]
-                    chwsData["total_pneumonie_pcime_soins"] = all_datas_found["total_pneumonie_pcime_soins"][i]["nbr"]
-                    chwsData["total_malnutrition_pcime_soins"] = all_datas_found["total_malnutrition_pcime_soins"][i]["nbr"]
-                    chwsData["prompt_diarrhee_24h_pcime_soins"] = all_datas_found["prompt_diarrhee_24h_pcime_soins"][i]["nbr"]
-                    chwsData["prompt_diarrhee_48h_pcime_soins"] = all_datas_found["prompt_diarrhee_48h_pcime_soins"][i]["nbr"]
-                    chwsData["prompt_diarrhee_72h_pcime_soins"] = all_datas_found["prompt_diarrhee_72h_pcime_soins"][i]["nbr"]
-                    chwsData["prompt_paludisme_24h_pcime_soins"] = all_datas_found["prompt_paludisme_24h_pcime_soins"][i]["nbr"]
-                    chwsData["prompt_paludisme_48h_pcime_soins"] = all_datas_found["prompt_paludisme_48h_pcime_soins"][i]["nbr"]
-                    chwsData["prompt_paludisme_72h_pcime_soins"] = all_datas_found["prompt_paludisme_72h_pcime_soins"][i]["nbr"]
-                    chwsData["prompt_pneumonie_24h_pcime_soins"] = all_datas_found["prompt_pneumonie_24h_pcime_soins"][i]["nbr"]
-                    chwsData["prompt_pneumonie_48h_pcime_soins"] = all_datas_found["prompt_pneumonie_48h_pcime_soins"][i]["nbr"]
-                    chwsData["prompt_pneumonie_72h_pcime_soins"] = all_datas_found["prompt_pneumonie_72h_pcime_soins"][i]["nbr"]
-                    chwsData["total_vad_femmes_enceintes_NC"] = all_datas_found["total_vad_femme_enceinte_NC_soins"][i]["nbr"]
-                    chwsData["total_vad_femme_postpartum_NC"] = all_datas_found["total_vad_femme_postpartum_NC"][i]["nbr"]
-                    chwsData["total_test_de_grossesse_domicile"] = all_datas_found["total_test_de_grossesse_domicile"][i]["nbr"]
+                    chwsData["diarrhee_pcime"] = all_datas_found["diarrhee_pcime"][i]["nbr"]
+                    chwsData["paludisme_pcime"] = all_datas_found["paludisme_pcime"][i]["nbr"]
+                    chwsData["pneumonie_pcime"] = all_datas_found["pneumonie_pcime"][i]["nbr"]
+                    chwsData["malnutrition_pcime"] = all_datas_found["malnutrition_pcime"][i]["nbr"]
+                    chwsData["prompt_pcime_diarrhee_24h"] = all_datas_found["prompt_pcime_diarrhee_24h"][i]["nbr"]
+                    chwsData["prompt_pcime_diarrhee_48h"] = all_datas_found["prompt_pcime_diarrhee_48h"][i]["nbr"]
+                    chwsData["prompt_pcime_diarrhee_72h"] = all_datas_found["prompt_pcime_diarrhee_72h"][i]["nbr"]
+                    chwsData["prompt_pcime_paludisme_24h"] = all_datas_found["prompt_pcime_paludisme_24h"][i]["nbr"]
+                    chwsData["prompt_pcime_paludisme_48h"] = all_datas_found["prompt_pcime_paludisme_48h"][i]["nbr"]
+                    chwsData["prompt_pcime_paludisme_72h"] = all_datas_found["prompt_pcime_paludisme_72h"][i]["nbr"]
+                    chwsData["prompt_pcime_pneumonie_24h"] = all_datas_found["prompt_pcime_pneumonie_24h"][i]["nbr"]
+                    chwsData["prompt_pcime_pneumonie_48h"] = all_datas_found["prompt_pcime_pneumonie_48h"][i]["nbr"]
+                    chwsData["prompt_pcime_pneumonie_72h"] = all_datas_found["prompt_pcime_pneumonie_72h"][i]["nbr"]
+                    chwsData["femmes_enceintes_NC"] = all_datas_found["total_vad_femme_enceinte_NC_soins"][i]["nbr"]
+                    chwsData["femme_postpartum_NC"] = all_datas_found["femme_postpartum_NC"][i]["nbr"]
+                    chwsData["test_de_grossesse"] = all_datas_found["test_de_grossesse"][i]["nbr"]
                     
                     if KWARG['InsertIntoDhis2'] == True:
                         response = insertOrUpdateDataToDhis2(chwsData,KWARG)
@@ -637,40 +637,40 @@ def flushMedicDataToDhis2(KWARG,fileName = "medic_output",data_type = "Consultat
                     chwsData["district"],
                     chwsFound(i, "findByCode", 2),
                     chwsData["total_vad"],
-                    chwsData["total_vad_pcime_c"],
-                    chwsData["total_suivi_pcime_c"],
-                    chwsData["reference_femmes_pf"],
+                    chwsData["pcime"],
+                    chwsData["suivi_pcime"],
+                    chwsData["reference_pf"],
                     chwsData["reference_pcime"],
                     chwsData["reference_femmes_enceinte_postpartum"], 
-                    chwsData["total_vad_femmes_enceinte"], 
-                    chwsData["total_vad_femmes_postpartum"], 
-                    chwsData["total_recherche_active"],
-                    chwsData["total_diarrhee_pcime_soins"],
-                    chwsData["total_paludisme_pcime_soins"],
-                    chwsData["total_pneumonie_pcime_soins"],
-                    chwsData["total_malnutrition_pcime_soins"],
-                    chwsData["prompt_diarrhee_24h_pcime_soins"],
-                    chwsData["prompt_diarrhee_48h_pcime_soins"],
-                    chwsData["prompt_diarrhee_72h_pcime_soins"],
-                    chwsData["prompt_paludisme_24h_pcime_soins"],
-                    chwsData["prompt_paludisme_48h_pcime_soins"],
-                    chwsData["prompt_paludisme_72h_pcime_soins"],
-                    chwsData["prompt_pneumonie_24h_pcime_soins"],
-                    chwsData["prompt_pneumonie_48h_pcime_soins"],
-                    chwsData["prompt_pneumonie_72h_pcime_soins"],
-                    chwsData["total_vad_femmes_enceintes_NC"],
-                    chwsData["total_vad_femme_postpartum_NC"],
-                    chwsData["total_test_de_grossesse_domicile"],
-                    chwsData["total_vad_family_planning"]),)
+                    chwsData["femmes_enceinte"], 
+                    chwsData["femmes_postpartum"], 
+                    chwsData["home_visit"],
+                    chwsData["diarrhee_pcime"],
+                    chwsData["paludisme_pcime"],
+                    chwsData["pneumonie_pcime"],
+                    chwsData["malnutrition_pcime"],
+                    chwsData["prompt_pcime_diarrhee_24h"],
+                    chwsData["prompt_pcime_diarrhee_48h"],
+                    chwsData["prompt_pcime_diarrhee_72h"],
+                    chwsData["prompt_pcime_paludisme_24h"],
+                    chwsData["prompt_pcime_paludisme_48h"],
+                    chwsData["prompt_pcime_paludisme_72h"],
+                    chwsData["prompt_pcime_pneumonie_24h"],
+                    chwsData["prompt_pcime_pneumonie_48h"],
+                    chwsData["prompt_pcime_pneumonie_72h"],
+                    chwsData["femmes_enceintes_NC"],
+                    chwsData["femme_postpartum_NC"],
+                    chwsData["test_de_grossesse"],
+                    chwsData["pf"]),)
                 else:
                     # 'ChwsCode,ChwsName,Type,District,Site,consultation'
                     data = ''
                     if data_type == medicDataType()[0]:
                         data = total_vad
                     elif data_type == medicDataType()[1]:
-                        data = all_datas_found["total_home_visit"][i]["nbr"]
+                        data = all_datas_found["home_visit"][i]["nbr"]
                     else:
-                        data = int(total_vad) - int(all_datas_found["total_home_visit"][i]["nbr"])
+                        data = int(total_vad) - int(all_datas_found["home_visit"][i]["nbr"])
 
                     result.write("{},{},{},{},{},{}\n".format(
                     chwsFound(i, "findByCode", 4),

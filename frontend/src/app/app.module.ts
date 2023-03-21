@@ -77,7 +77,6 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     HttpClientModule,
     ReactiveFormsModule,
     GoogleMapsModule,
-    
     BrowserAnimationsModule,
     MatDatepickerModule,
     MatIconModule,

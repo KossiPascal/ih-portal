@@ -3,14 +3,12 @@ import { AggragateData, Chws, Districts, Families, FilterParams, Patients, Sites
 import { SyncService } from '@ih-app/services/sync.service';
 // import * as Highcharts from 'highcharts';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ChtOutPutData, DataIndicators } from '@ih-app/models/DataAggragate';
 
 import { IndexDbService } from '@ih-app/services/index-db.service'; // db index start
 import { DateUtils, Functions, notNull } from '@ih-app/shared/functions';
 import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Roles } from '@ih-app/shared/roles';
-import { async } from 'rxjs';
 // import { liveQuery } from 'dexie';
 
 
@@ -209,6 +207,7 @@ export class Dashboard3Component implements OnInit {
       districts: districts,
       sites: sites,
       chws: chws,
+      withDhis2Data:false
     }
     return params;
   }

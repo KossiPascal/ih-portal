@@ -15,7 +15,6 @@ export interface Sync {
   weekly_Choosen_Dates: string[]
   InsertIntoDhis2: boolean
   dhisusersession: string
-
   userId?: string
 
   // thinkmd_host: string
@@ -62,8 +61,6 @@ export interface DataFromPython {
     }
   }
 }
-
-
 
 export interface OrgUnitImport {
   sites: {
@@ -119,6 +116,7 @@ export interface FilterParams {
   userId?: string
   dhisusersession?: string
   params?:any
+  withDhis2Data:boolean
 }
 
 export interface ChwsDataFormDb {

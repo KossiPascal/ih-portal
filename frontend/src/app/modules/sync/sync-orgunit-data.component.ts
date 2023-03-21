@@ -72,8 +72,8 @@ export class SyncOrgUnitDataComponent implements OnInit {
 
   createOrgUnitAndPersonFormGroup(): FormGroup {
     return new FormGroup({
-      start_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
-      end_date: new FormControl("", [Validators.required, Validators.minLength(7)]),
+      start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
+      end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
       site: new FormControl(true, [Validators.required]),
       zone: new FormControl(true, [Validators.required]),
       family: new FormControl(true, [Validators.required]),
@@ -177,9 +177,6 @@ export class SyncOrgUnitDataComponent implements OnInit {
       });
       
     }
-   
-
-
   }
 
 }

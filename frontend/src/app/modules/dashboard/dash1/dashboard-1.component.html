@@ -3,7 +3,7 @@
     <div class="card card-info">
 
       <h1 style="text-align: center;">Activité des ASC</h1>
-      
+
       <div class="overlay-wrapper">
         <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
           <div class="text-bold pt-2"> {{initMsg}}</div>
@@ -83,92 +83,64 @@
   </div>
 </section>
 
-<section *ngIf="bodyData.length > 0 && roles.isSupervisorMentor()" class="content">
-  <div class="card">
+
+<section *ngIf="FinalChwsOutputData$.length > 0 && roles.isSupervisorMentor()" class="content">
+  <div class="card" style="overflow-y:scroll!important;">
     <div class="card-header">
-      <h3 class="card-title">
-        <button type="button" (click)="initTable()">Generate Table</button>
-      </h3>
+      <div class="card-title">
+        <table-export></table-export>
+      </div>
     </div>
+
+
     <!-- /.card-header -->
     <div class="card-body">
-      <table id="compare_data" class="table table-bordered table-hover">
+      <table border="1 solid" id="export_table" class="table table-bordered table-hover border">
         <thead>
-          <tr class="bg-primary">
-            <th rowspan="2" style="width: 50px">Code ASC</th>
-            <th rowspan="2" style="width: 150px">Nom ASC</th>
-            <th *ngIf="!isRatioChecked()" colspan="2" style="width: 50px">Pcime</th>
-            <th *ngIf="isRatioChecked()" colspan="4" style="width: 50px">Pcime</th>
-            <th *ngIf="!isRatioChecked()" colspan="2" style="width: 50px">Maternel</th>
-            <th *ngIf="isRatioChecked()" colspan="4" style="width: 50px">Maternel</th>
-            <th *ngIf="!isRatioChecked()" colspan="2" style="width: 50px">PF</th>
-            <th *ngIf="isRatioChecked()" colspan="4" style="width: 50px">PF</th>
-            <!-- <th colspan="2" style="width: 50px">Consultation</th>
-            <th colspan="2" style="width: 50px">Consultation</th> -->
-            <th *ngIf="!isRatioChecked()" colspan="2" style="width: 50px">Recherche</th>
-            <th *ngIf="isRatioChecked()" colspan="4" style="width: 50px">Recherche</th>
-            <th *ngIf="!isRatioChecked()" colspan="2" style="width: 50px">Total</th>
-            <th *ngIf="isRatioChecked()" colspan="4" style="width: 50px">Total</th>
-          </tr>
-          <tr class="bg-primary">
-            <th style="width: 50px">APPLI</th>
-            <th style="width: 50px">DHIS2</th>
-            <th *ngIf="isRatioChecked()" style="width: 50px">Diff</th>
-            <th *ngIf="isRatioChecked()" style="width: 50px">Ratio</th>
+          <tr>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="chw.external_id" class="bg-info" style="width: 50px">Code ASC</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="chw.name" class="bg-info" style="width: 150px">Nom ASC</th>
 
-            <th style="width: 50px">APPLI</th>
-            <th style="width: 50px">DHIS2</th>
-            <th *ngIf="isRatioChecked()" style="width: 50px">Diff</th>
-            <th *ngIf="isRatioChecked()" style="width: 50px">Ratio</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.sum_soins_suivi.tonoudayo" class="bg-warning" style="width: 40px">Pcime <br> Appli.</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.sum_soins_suivi.dhis2" class="bg-warning" style="width: 40px">Pcime <br> Saisie</th>
 
-            <th style="width: 50px">APPLI</th>
-            <th style="width: 50px">DHIS2</th>
-            <th *ngIf="isRatioChecked()" style="width: 50px">Diff</th>
-            <th *ngIf="isRatioChecked()" style="width: 50px">Ratio</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.sum_enceinte_postpartum.tonoudayo" class="bg-primary" style="width: 40px">Maternel <br> Appli.</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.sum_enceinte_postpartum.dhis2" class="bg-primary" style="width: 40px">Maternel <br> Saisie</th>
 
-            <th style="width: 50px">APPLI</th>
-            <th style="width: 50px">DHIS2</th>
-            <th *ngIf="isRatioChecked()" style="width: 50px">Diff</th>
-            <th *ngIf="isRatioChecked()" style="width: 50px">Ratio</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.pf.tonoudayo" class="bg-warning" style="width: 40px">PF <br> Appli.</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.pf.dhis2" class="bg-warning" style="width: 40px">PF <br> Saisie</th>
 
-            <!-- <th style="width: 50px">APPLI</th>
-            <th style="width: 50px">DHIS2</th> -->
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.home_visit.tonoudayo" class="bg-primary" style="width: 40px">Recherche <br> Appli.</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.home_visit.dhis2" class="bg-primary" style="width: 40px">Recherche <br> Saisie</th>
 
-            <th style="width: 50px">APPLI</th>
-            <th style="width: 50px">DHIS2</th>
-            <th *ngIf="isRatioChecked()" style="width: 50px">Diff</th>
-            <th *ngIf="isRatioChecked()" style="width: 50px">Ratio</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.total_vad.tonoudayo" class="bg-success" style="width: 40px">Somme <br> Appli.</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.total_vad.dhis2" class="bg-success" style="width: 40px">Somme <br> Saisie</th>
+
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.sum_total_vad" class="bg-info" style="width: 40px">Total <br> Action</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr *ngFor="let item of bodyData; trackBy:identifyBodyData">
-            <td class="info">{{ item.Code }}</td>
-            <td class="info">{{ item.Name }}</td>
-            <td class="warning">{{ item.Pcime }}</td>
-            <td class="warning">{{ item.PcimeDhis2 }}</td>
-            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Pcime,item.PcimeDhis2,false).value}}</strong> </td>
-            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Pcime,item.PcimeDhis2).color }}">{{getRatio(item.Pcime,item.PcimeDhis2).value }} %</td>
-            <td class="primary">{{ item.Maternelle }}</td>
-            <td class="primary">{{ item.MaternelleDhis2 }}</td>
-            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Maternelle,item.MaternelleDhis2,false).value}}</strong> </td>
-            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Maternelle,item.MaternelleDhis2).color }}">{{getRatio(item.Maternelle,item.MaternelleDhis2).value }} %</td>
-            <td class="warning">{{ item.Pf }}</td>
-            <td class="warning">{{ item.PfDhis2 }}</td>
-            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Pf,item.PfDhis2,false).value}}</strong> </td>
-            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Pf,item.PfDhis2).color }}">{{getRatio(item.Pf,item.PfDhis2).value }} %</td>
-            <!-- <td class="warning">{{ item.Consultation }}</td>
-            <td class="warning">{{ item.ConsultationDhis }}</td>
-            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Consultation,item.ConsultationDhis,false).value}}</strong> </td>
-            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Consultation,item.ConsultationDhis).color }}">{{getRatio(item.Consultation,item.ConsultationDhis).value }} %</td> -->
-            <td class="primary">{{ item.Recherche }}</td>
-            <td class="primary">{{ item.RechercheDhis }}</td>
-            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Recherche,item.RechercheDhis,false).value}}</strong> </td>
-            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Recherche,item.RechercheDhis).color }}">{{getRatio(item.Recherche,item.RechercheDhis).value }} %</td>
-            <td class="final">{{ item.Total }}</td>
-            <td class="final">{{ item.TotalDhis }}</td>
-            <td *ngIf="isRatioChecked()" class="line" class=""> <strong>{{ this.getRatio(item.Total,item.TotalDhis,false).value}}</strong> </td>
-            <td *ngIf="isRatioChecked()" class="bg-{{ getRatio(item.Total,item.TotalDhis).color }}">{{getRatio(item.Total,item.TotalDhis).value }} %</td>
+          <tr *ngFor="let item of FinalChwsOutputData$">
+            <td class="info">{{ item.chw.external_id }}</td>
+            <td class="info">{{ item.chw.name }}</td>
+
+            <td class="warning">{{ item.data.sum_soins_suivi.tonoudayo }}</td>
+            <td class="warning">{{ item.data.sum_soins_suivi.dhis2 }}</td>
+
+            <td class="primary">{{ item.data.sum_enceinte_postpartum.tonoudayo }}</td>
+            <td class="primary">{{ item.data.sum_enceinte_postpartum.dhis2 }}</td>
+
+            <td class="warning">{{ item.data.pf.tonoudayo }}</td>
+            <td class="warning">{{ item.data.pf.dhis2 }}</td>
+
+            <td class="primary">{{ item.data.home_visit.tonoudayo }}</td>
+            <td class="primary">{{ item.data.home_visit.dhis2 }}</td>
+
+            <td class="final">{{ item.data.total_vad.tonoudayo }}</td>
+            <td class="final">{{ item.data.total_vad.dhis2 }}</td>
+
+            <td class="info"> <strong>{{ item.data.sum_total_vad }}</strong> </td>
           </tr>
         </tbody>
       </table>
@@ -187,69 +159,57 @@
 
 
 
-<section *ngIf="bodyData.length > 0 && roles.isChws()" class="content">
+<section *ngIf="FinalChwsOutputData$.length > 0 && roles.isChws()" class="content">
   <div class="card">
-    
     <div class="card-body">
       <table id="compare_data" class="table table-bordered table-hover">
+        <thead *ngFor="let item of FinalChwsOutputData$">
+          <tr class="bg-default">
+            <th colspan="3"> {{ item.chw.name }} ( {{ item.chw.external_id }} )</th>
+          </tr>
+        </thead>
+        <thead>
+          <tr class="bg-info">
+            <th style="font-size: 20px;">Type</th>
+            <th style="font-size: 20px;">Application</th>
+            <th style="font-size: 20px;">Fiche récape</th>
+          </tr>
+        </thead>
 
-        <tbody *ngFor="let item of bodyData; trackBy:identifyBodyData">
-          <tr><th colspan="3"> {{ item.Name }} ( {{ item.Code }} )</th></tr>
-            
-          <tr class="bg-primary">
-              <th rowspan="2" style="width: 100px; padding-top: 35px;"> Pcime</th>
-              <th style="width: 150px">Application</th>
-              <th style="font-size: 25px; text-align: center;">{{ item.Pcime }}</th>
-            </tr>
-            <tr class="bg-primary">
-              <td>Fiche récape</td>
-              <th style="font-size: 25px; text-align: center;">{{ item.PcimeDhis2 }}</th>
-            </tr>
+        <tbody *ngFor="let item of FinalChwsOutputData$">
+          <tr>
+            <th style="font-size: 20px;"> Pcime</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.sum_soins_suivi.tonoudayo }}</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.sum_soins_suivi.dhis2 }}</th>
+          </tr>
 
+          <tr>
+            <th style="font-size: 20px;"> Maternel</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.sum_enceinte_postpartum.tonoudayo }}</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.sum_enceinte_postpartum.dhis2 }}</th>
+          </tr>
 
-            <tr class="bg-warning">
-              <th rowspan="2" style="width: 100px; padding-top: 35px;"> Maternel</th>
-              <th>Application</th>
-              <th style="font-size: 25px; text-align: center;">{{ item.Maternelle }}</th>
-            </tr>
-            <tr class="bg-warning">
-              <td>Fiche récape</td>
-              <th style="font-size: 25px; text-align: center;">{{ item.MaternelleDhis2 }}</th>
-            </tr>
- 
+          <tr>
+            <th style="font-size: 20px;"> PF</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.pf.tonoudayo }}</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.pf.dhis2 }}</th>
+          </tr>
 
-            <tr class="bg-info">
-              <th rowspan="2" style="width: 100px; padding-top: 35px;"> PF</th>
-              <th>Application</th>
-              <th style="font-size: 25px; text-align: center;">{{ item.Pf }}</th>
-            </tr>
-            <tr class="bg-info">
-              <td>Fiche récape</td>
-              <th style="font-size: 25px; text-align: center;">{{ item.PfDhis2 }}</th>
-            </tr>
+          <tr>
+            <th style="font-size: 20px;"> Recherche</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.home_visit.tonoudayo }}</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.home_visit.dhis2 }}</th>
+          </tr>
 
+          <tr>
+            <th style="font-size: 20px;"> Total</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.total_vad.tonoudayo }}</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.total_vad.dhis2 }}</th>
+          </tr>
 
-            <tr class="bg-danger">
-              <th rowspan="2" style="width: 100px; padding-top: 35px;"> Recherche</th>
-              <th>Application</th>
-              <th style="font-size: 25px; text-align: center;">{{ item.Recherche }}</th>
-            </tr>
-            <tr class="bg-danger">
-              <td>Fiche récape</td>
-              <th style="font-size: 25px; text-align: center;">{{ item.RechercheDhis }}</th>
-            </tr>
-
-
-            <tr class="bg-success">
-              <th rowspan="2" style="width: 100px; padding-top: 35px;"> Total</th>
-              <th>Application</th>
-              <th style="font-size: 25px; text-align: center;">{{ item.Total }}</th>
-            </tr>
-            <tr class="bg-success">
-              <td>Fiche récape</td>
-              <th style="font-size: 25px; text-align: center;">{{ item.TotalDhis }}</th>
-            </tr>
-
+          <tr>
+            <th colspan="3" style="font-size: 20px; text-align: center;"> Total Action: {{ item.data.sum_total_vad }} </th>
+          </tr>
         </tbody>
       </table>
     </div>

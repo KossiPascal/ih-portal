@@ -242,11 +242,11 @@ def matchDhis2Data(datas):
         },
         {
             "dataElement": "lvW5Kj1cisa",  # "Nombre d'enfant 0 à 5 ans pris en charge à domicile
-            "value": datas["total_vad_pcime_c"],
+            "value": datas["pcime"],
         },
         {
             "dataElement": "M6WRPsREqsZ",  # "Total Vad PCIME Suivi
-            "value": datas["total_suivi_pcime_c"],
+            "value": datas["suivi_pcime"],
         },
         {
             "dataElement": "oeDKJi4BICh",  # total_vad
@@ -254,52 +254,52 @@ def matchDhis2Data(datas):
         },
         {
             "dataElement": "PrN89trdUGm",  # "Nombre de femme enceinte nouveau cas
-            "value": datas["total_vad_femmes_enceintes_NC"],
+            "value": datas["femmes_enceintes_NC"],
         },
         {
             # "Nombre de femmes référée pour plannification familiale
             "dataElement": "wdg7jjP9ZRg",
-            "value": datas["reference_femmes_pf"],
+            "value": datas["reference_pf"],
         },
         {
             "dataElement": "qNxNXSwDAaI",  # "promptitude diarrhée 24h
-            "value": datas["prompt_diarrhee_24h_pcime_soins"],
+            "value": datas["prompt_pcime_diarrhee_24h"],
         },
         {
             "dataElement": "S1zPDVOIVLZ",  # "promptitude diarrhee 48h
-            "value": datas["prompt_diarrhee_48h_pcime_soins"],
+            "value": datas["prompt_pcime_diarrhee_48h"],
         },
         {
             "dataElement": "nW3O5ULr75J",  # "promptitude diarrhée 72h
-            "value": datas["prompt_diarrhee_72h_pcime_soins"],
+            "value": datas["prompt_pcime_diarrhee_72h"],
         },
         {
             "dataElement": "NUpARMZ383s",  # "promptitude paludisme 24h
-            "value": datas["prompt_paludisme_24h_pcime_soins"],
+            "value": datas["prompt_pcime_paludisme_24h"],
         },
         {
             "dataElement": "yQa48SF9bua",  # "promptitude paludisme 48h
-            "value": datas["prompt_paludisme_48h_pcime_soins"],
+            "value": datas["prompt_pcime_paludisme_48h"],
         },
         {
             "dataElement": "NzKjJuAniNx",  # "promptitude paludisme 72h
-            "value": datas["prompt_paludisme_72h_pcime_soins"],
+            "value": datas["prompt_pcime_paludisme_72h"],
         },
         {
             "dataElement": "AA2We0Ao5sv",  # "promptitude pneumonie 24h
-            "value": datas["prompt_pneumonie_24h_pcime_soins"],
+            "value": datas["prompt_pcime_pneumonie_24h"],
         },
         {
             "dataElement": "PYwikai4k2J",  # "promptitude pneumonie 48h
-            "value": datas["prompt_pneumonie_48h_pcime_soins"],
+            "value": datas["prompt_pcime_pneumonie_48h"],
         },
         {
             "dataElement": "rgjFO0bDVUL",  # "promptitude pneumonie 72h
-            "value": datas["prompt_pneumonie_72h_pcime_soins"],
+            "value": datas["prompt_pcime_pneumonie_72h"],
         },
         {
             "dataElement": "WR9u3cGJn9W",  # "total consultation femme enceinte
-            "value": datas["total_vad_femmes_enceinte"],
+            "value": datas["femmes_enceinte"],
         },
         {
             "dataElement": "Pl6qRNgjd3a",  # "total de femmes référées par les asc
@@ -311,39 +311,39 @@ def matchDhis2Data(datas):
         },
         {
             "dataElement": "caef2rf638P",  # "total diarrhee pcime
-            "value": datas["total_diarrhee_pcime_soins"],
+            "value": datas["diarrhee_pcime"],
         },
         {
             "dataElement": "Q0BQtUdJOCy",  # "Total femmes en postpartum
-            "value": datas["total_vad_femmes_postpartum"],
+            "value": datas["femmes_postpartum"],
         },
         {
             "dataElement": "dLYksBMOqST",  # "total malnutrition pcime
-            "value": datas["total_malnutrition_pcime_soins"],
+            "value": datas["malnutrition_pcime"],
         },
         {
             "dataElement": "jp2i3vN3VJk",  # "total paludisme pcime
-            "value": datas["total_paludisme_pcime_soins"],
+            "value": datas["paludisme_pcime"],
         },
         {
             "dataElement": "LZ3R8fj9CGG",  # "total pneumonie pcime
-            "value": datas["total_pneumonie_pcime_soins"],
+            "value": datas["pneumonie_pcime"],
         },
         {
             "dataElement": "O9EZVn3C3pF",  # "Total postpartum nouveau cas
-            "value": datas["total_vad_femme_postpartum_NC"],
+            "value": datas["femme_postpartum_NC"],
         },
         {
             "dataElement": "lsBS60uQPtc",  # "Total recherche active
-            "value": datas["total_recherche_active"],
+            "value": datas["home_visit"],
         },
         {
             "dataElement": "lopdYxQrgyj",  # "Total test de grossesse administrée
-            "value": datas["total_test_de_grossesse_domicile"],
+            "value": datas["test_de_grossesse"],
         },
         {
             "dataElement": "AzwUzgh0nd7",  # "Total Vad Pf
-            "value": datas["total_vad_family_planning"],
+            "value": datas["pf"],
         }
     ]
 
