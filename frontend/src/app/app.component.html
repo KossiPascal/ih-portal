@@ -247,6 +247,14 @@
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Effectifs Des Patients
               </a>
 
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash4"
+                role="button">
+                <i style="margin-right: 10px;" class="fas far fa-info"></i> Visite de Ménages
+              </a>
+
+              
+
               <div *ngIf="roles.isSupervisorMentor()" class="dropdowndivider1"></div>
               <a *ngIf="roles.isSupervisorMentor()" class="nav-link" routerLink="chws/" role="button">
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Gestion ASC Remplaçantes
@@ -413,7 +421,7 @@
               <li *ngIf="roles.isSuperUser()" class="nav-item">
                 <a routerLink="dashboards/dash4" class="nav-link">
                   <!-- <i class="nav-icon fas fa-chart-line"></i> -->
-                  <p>Data Informatons</p>
+                  <p>Visite de Ménages</p>
                 </a>
               </li>
 

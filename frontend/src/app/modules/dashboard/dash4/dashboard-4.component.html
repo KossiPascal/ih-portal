@@ -81,16 +81,16 @@
   <div class="card" style="overflow-y:scroll!important;">
     <div class="card-header">
       <div class="card-title">
-        <table-export></table-export>
+        <table-export *ngIf="!roles.isChws()" ></table-export>
       </div>
     </div>
 
     <div style="margin-top: 15px; padding: 0px 40px;" class="row"> 
         <div class="col-sm-4 col-12" style="font-weight: bold; padding: 10px 20px; background-color: rgb(233, 189, 131);">
-          Total Familles: <strong style="font-size: 20px;">{{ ChwsDataInfos$.family_count }}</strong>
+          Total Familles: <strong style="font-size: 18px;">{{ ChwsDataInfos$.family_count }}</strong>
         </div>
         <div class="col-sm-4 col-12" style="font-weight: bold; padding: 10px 20px; background-color: antiquewhite;">
-          Total Familles Visités: <strong style="font-size: 16px;">{{ ChwsDataInfos$.total_visited }}</strong>
+          Total Familles Visités: <strong style="font-size: 18px;">{{ ChwsDataInfos$.total_visited }}</strong>
         </div>
         <div class="col-sm-4 col-12" style="font-weight: bold; padding: 10px 20px; background-color: rgb(218, 177, 235);">
           Total Famille Non Visités: <strong style="font-size: 18px;">{{ ChwsDataInfos$.total_not_visited }}</strong>
