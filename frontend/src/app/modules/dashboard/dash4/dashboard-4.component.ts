@@ -31,9 +31,9 @@ export class Dashboard4Component implements OnInit {
         return new FormGroup({
             start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
             end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
-            districts: new FormControl("", [Validators.required]),
-            sites: new FormControl(""),
-            zones: new FormControl(""),
+            districts: new FormControl("", !this.roles.isChws() ? [Validators.required] : []),
+            sites: new FormControl("",!this.roles.isChws() ? [Validators.required] : []),
+            zones: new FormControl("", !this.roles.isChws() ? [Validators.required] : []),
         });
     }
 
@@ -61,6 +61,7 @@ export class Dashboard4Component implements OnInit {
         this.isLoading = false;
         this.initDate = DateUtils.startEnd21and20Date();
         this.aggradateDataForm = this.createDataFilterFormGroup();
+
         if (!this.roles.isChws()) {
             this.initAllData();
         } else {
@@ -166,6 +167,7 @@ export class Dashboard4Component implements OnInit {
         this.initMsg = 'Loading Data ...';
         this.isLoading = true;
         this.ChwsDataInfos$ = undefined;
+        
         this.sync.getDataInformations(params ?? this.ParamsToFilter()).subscribe((res: { status: number, data: any }) => {
             if (res.status == 200) {
                 this.ChwsDataInfos$ = res.data;

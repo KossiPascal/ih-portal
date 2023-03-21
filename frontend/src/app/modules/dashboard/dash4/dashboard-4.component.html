@@ -77,7 +77,7 @@
   </div>
 </section>
 
-<section *ngIf="ChwsDataInfos$!=null && ChwsDataInfos$!=undefined && roles.isSupervisorMentor()" class="content">
+<section *ngIf="ChwsDataInfos$!=null && ChwsDataInfos$!=undefined" class="content">
   <div class="card" style="overflow-y:scroll!important;">
     <div class="card-header">
       <div class="card-title">
@@ -89,7 +89,7 @@
         <div class="col-sm-4 col-12" style="font-weight: bold; padding: 10px 20px; background-color: rgb(233, 189, 131);">
           Total Familles: <strong style="font-size: 18px;">{{ ChwsDataInfos$.family_count }}</strong>
         </div>
-        <div class="col-sm-4 col-12" style="font-weight: bold; padding: 10px 20px; background-color: rgb(129, 153, 134);">
+        <div class="col-sm-4 col-12" style="font-weight: bold; padding: 10px 20px; background-color: rgb(190, 207, 159);">
           Total Familles Visités: <strong style="font-size: 18px;">{{ ChwsDataInfos$.total_visited }}</strong>
         </div>
         <div class="col-sm-4 col-12" style="font-weight: bold; padding: 10px 20px; background-color: rgb(218, 177, 235);">
@@ -102,7 +102,7 @@
       <table border="1 solid" id="export_table" class="table table-bordered">
         <thead>
           <tr class="bg-info">
-            <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="family.name" style="width: 50px">Famille</th>
+            <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="family.name" style="width: 50px">Nom Famille</th>
             <!-- <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="family.zone.name" style="width: 150px">Zone</th>
             <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="family.zone.name" style="width: 150px">Code ASC</th> -->
             <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.visit_in_day" style="width: 40px">Visit 1/jour</th>
@@ -111,13 +111,13 @@
             <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.women_visit" style="width: 40px">#Maternel_PF</th>
             <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.home_visit" style="width: 40px">#Recherche</th> -->
             <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.all_visit" style="width: 40px">#Action Total</th>
-            <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.isVisited" style="width: 40px">#Type</th>
+            <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.isVisited" style="width: 40px">#Famille Visité</th>
           </tr>
         </thead>
 
         <tbody>
           <tr *ngFor="let item of ChwsDataInfos$.detail">
-            <td>{{ item.family.name }}</td>
+            <td> <b>{{ item.family.name }}</b> </td>
             <!-- <td>{{ item.family.zone.name }}</td>
             <td>{{ item.chw != null ? item.chw.external_id : ''}}</td> -->
             <td>{{ item.data.visit_in_day}}</td>
@@ -126,7 +126,7 @@
             <td>{{ item.data.women_visit }}</td>
             <td>{{ item.data.home_visit}}</td> -->
             <td>{{ item.data.all_visit }}</td>
-            <td class="{{ item.data.isVisited ? 'success0' : 'danger0' }}"> {{ item.data.isVisited ? '' :'Non '}} Visité</td>
+            <td class="{{ item.data.isVisited ? 'success0' : 'danger0' }}"> {{ item.data.isVisited ? 'Visité' :'Non '}}</td>
           </tr>
         </tbody>
       </table>
