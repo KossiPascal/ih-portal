@@ -9,7 +9,6 @@ import { Functions, DateUtils, notNull } from '@ih-app/shared/functions';
 import { Roles } from '@ih-app/shared/roles';
 
 
-declare var sortTable: any;
 
 @Component({
   selector: 'app-dashboard-1',
@@ -160,12 +159,6 @@ export class Dashboard1Component implements OnInit {
       console.log(err.error);
     });
   }
-
-
-  sort() {
-    sortTable('export_table');
-  }
-
   genarateSites() {
     this.sites$ = [];
     this.chws$ = [];

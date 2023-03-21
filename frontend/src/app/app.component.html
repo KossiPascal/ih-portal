@@ -410,6 +410,13 @@
                 </a>
               </li>
 
+              <li *ngIf="roles.isSuperUser()" class="nav-item">
+                <a routerLink="dashboards/dash4" class="nav-link">
+                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
+                  <p>Data Informatons</p>
+                </a>
+              </li>
+
               <p *ngIf="roles.isSupervisorMentor() || roles.isChws()" style="color: white;">{{ separation }}</p>
 
               <li *ngIf="roles.isChws()" class="nav-item">

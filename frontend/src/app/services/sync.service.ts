@@ -89,6 +89,19 @@ export class SyncService {
     return this.http.post(`${Functions.backenUrl()}/sync/get/data`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
+
+  getDataInformations(params?: FilterParams): any {
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (notNull(params)) {
+      params!.userId = user?.id;
+      params!.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/get/datainfos`, sendParams, Functions.HttpHeaders(this.auth));
+  }
+
+
   syncDhis2ChwsData(params: Dhis2Sync): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();

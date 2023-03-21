@@ -2,6 +2,7 @@
 
 import { Entity, PrimaryGeneratedColumn, Column, Repository, DataSource, PrimaryColumn, CreateDateColumn, UpdateDateColumn, OneToMany, JoinColumn, ManyToOne, Unique, Index } from "typeorm"
 import { AppDataSource } from "../data_source"
+import { DateUtils } from "../utils/functions";
 
 // export enum FlightType { DOMESTIC = "domestic", INTERNATIONAL = "international" }
 let Connection: DataSource = AppDataSource.manager.connection;
@@ -145,7 +146,7 @@ export async function getFamilySyncRepository(): Promise<Repository<Families>> {
 
 @Entity()
 export class Patients {
-  constructor() { };
+  constructor() {}
   @PrimaryColumn({ type: 'varchar', length: 255, nullable: false })
   id?: string
 

@@ -5,7 +5,7 @@ import { SyncService } from '@ih-app/services/sync.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { IndexDbService } from '@ih-app/services/index-db.service'; // db index start
-import { DateUtils, Functions, notNull } from '@ih-app/shared/functions';
+import { DateUtils, Functions, notNull, patientAgeDetails } from '@ih-app/shared/functions';
 import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Roles } from '@ih-app/shared/roles';
@@ -289,7 +289,7 @@ export class Dashboard3Component implements OnInit {
 
     for (let i = 0; i < this.Patients$!.length; i++) {
       const patient = this.Patients$![i];
-      const isInCible = DateUtils.isInCible({birth_date:patient.date_of_birth, sex:patient.sex});
+      const isInCible = patientAgeDetails(patient).is_in_cible;
 
       if (notNull(districts) && notNull(sites) && notNull(chws)) {
         if (districts?.includes(patient.site.district.id) && sites?.includes(patient.site.id) && chws?.includes(patient.zone.chw_id)){

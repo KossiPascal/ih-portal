@@ -20,7 +20,6 @@ export class Consts {
     `fp_follow_up_renewal`
   ];
 
-
   static vaccination_forms: string[] = [
     `vaccination`,
   ];

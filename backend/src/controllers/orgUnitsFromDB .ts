@@ -80,10 +80,8 @@ export async function getZones(req: Request, res: Response, next: NextFunction) 
                 chw_id: notNull(req.body.chws) ? In(req.body.chws) : undefined,
             }
         });
-
         if (!zones) return res.status(201).json({ status: 201, data: 'No Data Found !' });
         return res.status(200).json({ status: 200, data: zones });
-
     }
     catch (err) {
         // return next(err);
@@ -93,13 +91,11 @@ export async function getZones(req: Request, res: Response, next: NextFunction) 
 
 export async function getChws(req: Request, res: Response, next: NextFunction, onlyData:boolean = false):Promise<any> {
     var respData:{ status: number, data: any };
-
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         respData = { status: 201, data: 'Informations you provided are not valid' }
         return onlyData ? respData : res.status(201).json(respData);
     }
-    
     try {
         const _chwRepo = await getChwsSyncRepository();
         const userId: string = req.body.userId;
@@ -115,15 +111,12 @@ export async function getChws(req: Request, res: Response, next: NextFunction, o
                     chw_id: notNull(req.body.chws) ? In(req.body.chws) : undefined,
                 },
             },
-
         });
-
         respData = !chws ? { status: 201, data: 'No Data Found !' } : { status: 200, data: chws }
     } catch (err) {
         // return next(err);
         respData = { status: 201, data: err };
     }
-
     return onlyData ? respData : res.status(respData.status).json(respData);
 };
 
@@ -145,7 +138,6 @@ export async function getFamilies(req: Request, res: Response, next: NextFunctio
                 }, 
             }
         });
-
         if (!families) return res.status(201).json({ status: 201, data: 'No Data Found !' });
         return res.status(200).json({ status: 200, data: families });
     }
@@ -176,7 +168,6 @@ export async function getPatients(req: Request, res: Response, next: NextFunctio
         });
         if (!patients) return res.status(201).json({ status: 201, data: 'No Data Found !' });
         return res.status(200).json({ status: 200, data: patients });
-
     }
     catch (err) {
         // return next(err);

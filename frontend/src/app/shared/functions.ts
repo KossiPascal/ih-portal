@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Router } from "@angular/router";
+import { Patients } from "@ih-app/models/Sync";
 import { AuthService } from "@ih-services/auth.service";
 // import { envs } from '@ih-backendEnv/env';
 // const httpOptions: { headers: HttpHeaders } = {headers: new HttpHeaders({ "Content-Type": "application/json" }),};
@@ -123,7 +124,24 @@ export class Functions {
 }
 
 
+export function patientAgeDetails(patient: Patients): {
+  is_in_cible: boolean,
+  is_child_in_cible: boolean,
+  is_female_in_cible: boolean
+  age_in_year: number | null,
+  age_in_month: number | null,
+  age_in_day: number | null,
+} {
+  const is_child_in_cible = DateUtils.isChildUnder5(patient.date_of_birth!);
+  const is_female_in_cible = DateUtils.isFemaleInCible({ birth_date: patient.date_of_birth!, sex: patient.sex! });
+  const is_in_cible = is_child_in_cible || is_female_in_cible;
+  const age_in_year = DateUtils.getAgeInYear(patient.date_of_birth!);
+  const age_in_month = DateUtils.getAgeInMonths(patient.date_of_birth!);
+  const age_in_day = DateUtils.getAgeInDays(patient.date_of_birth!);
 
+  return { is_in_cible: is_in_cible, is_child_in_cible: is_child_in_cible, is_female_in_cible: is_female_in_cible, age_in_year: age_in_year, age_in_month: age_in_month, age_in_day: age_in_day }
+
+}
 
 
 export class DateUtils {

@@ -2,7 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import { Between, In } from "typeorm";
 import { ChtOutPutData, DataIndicators } from "../entity/DataAggragate";
-import { getChwsDataSyncRepository, ChwsData, Chws } from "../entity/Sync";
+import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository } from "../entity/Sync";
+import { Consts } from "../utils/constantes";
 import { DateUtils, notNull, sslFolder } from "../utils/functions";
 import { getChws } from "./orgUnitsFromDB ";
 
@@ -14,15 +15,12 @@ require('dotenv').config({ path: sslFolder('.env') });
 
 export async function getChwsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };
-
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     respData = { status: 201, data: 'Informations you provided are not valid' }
     return onlyData ? respData : res.status(201).json(respData);
   }
-
   const errorMsg: string = "Your request provides was rejected !";
-
   try {
     const repository = await getChwsDataSyncRepository();
 
@@ -38,16 +36,122 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
         chw: notNull(req.body.chws) ? { id: In(req.body.chws) } : undefined
       }
     });
-
     respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
   }
   catch (err) {
     // return next(err);
     respData = { status: 201, data: errorMsg };
   }
-
   return onlyData ? respData : res.status(respData.status).json(respData);
-};
+}
+
+
+function getChwInfos(chw: Chws[], chwId: string): Chws | null {
+  if (notNull(chwId)) {
+    for (let i = 0; i < chw.length; i++) {
+      const asc: Chws = chw[i];
+      if (asc != null && asc != undefined && asc.id === chwId) return asc;
+    }
+  }
+  return null;
+}
+
+
+export async function getDataInformations(req: Request, res: Response, next: NextFunction): Promise<any> {
+  var respData: { status: number, data: any };
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    respData = { status: 201, data: 'Informations you provided are not valid' }
+    return res.status(201).json(respData);
+  }
+
+  const errorMsg: string = "Your request provides was rejected !";
+  try {
+    const dataWithParams: { status: number, data: any } = await getChwsDataWithParams(req, res, next, true);
+    if (dataWithParams.status == 200) {
+      const _familyRepo = await getFamilySyncRepository();
+      var families: Families[] = await _familyRepo.find({
+        where: {
+          district: notNull(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+          site: notNull(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+          zone: {
+            id: notNull(req.body.zones) ? In(req.body.zones) : undefined,
+          },
+        }
+      });
+
+      const _chwsRepo = await getChwsSyncRepository();
+      var chws: Chws[] = await _chwsRepo.find({
+        where: {
+          district: notNull(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+          site: notNull(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+          zone: {
+            id: notNull(req.body.zones) ? In(req.body.zones) : undefined,
+          },
+        }
+      });
+
+      if (!families) return res.status(201).json({ status: 201, data: 'Not data found with parametter!' });
+
+      var finalData: any = { total_visited: 0, total_not_visited: 0, family_count: 0, detail: [] };
+      var familiesInfos: any = {};
+
+      for (let f = 0; f < families.length; f++) {
+        const family = families[f];
+        familiesInfos[`${family.id}`] = { family: family, chw: getChwInfos(chws, family.zone?.chw_id!), data: { all_visit: 0, visit_in_day: 0, death: 0, child_visit: 0, women_visit: 0, home_visit: 0, isVisited: false } };
+
+      }
+
+      const chwsData: ChwsData[] = dataWithParams.data;
+      var hasVisit: string[] = [];
+
+      for (let d = 0; d < chwsData.length; d++) {
+        const data = chwsData[d];
+        if (data.family_id != null && data.family_id != undefined && data.family_id != "" && data.form != undefined && data.form != null) {
+          var found = `${DateUtils.getDateInFormat(data.reported_date)}-${data.family_id}`;
+
+          try {
+            if (!hasVisit.includes(found)) {
+              hasVisit.push(found);
+              familiesInfos[data.family_id].data.visit_in_day += 1;
+            }
+            familiesInfos[data.family_id].data.all_visit += 1;
+            if (familiesInfos[data.family_id].data.all_visit > 0) familiesInfos[data.family_id].data.isVisited = true;
+            if (data.form == "death_report") familiesInfos[data.family_id].data.death += 1;
+            if (data.form == "home_visit") familiesInfos[data.family_id].data.home_visit += 1;
+            if (Consts.child_forms.includes(data.form)) familiesInfos[data.family_id].data.child_visit += 1;
+            if (Consts.women_forms.includes(data.form)) familiesInfos[data.family_id].data.women_visit += 1;
+
+          } catch (error) {
+
+          }
+        }
+      }
+
+      const details = Object.values(familiesInfos);
+
+      for (let d = 0; d < details.length; d++) {
+        const dtl:any = details[d];
+        finalData.family_count+=1;
+        if(dtl.data.isVisited == true){
+          finalData.total_visited += 1;
+        } else {
+          finalData.total_not_visited +=1;
+        }
+      }
+
+      finalData.detail = details;
+      respData = { status: 200, data: finalData }
+      return res.status(respData.status).json(respData);
+    } else {
+      return res.status(dataWithParams.status).json(dataWithParams);
+    }
+  } catch (err) {
+    // return next(err);
+    respData = { status: 201, data: errorMsg };
+  }
+  return res.status(respData.status).json(respData);
+}
 
 
 export async function fetchIhChtDataPerChw(req: Request, res: Response, next: NextFunction) {
@@ -61,10 +165,6 @@ export async function fetchIhChtDataPerChw(req: Request, res: Response, next: Ne
     return res.status(chwsData.status).json({ status: 201, data: 'No data found !' });
   }
 }
-
-
-
-
 
 function getAllAboutData(ChwsDataFromDb$: ChwsData[], Chws$: Chws[], req: Request, res: Response): { chw: Chws, data: DataIndicators }[] {
   // 'Démarrage du calcule des indicateurs ...'
@@ -128,7 +228,7 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], Chws$: Chws[], req: Reques
       if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
         if (data.source == 'Tonoudayo') {
 
-          if (["death_report", "home_visit"].includes(form!)) {
+          if (Consts.home_visit_form.includes(form!)) {
             outPutData.home_visit[chw].tonoudayo += 1;
           }
 
@@ -159,7 +259,7 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], Chws$: Chws[], req: Reques
             if (field["has_malnutrition"] == "true") outPutData.malnutrition_pcime[chw].tonoudayo += 1;
           }
 
-          if (["pcime_c_followup", "pcime_c_referral", "usp_pcime_followup", "newborn_followup", "malnutrition_followup"].includes(form!)) {
+          if (Consts.child_followup_forms.includes(form!)) {
             outPutData.suivi_pcime[chw].tonoudayo += 1;
             if (field["group_review.s_have_you_refer_child"] == "yes") outPutData.reference_pcime[chw].tonoudayo += 1;
           }
@@ -176,7 +276,7 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], Chws$: Chws[], req: Reques
             if (field["follow_up_count"] == "1") outPutData.femme_postpartum_NC[chw].tonoudayo += 1;
           }
 
-          if (["pregnancy_family_planning", "women_emergency_followup", "fp_follow_up_renewal", "fp_followup_danger_sign_check", "delivery"].includes(form!)) {
+          if (Consts.pregnancy_pf_forms.includes(form!)) {
             if (form == "pregnancy_family_planning") {
               var pregnant_1 = field["s_reg_pregnancy_screen.s_reg_urine_result"] == "positive"
               var pregnant_2 = field["s_reg_pregnancy_screen.s_reg_why_urine_test_not_done"] == "already_pregnant"
@@ -464,7 +564,7 @@ function transformChwsData(allDatasFound: ChtOutPutData, Chws$: Chws[], req: Req
     chwsData.sum_pcime = chwsData.sum_soins_suivi.tonoudayo + chwsData.sum_soins_suivi.dhis2;
     chwsData.sum_femmes_enceinte = chwsData.femmes_enceinte.tonoudayo + chwsData.femmes_enceinte.dhis2;
     chwsData.sum_femmes_postpartum = chwsData.femmes_postpartum.tonoudayo + chwsData.femmes_postpartum.dhis2;
-    chwsData.sum_enceinte_postpartum = { tonoudayo: chwsData.femmes_enceinte.tonoudayo+ chwsData.femmes_postpartum.tonoudayo, dhis2: chwsData.femmes_enceinte.dhis2 + chwsData.femmes_postpartum.dhis2 };
+    chwsData.sum_enceinte_postpartum = { tonoudayo: chwsData.femmes_enceinte.tonoudayo + chwsData.femmes_postpartum.tonoudayo, dhis2: chwsData.femmes_enceinte.dhis2 + chwsData.femmes_postpartum.dhis2 };
     chwsData.sum_maternel = chwsData.sum_enceinte_postpartum.tonoudayo + chwsData.sum_enceinte_postpartum.dhis2;
     chwsData.sum_home_visit = chwsData.home_visit.tonoudayo + chwsData.home_visit.dhis2;
     chwsData.sum_pf = chwsData.pf.tonoudayo + chwsData.pf.dhis2;

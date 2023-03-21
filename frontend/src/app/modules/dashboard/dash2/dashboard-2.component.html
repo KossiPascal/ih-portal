@@ -138,9 +138,9 @@
             </div>
             <!-- /.card-header -->
             <div class="card-body p-0">
-              <table class="table table-sm table-striped" style="margin: auto;">
+              <table (click)="sort()" id="export_table" class="table table-sm table-striped" style="margin: auto;">
                 <thead>
-                  <tr>
+                  <tr class="bg-info">
                     <th>ASC</th>
                     <th>Nbre Action/Jour</th>
                     <th></th>
@@ -150,8 +150,8 @@
                   <tr *ngFor="let datas of FinalChwsOutputData$; let i=index">
                     <td>
                       <span style="font-size: 16px;" class="custom-badge"> <b>{{ datas.chw.name }}</b> </span><br>
-                      <span class="custom-badge">{{ datas.chw.external_id }}</span><br>
-                      <span style="font-size: 14px;" class="info"><small>Total Action: </small> <b>{{ sum(datas.data)}}</b> </span>
+                      <span class="custom-badge" style="font-size: 12px;color: gray;">{{ datas.chw.external_id }}</span><br>
+                      <span style="font-size: 16px;color: blue;" class="info"><small>Total Action: </small> <b>{{ sum(datas.data)}}</b> </span>
                     </td>
 
                     <td>
@@ -164,7 +164,7 @@
                     
 
                     <td>
-                      <button style="margin-top: 10px; padding: 2px!important;" class="btn btn-info" (click)="seeSelectedChwData(datas)"
+                      <button style="margin-top: 15px; padding: 2px!important; font-size: 10px;" class="btn btn-info" (click)="seeSelectedChwData(datas)"
                       data-toggle="modal" data-target="#modal-default">Détails</button>
                       
                     </td>

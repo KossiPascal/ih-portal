@@ -7,9 +7,10 @@ import { Dashboard2Component } from './dash2/dashboard-2.component';
 import { Dashboard3Component } from './dash3/dashboard-3.component';
 import { TableExportComponent } from '@ih-app/components/table-export.component';
 import { SortDirective } from '@ih-app/directive/sort.directive';
+import { Dashboard4Component } from './dash4/dashboard-4.component';
 
 @NgModule({
-  declarations: [Dashboard1Component,Dashboard2Component,Dashboard3Component,TableExportComponent,SortDirective],
+  declarations: [Dashboard1Component,Dashboard2Component,Dashboard3Component, Dashboard4Component,TableExportComponent,SortDirective],
   imports: [
     CommonModule,
     ReactiveFormsModule,

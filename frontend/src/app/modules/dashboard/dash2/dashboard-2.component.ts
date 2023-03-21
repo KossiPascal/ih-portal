@@ -11,6 +11,9 @@ import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Roles } from '@ih-app/shared/roles';
 // import { liveQuery } from 'dexie';
 
+declare var sortTable: any;
+
+
 @Component({
   selector: 'app-dashboard-2',
   templateUrl: `./dashboard-2.component.html`,
@@ -137,7 +140,9 @@ export class Dashboard2Component implements OnInit {
     });
   }
 
-
+  sort() {
+    sortTable('export_table');
+  }
 
   capitaliseDataGiven(str: any, inputSeparator?: string, outPutSeparator?: string): string {
     return Functions.capitaliseDataGiven(str, inputSeparator, outPutSeparator);

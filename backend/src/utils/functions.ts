@@ -4,7 +4,7 @@ import http from "http";
 import { CouchDbFetchData, Dhis2Sync, MailConfig } from "./appInterface";
 import { token, toMap, User, jwSecretKey } from "../entity/User";
 import moment from "moment";
-import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws } from "../entity/Sync";
+import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws, Patients } from "../entity/Sync";
 
 const nodemailer = require("nodemailer");
 const smtpTransport = require('nodemailer-smtp-transport');
@@ -267,7 +267,91 @@ export function JsonDbFolder(file_Name_without_extension: string): string {
     return `${projectFolderParent()}/IhJsonStorage/${fileName}.json`
 }
 
+
+export function patientAgeDetails(patient: Patients): {
+    is_in_cible: boolean,
+    is_child_in_cible: boolean,
+    is_female_in_cible: boolean
+    age_in_year: number | null,
+    age_in_month: number | null,
+    age_in_day: number | null,
+} {
+    const is_child_in_cible = DateUtils.isChildUnder5(patient.date_of_birth!);
+    const is_female_in_cible = DateUtils.isFemaleInCible({ birth_date: patient.date_of_birth!, sex: patient.sex! });
+    const is_in_cible = is_child_in_cible || is_female_in_cible;
+    const age_in_year = DateUtils.getAgeInYear(patient.date_of_birth!);
+    const age_in_month = DateUtils.getAgeInMonths(patient.date_of_birth!);
+    const age_in_day = DateUtils.getAgeInDays(patient.date_of_birth!);
+
+    return { is_in_cible: is_in_cible, is_child_in_cible: is_child_in_cible, is_female_in_cible: is_female_in_cible, age_in_year: age_in_year, age_in_month: age_in_month, age_in_day: age_in_day }
+
+}
+
+
+
+// #########################################################################################################################################
+
+
+
 export class DateUtils {
+
+
+    static getAgeInMilliseconds(birth_date?: string): Date | null {
+        if (birth_date != null) {
+            return new Date(Date.now() - (new Date(birth_date)).getTime());
+        }
+        return null;
+    }
+
+    static getAgeInYear(birth_date: string, withUtc: boolean = true): number | null {
+        var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
+        if (ageInMs != null) {
+            const year = withUtc ? ageInMs.getUTCFullYear() : ageInMs.getFullYear();
+            return Math.abs(year - 1970);
+            // return Math.round(ageInMs.getTime() / (1000 * 60 * 60 * 24 *365));
+        }
+        return null;
+    }
+
+    static getAgeInMonths(birth_date: string, round: boolean = false): number | null {
+        var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
+        if (ageInMs != null) {
+            const ageInMonth = ageInMs.getTime() / (1000 * 60 * 60 * 24 * 30);
+            return round ? Math.round(ageInMonth) : ageInMonth;
+        }
+        return null;
+    }
+    static getAgeInDays(birth_date: string): number | null {
+        var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
+        if (ageInMs != null) {
+            return ageInMs.getTime() / (1000 * 60 * 60 * 24);
+        }
+        return null;
+    }
+
+    static isChildUnder5(birth_date: string): boolean {
+        var childAge = DateUtils.getAgeInMonths(birth_date);
+        if (childAge != null) {
+            return childAge < 60;
+        }
+        return false;
+    }
+
+    static isFemaleInCible(data: { birth_date: string, sex: string }) {
+        const year = DateUtils.getAgeInYear(data.birth_date!);
+        if (year != null) return year >= 5 && year < 60 && data.sex == 'F';
+        return false;
+    }
+
+    static isInCible(data: { birth_date: string, sex: string }): boolean {
+        return DateUtils.isChildUnder5(data.birth_date) || DateUtils.isFemaleInCible(data);
+    }
+
+
+
+
+
+
     static isGreater(d1: any, d2: any): boolean {
         try {
             let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
@@ -557,24 +641,24 @@ export function generateUserMapData(userFound: User, dhisusersession: string): a
     userFound.dhisusersession = dhisusersession;
     userFound.defaultRedirectUrl = userDefaultRedirectUrl(userFound);
     userFound.token = token(userFound);
-    userFound.expiresIn = JSON.stringify((moment().add(jwSecretKey({user:userFound}).expiredIn, 'seconds')).valueOf());
+    userFound.expiresIn = JSON.stringify((moment().add(jwSecretKey({ user: userFound }).expiredIn, 'seconds')).valueOf());
     return toMap(userFound);
 }
 
 
-function userDefaultRedirectUrl(user:User):string{
+function userDefaultRedirectUrl(user: User): string {
     return isChws(user) ? 'dashboards/dash2' : 'dashboards';
 }
 
-export function isChws(user:User): boolean{
+export function isChws(user: User): boolean {
     if (notNull(user.roles)) {
-      return user.roles.includes('c3WyuK3ibsN');
+        return user.roles.includes('c3WyuK3ibsN');
     }
     if (notNull(user.groups)) {
-      return user.groups.includes('enIOT8b8taV');
+        return user.groups.includes('enIOT8b8taV');
     }
     return false;
-  }
+}
 
 
 // export function generateAuthSuccessData(userFound:User): UserValue {

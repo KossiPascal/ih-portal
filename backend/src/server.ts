@@ -140,8 +140,8 @@ cron.schedule("0 05 */23 * * *", function () {
     const user = _repoUser.getBy(defaultUserId) as User;
     if (notNull(user)) {
       const initDate = DateUtils.startEnd21and20Date()
-      const start_date = '2023-03-15';// initDate.start_date;
-      const end_date = '2023-03-21'; //initDate.end_date,
+      const start_date = initDate.start_date;
+      const end_date = initDate.end_date;
       const api_host = `https://${process.env.LOCALHOST || process.env.CHT_HOST}:${portSecured}/api`;
       const headers = { "Content-Type": "application/json" };
 

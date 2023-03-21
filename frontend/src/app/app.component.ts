@@ -34,9 +34,9 @@ export class AppComponent implements OnInit {
   userData: User | null = this.auth.userValue()
   chwOU: Chws | null = null;
   checkForAppNewVersion: boolean = true;
-  isAppUpdateFound:boolean = false;
- 
-  separation:string = '_____________________________________';
+  isAppUpdateFound: boolean = false;
+
+  separation: string = '_____________________________________';
 
   @HostBinding('attr.app-version')
   appVersion: any;
@@ -59,11 +59,11 @@ export class AppComponent implements OnInit {
 
   public roles = new Roles(this.store);
 
-  
+
 
   ngOnInit(): void {
     this.chwOU = this.auth.chwsOrgUnit();
-   this.UpdateVersion(false);
+    this.UpdateVersion(false);
     const appTitle = this.titleService.getTitle();
     this.checkForAppNewVersion = true;
 
@@ -141,15 +141,15 @@ export class AppComponent implements OnInit {
 
 
 
-  // updateChecker(){
-  //   this.sw.available.subscribe((event: any) => {
-  //     this.sw.activateUpdate().then(() => {
-  //       if(confirm('Mise à jour disponible.')){
-  //         document.location.reload();
-  //       }
-  //     });
-  //   });
-  // }
+  updateChecker() {
+    if (this.sw.isEnabled) {
+      this.sw.available.subscribe(() => {
+        if (confirm("New version available. Load New Version?")) {
+          window.location.reload();
+        }
+      });
+    }
+  }
 
 
   // async checkForUpdates() {
@@ -201,13 +201,13 @@ export class AppComponent implements OnInit {
     this.clickModal('active-update-modal')
   }
 
-  UpdateVersion(reload:boolean = true) {
+  UpdateVersion(reload: boolean = true) {
     this.conf.appVersion().subscribe((newVersion: any) => {
-      if(reload)this.ShowUpdateVersionModal()
-        localStorage.setItem('appVersion', newVersion);
-        this.appVersion = newVersion;
-        if(reload) this.clickModal('close-update-modal');
-        if(reload) window.location.reload();
+      if (reload) this.ShowUpdateVersionModal()
+      localStorage.setItem('appVersion', newVersion);
+      this.appVersion = newVersion;
+      if (reload) this.clickModal('close-update-modal');
+      if (reload) window.location.reload();
     }, (err: any) => { console.log(err.toString()) });
   }
 

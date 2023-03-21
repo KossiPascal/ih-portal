@@ -192,6 +192,8 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                     if (districtId && siteId) {
                                         if (!outPutInfo.hasOwnProperty("Données Total")) outPutInfo["Données Total"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
                                         try {
+                                            const contactParent = row.doc.fields.inputs.contact.parent;
+                                            const contactId = row.doc.fields.inputs.contact._id;
                                             const _sync = new ChwsData();
                                             _sync.source = 'Tonoudayo';
                                             _sync.id = row.doc._id;
@@ -205,8 +207,8 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                             _sync.zone = row.doc.contact.parent._id;
                                             _sync.chw = row.doc.contact._id;
 
-                                            _sync.family_id = row.doc.fields.inputs.contact.parent
-                                            _sync.patient_id = row.doc.fields.inputs.contact._id
+                                            _sync.family_id = ['home_visit'].includes(row.doc.form) ?  contactId : contactParent;
+                                            _sync.patient_id = ['home_visit'].includes(row.doc.form) ? null : contactId;
                                             _sync.fields = Functions.getJsonFieldsAsKeyValue('', row.doc.fields);
                                             // _sync.patient_id = row.doc.fields.patient_id;
                                             if (!row.doc.geolocation.hasOwnProperty('code')) _sync.geolocation = Functions.getJsonFieldsAsKeyValue('', row.doc.geolocation);

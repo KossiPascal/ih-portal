@@ -1,10 +1,12 @@
 {
   "name": "ih-portal",
-  "version": "1.2.20",
+  "version": "1.2.21",
   "scripts": {
     "ng": "ng serve",
+    "start": "ng serve --ssl true",
+    "start2": "ng serve --ssl true --ssl-key ./node_modules/browser-sync/lib/server/certs/server.key --ssl-cert ./node_modules/browser-sync/lib/server/certs/server.crt",
     "appreq": "ng build --service-worker=true --build-optimizer=true --optimization=true --configuration=production --aot=true --output-hashing=all",
-    "start": "concurrently \"npm run ng serve\" \"cd ../backend && npm run nodemonserver\"",
+    "start_dev": "concurrently \"npm run ng serve\" \"cd ../backend && npm run nodemonserver\"",
     "prebuild": "npm --no-git-tab-version version patch -m \"Upgrade to %s for reasons\"",
     "build": "ng build --service-worker --build-optimizer --optimization --configuration production --aot --output-hashing=all",
     "postbuild": "cd ../ && git status && git add . && git status && git commit -m \"Initial Commit\" && git status && git push -u origin main && git status",
@@ -70,6 +72,7 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "^14.0.4",
     "@angular/cli": "^14.0.7",
-    "@angular/compiler-cli": "^14.0.0"
+    "@angular/compiler-cli": "^14.0.0",
+    "browser-sync": "^2.29.0"
   }
 }

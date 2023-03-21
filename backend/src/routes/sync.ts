@@ -1,4 +1,4 @@
-import { getChwsDataWithParams, deleteChwsData, fetchIhChtDataPerChw } from "../controllers/dataFromDB";
+import { getChwsDataWithParams, getDataInformations, deleteChwsData, fetchIhChtDataPerChw } from "../controllers/dataFromDB";
 import { getChws, getDistricts, getFamilies, getPatients, getSites, getZones } from "../controllers/orgUnitsFromDB ";
 import { fetchChwsDataFromCouchDb, fetchChwsDataFromDhis2, fetchOrgUnitsFromCouchDb, getDhis2Chws, insertOrUpdateDataToDhis2 } from "../controllers/fetchFormCloud";
 import { Middelware } from "../middleware/auth";
@@ -21,6 +21,12 @@ syncRouter.post(
 );
 
 syncRouter.post('/get/data', Middelware.authMiddleware,getChwsDataWithParams);
+
+syncRouter.post('/get/datainfos', Middelware.authMiddleware,getDataInformations);
+
+
+
+
 syncRouter.post('/delete/data', Middelware.authMiddleware,deleteChwsData);
 
 syncRouter.post(
