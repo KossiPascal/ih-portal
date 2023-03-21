@@ -89,7 +89,7 @@
         <div class="col-sm-4 col-12" style="font-weight: bold; padding: 10px 20px; background-color: rgb(233, 189, 131);">
           Total Familles: <strong style="font-size: 18px;">{{ ChwsDataInfos$.family_count }}</strong>
         </div>
-        <div class="col-sm-4 col-12" style="font-weight: bold; padding: 10px 20px; background-color: antiquewhite;">
+        <div class="col-sm-4 col-12" style="font-weight: bold; padding: 10px 20px; background-color: rgb(129, 153, 134);">
           Total Familles Visités: <strong style="font-size: 18px;">{{ ChwsDataInfos$.total_visited }}</strong>
         </div>
         <div class="col-sm-4 col-12" style="font-weight: bold; padding: 10px 20px; background-color: rgb(218, 177, 235);">
@@ -103,13 +103,13 @@
         <thead>
           <tr class="bg-info">
             <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="family.name" style="width: 50px">Famille</th>
-            <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="family.zone.name" style="width: 150px">Zone</th>
-            <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="family.zone.name" style="width: 150px">Code ASC</th>
+            <!-- <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="family.zone.name" style="width: 150px">Zone</th>
+            <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="family.zone.name" style="width: 150px">Code ASC</th> -->
             <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.visit_in_day" style="width: 40px">Visit 1/jour</th>
-            <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.death" style="width: 40px">#Déces</th>
+            <!-- <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.death" style="width: 40px">#Déces</th>
             <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.child_visit" style="width: 40px">#Pcime</th>
             <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.women_visit" style="width: 40px">#Maternel_PF</th>
-            <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.home_visit" style="width: 40px">#Recherche</th>
+            <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.home_visit" style="width: 40px">#Recherche</th> -->
             <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.all_visit" style="width: 40px">#Action Total</th>
             <th [appSort]="ChwsDataInfos$.detail" data-order="desc" data-name="data.isVisited" style="width: 40px">#Type</th>
           </tr>
@@ -118,13 +118,13 @@
         <tbody>
           <tr *ngFor="let item of ChwsDataInfos$.detail">
             <td>{{ item.family.name }}</td>
-            <td>{{ item.family.zone.name }}</td>
-            <td>{{ item.chw != null ? item.chw.external_id : ''}}</td>
+            <!-- <td>{{ item.family.zone.name }}</td>
+            <td>{{ item.chw != null ? item.chw.external_id : ''}}</td> -->
             <td>{{ item.data.visit_in_day}}</td>
-            <td>{{ item.data.death }}</td>
+            <!-- <td>{{ item.data.death }}</td>
             <td>{{ item.data.child_visit}}</td>
             <td>{{ item.data.women_visit }}</td>
-            <td>{{ item.data.home_visit}}</td>
+            <td>{{ item.data.home_visit}}</td> -->
             <td>{{ item.data.all_visit }}</td>
             <td class="{{ item.data.isVisited ? 'success0' : 'danger0' }}"> {{ item.data.isVisited ? '' :'Non '}} Visité</td>
           </tr>

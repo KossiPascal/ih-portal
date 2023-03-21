@@ -203,16 +203,18 @@
         </li> -->
 
 
-          
+
           <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#" style="text-align: center; color: blue !important;display: inline-block;">
+            <a class="nav-link" data-toggle="dropdown" href="#"
+              style="text-align: center; color: blue !important;display: inline-block;">
               <!-- <i style="font-size: 25px;" class="fas fa-th-large"></i> -->
               <!-- <span class="badge badge-warning navbar-badge">Infos</span> -->
-                  <img style="margin-top: -12px;" src="{{ userData?.userLogo }}" width="40" class="img-circle elevation-2" alt="User Image">
-                 
-              <span style="margin-left: 5px;" >{{ roles.isChws() ? chwOU?.name: userData?.fullname }}</span>
-                
-                </a>
+              <img style="margin-top: -12px;" src="{{ userData?.userLogo }}" width="40" class="img-circle elevation-2"
+                alt="User Image">
+
+              <span style="margin-left: 5px;">{{ roles.isChws() ? chwOU?.name: userData?.fullname }}</span>
+
+            </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
 
               <div *ngIf="roles.isAdmin()" class="dropdowndivider1"></div>
@@ -253,7 +255,7 @@
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Visite de Ménages
               </a>
 
-              
+
 
               <div *ngIf="roles.isSupervisorMentor()" class="dropdowndivider1"></div>
               <a *ngIf="roles.isSupervisorMentor()" class="nav-link" routerLink="chws/" role="button">
@@ -265,7 +267,7 @@
                 role="button">
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Données ThinkMd par semaine
               </a>
-              
+
 
               <div *ngIf="!roles.isChws()" class="dropdowndivider1"></div>
               <a *ngIf="!roles.isChws()" class="nav-link" routerLink="/cache/list" role="button">
@@ -277,34 +279,11 @@
                 <i class="fa fa-sign-out-alt"></i> Se déconnecter
               </a>
 
-              <div *ngIf="roles.isSuperUser()" class="dropdowndivider2"></div>
-
-              <div *ngIf="roles.isSuperUser()">
-                <p>{{ 'HOME.TITLE' | translate }}</p>
-                <p>{{ 'HOME.SELECT' | translate }}</p>
-              </div>
-
               <div class="dropdowndivider1"></div>
 
               <!-- <a clas   -->
             </div>
           </li>
-
-
-
-          <!-- Notifications Dropdown Menu -->
-
-          <li *ngIf="roles.isAdmin()" class="nav-item">
-            <form class="form-inline nav-link">
-              <div class="input-group input-group-sm">
-                <select #langSelect (change)="translate.use(langSelect.value)">
-                  <option *ngFor="let lang of translate.getLangs()" [value]="lang"
-                    [selected]="lang === translate.currentLang">{{ lang }}</option>
-                </select>
-              </div>
-            </form>
-          </li>
-
         </ul>
       </nav>
       <!-- /.navbar -->
@@ -322,17 +301,17 @@
         <!-- Sidebar -->
         <div class="sidebar">
           <!-- Sidebar user panel (optional) -->
-          <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+          <!-- <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
               <img src="{{ userData?.userLogo }}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
               <a href="#" class="d-block">{{ roles.isChws() ? chwOU?.name: userData?.fullname }}</a>
             </div>
-          </div>
+          </div> -->
 
           <!-- SidebarSearch Form -->
-          <div class="form-inline">
+          <!-- <div class="form-inline">
             <div class="input-group" data-widget="sidebar-search">
               <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
               <div class="input-group-append">
@@ -341,7 +320,7 @@
                 </button>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <!-- Sidebar Menu -->
           <nav class="mt-2">
@@ -485,6 +464,7 @@
                 </a>
               </li>
 
+              <p *ngIf="roles.isSupervisorMentor()" style="color: white;">{{ separation }}</p>
 
               <li *ngIf="roles.isSuperUser()" class="nav-item">
                 <a routerLink="docs" class="nav-link">
@@ -493,6 +473,22 @@
                     Documentation
                   </p>
                 </a>
+              </li>
+              <!-- Notifications Dropdown Menu -->
+
+              <li *ngIf="roles.isSuperUser()" class="nav-item">
+                <form class="form-inline nav-link">
+                  <div class="input-group input-group-sm">
+                    <select #langSelect (change)="translate.use(langSelect.value)">
+                      <option *ngFor="let lang of translate.getLangs()" [value]="lang"
+                        [selected]="lang === translate.currentLang">{{ lang }}</option>
+                    </select>
+                  </div>
+                </form>
+
+                <br>
+                <p>{{ 'HOME.TITLE' | translate }}</p>
+                <p>{{ 'HOME.SELECT' | translate }}</p>
               </li>
 
               <p *ngIf="roles.isSupervisorMentor()" style="color: white;">{{ separation }}</p>
