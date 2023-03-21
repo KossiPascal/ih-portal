@@ -89,9 +89,9 @@ export class AppComponent implements OnInit {
     this.updateOnlineStatus();
     window.addEventListener('online', this.updateOnlineStatus.bind(this));
     window.addEventListener('offline', this.updateOnlineStatus.bind(this));
-    this.checkForUpdates();
+    // this.checkForUpdates();
     // this.versionUpdateChecker();
-    // this.updateChecker();
+    this.updateChecker();
     this.appVersion = localStorage.getItem('appVersion');
   }
 
@@ -144,9 +144,10 @@ export class AppComponent implements OnInit {
   updateChecker() {
     if (this.sw.isEnabled) {
       this.sw.available.subscribe(() => {
-        if (confirm("New version available. Load New Version?")) {
-          window.location.reload();
-        }
+        // if (confirm("New version available. Load New Version?")) {
+        //   window.location.reload();
+        // }
+        this.ShowUpdateVersionModal();
       });
     }
   }
