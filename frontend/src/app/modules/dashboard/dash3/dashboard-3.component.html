@@ -53,7 +53,7 @@
             <div class="col-sm-2 col-6">
               <div class="form-group">
                 <label>Site</label>
-                <select (change)="genarateChws()" class="form-control"   [multiple]="sites$.length > 0? 'multiple' : ''" formControlName="sites" (click)="genarateChws()">
+                <select (change)="genarateChws()" class="form-control"   [multiple]="sites$.length > 0 ? 'multiple' : ''" formControlName="sites">
                   <option value=""></option>
                   <option *ngFor="let site of sites$" value="{{site.id}}">
                     {{ site.name }}
@@ -65,7 +65,7 @@
             <div class="col-sm-3 col-6">
               <div class="form-group">
                 <label>ASC</label>
-                <select class="form-control" [multiple]="chws$.length > 0? 'multiple' : ''" formControlName="chws">
+                <select class="form-control" [multiple]="chws$.length > 0 ? 'multiple' : ''" formControlName="chws">
                   <option value=""></option>
                   <option *ngFor="let chw of chws$" value="{{chw.id}}">
                     {{chw.name}}

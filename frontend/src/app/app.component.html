@@ -397,7 +397,7 @@
                 </a>
               </li>
 
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-item">
                 <a routerLink="dashboards/dash4" class="nav-link">
                   <!-- <i class="nav-icon fas fa-chart-line"></i> -->
                   <p>Visite de Ménages</p>

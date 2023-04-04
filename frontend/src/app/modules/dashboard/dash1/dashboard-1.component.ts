@@ -224,10 +224,13 @@ export class Dashboard1Component implements OnInit {
     return params;
   }
 
+
   initDataFilted(params?: FilterParams): void {
     this.initMsg = 'Loading Data ...';
     this.isLoading = true;
     this.genarateChws();
+
+
 
     this.sync.ihChtDataPerChw(params ?? this.ParamsToFilter()).subscribe((_res$: { status: number, data: { chw: Chws, data: DataIndicators }[] | any }) => {
       if (_res$.status == 200) {

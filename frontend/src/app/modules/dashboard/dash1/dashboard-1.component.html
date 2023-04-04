@@ -84,7 +84,7 @@
 </section>
 
 
-<section *ngIf="FinalChwsOutputData$.length > 0 && roles.isSupervisorMentor()" class="content">
+<section *ngIf="FinalChwsOutputData$.length > 0 && (roles.isSupervisorMentor() || roles.onlySeeData())" class="content">
   <div class="card">
     <div class="card-header">
       <div class="card-title">
