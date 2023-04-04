@@ -68,7 +68,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
 @NgModule({
   declarations: [
     AppComponent,
-    IndexDbItemListComponent,
+    IndexDbItemListComponent
   ],
   imports: [
     BrowserModule,
@@ -82,7 +82,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     MatIconModule,
     MatButtonModule,
     MatButtonToggleModule,
-    NgMultiSelectDropDownModule.forRoot(),
+    NgMultiSelectDropDownModule.forRoot(), 
     
     TranslateModule.forRoot({
       loader: {

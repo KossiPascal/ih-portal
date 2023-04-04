@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="card card-info">
 
-      <h1 style="text-align: center; color: purple;">Activité des ASC</h1>
+      <h2 class="title" style="text-align: center; color: purple;">Activité des ASC</h2>
 
       <div class="overlay-wrapper">
         <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
@@ -27,7 +27,7 @@
                 </div>
               </div>
 
-              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+              <div *ngIf="!roles.isChws()" class="col-sm-3 col-6">
                 <div class="form-group">
                   <label>District</label>
                   <select (change)="genarateSites()" class="form-control" formControlName="districts">
@@ -39,7 +39,7 @@
                 </div>
               </div>
 
-              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+              <div *ngIf="!roles.isChws()" class="col-sm-3 col-6">
                 <div class="form-group">
                   <label>Site</label>
                   <select (change)="genarateChws()" class="form-control" formControlName="sites">
@@ -53,8 +53,8 @@
 
               <div class="col-sm-2 col-6">
                 <div class="form-group">
-                  <label>.</label>
-                  <button [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control">
+                  <label style="color: white;">.</label>
+                  <button class="submit" [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control">
                     OK <span class="fa fa-floppy-o fa-right"></span>
                   </button>
                 </div>
@@ -85,7 +85,7 @@
 
 
 <section *ngIf="FinalChwsOutputData$.length > 0 && roles.isSupervisorMentor()" class="content">
-  <div class="card" style="overflow-y:scroll!important;">
+  <div class="card">
     <div class="card-header">
       <div class="card-title">
         <table-export></table-export>
@@ -94,7 +94,7 @@
 
 
     <!-- /.card-header -->
-    <div class="card-body">
+    <div class="card-body" style="overflow-y:scroll!important;">
       <table border="1 solid" id="export_table" class="table table-bordered table-hover border">
         <thead>
           <tr>

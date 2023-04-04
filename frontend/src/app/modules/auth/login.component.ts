@@ -8,6 +8,7 @@ import { Functions } from '@ih-app/shared/functions';
 import { ConfigService } from '@ih-app/services/config.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Roles } from '@ih-app/shared/roles';
+import { Consts } from '@ih-app/shared/constantes';
 
 
 @Component({
@@ -21,6 +22,10 @@ export class LoginComponent implements OnInit {
   isLoading:boolean = false;
   LoadingMsg: string = "Loading...";
   showRegisterPage:boolean = false;
+
+
+  APP_LOGO: string = Consts.APP_LOGO;
+
 
   constructor(private store:AppStorageService, private auth: AuthService, private conf:ConfigService) { }
 

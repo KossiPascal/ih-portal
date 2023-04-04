@@ -41,39 +41,36 @@
             <div class="col-sm-2 col-6">
               <div class="form-group">
                 <label>District</label>
-                <select *ngIf="Districts$.length > 0"  (change)="genarateSites()" class="form-control" multiple="multiple" formControlName="districts">
+                <select  (change)="genarateSites()" class="form-control" [multiple]="Districts$.length > 0? 'multiple' : ''" formControlName="districts">
                   <option value=""></option>
                   <option *ngFor="let district of Districts$" value="{{district.id}}">
                     {{ district.name }}
                   </option>
                 </select>
               </div>
-              <select *ngIf="Districts$.length == 0"  class="form-control"></select>
             </div>
 
             <div class="col-sm-2 col-6">
               <div class="form-group">
                 <label>Site</label>
-                <select *ngIf="sites$.length > 0" (change)="genarateChws()" class="form-control" multiple="multiple" formControlName="sites" (click)="genarateChws()">
+                <select (change)="genarateChws()" class="form-control"   [multiple]="sites$.length > 0? 'multiple' : ''" formControlName="sites" (click)="genarateChws()">
                   <option value=""></option>
                   <option *ngFor="let site of sites$" value="{{site.id}}">
                     {{ site.name }}
                   </option>
                 </select>
               </div>
-              <select *ngIf="sites$.length == 0"  class="form-control"></select>
             </div>
 
             <div class="col-sm-3 col-6">
               <div class="form-group">
                 <label>ASC</label>
-                <select *ngIf="chws$.length > 0" class="form-control" multiple="multiple" formControlName="chws">
+                <select class="form-control" [multiple]="chws$.length > 0? 'multiple' : ''" formControlName="chws">
                   <option value=""></option>
                   <option *ngFor="let chw of chws$" value="{{chw.id}}">
                     {{chw.name}}
                   </option>
                 </select>
-                <select *ngIf="chws$.length == 0"  class="form-control"></select>
               </div>
             </div>
 

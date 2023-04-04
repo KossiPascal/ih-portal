@@ -72,5 +72,3 @@ syncRouter.post('/dhis2/insert_or_update', Middelware.authMiddleware,insertOrUpd
 
 
 export = syncRouter;
-
-

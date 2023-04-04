@@ -11,6 +11,7 @@ import { Roles } from './shared/roles';
 import { User } from './models/User';
 import { AppStorageService } from './services/cookie.service';
 import { Chws } from './models/Sync';
+import { Consts } from './shared/constantes';
 
 declare var $: any;
 @Component({
@@ -30,7 +31,7 @@ export class AppComponent implements OnInit {
   private readonly retryFailedUpdateAfterSec = 5 * 60;
   private existingUpdateLoop?: any;
 
-  appLogo: any = this.auth.appLogoPath()
+  appLogo: any = Consts.APP_LOGO_1
   userData: User | null = this.auth.userValue()
   chwOU: Chws | null = null;
   checkForAppNewVersion: boolean = true;

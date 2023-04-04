@@ -22,8 +22,7 @@
             <div class="card-body">
                 <div class="tab-content" id="custom-tabs-one-tabContent">
                     <!-- start tab 1 -->
-                    <div class="tab-pane fade show active" id="custom-tabs-one-thinkmd" role="tabpanel"
-                        aria-labelledby="custom-tabs-one-thinkmd-tab">
+                    <div class="tab-pane fade show active" id="custom-tabs-one-thinkmd" role="tabpanel" aria-labelledby="custom-tabs-one-thinkmd-tab">
 
                         <div class="row">
                             <div class="col-sm-7">
@@ -158,25 +157,22 @@
                                 <div *ngFor="let item of tab1_messages?.errorToSend?.ErrorData">
                                     Error Found: {{item}}<br>
                                 </div>
-                                <div *ngIf="tab1_messages?.dataToSend?.success == 'true'">
+                                <!-- <div *ngIf="tab1_messages?.dataToSend?.success == 'true'">
                                     Pas d'erreur rencontré lors de la récupération des données sur le serveur!
-                                </div>
-
-
+                                </div> -->
                             </div>
-
                         </div>
-                        <div class="row">
+
+                        <div *ngIf="tab1_messages?.dataToSend?.Data" class="row">
                             <div class="col-sm-12">
                                 <!-- /.card -->
                                 <div class="card">
                                     <div class="card-header">
-                                        <!-- <h3 class="card-title">DataTable with default features</h3> -->
-                                        <button type="button" (click)="initTable('thinkmd_datatable')">Générer
-                                            Table</button>
-                                    </div>
-                                    <!-- /.card-header -->
-                                    <div class="card-body">
+                                        <div class="card-title">
+                                          <table-export></table-export>
+                                        </div>
+                                      </div>
+                                    <div class="card-body" style="overflow-y:scroll!important;">
                                         <table id="thinkmd_datatable" class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
@@ -201,12 +197,11 @@
                                 <!-- /.card -->
                             </div>
                         </div>
+
                     </div>
 
                     <!-- start tab 2 -->
-                    <div class="tab-pane fade" id="custom-tabs-one-cht" role="tabpanel"
-                        aria-labelledby="custom-tabs-one-cht-tab">
-
+                    <div class="tab-pane fade" id="custom-tabs-one-cht" role="tabpanel" aria-labelledby="custom-tabs-one-cht-tab">
                         <div class="row">
                             <div class="col-sm-7">
                                 <div class="overlay-wrapper">
@@ -378,12 +373,12 @@
                                 <!-- /.card -->
                                 <div class="card" *ngIf="tab3_error_messages==''  && tab3_messages.length > 0">
                                     <div class="card-header">
-                                        <!-- <h3 class="card-title">DataTable with default features</h3> -->
-                                        <button type="button" (click)="initTable('cht_datatable')">Générer
-                                            Table</button>
-                                    </div>
+                                        <div class="card-title">
+                                          <table-export></table-export>
+                                        </div>
+                                      </div>
                                     <!-- /.card-header -->
-                                    <div class="card-body">
+                                    <div class="card-body" style="overflow-y:scroll!important;">
                                         <table id="cht_datatable" class="table table-bordered table-striped">
                                             <thead>
                                                 <th>Nom Asc</th>

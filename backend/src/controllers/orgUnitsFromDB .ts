@@ -5,10 +5,7 @@ import { Between, Equal, In } from "typeorm";
 // const request = require('request');
 
 import { getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, getDistrictSyncRepository, Districts } from "../entity/Sync";
-import { notNull, sslFolder } from "../utils/functions";
-
-require('dotenv').config({ path: sslFolder('.env') });
-
+import { notNull } from "../utils/functions";
 
 // OperatorSymbolToFunction = new Map<FilterOperator, (...args: any[]) => FindOperator<string>>([
 //     [FilterOperator.EQ, Equal],

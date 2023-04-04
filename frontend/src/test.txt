@@ -1,0 +1,82 @@
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule, Component } from '@angular/core';
+
+
+
+
+
+https://ng-findme.surge.sh/
+
+https://arminzia.com/blog/working-with-google-maps-in-angular/
+https://arminzia.com/blog/using-google-geocoding-api-in-angular/
+https://timdeschryver.dev/blog/google-maps-as-an-angular-component#angular
+
+https://developers.google.com/maps/documentation/javascript/geolocation?hl=fr
+
+
+https://kevinkreuzer.medium.com/how-to-implement-an-address-search-with-angular-and-google-maps-32a2df09f8e9
+https://thingsmatic.com/2020/02/04/geolocation-with-angular-and-net-core-part-2/
+https://www.digitalocean.com/community/tutorials/angular-angular-google-maps
+
+
+
+
+    findMe() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            this.showPosition(position);
+          });
+        } else {
+          alert("Geolocation is not supported by this browser.");
+        }
+      }
+    
+      trackMe() {
+        if (navigator.geolocation) {
+          this.isTracking = true;
+          navigator.geolocation.watchPosition((position) => {
+            this.showTrackingPosition(position);
+          });
+        } else {
+          alert("Geolocation is not supported by this browser.");
+        }
+      }
+      showPosition(position:any) {
+        this.lat = position.coords.latitude;
+        this.lng = position.coords.longitude;
+    
+        let location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        this.map.panTo(location);
+    
+        if (!this.marker) {
+          this.marker = new google.maps.Marker({
+            position: location,
+            map: this.map,
+            title: 'Got you!'
+          });
+        }
+        else {
+          this.marker.setPosition(location);
+        }
+      }
+    
+      showTrackingPosition(position:any) {
+        console.log(`tracking postion:  ${position.coords.latitude} - ${position.coords.longitude}`);
+        this.lat = position.coords.latitude;
+        this.lng = position.coords.longitude;
+    
+        let location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        this.map.panTo(location);
+    
+        if (!this.marker) {
+          this.marker = new google.maps.Marker({
+            position: location,
+            map: this.map,
+            title: 'Got you!'
+          });
+        }
+        else {
+          this.marker.setPosition(location);
+        }
+      }
+    

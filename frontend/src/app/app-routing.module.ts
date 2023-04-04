@@ -13,13 +13,12 @@ const routes: Routes = [
   { path: 'dashboards', loadChildren: () => import('./modules/dashboard/dashboards.module').then(m => m.DashboardsModule)},
   { path: 'docs', loadChildren: () => import('./modules/documentation/documentations.module').then(m => m.DocumentationsModule)},
   { path: 'fetch', loadChildren: () => import('./modules/sync/syncs.module').then(m => m.SyncsModule)},
+  { path: 'maps', loadChildren: () => import('./modules/geo_search/googlemaps.module').then(m => m.GoogleMapsModule)},
   { path: 'cache', loadChildren: () => import('./modules/cache/caches.module').then(m => m.CachesModule)},
   { path: 'truncate_db', loadChildren: () => import('./modules/database/database_utils.module').then(m => m.DatabaseUtilsModule)},
   { path: 'error', loadChildren: () => import('./modules/error/errors.module').then(m => m.ErrorsModule)},
-  
-  
+    
   { path: '**', redirectTo: 'error' },
-  
 ];
 
 @NgModule({

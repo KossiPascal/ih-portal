@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "1.0.36",
+  "version": "1.0.57",
   "description": "portal-backend",
   "main": "index.js",
   "scripts": {
@@ -52,6 +52,7 @@
     "mongodb": "^3.7.3",
     "mssql": "^9.0.1",
     "mysql": "^2.18.1",
+    "node-couchdb": "^2.0.0",
     "node-cron": "^3.0.2",
     "node-fetch": "^2.6.7",
     "node-json-file-storage": "^1.1.0",
@@ -62,6 +63,7 @@
     "pm2": "^5.2.0",
     "postgres-array": "^3.0.1",
     "python-shell": "^3.0.1",
+    "rapid-couchdb-backup": "^0.3.5",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",
     "shelljs": "^0.8.5",

@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="card card-info">
       
-      <h1 style="text-align: center;">Données détaillées par ASC</h1>
+      <h2 class="title" style="text-align: center; color: blue;">ASC Données détaillées</h2>
       
       <div class="overlay-wrapper">
         <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
@@ -30,41 +30,36 @@
               <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>District</label>
-                  <select *ngIf="Districts$.length > 0" (change)="genarateSites()" class="form-control"
-                    multiple="multiple" formControlName="districts">
+                  <select *ngIf="Districts$.length > 0" (change)="genarateSites()" class="form-control" [multiple]="Districts$.length > 0? 'multiple' : ''" formControlName="districts">
                     <!-- <option value=""></option> -->
                     <option *ngFor="let dist of Districts$" value="{{dist.id}}">
                       {{ dist.name }}
                     </option>
                   </select>
-                  <select *ngIf="Districts$.length == 0" class="form-control"></select>
                 </div>
               </div>
 
               <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>Site</label>
-                  <select *ngIf="sites$.length > 0" (change)="genarateChws()" class="form-control" multiple="multiple"
-                    formControlName="sites">
+                  <select (change)="genarateChws()" class="form-control" [multiple]="sites$.length > 0? 'multiple' : ''" formControlName="sites">
                     <!-- <option value=""></option> -->
                     <option *ngFor="let site of sites$" value="{{site.id}}">
                       {{ site.name }}
                     </option>
                   </select>
-                  <select *ngIf="sites$.length == 0" class="form-control"></select>
                 </div>
               </div>
 
               <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>ASC</label>
-                  <select *ngIf="chws$.length > 0" class="form-control" multiple="multiple" formControlName="chws">
+                  <select class="form-control" [multiple]="chws$.length > 0? 'multiple' : ''" formControlName="chws">
                     <!-- <option value=""></option> -->
                     <option *ngFor="let chw of chws$" value="{{chw.id}}">
                       {{chw.name}}
                     </option>
                   </select>
-                  <select *ngIf="chws$.length == 0" class="form-control"></select>
                 </div>
               </div>
 
@@ -82,11 +77,11 @@
 
               <div *ngIf="days$.length > 0" class="col-sm-2 col-6">
                 <div class="form-group">
-                  <label>Nbre Jour d'activité</label>
-                  <select style="font-size: 20px;" class="form-control" formControlName="day" (change)="initDataFilted()">
+                  <label>Nbr de Jour</label>
+                  <select style="font-size: 18px;" class="form-control" formControlName="day" (change)="initDataFilted()">
                     <!-- <option value=""></option> -->
                     <option *ngFor="let day of days$" value="{{day}}">
-                      {{ day }}
+                      <strong>{{ day }} </strong> {{ day <=1  ? 'jour' : 'jours'}}
                     </option>
                   </select>
                 </div>
@@ -94,9 +89,9 @@
 
               <div class="col-sm-2 col-6">
                 <div class="form-group">
-                  <label>.</label>
-                  <button [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control">
-                    OK <span class="fa fa-floppy-o fa-right"></span>
+                  <label style="color: white;">.</label>
+                  <button class="submit" [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control">
+                    Charger <span class="fa fa-floppy-o fa-right"></span>
                   </button>
                 </div>
               </div>
@@ -134,10 +129,12 @@
         <div *ngIf="data_error_messages==''  && FinalChwsOutputData$.length > 0" class="card card-info">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Données par ASC</h3>
+              <div class="card-title">
+                <table-export></table-export>
+              </div>
             </div>
             <!-- /.card-header -->
-            <div class="card-body p-0">
+            <div class="card-body p-0" style="overflow-y:scroll!important;">
               <table (click)="sort()" id="export_table" class="table table-sm table-striped" style="margin: auto;">
                 <thead>
                   <tr class="bg-info">

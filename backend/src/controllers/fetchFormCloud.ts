@@ -8,21 +8,18 @@ import { DataIndicators } from "../entity/DataAggragate";
 
 const fetch = require('node-fetch');
 const request = require('request');
-
-
-const _sepation = `\n\n\n\n__________\n\n\n\n`;
-
-
 require('dotenv').config({ path: sslFolder('.env') });
 
+const { DHIS_HOST, NODE_TLS_REJECT_UNAUTHORIZED } = process.env;
 
+const _sepation = `\n\n\n\n__________\n\n\n\n`;
 
 export async function getDhis2Chws(req: Request, res: Response, next: NextFunction) {
     if (!validationResult(req).isEmpty()) {
         return res.status(201).json({ status: 201, data: 'Error when getting chws from dhis2' });
     }
     try {
-        const link = `https://${process.env.DHIS_HOST}/api/options`;
+        const link = `https://${DHIS_HOST}/api/options`;
         const params = `.json?paging=false&filter=optionSet.id:eq:uOKgQa2W8tn&fields=id,code,name,optionSet&order=created:desc`;
         request({
             url: link + params,
@@ -52,7 +49,7 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
 
     const repository = await getChwsDataSyncRepository();
     const _repoSite = await getSiteSyncRepository();
-    req.body['host'] = process.env.DHIS_HOST;
+    req.body['host'] = DHIS_HOST;
     req.body['cibleName'] = 'events';
     req.body['program'] = 'siupB4uk4O2';
 
@@ -143,7 +140,7 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
 
     // request(dhis2Sync.headerOptions(), async (err: any, res: any, body: any) => {});
 
-};
+}
 
 export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, next: NextFunction) {
 
@@ -207,7 +204,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                             _sync.zone = row.doc.contact.parent._id;
                                             _sync.chw = row.doc.contact._id;
 
-                                            _sync.family_id = ['home_visit'].includes(row.doc.form) ?  contactId : contactParent;
+                                            _sync.family_id = ['home_visit'].includes(row.doc.form) ? contactId : contactParent;
                                             _sync.patient_id = ['home_visit'].includes(row.doc.form) ? null : contactId;
                                             _sync.fields = Functions.getJsonFieldsAsKeyValue('', row.doc.fields);
                                             // _sync.patient_id = row.doc.fields.patient_id;
@@ -231,9 +228,9 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                     } else {
                         return resp.status(200).json(outPutInfo);
                     }
-                    // if (sync.use_SSL_verification !== true) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = undefined;
+                    // if (sync.use_SSL_verification !== true) NODE_TLS_REJECT_UNAUTHORIZED = undefined;
                 } catch (err: any) {
-                    // process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = undefined;
+                    // NODE_TLS_REJECT_UNAUTHORIZED = undefined;
                     if (!err.statusCode) err.statusCode = 500;
                     outPutInfo["Message"] = {}
                     outPutInfo["Message"]["errorElements"] = err.message;
@@ -268,7 +265,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
         outPutInfo["Message"]["errorElements"] = "Your request provides was rejected !";
         return resp.status(500).json(outPutInfo);
     }
-    
+
     var params: CouchDbFetchData = {
         viewName: 'contacts_by_date', //'contacts_by_type',
         startKey: [Functions.date_to_milisecond(req.body.start_date, true)],
@@ -537,11 +534,11 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                         }
                     }
 
-                    // if (sync.use_SSL_verification !== true) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = undefined;
+                    // if (sync.use_SSL_verification !== true) NODE_TLS_REJECT_UNAUTHORIZED = undefined;
                     if (done === len * outDoneLenght) resp.status(200).json(outPutInfo);
                     // resp.status(200).json(outPutInfo);
                 } catch (err: any) {
-                    // process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = undefined;
+                    // NODE_TLS_REJECT_UNAUTHORIZED = undefined;
                     if (!err.statusCode) err.statusCode = 500;
                     outPutInfo["Message"] = {};
                     outPutInfo["Message"]["errorElements"] = err.message;
@@ -575,10 +572,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
     }
 }
 
-
 export async function insertOrUpdateDataToDhis2(req: Request, res: Response, next: NextFunction) {
     const { dhisusersession, chwsDataToDhis2 } = req.body;
-
     const chwsData = chwsDataToDhis2 as DataIndicators;
 
     try {
@@ -593,7 +588,7 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
             const data_filter = "JC752xYegbJ:EQ:" + dist + ",JkMyqI3e6or:like:" + chw + ",lbHrQBTbY1d:EQ:" + date + ",FW6z2Ha2GNr:like:" + srce;
             const fields = "event,eventDate,dataValues[dataElement, value]";
             const headers = httpHeaders('Basic ' + dhisusersession);
-            const link = `https://${process.env.DHIS_HOST}/api/events`;
+            const link = `https://${DHIS_HOST}/api/events`;
             const params = `.json?paging=false&program=${program}&orgUnit=${sit}&filter=${data_filter}&fields=${fields}&order=created:desc`;
 
             await request({
@@ -601,45 +596,44 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
                 method: 'GET',
                 headers: headers
             }, async function (err: any, response1: any, body: any) {
-                if (err) return res.status(201).json({ status: 201, data: err.toString(), chw:chw });
+                if (err) return res.status(201).json({ status: 201, data: err.toString(), chw: chw });
                 try {
                     const jsonBody = JSON.parse(body);
                     if (jsonBody.hasOwnProperty('events')) {
                         var reqData: Dhis2DataFormat[] = jsonBody["events"] as Dhis2DataFormat[];
                         const dataId = reqData.length == 1 ? reqData[0].event : ''
-    
+
                         await request({
-                          url: reqData .length == 1 ? `${link}/${dataId}` : link,
-                          cache: 'no-cache',
-                          mode: "cors",
-                          credentials: "include",
-                          referrerPolicy: 'no-referrer',
-                          method: reqData .length == 1 ? 'PUT' : 'POST',
-                          body: JSON.stringify(jsonData),
-                          headers: headers
+                            url: reqData.length == 1 ? `${link}/${dataId}` : link,
+                            cache: 'no-cache',
+                            mode: "cors",
+                            credentials: "include",
+                            referrerPolicy: 'no-referrer',
+                            method: reqData.length == 1 ? 'PUT' : 'POST',
+                            body: JSON.stringify(jsonData),
+                            headers: headers
                         }, async function (err: any, response2: any, body: any) {
-                            if (err) return res.status(201).json({ status: 201, data: err.toString(), chw:chw });
-                            if (response2.statusCode != 200) return res.status(201).json({status:  201, data: `Error Found, retry!`, chw:chw })
-                            return res.status(200).json({status: 200 , data: reqData .length == 1 ? `Updated` : `Created`})
+                            if (err) return res.status(201).json({ status: 201, data: err.toString(), chw: chw });
+                            if (response2.statusCode != 200) return res.status(201).json({ status: 201, data: `Error Found, retry!`, chw: chw })
+                            return res.status(200).json({ status: 200, data: reqData.length == 1 ? `Updated` : `Created` })
                         });
-    
+
                     } else {
-                        return res.status(201).json({ status: 201, data: 'Connection Error! Retry', chw:chw  });
+                        return res.status(201).json({ status: 201, data: 'Connection Error! Retry', chw: chw });
                     }
                 } catch (error) {
-                    // console.log('------------------------------');
+                    console.log(error);
                     // console.log(chwsDataToDhis2);
                 }
             });
         } else {
-            return res.status(201).json({ status: 201, data: 'No Data Available!', chw:''  });
+            return res.status(201).json({ status: 201, data: 'No Data Available!', chw: '' });
         }
-    } catch (err:any) {
-        return res.status(201).json({ status: 201, data: err.toString(), chw:'' });
+    } catch (err: any) {
+        console.log(err);
+        return res.status(201).json({ status: 201, data: err.toString(), chw: '' });
     }
 }
-
-
 
 export function matchDhis2Data(datas: DataIndicators) {
 
@@ -662,107 +656,107 @@ export function matchDhis2Data(datas: DataIndicators) {
         },
         {
             "dataElement": "lvW5Kj1cisa", // "Nombre d'enfant 0 à 5 ans pris en charge à domicile
-            "value": datas.sum_soins_suivi.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.sum_soins_suivi : datas.sum_soins_suivi.tonoudayo,
         },
         {
             "dataElement": "M6WRPsREqsZ",  // "Total Vad PCIME Suivi
-            "value": datas.suivi_pcime.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.suivi_pcime : datas.suivi_pcime.tonoudayo,
         },
         {
             "dataElement": "oeDKJi4BICh",  // total_vad
-            "value": datas.total_vad.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.total_vad : datas.total_vad.tonoudayo,
         },
         {
             "dataElement": "PrN89trdUGm", // "Nombre de femme enceinte nouveau cas
-            "value": datas.femmes_enceintes_NC.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.femmes_enceintes_NC : datas.femmes_enceintes_NC.tonoudayo,
         },
         {
             "dataElement": "wdg7jjP9ZRg", // "Nombre de femmes référée pour plannification familiale
-            "value": datas.reference_pf.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.reference_pf : datas.reference_pf.tonoudayo,
         },
         {
             "dataElement": "qNxNXSwDAaI", // "promptitude diarrhée 24h
-            "value": datas.prompt_pcime_diarrhee_24h.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.prompt_pcime_diarrhee_24h : datas.prompt_pcime_diarrhee_24h.tonoudayo,
         },
         {
             "dataElement": "S1zPDVOIVLZ",  // "promptitude diarrhee 48h
-            "value": datas.prompt_pcime_diarrhee_48h.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.prompt_pcime_diarrhee_48h : datas.prompt_pcime_diarrhee_48h.tonoudayo,
         },
         {
             "dataElement": "nW3O5ULr75J", // "promptitude diarrhée 72h
-            "value": datas.prompt_pcime_diarrhee_72h.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.prompt_pcime_diarrhee_72h : datas.prompt_pcime_diarrhee_72h.tonoudayo,
         },
         {
             "dataElement": "NUpARMZ383s", // "promptitude paludisme 24h
-            "value": datas.prompt_pcime_paludisme_24h.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.prompt_pcime_paludisme_24h : datas.prompt_pcime_paludisme_24h.tonoudayo,
         },
         {
             "dataElement": "yQa48SF9bua", // "promptitude paludisme 48h
-            "value": datas.prompt_pcime_paludisme_48h.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.prompt_pcime_paludisme_48h : datas.prompt_pcime_paludisme_48h.tonoudayo,
         },
         {
             "dataElement": "NzKjJuAniNx", // "promptitude paludisme 72h
-            "value": datas.prompt_pcime_paludisme_72h.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.prompt_pcime_paludisme_72h : datas.prompt_pcime_paludisme_72h.tonoudayo,
         },
         {
             "dataElement": "AA2We0Ao5sv", // "promptitude pneumonie 24h
-            "value": datas.prompt_pcime_pneumonie_24h.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.prompt_pcime_pneumonie_24h : datas.prompt_pcime_pneumonie_24h.tonoudayo,
         },
         {
             "dataElement": "PYwikai4k2J", // "promptitude pneumonie 48h
-            "value": datas.prompt_pcime_pneumonie_48h.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.prompt_pcime_pneumonie_48h : datas.prompt_pcime_pneumonie_48h.tonoudayo,
         },
         {
             "dataElement": "rgjFO0bDVUL", // "promptitude pneumonie 72h
-            "value": datas.prompt_pcime_pneumonie_72h.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.prompt_pcime_pneumonie_72h : datas.prompt_pcime_pneumonie_72h.tonoudayo,
         },
         {
             "dataElement": "WR9u3cGJn9W", // "total consultation femme enceinte
-            "value": datas.femmes_enceinte.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.femmes_enceinte : datas.femmes_enceinte.tonoudayo,
         },
         {
             "dataElement": "Pl6qRNgjd3a", // "total de femmes référées par les asc
-            "value": datas.reference_femmes_enceinte_postpartum.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.reference_femmes_enceinte_postpartum : datas.reference_femmes_enceinte_postpartum.tonoudayo,
         },
         {
             "dataElement": "DicYcTqr9xT", // "Total de référence pcime
-            "value": datas.reference_pcime.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.reference_pcime : datas.reference_pcime.tonoudayo,
         },
         {
             "dataElement": "caef2rf638P", // "total diarrhee pcime
-            "value": datas.diarrhee_pcime.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.diarrhee_pcime : datas.diarrhee_pcime.tonoudayo,
         },
         {
             "dataElement": "Q0BQtUdJOCy", // "Total femmes en postpartum
-            "value": datas.femmes_postpartum.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.femmes_postpartum : datas.femmes_postpartum.tonoudayo,
         },
         {
             "dataElement": "dLYksBMOqST", // "total malnutrition pcime
-            "value": datas.malnutrition_pcime.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.malnutrition_pcime : datas.malnutrition_pcime.tonoudayo,
         },
         {
             "dataElement": "jp2i3vN3VJk", // "total paludisme pcime
-            "value": datas.paludisme_pcime.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.paludisme_pcime : datas.paludisme_pcime.tonoudayo,
         },
         {
             "dataElement": "LZ3R8fj9CGG", // "total pneumonie pcime
-            "value": datas.pneumonie_pcime.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.pneumonie_pcime : datas.pneumonie_pcime.tonoudayo,
         },
         {
             "dataElement": "O9EZVn3C3pF", // "Total postpartum nouveau cas
-            "value": datas.femme_postpartum_NC.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.femme_postpartum_NC : datas.femme_postpartum_NC.tonoudayo,
         },
         {
             "dataElement": "lsBS60uQPtc", // "Total recherche active
-            "value": datas.home_visit.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.home_visit : datas.home_visit.tonoudayo,
         },
         {
             "dataElement": "lopdYxQrgyj", // "Total test de grossesse administrée
-            "value": datas.test_de_grossesse.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.test_de_grossesse : datas.test_de_grossesse.tonoudayo,
         },
         {
             "dataElement": "AzwUzgh0nd7",  // "Total Vad Pf
-            "value": datas.pf.tonoudayo,
+            "value": datas.data_source == 'thinkmd' ? datas.pf : datas.pf.tonoudayo,
         }
     ]
 

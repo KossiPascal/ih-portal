@@ -2,13 +2,16 @@ import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 import { DataSource, EntityMetadata, In } from "typeorm";
 import { AppDataSource } from "../data_source";
-import { httpHeaders } from "../utils/functions";
+import { httpHeaders, sslFolder } from "../utils/functions";
 import { getChwsDataSyncRepository, getChwsSyncRepository, getFamilySyncRepository, getPatientSyncRepository } from "../entity/Sync";
 import { getChwsDataWithParams } from "./dataFromDB";
 import { getPatients, getFamilies } from "./orgUnitsFromDB ";
+import { Consts } from "../utils/constantes";
 const request = require('request');
 // const axios = require('axios');
 // const fetch = require('node-fetch')
+require('dotenv').config({ path: sslFolder('.env') });
+const { CHT_HOST, PROD_CHT_PORT, DEV_CHT_PORT } = process.env;
 
 export async function databaseEntitiesList(req: Request, res: Response, next: NextFunction) {
     const errors = validationResult(req);
@@ -57,21 +60,6 @@ export async function getChwDataToBeDeleteFromCouchDb(req: Request, resp: Respon
     var reqZone = req.body.zones;
     var reqChw = req.body.chws;
     var reqType = req.body.type;
-
-
-
-
-    // var params: CouchDbFetchData = {
-    //     viewName: 'reports_by_date',
-    //     startKey: [Functions.date_to_milisecond(req.body.start_date, true)],
-    //     endKey: [Functions.date_to_milisecond(req.body.end_date, false)],
-
-    //     medic_host: process.env.CHT_HOST ?? '',
-    //     port: parseInt(process.env.CHT_PORT ?? '443'),
-    //     medic_username: process.env.CHT_USER ?? '',
-    //     medic_password: process.env.CHT_PASS ?? '',
-    //     ssl_verification: true,
-    // };
 
     if (reqSource && reqDist && reqSite && reqZone && reqChw && reqType) {
         var errorMsg = { status: 201, data: 'Error fond when fetching data! ' };
@@ -126,7 +114,7 @@ export async function getChwDataToBeDeleteFromCouchDb(req: Request, resp: Respon
         return resp.status(resp.statusCode).json({ status: 200, data: "You dont'provide a valide parametters" })
     }
     // if (req.body.delete_one == true && req.body.dataId) {
-    //     url = `https://${CHT_HOST}:${CHT_PORT}/medic/${req.body.dataId}`;
+    //     url = `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/medic/${req.body.dataId}`;
     // } else {
     //     url = (CouchDbFetchDataOptions(params) as any).url;
     // }
@@ -148,16 +136,15 @@ export async function deleteFromCouchDb(req: Request, res: Response, next: NextF
     var todelete: { _deleted: boolean, _id: string, _rev: string }[] = req.body.array_data_to_delete;
     var reqType = req.body.type;
     var allIds: string[] = [];
-    const { CHT_HOST, CHT_PORT } = process.env;
 
     for (let i = 0; i < todelete.length; i++) {
         const ids = todelete[i];
         allIds.push(ids._id);
     }
- 
+
     if (todelete.length > 0 && allIds.length > 0 && reqType) {
         request({
-            url: `https://${CHT_HOST}:${CHT_PORT}/medic/_bulk_docs`,
+            url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/medic/_bulk_docs`,
             method: 'POST',
             body: JSON.stringify({ "docs": todelete }),
             headers: httpHeaders()
@@ -200,11 +187,10 @@ async function updateChws(chwId: string, data: any) {
 
 export async function updateUserFacilityIdAndContactPlace(req: Request, res: Response, next: NextFunction) {
 
-    const { CHT_HOST, CHT_PORT } = process.env;
     // const req_params: ChwUserParams = req.body;
 
     request({
-        url: `https://${CHT_HOST}:${CHT_PORT}/api/v1/users`,
+        url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/api/v1/users`,
         method: 'GET',
         headers: httpHeaders()
     }, function (error: any, response: any, body: any) {
@@ -213,7 +199,7 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
         try {
             const users = JSON.parse(body);
 
-            var dataFound:string[] = [];
+            var dataFound: string[] = [];
 
             for (let i = 0; i < users.length; i++) {
                 const user = users[i];
@@ -226,7 +212,7 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
 
                                 // start updating facility_id
                                 return request({
-                                    url: `https://${CHT_HOST}:${CHT_PORT}/api/v1/users/${user.username}`,
+                                    url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/api/v1/users/${user.username}`,
                                     method: 'POST',
                                     body: JSON.stringify({ "place": req.body.new_parent }),
                                     headers: httpHeaders()
@@ -234,7 +220,7 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
                                     if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
 
                                     request({
-                                        url: `https://${CHT_HOST}:${CHT_PORT}/medic/${req.body.contact}`,
+                                        url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/medic/${req.body.contact}`,
                                         method: 'GET',
                                         headers: httpHeaders()
                                     }, function (error: any, response: any, body: any) {
@@ -245,7 +231,7 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
 
                                             // start updating Contact Place Informations
                                             request({
-                                                url: `https://${CHT_HOST}:${CHT_PORT}/api/v1/people`,
+                                                url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/api/v1/people`,
                                                 method: 'POST',
                                                 body: JSON.stringify(data),
                                                 headers: httpHeaders()

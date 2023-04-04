@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SyncsRoutingModule } from './syncs-routing.module';
 import { SyncComponent } from './sync.component';
@@ -11,7 +11,7 @@ import { SyncOrgUnitDataComponent } from './sync-orgunit-data.component';
     ReactiveFormsModule,
     SyncsRoutingModule
   ],
-  declarations: [SyncComponent,SyncOrgUnitDataComponent]
+  declarations: [SyncComponent,SyncOrgUnitDataComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SyncsModule { }
-

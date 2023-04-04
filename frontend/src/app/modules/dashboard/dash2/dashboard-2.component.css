@@ -29,4 +29,7 @@
   margin-top: 8px;
   font-family: monospace;
 }
-/* testttttttttttttttttttttttttt */
+
+input,select,label,.submit, .title  {
+  margin-bottom: -10px!important;
+}

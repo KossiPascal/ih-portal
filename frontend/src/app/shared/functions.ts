@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { Patients } from "@ih-app/models/Sync";
 import { AuthService } from "@ih-services/auth.service";
+import { Consts } from "./constantes";
 // import { envs } from '@ih-backendEnv/env';
 // const httpOptions: { headers: HttpHeaders } = {headers: new HttpHeaders({ "Content-Type": "application/json" }),};
 
@@ -82,14 +83,18 @@ export class Functions {
   }
 
   static backenUrl(cible:string = 'api'): string {
-    // const port = location.protocol === 'https:' ? envs.PORT_SECURED : envs.PORT;
-    const port = location.protocol === 'https:' ? 9999 : 7777;
-
-    return `${location.protocol}//${location.hostname}:${port}/${cible}`;
-    // return environment.apiURL;
-
+    if (location.port == '4200') {
+      // const port = location.protocol === 'https:' ? envs.PORT_SECURED : envs.PORT;
+      const isHttps:boolean = location.protocol === 'https:';
+      const prodPort = isHttps ? 9999 : 9990;
+      const devPort = isHttps ? 7777 : 7770;
+      const port = Consts.isProdEnv() ? prodPort : devPort;
+      return `${location.protocol}//${location.hostname}:${port}/${cible}`;
+      // return environment.apiURL;
+    }
+    return `${location.origin}/${cible}`;
   }
-
+  
   static custumRequest(method: string, http: HttpClient, auth: AuthService, url: string, data?: any, responseType?: any) {
     // console.log(`${baseUrl}/${url}`);
     // console.log('request ' + JSON.stringify(data));

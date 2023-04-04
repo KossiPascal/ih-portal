@@ -4,14 +4,11 @@ import { Between, In } from "typeorm";
 import { ChtOutPutData, DataIndicators } from "../entity/DataAggragate";
 import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository } from "../entity/Sync";
 import { Consts } from "../utils/constantes";
-import { DateUtils, notNull, sslFolder } from "../utils/functions";
+import { DateUtils, notNull } from "../utils/functions";
 import { getChws } from "./orgUnitsFromDB ";
 
 const request = require('request');
 // const fetch = require('node-fetch');
-
-require('dotenv').config({ path: sslFolder('.env') });
-
 
 export async function getChwsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };

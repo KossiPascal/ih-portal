@@ -15,7 +15,10 @@ import { Roles } from '@ih-app/shared/roles';
 
 @Component({
   selector: 'app-dashboard-3',
-  templateUrl: `./dashboard-3.component.html`
+  templateUrl: `./dashboard-3.component.html`,
+  styleUrls: [
+    './dashboard-3.component.css'
+  ]
 })
 export class Dashboard3Component implements OnInit {
   constructor(private store: AppStorageService, private auth: AuthService, private db: IndexDbService, private sync: SyncService) {

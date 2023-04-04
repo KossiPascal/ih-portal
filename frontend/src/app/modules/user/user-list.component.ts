@@ -3,6 +3,7 @@ import { FormGroup, FormControl, Validators, AbstractControl, ValidationErrors, 
 import { Router } from '@angular/router';
 import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
+import { Consts } from '@ih-app/shared/constantes';
 import { Functions, notNull } from '@ih-app/shared/functions';
 import { Roles } from '@ih-app/shared/roles';
 import { User } from '@ih-models/User';
@@ -31,6 +32,7 @@ export class UserComponent implements OnInit {
   user!:User|null;
   message: string = '';
 
+  APP_LOGO: string = Consts.APP_LOGO;
 
   constructor(private store: AppStorageService, private auth: AuthService, private router: Router) { 
     if(!this.roles.isSuperUser()) location.href = this.auth.userValue()?.defaultRedirectUrl!;

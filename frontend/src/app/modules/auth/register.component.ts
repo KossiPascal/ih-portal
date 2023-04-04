@@ -5,6 +5,7 @@ import { Router } from "@angular/router";
 import { Configs } from "@ih-app/models/User";
 import { ConfigService } from "@ih-app/services/config.service";
 import { AppStorageService } from "@ih-app/services/cookie.service";
+import { Consts } from "@ih-app/shared/constantes";
 import { Functions } from "@ih-app/shared/functions";
 import { Roles } from "@ih-app/shared/roles";
 import { AuthService } from "@ih-services/auth.service";
@@ -21,6 +22,8 @@ export class RegisterComponent implements OnInit {
   isLoading: boolean = false;
   LoadingMsg: string = "Loading...";
   showRegisterPage:boolean = false;
+
+  APP_LOGO: string = Consts.APP_LOGO;
 
   constructor(private store:AppStorageService, private auth: AuthService, private router: Router, private http: HttpClient, private conf:ConfigService) { }
 

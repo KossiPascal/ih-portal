@@ -5,16 +5,19 @@ import { CouchDbFetchData, Dhis2Sync, MailConfig } from "./appInterface";
 import { token, toMap, User, jwSecretKey } from "../entity/User";
 import moment from "moment";
 import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws, Patients } from "../entity/Sync";
+import { Consts } from "./constantes";
 
 const nodemailer = require("nodemailer");
 const smtpTransport = require('nodemailer-smtp-transport');
-
 var rootCas = require('ssl-root-cas').create();
 
+require('dotenv').config({ path: sslFolder('.env') });
+const { CHT_USER, CHT_PASS, CHT_HOST, PROD_CHT_PORT, DEV_CHT_PORT,NODE_TLS_REJECT_UNAUTHORIZED } = process.env;
+
 export function httpHeaders(Authorization?: string, withParams: boolean = true) {
-    // process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = '0';
+    // NODE_TLS_REJECT_UNAUTHORIZED = '0';
     var p: any = {
-        'Authorization': Authorization ?? 'Basic ' + Buffer.from(`${process.env.CHT_USER}:${process.env.CHT_PASS}`).toString('base64'),
+        'Authorization': Authorization ?? 'Basic ' + Buffer.from(`${CHT_USER}:${CHT_PASS}`).toString('base64'),
         "Accept": "application/json",
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT, OPTIONS",
@@ -196,6 +199,21 @@ export class Functions {
         process.on('ERR_HTTP_HEADERS_SENT', err => console.error(err && err.stack));
     }
 
+    static ServerStart(data:{isSecure:boolean,credential?: {
+        key: string;
+        ca: string;
+        cert: string;
+    }, app: any, access_ports:boolean, port:any, hostnames:any[]}) {
+        const server = data.isSecure==true ? https.createServer(data.credential!, data.app) : http.createServer(data.app);
+        // var io = require('socket.io')(server, {});
+        // server.listen(data.port, '0.0.0.0', () => Functions.onProcess)
+        if (data.access_ports) server.listen(data.port, '0.0.0.0', () => Functions.onProcess);
+        if (!data.access_ports) server.listen(data.port, data.hostnames[0], () => Functions.onProcess);
+        server.on('error', (err) => Functions.onError(err, data.port));
+        server.on('listening', () => Functions.onListening(server, data.hostnames, 'https'));
+        server.on('connection', (stream) => console.log('someone connected!'));
+      }
+
     static getIPAddress(accessAllAvailablePort: boolean = true): string[] {
         var ips: any[] = [];
         //   return require("ip").address();
@@ -258,13 +276,15 @@ export function sslFolder(file_Name_with_extension: string): string {
     // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/ssl/${file_Name_with_extension}`
 }
 export function extractFolder(file_Name_with_extension: string): string {
-    return `${projectFolderParent()}/extracts/${file_Name_with_extension}`;
+    const folder = Consts.isProdEnv ? 'extracts' : 'dev_extracts';
+    return `${projectFolderParent()}/${folder}/${file_Name_with_extension}`;
 }
 
 export function JsonDbFolder(file_Name_without_extension: string): string {
     const fileName: string = file_Name_without_extension.trim().replace(' ', '-').split('.')[0];
     // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/IhJsonStorage/${fileName}.json`
-    return `${projectFolderParent()}/IhJsonStorage/${fileName}.json`
+    const folder = Consts.isProdEnv ? 'IhJsonStorage' : 'dev_IhJsonStorage';
+    return `${projectFolderParent()}/${folder}/${fileName}.json`
 }
 
 
@@ -520,18 +540,19 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
     couchArg.push(`descending=${params.descending == true}`);
     if (notNull(params.startKey)) couchArg.push(`key=[${params.startKey}]`);
     if (notNull(params.endKey)) couchArg.push(`endkey=[${params.endKey}]`);
-
     var options = {
-        host: process.env.CHT_HOST ?? '',
-        port: parseInt(process.env.CHT_PORT ?? '443'),
+        host: CHT_HOST ?? '',
+        port: parseInt((Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT) ?? '443'),
         path: `${dbCibleUrl}?${couchArg.join('&')}`,
-        url: `${process.env.CHT_HOST ?? ''}${dbCibleUrl}?${couchArg.join('&')}`,
+        url: `${CHT_HOST ?? ''}${dbCibleUrl}?${couchArg.join('&')}`,
         use_SSL_verification: true,
-        user: process.env.CHT_USER ?? '',
-        pass: process.env.CHT_PASS ?? '',
+        user: CHT_USER ?? '',
+        pass: CHT_PASS ?? '',
     };
     return Functions.getHttpsOptions(options);
 }
+
+
 
 // export class OldCouchDbSyncConfig {
 

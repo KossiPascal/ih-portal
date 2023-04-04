@@ -347,7 +347,6 @@ export class SyncComponent implements OnInit {
               var chwsData = respData?.DataFordhis2[i] as DataIndicators;
               const nOrId = chwsData.orgUnit;
               chwsData.orgUnit = this.getExternalIdByName(nOrId!);
-              console.log(chwsData.orgUnit);
               this.sync.insertOrUpdateDhis2Data(chwsData).subscribe((resp: { status: number, data: any }) => {
                 t2++;
                 if (resp.status == 200) {

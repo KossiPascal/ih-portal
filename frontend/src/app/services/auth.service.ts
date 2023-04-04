@@ -52,10 +52,6 @@ export class AuthService {
     return !this.isLoggedIn();
   }
 
-  appLogoPath() {
-    return 'assets/logo/logo1.png';
-  }
-
   getExpiration(): moment.Moment | null {
     if (this.userValue()) {
       const expiration = this.userValue()!.expiresIn;

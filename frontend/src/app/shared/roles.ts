@@ -73,9 +73,10 @@ export class Roles {
   }
 
   onlySeeData = (): boolean => {
-    if (notNull(this.getRoles())) {
-      return this.getRoles().includes('STAgD7Z462J')  || this.isSuperUser();
-    }
-    return false;
+    // if (notNull(this.getRoles())) {
+    //   return this.getRoles().includes('STAgD7Z462J')  || this.isSuperUser();
+    // }
+    // return false;
+    return true;
   }
 } 

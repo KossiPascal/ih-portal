@@ -13,6 +13,8 @@ const fs = require("fs");
 const csv = require("csv-parser");
 
 require('dotenv').config({ path: sslFolder('.env') });
+const { TSC_HOST, TSC_SITE, TSC_TOKEN_NAME, TSC_TOKEN_CODE, DHIS_HOST, TSC_USER, TSC_PASS } = process.env;
+
 
 
 var basename = path.dirname(__dirname)
@@ -69,16 +71,16 @@ pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, async (req: Reques
     const userId = `${req.body['userId']}`;
     errorToSend[`${userId}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
-    req.body['thinkmd_host'] = process.env.TSC_HOST;
-    req.body['thinkmd_site'] = process.env.TSC_SITE;
-    req.body['thinkmd_token_username'] = process.env.TSC_TOKEN_NAME;
-    req.body['thinkmd_token'] = process.env.TSC_TOKEN_CODE;
+    req.body['thinkmd_host'] = TSC_HOST;
+    req.body['thinkmd_site'] = TSC_SITE;
+    req.body['thinkmd_token_username'] = TSC_TOKEN_NAME;
+    req.body['thinkmd_token'] = TSC_TOKEN_CODE;
     // if (req.body['useToken'] == false) {
     //     req.body['thinkmd_username'] = TSC_USER;
-    //     req.body['thinkmd_password'] = process.env.TSC_PASS;
+    //     req.body['thinkmd_password'] = TSC_PASS;
     // }
 
-    req.body['dhis2_host'] = process.env.DHIS_HOST;
+    req.body['dhis2_host'] = DHIS_HOST;
 
     const python = spawn('python3', [basename + '/pythons/fetch_thinkmd_data.py', JSON.stringify(req.body),]);
 
@@ -109,11 +111,6 @@ pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, async (req: Reques
             return res.jsonp(brutOutPut);
         }
 
-
-
-
-
-
     });
     python.on('end', (msg) => console.log(`Finish`));
 });
@@ -126,12 +123,12 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
     const userId = `${req.body['userId']}`;
     errorToSend[`${userId}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
-    req.body['thinkmd_host'] = process.env.TSC_HOST;
-    req.body['thinkmd_site'] = process.env.TSC_SITE;
-    req.body['thinkmd_token_username'] = process.env.TSC_TOKEN_NAME;
-    req.body['thinkmd_token'] = process.env.TSC_TOKEN_CODE;
+    req.body['thinkmd_host'] = TSC_HOST;
+    req.body['thinkmd_site'] = TSC_SITE;
+    req.body['thinkmd_token_username'] = TSC_TOKEN_NAME;
+    req.body['thinkmd_token'] = TSC_TOKEN_CODE;
 
-    // req.body['dhis2_host'] = process.env.DHIS_HOST;
+    // req.body['dhis2_host'] = DHIS_HOST;
 
     const python = spawn('python3', [basename + '/pythons/thinkmd_weekly_data.py', JSON.stringify(req.body),]);
 
@@ -167,7 +164,7 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
 //     const userId = `${req.body['userId']}`;
 //     errorToSend[`${userId}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
-//     req.body['medic_password'] = process.env.COUCH_PASS;
+//     req.body['medic_password'] = COUCH_PASS;
 
 //     const python = spawn('python3', [basename + '/pythons/fetch_medic_data.py', JSON.stringify(req.body),]);
 
@@ -188,8 +185,8 @@ pyRouter.post('/thinkmd_weekly', Middelware.authMiddleware, (req: Request, res: 
 //     const userId = `${req.body['userId']}`;
 //     errorToSend[`${userId}`] = { "ErrorCount": 0, "ErrorData": [], "ConsoleError": "" };
 
-//     if (req.body['dhis2_password'] === '' || req.body['dhis2_password'] === null) req.body['dhis2_password'] = process.env.DHIS_PASS;
-//     if (req.body['cht_password'] === '' || req.body['cht_password'] === null) req.body['cht_password'] = process.env.CHT_PASS;
+//     if (req.body['dhis2_password'] === '' || req.body['dhis2_password'] === null) req.body['dhis2_password'] = DHIS_PASS;
+//     if (req.body['cht_password'] === '' || req.body['cht_password'] === null) req.body['cht_password'] = CHT_PASS;
 //     const python = spawn('python3', [basename + '/pythons/fetch_ih_cht_data.py', JSON.stringify(req.body),]);
 
 //     python.stdout.on('data', (data) => { 

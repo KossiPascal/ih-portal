@@ -1,12 +1,10 @@
 // import "reflect-metadata"
 import { DataSource } from "typeorm"
 import path from "path";
-// import { sslFolder } from "./utils/functions";
-
-// require('dotenv').config({ path: sslFolder('.env')});
+import { Consts } from "./utils/constantes";
 require('dotenv').config({ path: `${path.dirname(path.dirname(path.dirname(__dirname)))}/ssl/.env` });
 
-const { DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS } = process.env
+const { DB_HOST, DB_PORT, PROD_DB_NAME, DEV_DB_NAME, DB_USER, DB_PASS } = process.env
 
 // const appdirname = Functions.appDirectory();
 // `${appdirname}/ssl/server.key`
@@ -14,11 +12,11 @@ const { DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS } = process.env
 export const AppDataSource = new DataSource({
     type: 'postgres',
     host: DB_HOST,
-    // url: `postgres://kossi:kossi@123@${envs.DB_HOST}:${envs.DB_PORT}/${envs.DB_NAME}`,
+    // url: `postgres://kossi:kossi@123@${DB_HOST}:${DB_PORT}/${PROD_DB_NAME, DEV_DB_NAME}`,
     port: parseInt(`${DB_PORT}`),
     username: DB_USER,
     password: DB_PASS,
-    database: DB_NAME,
+    database: Consts.isProdEnv ? PROD_DB_NAME : DEV_DB_NAME,
     synchronize: true,
     logging: true,
     // ssl:true,

@@ -6,6 +6,7 @@ import { HttpClient } from "@angular/common/http";
 import { Configs } from '@ih-app/models/User';
 import { Functions } from '@ih-app/shared/functions';
 import { ConfigService } from '@ih-app/services/config.service';
+import { Consts } from '@ih-app/shared/constantes';
 
 
 @Component({
@@ -19,6 +20,8 @@ export class LockScreenComponent implements OnInit {
   isLoading:boolean = false;
   LoadingMsg: string = "Loading...";
   showRegisterPage:boolean = false;
+
+  APP_LOGO: string = Consts.APP_LOGO;
 
   constructor(private auth: AuthService, private router: Router, private http: HttpClient, private conf:ConfigService) { }
 

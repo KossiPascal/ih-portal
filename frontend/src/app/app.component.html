@@ -79,7 +79,7 @@
     <div class="wrapper">
       <!-- Preloader -->
       <div class="preloader flex-column justify-content-center align-items-center">
-        <!-- <img class="animation__shake" src="assets/logo/logo.png" alt="Integrate Health" height="60" width="60"> -->
+        <!-- <img class="animation__shake" src="{{ APP_LOGO}}" alt="Integrate Health" height="60" width="60"> -->
 
         <div id="nb-global-spinner" class="spinner">
           <div class="blob blob-0"></div>
@@ -121,7 +121,7 @@
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
           <!-- Navbar Search -->
-          <li *ngIf="!roles.isChws() && !roles.isOnlySupervisorMentor()" class="nav-item">
+          <li *ngIf="!roles.isChws() && !roles.isOnlySupervisorMentor() && !roles.onlySeeData()" class="nav-item">
             <a class="nav-link" data-widget="navbar-search" href="#" role="button">
               <i class="fas fa-search"></i>
             </a>
@@ -212,7 +212,7 @@
               <img style="margin-top: -12px;" src="{{ userData?.userLogo }}" width="40" class="img-circle elevation-2"
                 alt="User Image">
 
-              <span style="margin-left: 5px;">{{ roles.isChws() ? chwOU?.name: userData?.fullname }}</span>
+              <span style="margin-left: 5px;">{{ roles.isChws() ? chwOU?.name: userData?.username }}</span>
 
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
@@ -231,26 +231,26 @@
 
               <div class="dropdowndivider0"></div>
 
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash1"
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-link" routerLink="dashboards/dash1"
                 role="button">
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Activité Des ASC
               </a>
 
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash2"
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-link" routerLink="dashboards/dash2"
                 role="button">
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Données Détaillées Par ASC
               </a>
 
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash3"
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-link" routerLink="dashboards/dash3"
                 role="button">
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Effectifs Des Patients
               </a>
 
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash4"
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-link" routerLink="dashboards/dash4"
                 role="button">
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Visite de Ménages
               </a>
@@ -375,7 +375,7 @@
 
               <p *ngIf="roles.isDataManager()" style="color: white;">{{ separation }}</p>
 
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-item">
                 <a routerLink="dashboards/dash1" class="nav-link">
                   <!-- <i class="nav-icon fas fa-tachometer-alt"></i> -->
                   <p>Activité Des ASC</p>
@@ -383,14 +383,14 @@
               </li>
 
 
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-item">
                 <a routerLink="dashboards/dash2" class="nav-link">
                   <!-- <i class="nav-icon fas fa-chart-pie"></i> -->
                   <p>Données Détaillées Par ASC</p>
                 </a>
               </li>
 
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-item">
                 <a routerLink="dashboards/dash3" class="nav-link">
                   <!-- <i class="nav-icon fas fa-chart-line"></i> -->
                   <p>Effectifs Des Patients</p>
@@ -404,7 +404,7 @@
                 </a>
               </li>
 
-              <p *ngIf="roles.isSupervisorMentor() || roles.isChws()" style="color: white;">{{ separation }}</p>
+              <p *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" style="color: white;">{{ separation }}</p>
 
               <li *ngIf="roles.isChws()" class="nav-item">
                 <a routerLink="chws/select_orgunit" class="nav-link">
