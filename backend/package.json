@@ -1,8 +1,22 @@
 {
-  "name": "backend",
+  "name": "ih-portal-backend",
   "version": "1.0.63",
-  "description": "portal-backend",
   "main": "index.js",
+  "author": "TSOLEGNAGBO Kossi <kossi.tsolegnagbo@aiesec.net>",
+  "private": true,
+  "description": "Integratehealth analytics backend app for chws followup",
+  "homepage": "https://portal-integratehealth.org:9999",
+  "repository": "https://github.com/KossiPascal/ih-portal",
+  "contributors": [
+    {
+      "name": "TSOLEGNAGBO Kossi",
+      "email": "kossi.tsolegnagbo@aiesec.net"
+    }
+  ],
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/KossiPascal/ih-portal"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node src/server.ts",
@@ -28,7 +42,6 @@
     "migrate:down": "ts-node ./node_modules/typeorm/cli.js migration:revert"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "@angular/service-worker": "^15.0.2",

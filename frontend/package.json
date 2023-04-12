@@ -1,6 +1,21 @@
 {
   "name": "ih-portal",
-  "version": "1.2.40",
+  "version": "1.2.41",
+  "author": "TSOLEGNAGBO Kossi <kossi.tsolegnagbo@aiesec.net>",
+  "private": true,
+  "description": "Integratehealth analytics app for chws followup",
+  "homepage": "https://portal-integratehealth.org:9999",
+  "repository": "https://github.com/KossiPascal/ih-portal",
+  "contributors": [
+    {
+      "name": "TSOLEGNAGBO Kossi",
+      "email": "kossi.tsolegnagbo@aiesec.net"
+    }
+  ],
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/KossiPascal/ih-portal"
+  },
   "scripts": {
     "ng": "ng serve",
     "start": "ng serve --ssl true",
@@ -22,7 +37,6 @@
     "arrowParens": "always",
     "parser": "typescript"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^14.0.0",
     "@angular/cdk": "^14.2.7",
