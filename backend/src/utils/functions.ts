@@ -7,6 +7,19 @@ import moment from "moment";
 import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws, Patients } from "../entity/Sync";
 import { Consts } from "./constantes";
 var fs = require('fs');
+var JFile=require('jfile'); //  "npm install jfile --save" required
+
+
+export function logNginx(message:any){
+    try {
+        
+    let nxFile=new JFile('/var/log/nginx/access.log'); // check path before if exist in your system . IF no , change it with the available path
+    nxFile.text+=`\n${message}`; //append new line in nginx log file
+
+    } catch (error) {
+        
+    }
+}
 
 const nodemailer = require("nodemailer");
 const smtpTransport = require('nodemailer-smtp-transport');
@@ -28,7 +41,6 @@ export function httpHeaders(Authorization?: string, withParams: boolean = true) 
 
     if (withParams) {
         p["Content-Type"] = "application/json";
-
         // 'Accept-Charset': 'UTF-8',
         // "Access-Control-Allow-Origin": "*",
         // "Access-Control-Max-Age": "86400",
@@ -189,15 +201,26 @@ export class Functions {
         var addr = server.address();
         var bind = typeof addr === 'string' ? addr : addr!.port;
         for (let i = 0; i < hostnames.length; i++) {
-            console.log(`🚀 ${protocole.toLocaleUpperCase()} Server is available at ${protocole}://${hostnames[i]}:${bind}`)
+            console.log(`🚀 ${protocole.toLocaleUpperCase()} Server is available at ${protocole}://${hostnames[i]}:${bind}`);
+            logNginx(`🚀 ${protocole.toLocaleUpperCase()} Server is available at ${protocole}://${hostnames[i]}:${bind}`);
         }
         console.log('\n');
+        logNginx('\n');
     }
 
     static onProcess() {
-        process.on('unhandledRejection', (error, promise) => console.log('Alert! ERROR : ', error));
-        process.on('uncaughtException', err => console.error(err && err.stack));
-        process.on('ERR_HTTP_HEADERS_SENT', err => console.error(err && err.stack));
+        process.on('unhandledRejection', (error, promise) =>{ 
+            console.log('Alert! ERROR : ', error)
+            logNginx(`Alert! ERROR : ${error}`);
+            });
+        process.on('uncaughtException', err => {
+            console.error(err && err.stack);
+            logNginx(`${err && err.stack}`)
+            });
+        process.on('ERR_HTTP_HEADERS_SENT', err => {
+            console.error(err && err.stack);
+            logNginx(`${err && err.stack}`)
+            });
     }
 
     static ServerStart(data: {
@@ -276,14 +299,14 @@ export function projectFolderParent(): string {
 }
 export function sslFolder(file_Name_with_extension: string): string {
     const dir = `${projectFolderParent()}/ssl`;
-    createDirectories(dir, (err:any) => console.log(err));
+    createDirectories(dir, (e:any) =>{});
     return `${dir}/${file_Name_with_extension}`;
     // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/ssl/${file_Name_with_extension}`
 }
 export function extractFolder(file_Name_with_extension: string): string {
     const folder = Consts.isProdEnv ? 'prod' : 'dev';
     const dir = `${projectFolderParent()}/storage/extracts/${folder}`;
-    createDirectories(dir, (err:any) => console.log(err));
+    createDirectories(dir, (e:any) =>{});
     return `${dir}/${file_Name_with_extension}`;
 }
 
@@ -292,7 +315,7 @@ export function JsonDbFolder(file_Name_without_extension: string): string {
     // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/storage/Json/${folder}/${fileName}.json`
     const folder = Consts.isProdEnv ? 'prod' : 'dev';
     const dir = `${projectFolderParent()}/storage/Json/${folder}`;
-    createDirectories(dir, (err:any) => console.log(err));
+    createDirectories(dir, (e:any) =>{});
     return `${dir}/${fileName}.json`
 }
 
@@ -624,8 +647,6 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
 export function notNull(data: any): boolean {
     return data != '' && data != null && data != undefined && data.length != 0;
 }
-
-
 
 
 export class Dhis2SyncConfig {

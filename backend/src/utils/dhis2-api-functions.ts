@@ -2,7 +2,7 @@
 
 import { Request, Response } from "express";
 import { User } from "../entity/User";
-import { httpHeaders } from "./functions";
+import { httpHeaders, logNginx } from "./functions";
 
 const fetch = require('node-fetch')
 
@@ -55,9 +55,11 @@ export async function getMe(dhisuserAuthorization: string): Promise<User> {
 
 			} catch (err) {
 				console.log(err);
+				logNginx(err);
 			}
 		}).catch((err: any) => {
 			console.log(err);
+			logNginx(err);
 		});
 
 	return userFound;

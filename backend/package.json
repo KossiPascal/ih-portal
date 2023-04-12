@@ -1,6 +1,6 @@
 {
   "name": "ih-portal-backend",
-  "version": "1.0.63",
+  "version": "1.0.64",
   "main": "index.js",
   "author": "TSOLEGNAGBO Kossi <kossi.tsolegnagbo@aiesec.net>",
   "private": true,
@@ -61,6 +61,7 @@
     "express-validator": "^6.14.2",
     "hdb-pool": "^0.1.6",
     "ip": "^1.1.8",
+    "jfile": "^1.1.12",
     "moment": "^2.29.4",
     "mongodb": "^3.7.3",
     "mssql": "^9.0.1",

@@ -8,7 +8,7 @@ const { DB_HOST, DB_PORT, PROD_DB_NAME, DEV_DB_NAME, DB_USER, DB_PASS } = proces
 
 // const appdirname = Functions.appDirectory();
 // `${appdirname}/ssl/server.key`
- 
+
 export const AppDataSource = new DataSource({
     type: 'postgres',
     host: DB_HOST,
@@ -18,7 +18,8 @@ export const AppDataSource = new DataSource({
     password: DB_PASS,
     database: Consts.isProdEnv ? PROD_DB_NAME : DEV_DB_NAME,
     synchronize: true,
-    logging: true,
+    // logging: true,
+    logging: ["query", "error"],
     // ssl:true,
     // entities: [__dirname + "/entity/*.ts"],
     entities: [__dirname + '/entity/*{.ts,.js}'],
@@ -28,6 +29,8 @@ export const AppDataSource = new DataSource({
     subscribers: [__dirname + "/subscriber/*{.ts,.js}"],
     // replication:{ master: {}, slaves: [] }
     // dropSchema: false,
+    // logger: 'advanced-console',
+    
 });
 
   
@@ -46,3 +49,5 @@ export const AppDataSource = new DataSource({
 //     subscribers: [__dirname + "/subscriber/*.ts"],
 //     // dropSchema: false,
 // });
+
+

@@ -1,7 +1,7 @@
 import "reflect-metadata"
 import express from 'express';
 import { json, urlencoded } from 'body-parser';
-import { Functions, projectFolder, sslFolder } from './utils/functions';
+import { Functions, logNginx, projectFolder, sslFolder } from './utils/functions';
 import { AppDataSource } from './data_source';
 import cors from "cors";
 import bearerToken from "express-bearer-token";
@@ -23,7 +23,7 @@ const { ACCESS_ALL_AVAILABE_PORT, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PO
 
 const hostnames = Functions.getIPAddress(ACCESS_ALL_AVAILABE_PORT == 'true');
 // const cookieParser = require('cookie-parser')
-var session = require('express-session');
+// var session = require('express-session');
 const port = Functions.normalizePort((Consts.isProdEnv ? PROD_PORT : DEV_PORT) || '3000');
 const portSecured = Functions.normalizePort((Consts.isProdEnv ? PROD_PORT_SECURED : DEV_PORT_SECURED) || '3003');
 
@@ -31,9 +31,11 @@ AppDataSource
   .initialize()
   .then(async () => {
     console.log("initialize success !");
-    console.log(`App Version: ${Functions.appVersion()}`)
+    logNginx("initialize success !");
+    console.log(`App Version: ${Functions.appVersion()}`);
+    logNginx(`App Version: ${Functions.appVersion()}`);
   })
-  .catch(error => console.log(`${error}`));
+  .catch(error => {console.log(`${error}`); logNginx(`${error}`)});
 
 const app = express()
   .use(cors())
@@ -44,16 +46,16 @@ const app = express()
   .set("view engine", "ejs")
   .set('json spaces', 2)
   .set('content-type', 'application/json; charset=utf-8')
-  .use(session({
-    secret: 'session',
-    cookie: {
-      secure: true,
-      maxAge: 60000
-    },
-    // store: new RedisStore(),
-    saveUninitialized: true,
-    resave: true
-  }))
+  // .use(session({
+  //   secret: 'session',
+  //   cookie: {
+  //     secure: true,
+  //     maxAge: 60000
+  //   },
+  //   // store: new RedisStore(),
+  //   saveUninitialized: true,
+  //   resave: true
+  // }))
   .use(bearerToken())
   .use('/api/auth', authRouter)
   .use('/api/sync', syncRouter)
@@ -97,6 +99,7 @@ appSecured.use((req, res, next) => {
 //  * * * * * * 
 cron.schedule("0 05 */23 * * *", function () {
   console.log(`running this task every 23h 05 min 0 seconds.`);
+  logNginx(`running this task every 23h 05 min 0 seconds.`);
   AutoSyncDataFromCloud(portSecured);
 });
 

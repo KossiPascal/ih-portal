@@ -1,6 +1,6 @@
 import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository } from "../entity/Sync";
 import { CouchDbFetchData, Dhis2DataFormat } from "../utils/appInterface";
-import { Dhis2SyncConfig, Functions, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders, notNull } from "../utils/functions";
+import { Dhis2SyncConfig, Functions, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders, notNull, logNginx } from "../utils/functions";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import https from 'https';
@@ -623,6 +623,7 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
                     }
                 } catch (error) {
                     console.log(error);
+                    logNginx(error)
                     // console.log(chwsDataToDhis2);
                 }
             });
