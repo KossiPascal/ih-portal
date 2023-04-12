@@ -251,6 +251,13 @@ export class SyncService {
     return this.http.post(`${Functions.backenUrl()}/sync/dhis2/insert_or_update`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
+  syncGeojsonData(): any {
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    const sendParams = { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/geojson`, sendParams, Functions.HttpHeaders(this.auth));
+  }
+
 
   getDataByReportsDateView(syncData: Sync) {
     // const response = this.http.request('get', sync.Url(), sync.headerOption());

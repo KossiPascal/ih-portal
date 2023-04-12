@@ -25,6 +25,12 @@ function initSeleted(id) {
   });
 }
 
+function highmaps({ cibleId, chartOptions, highchartsOptions }) {
+  Highcharts.setOptions({ chart: chartOptions,});
+  $('#'+cibleId).highcharts('Map', highchartsOptions);
+  //   "crs": "+proj=tmerc +lat_0=58 +lon_0=10.72291666666667 +k=1 +x_0=0 +y_0=0 +a=6377492.018 +b=6356173.508712696 +units=m +no_defs",
+}
+
 function initDataTable(tableId, paging = true) {
   $('#' + tableId)
     .DataTable({
@@ -135,10 +141,10 @@ function table2pdf(fileName = 'fileName', orientation = 'p') {
     orientation: orientation,
     unit: 'pt',
     format: 'a4',
-    margins: { left: 20, right: 10, top: 10, bottom: 10,width: 600, },
+    margins: { left: 20, right: 10, top: 10, bottom: 10, width: 600 },
     onDocCreated: null,
-  },);
-  
+  });
+
   var pageHeight = 0;
   pageHeight = doc.internal.pageSize.height;
   specialElementHandlers = {
@@ -192,7 +198,7 @@ function table2pdf(fileName = 'fileName', orientation = 'p') {
       outputImages: true,
     },
   });
-  doc.save(fileName+'.pdf');
+  doc.save(fileName + '.pdf');
 }
 
 function table2json(fileName) {
@@ -223,62 +229,72 @@ function table2excel(fileName) {
 }
 
 function printTable(fileName) {
-   var divToPrint=document.getElementById("export_table");
-   newWin= window.open("");
-   newWin.document.write(divToPrint.outerHTML);
-   newWin.print();
-   newWin.close();
+  var divToPrint = document.getElementById('export_table');
+  newWin = window.open('');
+  newWin.document.write(divToPrint.outerHTML);
+  newWin.print();
+  newWin.close();
 }
 
-// function sortTable(tableId) {  
-//     $('#'+tableId).on('click', 'th', function () {  
-//         var index = $(this).index(),  
-//             rows = [],  
-//             thClass = $(this).hasClass('asc') ? 'desc' : 'asc';  
-//         $('#'+tableId+' th').removeClass('asc desc');  
-//         $(this).addClass(thClass);  
+// function sortTable(tableId) {
+//     $('#'+tableId).on('click', 'th', function () {
+//         var index = $(this).index(),
+//             rows = [],
+//             thClass = $(this).hasClass('asc') ? 'desc' : 'asc';
+//         $('#'+tableId+' th').removeClass('asc desc');
+//         $(this).addClass(thClass);
 
-//         $('#'+tableId+' tbody tr').each(function (index, row) {  
-//           rows.push($(row).detach());  
-//         });  
-//         rows.sort(function (a, b) {  
-//           var aValue = $(a).find('td').eq(index).text(),  
-//               bValue = $(b).find('td').eq(index).text();  
-//           return aValue > bValue  
-//                ? 1  
-//                : aValue < bValue  
-//                ? -1  
-//                : 0;  
-//         });  
-//         if ($(this).hasClass('desc')) {  
-//           rows.reverse();  
-//         }  
-//         $.each(rows, function (index, row) {  
-//           $('#'+tableId+' tbody').append(row);  
-//         });  
-//       });  
+//         $('#'+tableId+' tbody tr').each(function (index, row) {
+//           rows.push($(row).detach());
+//         });
+//         rows.sort(function (a, b) {
+//           var aValue = $(a).find('td').eq(index).text(),
+//               bValue = $(b).find('td').eq(index).text();
+//           return aValue > bValue
+//                ? 1
+//                : aValue < bValue
+//                ? -1
+//                : 0;
+//         });
+//         if ($(this).hasClass('desc')) {
+//           rows.reverse();
+//         }
+//         $.each(rows, function (index, row) {
+//           $('#'+tableId+' tbody').append(row);
+//         });
+//       });
 //   }
 
-function sortTable(tableId) {  
-  $('#'+tableId).on('click', 'th',function(){
+function sortTable(tableId) {
+  $('#' + tableId).on('click', 'th', function () {
     var table = $(this).parents('table').eq(0);
     // var rows = table.find('tbody tr:gt(0)').toArray().sort(comparer($(this).index()));
-    var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
-    this.asc = !this.asc
-    if (!this.asc){rows = rows.reverse()}
-    for (var i = 0; i < rows.length; i++){table.append(rows[i])}
-  })
- }
-
-  
-function comparer(index) {
-  return function(a, b) {
-      var valA = getCellValue(a, index), valB = getCellValue(b, index)
-      return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.toString().localeCompare(valB)
-  }
+    var rows = table
+      .find('tbody tr')
+      .toArray()
+      .sort(comparer($(this).index()));
+    this.asc = !this.asc;
+    if (!this.asc) {
+      rows = rows.reverse();
+    }
+    for (var i = 0; i < rows.length; i++) {
+      table.append(rows[i]);
+    }
+  });
 }
-function getCellValue(row, index){ return $(row).children('td').eq(index).text() }
 
+function comparer(index) {
+  return function (a, b) {
+    var valA = getCellValue(a, index),
+      valB = getCellValue(b, index);
+    return $.isNumeric(valA) && $.isNumeric(valB)
+      ? valA - valB
+      : valA.toString().localeCompare(valB);
+  };
+}
+function getCellValue(row, index) {
+  return $(row).children('td').eq(index).text();
+}
 
 function initJsGridTable(id, dataArrayOfJson, fields) {
   $('#' + id).jsGrid({

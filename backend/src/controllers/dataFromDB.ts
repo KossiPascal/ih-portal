@@ -42,7 +42,6 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
   return onlyData ? respData : res.status(respData.status).json(respData);
 }
 
-
 function getChwInfos(chw: Chws[], chwId: string): Chws | null {
   if (notNull(chwId)) {
     for (let i = 0; i < chw.length; i++) {
@@ -52,7 +51,6 @@ function getChwInfos(chw: Chws[], chwId: string): Chws | null {
   }
   return null;
 }
-
 
 export async function getDataInformations(req: Request, res: Response, next: NextFunction): Promise<any> {
   var respData: { status: number, data: any };
@@ -149,7 +147,6 @@ export async function getDataInformations(req: Request, res: Response, next: Nex
   }
   return res.status(respData.status).json(respData);
 }
-
 
 export async function fetchIhChtDataPerChw(req: Request, res: Response, next: NextFunction) {
   const chwsData: { status: number, data: ChwsData[] } = await getChwsDataWithParams(req, res, next, true);

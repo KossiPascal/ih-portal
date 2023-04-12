@@ -255,6 +255,20 @@
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Visite de Ménages
               </a>
 
+              <div *ngIf="roles.isSuperUser()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSuperUser()" class="nav-link" routerLink="maps/highchartmap1"
+                role="button">
+                <i style="margin-right: 10px;" class="fas far fa-info"></i> M . A . P - 1
+              </a>
+
+              <div *ngIf="roles.isSuperUser()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSuperUser()" class="nav-link" routerLink="maps/highchartmap2"
+                role="button">
+                <i style="margin-right: 10px;" class="fas far fa-info"></i> M . A . P - 2
+              </a>
+
+              
+
 
 
               <div *ngIf="roles.isSupervisorMentor()" class="dropdowndivider1"></div>
@@ -403,6 +417,21 @@
                   <p>Visite de Ménages</p>
                 </a>
               </li>
+
+              <li *ngIf="roles.isSuperUser()" class="nav-item">
+                <a routerLink="maps/highchartmap1" class="nav-link">
+                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
+                  <p>M . A . P - 1</p>
+                </a>
+              </li>
+
+              <li *ngIf="roles.isSuperUser()" class="nav-item">
+                <a routerLink="maps/highchartmap2" class="nav-link">
+                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
+                  <p>M . A . P - 2</p>
+                </a>
+              </li>
+              
 
               <p *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" style="color: white;">{{ separation }}</p>
 

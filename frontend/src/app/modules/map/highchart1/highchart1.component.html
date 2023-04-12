@@ -1,0 +1,104 @@
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="card card-info">
+
+            <h2 class="title" style="text-align: center; color: purple;">Activité des ASC</h2>
+
+            <div class="overlay-wrapper">
+                <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                    <div class="text-bold pt-2"> {{initMsg}}</div>
+                </div>
+
+                <div class="card-header">
+                    <form [formGroup]="aggradateDataForm" (ngSubmit)="initDataFilted()" novalidate>
+                        <div class="row">
+
+                            <div class="col-sm-2 col-6">
+                                <div class="form-group">
+                                    <label>Date Début</label>
+                                    <input type="date" class="form-control" formControlName="start_date" />
+                                </div>
+                            </div>
+
+                            <div class="col-sm-2 col-6">
+                                <div class="form-group">
+                                    <label>Date Fin</label>
+                                    <input type="date" class="form-control" formControlName="end_date" />
+                                </div>
+                            </div>
+
+                            <div *ngIf="!roles.isChws()" class="col-sm-3 col-6">
+                                <div class="form-group">
+                                    <label>District</label>
+                                    <select (change)="genarateSites()" class="form-control" [multiple]="Districts$.length > 0? 'multiple' : ''" formControlName="districts">
+                                        <option value=""></option>
+                                        <option *ngFor="let district of Districts$" value="{{district.id}}">
+                                            {{ district.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div *ngIf="!roles.isChws()" class="col-sm-3 col-6">
+                                <div class="form-group">
+                                    <label>Site</label>
+                                    <select (change)="genarateChws()" class="form-control" [multiple]="sites$.length > 0? 'multiple' : ''" formControlName="sites">
+                                        <option value=""></option>
+                                        <option *ngFor="let site of sites$" value="{{site.id}}">
+                                            {{ site.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-2 col-6">
+                                <div class="form-group">
+                                    <label style="color: white;">.</label>
+                                    <button class="submit" [disabled]="!aggradateDataForm.valid" type="submit"
+                                        class="btn btn-warning form-control">
+                                        OK <span class="fa fa-floppy-o fa-right"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- <div *ngIf="!roles.isChws()" class="row">
+                <div class="col-sm-4">
+                  <div class="form-group">
+                    <label>.</label>
+                    <div class="form-check">
+                      <input style="font-size: 20px;" id="withRatio" class="form-check-input" type="checkbox"
+                        formControlName="withRatio">
+                      <label class="form-check-label" for="withRatio"> <b>Avec Ratio</b> </label>
+                    </div>
+                  </div>
+                </div>
+              </div> -->
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+<section *ngIf="roles.isSupervisorMentor() || roles.onlySeeData()" class="content">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <!-- <table-export></table-export> -->
+            </div>
+        </div>
+
+        <div class="card-body" style="overflow-y:scroll!important;">
+            <!-- <div id="highchart_container" style="height: 700px; min-width: 310px; max-width: 800px; margin: 0 auto"></div> -->
+            <div id="highchart_container" style="height: 700px; width: 100%; margin: 0 auto; display: block"></div>
+        </div>
+
+    </div>
+</section>

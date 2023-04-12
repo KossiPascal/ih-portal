@@ -41,7 +41,7 @@ def sslFolder(file_Name_with_extension):
 
 
 def extractFolder():
-    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__) or '.'))))+"/extracts"
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__) or '.'))))+"/storage/extracts/python"
 
 # def extractFolder():
 #     """ extract folder name"""

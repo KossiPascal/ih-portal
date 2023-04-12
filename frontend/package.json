@@ -1,6 +1,6 @@
 {
   "name": "ih-portal",
-  "version": "1.2.38",
+  "version": "1.2.40",
   "scripts": {
     "ng": "ng serve",
     "start": "ng serve --ssl true",
@@ -42,6 +42,7 @@
     "@fortawesome/angular-fontawesome": "^0.10.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@highcharts/map-collection": "^2.0.1",
     "@ng-bootstrap/ng-bootstrap": "^14.0.0-rc.1",
     "@ngx-translate/core": "^14.0.0",
     "@ngx-translate/http-loader": "^7.0.0",
@@ -51,7 +52,8 @@
     "core-js": "^3.24.1",
     "dexie": "^3.2.2",
     "dexie-relationships": "^1.2.11",
-    "highcharts": "^10.2.0",
+    "highcharts": "^10.3.3",
+    "highcharts-angular": "^3.1.2",
     "http-server": "^14.1.1",
     "lite-server": "^2.6.1",
     "moment": "^2.29.4",
@@ -60,6 +62,7 @@
     "ng-pwa-tools": "0.0.15",
     "ngx-multiple-dates": "^14.3.1",
     "postgres-array": "^3.0.1",
+    "proj4": "^2.9.0",
     "rxjs": "~7.5.0",
     "socket.io": "^4.5.1",
     "socket.io-client": "^4.5.1",
@@ -73,6 +76,7 @@
     "@angular-devkit/build-angular": "^14.0.4",
     "@angular/cli": "^14.0.7",
     "@angular/compiler-cli": "^14.0.0",
+    "@types/proj4": "^2.5.2",
     "browser-sync": "^2.29.0"
   }
 }

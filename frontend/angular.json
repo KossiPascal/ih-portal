@@ -85,6 +85,9 @@
               "src/assets/js/tableHTMLExport.js",
               "src/assets/js/tableExport.min.js",
               "src/assets/js/jquery_table_to_excel.js",
+              
+              "src/assets/js/highmaps/highmaps.js",
+              "src/assets/js/highmaps/proj4.js",
               "src/assets/js/app.js",
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
               "src/assets/plugins/bootstrap/js/bootstrap.bundle.min.js",

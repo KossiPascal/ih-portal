@@ -1,5 +1,11 @@
 import { DataIndicators } from "./DataAggragate"
 
+export interface HighChart {
+  cibleId: string;
+  chartOptions: any;
+  highchartsOptions: any;
+}
+
 export interface AggragateData {
   label: string
   count: number

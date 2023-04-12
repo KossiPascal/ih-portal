@@ -6,13 +6,14 @@ import { token, toMap, User, jwSecretKey } from "../entity/User";
 import moment from "moment";
 import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws, Patients } from "../entity/Sync";
 import { Consts } from "./constantes";
+var fs = require('fs');
 
 const nodemailer = require("nodemailer");
 const smtpTransport = require('nodemailer-smtp-transport');
 var rootCas = require('ssl-root-cas').create();
 
 require('dotenv').config({ path: sslFolder('.env') });
-const { CHT_USER, CHT_PASS, CHT_HOST, PROD_CHT_PORT, DEV_CHT_PORT,NODE_TLS_REJECT_UNAUTHORIZED } = process.env;
+const { CHT_USER, CHT_PASS, CHT_HOST, PROD_CHT_PORT, DEV_CHT_PORT, NODE_TLS_REJECT_UNAUTHORIZED } = process.env;
 
 export function httpHeaders(Authorization?: string, withParams: boolean = true) {
     // NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -199,12 +200,14 @@ export class Functions {
         process.on('ERR_HTTP_HEADERS_SENT', err => console.error(err && err.stack));
     }
 
-    static ServerStart(data:{isSecure:boolean,credential?: {
-        key: string;
-        ca: string;
-        cert: string;
-    }, app: any, access_ports:boolean, port:any, hostnames:any[]}) {
-        const server = data.isSecure==true ? https.createServer(data.credential!, data.app) : http.createServer(data.app);
+    static ServerStart(data: {
+        isSecure: boolean, credential?: {
+            key: string;
+            ca: string;
+            cert: string;
+        }, app: any, access_ports: boolean, port: any, hostnames: any[]
+    }) {
+        const server = data.isSecure == true ? https.createServer(data.credential!, data.app) : http.createServer(data.app);
         // var io = require('socket.io')(server, {});
         // server.listen(data.port, '0.0.0.0', () => Functions.onProcess)
         if (data.access_ports) server.listen(data.port, '0.0.0.0', () => Functions.onProcess);
@@ -212,7 +215,7 @@ export class Functions {
         server.on('error', (err) => Functions.onError(err, data.port));
         server.on('listening', () => Functions.onListening(server, data.hostnames, 'https'));
         server.on('connection', (stream) => console.log('someone connected!'));
-      }
+    }
 
     static getIPAddress(accessAllAvailablePort: boolean = true): string[] {
         var ips: any[] = [];
@@ -272,19 +275,39 @@ export function projectFolderParent(): string {
     return path.dirname(projectFolder())//  ih-portal parent
 }
 export function sslFolder(file_Name_with_extension: string): string {
-    return `${projectFolderParent()}/ssl/${file_Name_with_extension}`;
+    const dir = `${projectFolderParent()}/ssl`;
+    createDirectories(dir, (err:any) => console.log(err));
+    return `${dir}/${file_Name_with_extension}`;
     // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/ssl/${file_Name_with_extension}`
 }
 export function extractFolder(file_Name_with_extension: string): string {
-    const folder = Consts.isProdEnv ? 'extracts' : 'dev_extracts';
-    return `${projectFolderParent()}/${folder}/${file_Name_with_extension}`;
+    const folder = Consts.isProdEnv ? 'prod' : 'dev';
+    const dir = `${projectFolderParent()}/storage/extracts/${folder}`;
+    createDirectories(dir, (err:any) => console.log(err));
+    return `${dir}/${file_Name_with_extension}`;
 }
 
 export function JsonDbFolder(file_Name_without_extension: string): string {
     const fileName: string = file_Name_without_extension.trim().replace(' ', '-').split('.')[0];
-    // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/IhJsonStorage/${fileName}.json`
-    const folder = Consts.isProdEnv ? 'IhJsonStorage' : 'dev_IhJsonStorage';
-    return `${projectFolderParent()}/${folder}/${fileName}.json`
+    // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/storage/Json/${folder}/${fileName}.json`
+    const folder = Consts.isProdEnv ? 'prod' : 'dev';
+    const dir = `${projectFolderParent()}/storage/Json/${folder}`;
+    createDirectories(dir, (err:any) => console.log(err));
+    return `${dir}/${fileName}.json`
+}
+
+
+export function createDirectories(path: string, cb: any) {
+    if (!fs.existsSync(path)) {
+        fs.mkdirSync(path, { recursive: true }, function (err: any) {
+            if (err) {
+                if (err.code == 'EEXIST') cb(null); // Ignore the error if the folder already exists
+                else cb(err); // Something else went wrong
+            } else cb(null); // Successfully created folder
+        });
+    } else {
+        cb(null);
+    }
 }
 
 

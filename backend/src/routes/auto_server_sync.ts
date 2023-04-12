@@ -15,8 +15,8 @@ export function AutoSyncDataFromCloud(secure_port: any) {
     const user = _repoUser.getBy(defaultUserId) as User;
     if (notNull(user)) {
       const initDate = DateUtils.startEnd21and20Date()
-      const start_date = '2023-03-21';//initDate.start_date;
-      const end_date = '2023-03-22';//initDate.end_date;
+      const start_date = initDate.start_date;
+      const end_date = initDate.end_date;
       const api_host = `https://${LOCALHOST || CHT_HOST}:${secure_port}/api`;
       const headers = { "Content-Type": "application/json" };
       console.log('\n\nstart fetching orgunits\n');
