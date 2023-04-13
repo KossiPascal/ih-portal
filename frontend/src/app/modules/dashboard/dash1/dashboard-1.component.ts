@@ -25,7 +25,6 @@ export class Dashboard1Component implements OnInit {
     if (!this.roles.isSupervisorMentor() && !this.roles.isChws() && !this.roles.onlySeeData()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
   }
 
-
   public roles = new Roles(this.store);
 
   aggradateDataForm!: FormGroup;

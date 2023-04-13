@@ -11,7 +11,7 @@ import { Consts } from '@ih-app/shared/constantes';
 
 @Component({
   selector: 'app-forgot-password',
-  templateUrl: './forgot-password.component.html'
+  templateUrl: './forgot-password.component.html',
 })
 export class ForgotPasswordComponent implements OnInit {
   authForm!: FormGroup;

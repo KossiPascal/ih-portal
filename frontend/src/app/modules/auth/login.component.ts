@@ -13,7 +13,7 @@ import { Consts } from '@ih-app/shared/constantes';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './auth.component.html'
+  templateUrl: './auth.component.html',
 })
 export class LoginComponent implements OnInit {
   authForm!: FormGroup;

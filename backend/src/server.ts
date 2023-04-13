@@ -17,13 +17,15 @@ import { AutoSyncDataFromCloud } from "./routes/auto_server_sync";
 import { Consts } from "./utils/constantes";
 const path = require('path');
 const cron = require("node-cron");
+const compression = require("compression");
+const responseTime = require('response-time')
 
 require('dotenv').config({ path: sslFolder('.env') });
 const { ACCESS_ALL_AVAILABE_PORT, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED, CAN_ACCESS_INSECURE } = process.env
 
 const hostnames = Functions.getIPAddress(ACCESS_ALL_AVAILABE_PORT == 'true');
 // const cookieParser = require('cookie-parser')
-// var session = require('express-session');
+var session = require('express-session');
 const port = Functions.normalizePort((Consts.isProdEnv ? PROD_PORT : DEV_PORT) || '3000');
 const portSecured = Functions.normalizePort((Consts.isProdEnv ? PROD_PORT_SECURED : DEV_PORT_SECURED) || '3003');
 
@@ -40,22 +42,24 @@ AppDataSource
 const app = express()
   .use(cors())
   .use(json())
+  .use(responseTime())
+  .use(compression())
   .use(urlencoded({ extended: false }))
   .enable('trust proxy')
   .set('trust proxy', 1)
   .set("view engine", "ejs")
   .set('json spaces', 2)
   .set('content-type', 'application/json; charset=utf-8')
-  // .use(session({
-  //   secret: 'session',
-  //   cookie: {
-  //     secure: true,
-  //     maxAge: 60000
-  //   },
-  //   // store: new RedisStore(),
-  //   saveUninitialized: true,
-  //   resave: true
-  // }))
+  .use(session({
+    secret: 'session',
+    cookie: {
+      secure: true,
+      maxAge: 60000
+    },
+    // store: new RedisStore(),
+    saveUninitialized: true,
+    resave: true
+  }))
   .use(bearerToken())
   .use('/api/auth', authRouter)
   .use('/api/sync', syncRouter)
@@ -97,7 +101,7 @@ appSecured.use((req, res, next) => {
 //  │ │ │ │ │ │
 //  │ │ │ │ │ │
 //  * * * * * * 
-cron.schedule("0 05 */23 * * *", function () {
+cron.schedule("59 */23 * * *", function () {
   console.log(`running this task every 23h 05 min 0 seconds.`);
   logNginx(`running this task every 23h 05 min 0 seconds.`);
   AutoSyncDataFromCloud(portSecured);

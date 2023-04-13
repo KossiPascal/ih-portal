@@ -1,13 +1,14 @@
 import { getSiteSyncRepository, Sites } from "../entity/Sync";
 import { User } from "../entity/User";
 import { JsonDatabase } from "../json-data-source";
-import { notNull, DateUtils, sslFolder, logNginx } from "../utils/functions";
+import { notNull, DateUtils, sslFolder, logNginx, delay } from "../utils/functions";
 const request = require('request');
 
 require('dotenv').config({ path: sslFolder('.env') });
 const { DEFAULT_DHIS2_USER_ID, LOCALHOST, CHT_HOST } = process.env;
 
-export function AutoSyncDataFromCloud(secure_port: any) {
+export async function AutoSyncDataFromCloud(secure_port: any, wait:boolean = true) {
+  if(wait) await delay(60000);
   const startDate = new Date();
   const startAt = (startDate).getTime();
 
