@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 import { JsonDatabase } from '../json-data-source';
-import { isChws, notNull } from '../utils/functions';
+import { isChws, notEmpty } from '../utils/functions';
 
 export class User {
     id!: string;
@@ -39,12 +39,12 @@ export function token(user: User) {
 
 export function jwSecretKey(data:{userId?:string, user?:User}): { expiredIn: string, secretOrPrivateKey: string } {
     var userIsChws:boolean = false;
-    if (notNull(data.user)) {
+    if (notEmpty(data.user)) {
         userIsChws = isChws(data.user!);
-    } else if (notNull(data.userId)) {
+    } else if (notEmpty(data.userId)) {
         const _repoUser = new JsonDatabase('users');
         const jData = _repoUser.getBy(data.userId!) as User;
-        if (notNull(jData)) {
+        if (notEmpty(jData)) {
             userIsChws = isChws(jData);
         }
     }
@@ -69,7 +69,7 @@ export function jwSecretKey(data:{userId?:string, user?:User}): { expiredIn: str
 // import * as bcrypt from 'bcryptjs';
 // import { response } from 'express';
 // import { Utils } from "../utils/utils";
-// import { token, isNotNull } from "../utils/functions";
+// import { token, notEmpty } from "../utils/functions";
 
 
 
@@ -146,7 +146,7 @@ export function jwSecretKey(data:{userId?:string, user?:User}): { expiredIn: str
 //       user.fullname = data.fullname??'';
 //       user.email = data.email??'';
 //       user.password = data.password??'';
-//       user.roles = notNull(data.roles)?`[${data.roles}]`:'[]';
+//       user.roles = notEmpty(data.roles)?`[${data.roles}]`:'[]';
 //       user.isActive = data.isActive??false;
 //       user.isSuperAdmin = data.isSuperAdmin??false;
 //     return user;

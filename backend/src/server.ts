@@ -13,7 +13,7 @@ import syncRouter from "./routes/sync";
 import userRouter from "./routes/user";
 import fs from "fs";
 import databaseRouter from "./routes/database";
-import { AutoSyncDataFromCloud } from "./routes/auto_server_sync";
+import { AutoSyncDataFromCloud } from "./controllers/auto_server_sync";
 import { Consts } from "./utils/constantes";
 const path = require('path');
 const cron = require("node-cron");
@@ -21,13 +21,15 @@ const compression = require("compression");
 const responseTime = require('response-time')
 
 require('dotenv').config({ path: sslFolder('.env') });
-const { ACCESS_ALL_AVAILABE_PORT, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED, CAN_ACCESS_INSECURE } = process.env
+const { ACCESS_ALL_AVAILABE_PORT,CAN_ACCESS_INSECURE, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED } = process.env
+
 
 const hostnames = Functions.getIPAddress(ACCESS_ALL_AVAILABE_PORT == 'true');
+const port = Functions.normalizePort((Consts.isProdEnv ? PROD_PORT : DEV_PORT) || Consts.defaultPort);
+const portSecured = Functions.normalizePort((Consts.isProdEnv ? PROD_PORT_SECURED : DEV_PORT_SECURED) || Consts.defaultSecurePort);
+
 // const cookieParser = require('cookie-parser')
 var session = require('express-session');
-const port = Functions.normalizePort((Consts.isProdEnv ? PROD_PORT : DEV_PORT) || '3000');
-const portSecured = Functions.normalizePort((Consts.isProdEnv ? PROD_PORT_SECURED : DEV_PORT_SECURED) || '3003');
 
 AppDataSource
   .initialize()
@@ -104,7 +106,7 @@ appSecured.use((req, res, next) => {
 cron.schedule("59 */23 * * *", function () {
   console.log(`running this task every 23h 05 min 0 seconds.`);
   logNginx(`running this task every 23h 05 min 0 seconds.`);
-  AutoSyncDataFromCloud(portSecured);
+  AutoSyncDataFromCloud();
 });
 
 // uploadData();

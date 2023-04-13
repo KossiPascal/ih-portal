@@ -5,7 +5,7 @@ import { Between, Equal, In } from "typeorm";
 // const request = require('request');
 
 import { getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, getDistrictSyncRepository, Districts } from "../entity/Sync";
-import { notNull } from "../utils/functions";
+import { notEmpty } from "../utils/functions";
 
 // OperatorSymbolToFunction = new Map<FilterOperator, (...args: any[]) => FindOperator<string>>([
 //     [FilterOperator.EQ, Equal],
@@ -28,8 +28,8 @@ export async function getDistricts(req: Request, res: Response, next: NextFuncti
         const repository = await getDistrictSyncRepository();
         var districts: Districts[] = await repository.find({
             where: {
-                id: notNull(req.body.id) ? req.body.id : undefined,
-                source: notNull(req.body.sources) ? In(req.body.sources) : undefined,
+                id: notEmpty(req.body.id) ? req.body.id : undefined,
+                source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
             }
         });
         if (!districts) return res.status(201).json({ status: 201, data: 'No Data Found !' });
@@ -48,10 +48,10 @@ export async function getSites(req: Request, res: Response, next: NextFunction) 
         const repository = await getSiteSyncRepository();
         var sites: Sites[] = await repository.find({
             where: {
-                id: notNull(req.body.id) ? req.body.id : undefined,
-                // reported_date: notNull(req.body.start_date) && notNull(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
-                source: notNull(req.body.sources) ? In(req.body.sources) : undefined,
-                district: notNull(req.body.districts) ? { id: In(req.body.districts) } : undefined
+                id: notEmpty(req.body.id) ? req.body.id : undefined,
+                // reported_date: notEmpty(req.body.start_date) && notEmpty(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
+                source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
+                district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined
             }
         });
         if (!sites) return res.status(201).json({ status: 201, data: 'No Data Found !' });
@@ -69,12 +69,12 @@ export async function getZones(req: Request, res: Response, next: NextFunction) 
         const repository = await getZoneSyncRepository();
         var zones: Zones[] = await repository.find({
             where: {
-                id: notNull(req.body.id) ? req.body.id : undefined,
-                // reported_date: notNull(req.body.start_date) && notNull(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
-                source: notNull(req.body.sources) ? In(req.body.sources) : undefined,
-                district: notNull(req.body.districts) ? { id: In(req.body.districts) } : undefined,
-                site: notNull(req.body.sites) ? { id: In(req.body.sites) } : undefined,
-                chw_id: notNull(req.body.chws) ? In(req.body.chws) : undefined,
+                id: notEmpty(req.body.id) ? req.body.id : undefined,
+                // reported_date: notEmpty(req.body.start_date) && notEmpty(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
+                source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
+                district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+                site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+                chw_id: notEmpty(req.body.chws) ? In(req.body.chws) : undefined,
             }
         });
         if (!zones) return res.status(201).json({ status: 201, data: 'No Data Found !' });
@@ -98,14 +98,14 @@ export async function getChws(req: Request, res: Response, next: NextFunction, o
         const userId: string = req.body.userId;
         var chws: Chws[] = await _chwRepo.find({
             where: {
-                id: notNull(req.body.id) ? req.body.id : undefined,
+                id: notEmpty(req.body.id) ? req.body.id : undefined,
                 // reported_date: req.body.start_date && req.body.end_date ? Between(req.body.start_date, req.body.end_date) : undefined,
-                source: notNull(req.body.sources) ? In(req.body.sources) : undefined,
-                district: notNull(req.body.districts) ? { id: In(req.body.districts) } : undefined,
-                site: notNull(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+                source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
+                district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+                site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
                 zone: {
-                    id: notNull(req.body.zones) ? In(req.body.zones) : undefined,
-                    chw_id: notNull(req.body.chws) ? In(req.body.chws) : undefined,
+                    id: notEmpty(req.body.zones) ? In(req.body.zones) : undefined,
+                    chw_id: notEmpty(req.body.chws) ? In(req.body.chws) : undefined,
                 },
             },
         });
@@ -124,14 +124,14 @@ export async function getFamilies(req: Request, res: Response, next: NextFunctio
         const repository = await getFamilySyncRepository();
         var families: Families[] = await repository.find({
             where: {
-                id: notNull(req.body.id) ? req.body.id : undefined,
+                id: notEmpty(req.body.id) ? req.body.id : undefined,
                 reported_date: req.body.start_date && req.body.end_date ? Between(req.body.start_date, req.body.end_date) : undefined,
-                source: notNull(req.body.sources) ? In(req.body.sources) : undefined,
-                district: notNull(req.body.districts) ? { id: In(req.body.districts) } : undefined,
-                site: notNull(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+                source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
+                district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+                site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
                 zone: {
-                    id: notNull(req.body.zones) ? In(req.body.zones) : undefined,
-                    chw_id: notNull(req.body.chws) ? In(req.body.chws) : undefined,
+                    id: notEmpty(req.body.zones) ? In(req.body.zones) : undefined,
+                    chw_id: notEmpty(req.body.chws) ? In(req.body.chws) : undefined,
                 }, 
             }
         });
@@ -151,15 +151,15 @@ export async function getPatients(req: Request, res: Response, next: NextFunctio
         const repository = await getPatientSyncRepository();
         var patients: Patients[] = await repository.find({
             where: {
-                id: notNull(req.body.id) ? req.body.id : undefined,
+                id: notEmpty(req.body.id) ? req.body.id : undefined,
                 // reported_date: req.body.start_date && req.body.end_date ? Between(req.body.start_date, req.body.end_date) : undefined,
-                source: notNull(req.body.sources) ? In(req.body.sources) : undefined,
-                district: notNull(req.body.districts) ? { id: In(req.body.districts) } : undefined,
-                site: notNull(req.body.sites) ? { id: In(req.body.sites) } : undefined,
-                family: notNull(req.body.families) ? { id: In(req.body.families) } : undefined,
+                source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
+                district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+                site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+                family: notEmpty(req.body.families) ? { id: In(req.body.families) } : undefined,
                 zone: {
-                    id: notNull(req.body.zones) ? In(req.body.zones) : undefined,
-                    chw_id: notNull(req.body.chws) ? In(req.body.chws) : undefined,
+                    id: notEmpty(req.body.zones) ? In(req.body.zones) : undefined,
+                    chw_id: notEmpty(req.body.chws) ? In(req.body.chws) : undefined,
                 },
             }
         });

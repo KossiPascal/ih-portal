@@ -8,6 +8,7 @@ import * as moment from 'moment';
 import { DateUtils, Functions, notNull } from '@ih-app/shared/functions';
 import { Roles } from '@ih-app/shared/roles';
 import { AppStorageService } from '@ih-app/services/cookie.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-sync',
@@ -17,13 +18,18 @@ import { AppStorageService } from '@ih-app/services/cookie.service';
 })
 export class SyncOrgUnitDataComponent implements OnInit {
 
+
   chwsDataForm!: FormGroup;
   dhis2ChwsDataForm!: FormGroup;
   orgUnitAndPersonForm!: FormGroup;
+  syncAllForm!: FormGroup;
 
   tab4_messages: OrgUnitImport | null = null;
   tab5_messages: OrgUnitImport | null = null;
   tab6_messages: OrgUnitImport[] = [];
+
+  tab7_messages: { orgunit: OrgUnitImport| null, tonoudayo: OrgUnitImport| null, dhis2: OrgUnitImport[], globalError: any, successDetails:any } | null = null;
+
   dates: moment.Moment[] = [];
   weekly_Choosen_Dates: string[] = [];
   is_weekly_date_error: boolean = false;
@@ -32,6 +38,9 @@ export class SyncOrgUnitDataComponent implements OnInit {
   loading4!: boolean;
   loading5!: boolean;
   loading6!: boolean;
+  loading7!: boolean;
+
+  activePage: any = '';
 
   start_date_error: boolean = false;
   end_date_error: boolean = false;
@@ -41,7 +50,7 @@ export class SyncOrgUnitDataComponent implements OnInit {
   sites$: Sites[] = [];
   initDate!: { start_date: string, end_date: string };
 
-  constructor(private store: AppStorageService, private sync: SyncService, private http: HttpClient, private auth: AuthService) { 
+  constructor(private store: AppStorageService, private route: ActivatedRoute, private sync: SyncService, private http: HttpClient, private auth: AuthService) { 
     if(!this.roles.isSuperUser()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
     
   }
@@ -51,6 +60,8 @@ export class SyncOrgUnitDataComponent implements OnInit {
   ngOnInit(): void {
 
     this.initDate = DateUtils.startEnd21and20Date();
+    this.route.params.subscribe(params => this.activePage = params['cible']);
+
     this.sync.getDistrictsList().subscribe(async (_d$: { status: number, data: Districts[] }) => {
       if (_d$.status == 200) {
         this.Districts$ = _d$.data;
@@ -67,7 +78,15 @@ export class SyncOrgUnitDataComponent implements OnInit {
     this.chwsDataForm = this.createChwsDataFormGroup();
     this.dhis2ChwsDataForm = this.createDhis2ChwsDataFormGroup();
     this.orgUnitAndPersonForm = this.createOrgUnitAndPersonFormGroup();
+    this.syncAllForm = this.createSyncAllFormGroup();
 
+  }
+
+  createSyncAllFormGroup(): FormGroup {
+    return new FormGroup({
+      start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
+      end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
+    });
   }
 
   createOrgUnitAndPersonFormGroup(): FormGroup {
@@ -135,6 +154,8 @@ export class SyncOrgUnitDataComponent implements OnInit {
     });
   }
 
+  
+
   syncChwsDataFromCouchDb(): void {
     this.loading5 = true;
     this.tab5_messages = null;
@@ -177,6 +198,27 @@ export class SyncOrgUnitDataComponent implements OnInit {
       });
       
     }
+  }
+
+
+  syncAllFromCouchToDb(): void {
+    this.loading7= true;
+    this.tab7_messages = null;
+    this.sync.syncAll(this.syncAllForm.value).subscribe((res: {status:number, data:any}) => {
+      this.loading7 = false;
+      if (res.status == 200) {
+        this.tab7_messages = res.data;
+        console.log(this.tab7_messages)
+
+      } else {
+        this.tab7_messages = res.data;
+      }
+      
+      // console.log(response);
+    }, (err: any) => {
+      this.loading7 = false;
+      this.tab7_messages = err.error;
+    });
   }
 
 }

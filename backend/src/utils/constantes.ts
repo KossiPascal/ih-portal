@@ -1,12 +1,9 @@
 import path from "path";
 
-
 export class Consts {
-
     private static projectFolderName = path.basename(path.dirname(path.dirname(path.dirname(__dirname))));
 
     static isProdEnv:boolean = this.projectFolderName === 'ih-portal' ;
-    
 
     static child_forms = [
         "pcime_c_asc",
@@ -47,7 +44,13 @@ export class Consts {
         "fp_followup_danger_sign_check",
         "delivery"
     ];
+  static defaultSecurePort: string  = '3003';
+  static defaultPort: string  = '3000';
 
 }
+
+
+
+
 
 

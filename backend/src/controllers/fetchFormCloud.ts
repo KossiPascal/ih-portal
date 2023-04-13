@@ -1,6 +1,6 @@
 import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository } from "../entity/Sync";
 import { CouchDbFetchData, Dhis2DataFormat } from "../utils/appInterface";
-import { Dhis2SyncConfig, Functions, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders, notNull, logNginx } from "../utils/functions";
+import { Dhis2SyncConfig, Functions, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders, notEmpty, logNginx } from "../utils/functions";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import https from 'https';
@@ -63,13 +63,13 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
             try {
                 var jsonBody: Dhis2DataFormat[] = jsonDatas["events"] as Dhis2DataFormat[];
 
-                if (notNull(jsonBody)) {
+                if (notEmpty(jsonBody)) {
                     var len = jsonBody.length;
                     var done: number = 0;
                     for (let i = 0; i < len; i++) {
                         done++;
                         const row: Dhis2DataFormat = jsonBody[i];
-                        if (notNull(row)) {
+                        if (notEmpty(row)) {
                             if (row.dataValues.length > 0) {
                                 const siteId: any = await getSiteByDhis2Uid(row.orgUnit);
                                 var districtId = undefined;
@@ -80,7 +80,7 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
                                 }
                                 const chwsId: any = await getChwsByDhis2Uid(getValue(row.dataValues, 'JkMyqI3e6or'));
                                 const dateVal = getValue(row.dataValues, 'RlquY86kI66');
-                                if (districtId && notNull(siteId) && notNull(chwsId) && notNull(dateVal)) {
+                                if (districtId && notEmpty(siteId) && notEmpty(chwsId) && notEmpty(dateVal)) {
                                     if (!outPutInfo.hasOwnProperty(`Données Total ${siteName}`)) outPutInfo[`Données Total ${siteName}`] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
                                     try {
                                         const _dhis2Sync = new ChwsData();
@@ -318,7 +318,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                             const districtId = row.doc.district_external_id;
                                             const districtName = row.doc.district_external_name;
                                             try {
-                                                if (notNull(districtId) && notNull(districtName)) {
+                                                if (notEmpty(districtId) && notEmpty(districtName)) {
                                                     if (!outPutInfo.hasOwnProperty("Districts")) outPutInfo["Districts"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' };
                                                     const _syncDistrict = new Districts();
                                                     _syncDistrict.id = districtId
@@ -577,7 +577,7 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
     const chwsData = chwsDataToDhis2 as DataIndicators;
 
     try {
-        if (notNull(chwsData)) {
+        if (notEmpty(chwsData)) {
             var jsonData = matchDhis2Data(chwsData);
             const date = getValue(jsonData["dataValues"], "lbHrQBTbY1d");  // reported_date
             const srce = getValue(jsonData["dataValues"], "FW6z2Ha2GNr");  // data_source

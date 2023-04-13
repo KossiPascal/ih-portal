@@ -590,8 +590,8 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
 
     var couchArg = ['include_docs=true', 'returnDocs=true', 'attachments=false', 'binary=false', 'reduce=false'];
     couchArg.push(`descending=${params.descending == true}`);
-    if (notNull(params.startKey)) couchArg.push(`key=[${params.startKey}]`);
-    if (notNull(params.endKey)) couchArg.push(`endkey=[${params.endKey}]`);
+    if (notEmpty(params.startKey)) couchArg.push(`key=[${params.startKey}]`);
+    if (notEmpty(params.endKey)) couchArg.push(`endkey=[${params.endKey}]`);
     var options = {
         host: CHT_HOST ?? '',
         port: parseInt((Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT) ?? '443'),
@@ -650,8 +650,8 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
 //     }
 // };
 
-export function notNull(data: any): boolean {
-    return data != '' && data != null && data != undefined && data.length != 0;
+export function notEmpty(data: any): boolean {
+    return data != '' && data != null && data != undefined && data.length != 0 && JSON.stringify(data) != JSON.stringify({})  && `${data}` != `{}`;
 }
 
 
@@ -662,9 +662,9 @@ export class Dhis2SyncConfig {
         var link: string = `/api/${cibleName}.json?paging=false`;
         if (param.program != null && param.program != '') link += `&program=${param.program}`;
 
-        if (notNull(param.orgUnit)) link += `&orgUnit=${param.orgUnit}`;
-        if (notNull(param.filter)) link += `&filter=${param.filter?.join('&filter=')}`;
-        if (notNull(param.fields)) link += `&fields=${param.fields?.join(',')}`;
+        if (notEmpty(param.orgUnit)) link += `&orgUnit=${param.orgUnit}`;
+        if (notEmpty(param.filter)) link += `&filter=${param.filter?.join('&filter=')}`;
+        if (notEmpty(param.fields)) link += `&fields=${param.fields?.join(',')}`;
 
         link += `&order=created:${param.order ?? 'desc'}`;
         this.host = host;
@@ -700,7 +700,7 @@ export class Dhis2SyncConfig {
             credentials: "include",
             referrerPolicy: 'no-referrer',
             method: method,
-            body: notNull(data) ? JSON.stringify(data) : undefined,
+            body: notEmpty(data) ? JSON.stringify(data) : undefined,
             headers: this.headers
         };
         return option;
@@ -722,10 +722,10 @@ function userDefaultRedirectUrl(user: User): string {
 }
 
 export function isChws(user: User): boolean {
-    if (notNull(user.roles)) {
+    if (notEmpty(user.roles)) {
         return user.roles.includes('c3WyuK3ibsN');
     }
-    if (notNull(user.groups)) {
+    if (notEmpty(user.groups)) {
         return user.groups.includes('enIOT8b8taV');
     }
     return false;
@@ -822,7 +822,7 @@ export function getDataValuesAsMap(dataValues: { dataElement: string, value: any
 
     for (let i = 0; i < dataValues.length; i++) {
         const data = dataValues[i];
-        if (notNull(excludeDataElement)) {
+        if (notEmpty(excludeDataElement)) {
             if (!excludeDataElement!.includes(data.dataElement)) {
                 finalData[data.dataElement] = data.value;
             }

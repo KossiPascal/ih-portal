@@ -5,6 +5,7 @@ import { Middelware } from "../middleware/auth";
 import { Request, Response } from "express";
 import { DataIndicators } from "../entity/DataAggragate";
 import { srcFolder } from "../utils/functions";
+import { SyncAllCloudAppDataToDB } from "../controllers/auto_server_sync";
 
 const fs = require("fs");
 
@@ -29,19 +30,26 @@ syncRouter.post('/get/data', Middelware.authMiddleware, getChwsDataWithParams);
 
 syncRouter.post('/get/datainfos', Middelware.authMiddleware, getDataInformations);
 
-
-
-
 syncRouter.post('/delete/data', Middelware.authMiddleware, deleteChwsData);
 
+
+
 syncRouter.post(
-  '/dhis2/data',
+  '/fetch/all',
   [
-    body('fields').not().isEmpty(),
-    body('filter').not().isEmpty(),
-    body('orgUnit').not().isEmpty(),
+    body('start_date').trim().isLength({ min: 7, max: 7 }).not().isEmpty(),
+    body('end_date').trim().isLength({ min: 7, max: 7 }).not().isEmpty(),
   ],
-  Middelware.authMiddleware, fetchChwsDataFromDhis2);
+  Middelware.authMiddleware, SyncAllCloudAppDataToDB);
+
+  syncRouter.post(
+    '/dhis2/data',
+    [
+      body('fields').not().isEmpty(),
+      body('filter').not().isEmpty(),
+      body('orgUnit').not().isEmpty(),
+    ],
+    Middelware.authMiddleware, fetchChwsDataFromDhis2);
 
 syncRouter.post(
   '/fetch/orgunits',

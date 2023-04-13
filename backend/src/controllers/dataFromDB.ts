@@ -4,7 +4,7 @@ import { Between, In } from "typeorm";
 import { ChtOutPutData, DataIndicators } from "../entity/DataAggragate";
 import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository } from "../entity/Sync";
 import { Consts } from "../utils/constantes";
-import { DateUtils, notNull } from "../utils/functions";
+import { DateUtils, notEmpty } from "../utils/functions";
 import { getChws } from "./orgUnitsFromDB ";
 
 const request = require('request');
@@ -23,14 +23,14 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
 
     var allSync: ChwsData[] = await repository.find({
       where: {
-        id: notNull(req.body.id) ? req.body.id : notNull(req.params.id) ? req.params.id : undefined,
-        reported_date: notNull(req.body.start_date) && notNull(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
-        form: notNull(req.body.forms) ? In(req.body.forms) : undefined,
-        source: notNull(req.body.sources) ? In(req.body.sources) : undefined,
-        district: notNull(req.body.districts) ? { id: In(req.body.districts) } : undefined,
-        site: notNull(req.body.sites) ? { id: In(req.body.sites) } : undefined,
-        zone: notNull(req.body.zones) ? { id: In(req.body.zones) } : undefined,
-        chw: notNull(req.body.chws) ? { id: In(req.body.chws) } : undefined
+        id: notEmpty(req.body.id) ? req.body.id : notEmpty(req.params.id) ? req.params.id : undefined,
+        reported_date: notEmpty(req.body.start_date) && notEmpty(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
+        form: notEmpty(req.body.forms) ? In(req.body.forms) : undefined,
+        source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
+        district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+        site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+        zone: notEmpty(req.body.zones) ? { id: In(req.body.zones) } : undefined,
+        chw: notEmpty(req.body.chws) ? { id: In(req.body.chws) } : undefined
       }
     });
     respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
@@ -43,7 +43,7 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
 }
 
 function getChwInfos(chw: Chws[], chwId: string): Chws | null {
-  if (notNull(chwId)) {
+  if (notEmpty(chwId)) {
     for (let i = 0; i < chw.length; i++) {
       const asc: Chws = chw[i];
       if (asc != null && asc != undefined && asc.id === chwId) return asc;
@@ -67,10 +67,10 @@ export async function getDataInformations(req: Request, res: Response, next: Nex
       const _familyRepo = await getFamilySyncRepository();
       var families: Families[] = await _familyRepo.find({
         where: {
-          district: notNull(req.body.districts) ? { id: In(req.body.districts) } : undefined,
-          site: notNull(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+          district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+          site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
           zone: {
-            id: notNull(req.body.zones) ? In(req.body.zones) : undefined,
+            id: notEmpty(req.body.zones) ? In(req.body.zones) : undefined,
           },
         }
       });
@@ -78,10 +78,10 @@ export async function getDataInformations(req: Request, res: Response, next: Nex
       const _chwsRepo = await getChwsSyncRepository();
       var chws: Chws[] = await _chwsRepo.find({
         where: {
-          district: notNull(req.body.districts) ? { id: In(req.body.districts) } : undefined,
-          site: notNull(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+          district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+          site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
           zone: {
-            id: notNull(req.body.zones) ? In(req.body.zones) : undefined,
+            id: notEmpty(req.body.zones) ? In(req.body.zones) : undefined,
           },
         }
       });
@@ -213,11 +213,11 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], Chws$: Chws[], req: Reques
       const site: string = data.site != null ? data.site.id != null && data.site.id != '' ? data.site.id : '' : '';
       const chw: string = data.chw != null ? data.chw.id != null && data.chw.id != '' ? data.chw.id : '' : '';
 
-      const idSourceValid: boolean = notNull(source) && notNull(sources) && sources?.includes(source) || !notNull(sources);
-      const idDistrictValid: boolean = notNull(district) && notNull(districts) && districts?.includes(district) || !notNull(districts);
-      const idSiteValid: boolean = notNull(site) && notNull(sites) && sites?.includes(site) || !notNull(sites);
-      const idChwValid: boolean = notNull(chw) && notNull(chws) && chws?.includes(chw) || !notNull(chws);
-      const isDateValid: boolean = notNull(start_date) && notNull(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
+      const idSourceValid: boolean = notEmpty(source) && notEmpty(sources) && sources?.includes(source) || !notEmpty(sources);
+      const idDistrictValid: boolean = notEmpty(district) && notEmpty(districts) && districts?.includes(district) || !notEmpty(districts);
+      const idSiteValid: boolean = notEmpty(site) && notEmpty(sites) && sites?.includes(site) || !notEmpty(sites);
+      const idChwValid: boolean = notEmpty(chw) && notEmpty(chws) && chws?.includes(chw) || !notEmpty(chws);
+      const isDateValid: boolean = notEmpty(start_date) && notEmpty(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
 
       if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
         if (data.source == 'Tonoudayo') {

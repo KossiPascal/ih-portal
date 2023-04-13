@@ -210,6 +210,18 @@ export class SyncService {
   }
 
 
+  syncAll(params: {start_date:string, end_date:string, userId?:string, dhisusersession?:string}): any {
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (notNull(params)) {
+      params.userId = user?.id;
+      params.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/fetch/all`, sendParams, Functions.HttpHeaders(this.auth));
+  }
+
+
   syncOrgUnits(params: SyncOrgUnit): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();

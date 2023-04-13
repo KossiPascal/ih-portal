@@ -83,7 +83,7 @@ export async function getChwDataToBeDeleteFromCouchDb(req: Request, resp: Respon
         //         const _repoSite = await getSiteSyncRepository();
         //         try {
         //             var jsonBody: any = JSON.parse(body).rows;
-        //             if (notNull(jsonBody)) {
+        //             if (notEmpty(jsonBody)) {
         //                 var len = jsonBody.length;
         //                 for (let i = 0; i < len; i++) {
         //                     const row: any = jsonBody[i];

@@ -370,7 +370,15 @@
               <p *ngIf="roles.isSuperUser()" style="color: white;">{{ separation }}</p>
 
               <li *ngIf="roles.isDataManager()" class="nav-item">
-                <a routerLink="fetch/sync" class="nav-link">
+                <a [routerLink]="[ '/fetch/sync','syncAllDataOneTime']" class="nav-link">
+                  <!-- <i class="far fa-circle nav-icon"></i> -->
+                  <p>Sync All One Time</p>
+                </a>
+              </li>
+              
+
+              <li *ngIf="roles.isDataManager()" class="nav-item">
+                <a [routerLink]="[ '/fetch/sync','syncDataOneByOne']" class="nav-link">
                   <!-- <i class="far fa-circle nav-icon"></i> -->
                   <p>Sync OrgUnits & Data</p>
                 </a>

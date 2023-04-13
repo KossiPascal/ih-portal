@@ -43,7 +43,7 @@ export class UserController {
             // const user = await repo.findOneBy({ id: req.body.id });
 
             // if (user) {
-            //     if (req.body.editPassword && notNull(req.body.password)) {
+            //     if (req.body.editPassword && notEmpty(req.body.password)) {
             //         req.body.password = await user.hashPassword(req.body.password);
             //     } else {
             //         delete req.body.password;
@@ -52,7 +52,7 @@ export class UserController {
             //     delete req.body.id;
             //     delete req.body.editPassword;
 
-            //     req.body.roles = notNull(req.body.roles)?`[${req.body.roles}]`:'[]'
+            //     req.body.roles = notEmpty(req.body.roles)?`[${req.body.roles}]`:'[]'
 
             //     const userUpdated = await repo.update({ id: user.id, }, req.body);
 
