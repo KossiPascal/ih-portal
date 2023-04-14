@@ -103,7 +103,7 @@ appSecured.use((req, res, next) => {
 //  │ │ │ │ │ │
 //  │ │ │ │ │ │
 //  * * * * * * 
-cron.schedule("59 */23 * * *", function () {
+cron.schedule("00 59 23 * * *", function () {
   console.log(`running this task every 23h 05 min 0 seconds.`);
   logNginx(`running this task every 23h 05 min 0 seconds.`);
   AutoSyncDataFromCloud();
