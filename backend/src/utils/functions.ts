@@ -7,17 +7,17 @@ import moment from "moment";
 import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws, Patients } from "../entity/Sync";
 import { Consts } from "./constantes";
 var fs = require('fs');
-var JFile=require('jfile'); //  "npm install jfile --save" required
+var JFile = require('jfile'); //  "npm install jfile --save" required
 
 
-export function logNginx(message:any){
+export function logNginx(message: any) {
     try {
-        
-    let nxFile=new JFile('/var/log/nginx/access.log'); // check path before if exist in your system . IF no , change it with the available path
-    nxFile.text+=`\n${message}`; //append new line in nginx log file
+
+        let nxFile = new JFile('/var/log/nginx/access.log'); // check path before if exist in your system . IF no , change it with the available path
+        nxFile.text += `\n${message}`; //append new line in nginx log file
 
     } catch (error) {
-        
+
     }
 }
 
@@ -209,18 +209,18 @@ export class Functions {
     }
 
     static onProcess() {
-        process.on('unhandledRejection', (error, promise) =>{ 
+        process.on('unhandledRejection', (error, promise) => {
             console.log('Alert! ERROR : ', error)
             logNginx(`Alert! ERROR : ${error}`);
-            });
+        });
         process.on('uncaughtException', err => {
             console.error(err && err.stack);
             logNginx(`${err && err.stack}`)
-            });
+        });
         process.on('ERR_HTTP_HEADERS_SENT', err => {
             console.error(err && err.stack);
             logNginx(`${err && err.stack}`)
-            });
+        });
     }
 
     static ServerStart(data: {
@@ -299,14 +299,14 @@ export function projectFolderParent(): string {
 }
 export function sslFolder(file_Name_with_extension: string): string {
     const dir = `${projectFolderParent()}/ssl`;
-    createDirectories(dir, (e:any) =>{});
+    createDirectories(dir, (e: any) => { });
     return `${dir}/${file_Name_with_extension}`;
     // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/ssl/${file_Name_with_extension}`
 }
 export function extractFolder(file_Name_with_extension: string): string {
     const folder = Consts.isProdEnv ? 'prod' : 'dev';
     const dir = `${projectFolderParent()}/storage/extracts/${folder}`;
-    createDirectories(dir, (e:any) =>{});
+    createDirectories(dir, (e: any) => { });
     return `${dir}/${file_Name_with_extension}`;
 }
 
@@ -315,7 +315,7 @@ export function JsonDbFolder(file_Name_without_extension: string): string {
     // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/storage/Json/${folder}/${fileName}.json`
     const folder = Consts.isProdEnv ? 'prod' : 'dev';
     const dir = `${projectFolderParent()}/storage/Json/${folder}`;
-    createDirectories(dir, (e:any) =>{});
+    createDirectories(dir, (e: any) => { });
     return `${dir}/${fileName}.json`
 }
 
@@ -353,7 +353,7 @@ export function patientAgeDetails(patient: Patients): {
 
 }
 
-export function delay(milliseconds:number){
+export function delay(milliseconds: number) {
     return new Promise(resolve => {
         setTimeout(resolve, milliseconds);
     });
@@ -651,7 +651,7 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
 // };
 
 export function notEmpty(data: any): boolean {
-    return data != '' && data != null && data != undefined && data.length != 0 && JSON.stringify(data) != JSON.stringify({})  && `${data}` != `{}`;
+    return data != '' && data != null && data != undefined && data.length != 0 && JSON.stringify(data) != JSON.stringify({}) && `${data}` != `{}`;
 }
 
 
