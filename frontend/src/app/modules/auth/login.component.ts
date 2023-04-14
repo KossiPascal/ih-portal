@@ -22,6 +22,7 @@ export class LoginComponent implements OnInit {
   isLoading:boolean = false;
   LoadingMsg: string = "Loading...";
   showRegisterPage:boolean = false;
+  passwordType:'password'|'text' = 'password';
 
 
   APP_LOGO: string = Consts.APP_LOGO;
@@ -42,6 +43,12 @@ export class LoginComponent implements OnInit {
     }, (err: any) => {
       this.showRegisterPage = false;
     });
+  }
+
+  
+
+  showHidePassword(){
+    this.passwordType = this.passwordType == 'password' ? 'text' : 'password';
   }
 
   setMessage(msg: string) {

@@ -25,6 +25,8 @@ export class RegisterComponent implements OnInit {
 
   APP_LOGO: string = Consts.APP_LOGO;
 
+  passwordType:'password'|'text' = 'password';
+
   constructor(private store:AppStorageService, private auth: AuthService, private router: Router, private http: HttpClient, private conf:ConfigService) { }
 
   private roles = new Roles(this.store);
@@ -36,6 +38,10 @@ export class RegisterComponent implements OnInit {
       this.auth.alreadyLogin();
     }
     this.authForm = this.createFormGroup();
+  }
+
+  showHidePassword(){
+    this.passwordType = this.passwordType == 'password' ? 'text' : 'password';
   }
 
   getConfigs(){

@@ -53,9 +53,9 @@
 
             <!-- <label for="password">Password</label> -->
             <div class="input-group mb-3">
-                <input id="password" type="password" class="form-control" placeholder="Password" formControlName="password" />
+                <input id="password" type="{{passwordType}}" class="form-control" placeholder="Password" formControlName="password" />
                 <div class="input-group-append">
-                    <div class="input-group-text">
+                    <div (click)="showHidePassword()" class="input-group-text">
                         <span class="fas fa-lock"></span>
                     </div>
                 </div>
