@@ -1,7 +1,7 @@
 {
   "name": "ih-portal",
-  "version": "1.2.49",
-  "author": "TSOLEGNAGBO Kossi <kossi.tsolegnagbo@aiesec.net>",
+  "version": "1.2.50",
+  "author": "TSOLEGNAGBO Kossi <kossi.tsolegnagbo@gmail.com>",
   "private": true,
   "description": "Integratehealth analytics app for chws followup",
   "homepage": "https://portal-integratehealth.org:9999",
@@ -9,7 +9,7 @@
   "contributors": [
     {
       "name": "TSOLEGNAGBO Kossi",
-      "email": "kossi.tsolegnagbo@aiesec.net"
+      "email": "kossi.tsolegnagbo@gmail.com"
     }
   ],
   "funding": {
@@ -67,8 +67,8 @@
     "dexie": "^3.2.2",
     "dexie-relationships": "^1.2.11",
     "highcharts": "^10.3.3",
-    "highcharts-angular": "^3.1.2",
     "http-server": "^14.1.1",
+    "jspdf": "^2.5.1",
     "lite-server": "^2.6.1",
     "moment": "^2.29.4",
     "morris": "^0.1.4",
@@ -79,12 +79,13 @@
     "postgres-array": "^3.0.1",
     "proj4": "^2.9.0",
     "rxjs": "~7.5.0",
-    "socket.io": "^4.5.1",
+    "socket.io": "^4.7.3",
     "socket.io-client": "^4.5.1",
     "sw-precache": "^5.2.1",
     "tslib": "^2.3.0",
     "turbocommons-ts": "^3.8.0",
     "typescript": "^4.8.4",
+    "xlsx": "^0.18.5",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {

@@ -60,8 +60,8 @@ def GenerateThinkMdDataToPushDhis2(KWARG):
     csvreader = fileData['body']
 
 
-    with createFile(extractFolder(), "thinkMd_output_for_dhis2"+"_"+str(KWARG['userId'])+"_output", ".json") as dhis2result:
-        with createFile(extractFolder(), "thinkMd_output"+"_"+str(KWARG['userId'])+"_output") as result:
+    with createFile(extractFolder(), "thinkMd_output_for_dhis2_"+str(KWARG['userId'])+"_output", ".json") as dhis2result:
+        with createFile(extractFolder(), "thinkMd_output_"+str(KWARG['userId'])+"_output") as result:
             result.write("site,reported_date,district,asc_code,total_vad,pcime,suivi_pcime,reference_pf,reference_pcime,reference_femmes_enceinte_postpartum,femmes_enceinte,femmes_postpartum,home_visit,diarrhee_pcime,paludisme_pcime,pneumonie_pcime,malnutrition_pcime,prompt_pcime_diarrhee_24h,prompt_pcime_diarrhee_48h,prompt_pcime_diarrhee_72h,prompt_pcime_paludisme_24h,prompt_pcime_paludisme_48h,prompt_pcime_paludisme_72h,prompt_pcime_pneumonie_24h,prompt_pcime_pneumonie_48h,prompt_pcime_pneumonie_72h,total_vad_femme_enceinte_NC_soins,femme_postpartum_NC,test_de_grossesse,pf\n")
 
 
@@ -140,75 +140,76 @@ def GenerateThinkMdDataToPushDhis2(KWARG):
                     status += getVal("status", headers[j], row[j])
                     completedDate += getVal("completedDate", headers[j], row[j])
                 
-                chwsData = {
-                    "orgUnit": orgUnit,
-                    "reported_date": reported_date,
-                    "code_asc": code_asc,
-                    "district": district,
-                    "data_source": 'thinkmd',
-                    "total_vad": total_vad,
-                    "pcime": pcime,
-                    "suivi_pcime": suivi_pcime,
-                    "femmes_enceintes_NC": femmes_enceintes_NC,
-                    "reference_pf": reference_pf,
-                    "prompt_pcime_diarrhee_24h": prompt_pcime_diarrhee_24h,
-                    "prompt_pcime_diarrhee_48h": prompt_pcime_diarrhee_48h,
-                    "prompt_pcime_diarrhee_72h": prompt_pcime_diarrhee_72h,
-                    "prompt_pcime_paludisme_24h": prompt_pcime_paludisme_24h,
-                    "prompt_pcime_paludisme_48h": prompt_pcime_paludisme_48h,
-                    "prompt_pcime_paludisme_72h": prompt_pcime_paludisme_72h,
-                    "prompt_pcime_pneumonie_24h": prompt_pcime_pneumonie_24h,
-                    "prompt_pcime_pneumonie_48h": prompt_pcime_pneumonie_48h,
-                    "prompt_pcime_pneumonie_72h": prompt_pcime_pneumonie_72h,
-                    "femmes_enceinte": femmes_enceinte,
-                    "reference_femmes_enceinte_postpartum": reference_femmes_enceinte_postpartum,
-                    "reference_pcime": reference_pcime,
-                    "diarrhee_pcime": diarrhee_pcime,
-                    "femmes_postpartum": femmes_postpartum,
-                    "malnutrition_pcime": malnutrition_pcime,
-                    "paludisme_pcime": paludisme_pcime,
-                    "pneumonie_pcime": pneumonie_pcime,
-                    "femme_postpartum_NC": femme_postpartum_NC,
-                    "home_visit": home_visit,
-                    "test_de_grossesse": test_de_grossesse,
-                    "pf": pf,
-                }
-                
-                if KWARG['InsertIntoDhis2'] == True:
-                    dhis2DictionaryData.append(chwsData)
+                if orgUnit in KWARG['sites']:
+                    chwsData = {
+                        "orgUnit": orgUnit,
+                        "reported_date": reported_date,
+                        "code_asc": code_asc,
+                        "district": district,
+                        "data_source": 'thinkmd',
+                        "total_vad": total_vad,
+                        "pcime": pcime,
+                        "suivi_pcime": suivi_pcime,
+                        "femmes_enceintes_NC": femmes_enceintes_NC,
+                        "reference_pf": reference_pf,
+                        "prompt_pcime_diarrhee_24h": prompt_pcime_diarrhee_24h,
+                        "prompt_pcime_diarrhee_48h": prompt_pcime_diarrhee_48h,
+                        "prompt_pcime_diarrhee_72h": prompt_pcime_diarrhee_72h,
+                        "prompt_pcime_paludisme_24h": prompt_pcime_paludisme_24h,
+                        "prompt_pcime_paludisme_48h": prompt_pcime_paludisme_48h,
+                        "prompt_pcime_paludisme_72h": prompt_pcime_paludisme_72h,
+                        "prompt_pcime_pneumonie_24h": prompt_pcime_pneumonie_24h,
+                        "prompt_pcime_pneumonie_48h": prompt_pcime_pneumonie_48h,
+                        "prompt_pcime_pneumonie_72h": prompt_pcime_pneumonie_72h,
+                        "femmes_enceinte": femmes_enceinte,
+                        "reference_femmes_enceinte_postpartum": reference_femmes_enceinte_postpartum,
+                        "reference_pcime": reference_pcime,
+                        "diarrhee_pcime": diarrhee_pcime,
+                        "femmes_postpartum": femmes_postpartum,
+                        "malnutrition_pcime": malnutrition_pcime,
+                        "paludisme_pcime": paludisme_pcime,
+                        "pneumonie_pcime": pneumonie_pcime,
+                        "femme_postpartum_NC": femme_postpartum_NC,
+                        "home_visit": home_visit,
+                        "test_de_grossesse": test_de_grossesse,
+                        "pf": pf,
+                    }
+                    
+                    if KWARG['InsertIntoDhis2'] == True:
+                        dhis2DictionaryData.append(chwsData)
 
-                result.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
-                    getDhis2OrgUnit(chwsData["orgUnit"], False), # get Name
-                    chwsData["reported_date"], 
-                    chwsData["district"],
-                    chwsData["code_asc"], # get Name
-                    chwsData["total_vad"],
-                    chwsData["pcime"],
-                    chwsData["suivi_pcime"],
-                    chwsData["reference_pf"],
-                    chwsData["reference_pcime"],
-                    chwsData["reference_femmes_enceinte_postpartum"], 
-                    chwsData["femmes_enceinte"], 
-                    chwsData["femmes_postpartum"], 
-                    chwsData["home_visit"],
-                    chwsData["diarrhee_pcime"],
-                    chwsData["paludisme_pcime"],
-                    chwsData["pneumonie_pcime"],
-                    chwsData["malnutrition_pcime"],
-                    chwsData["prompt_pcime_diarrhee_24h"],
-                    chwsData["prompt_pcime_diarrhee_48h"],
-                    chwsData["prompt_pcime_diarrhee_72h"],
-                    chwsData["prompt_pcime_paludisme_24h"],
-                    chwsData["prompt_pcime_paludisme_48h"],
-                    chwsData["prompt_pcime_paludisme_72h"],
-                    chwsData["prompt_pcime_pneumonie_24h"],
-                    chwsData["prompt_pcime_pneumonie_48h"],
-                    chwsData["prompt_pcime_pneumonie_72h"],
-                    chwsData["femmes_enceintes_NC"],
-                    chwsData["femme_postpartum_NC"],
-                    chwsData["test_de_grossesse"],
-                    chwsData["pf"]),)
-            
+                    result.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
+                        getDhis2OrgUnit(chwsData["orgUnit"], False), # get Name
+                        chwsData["reported_date"], 
+                        chwsData["district"],
+                        chwsData["code_asc"], # get Name
+                        chwsData["total_vad"],
+                        chwsData["pcime"],
+                        chwsData["suivi_pcime"],
+                        chwsData["reference_pf"],
+                        chwsData["reference_pcime"],
+                        chwsData["reference_femmes_enceinte_postpartum"], 
+                        chwsData["femmes_enceinte"], 
+                        chwsData["femmes_postpartum"], 
+                        chwsData["home_visit"],
+                        chwsData["diarrhee_pcime"],
+                        chwsData["paludisme_pcime"],
+                        chwsData["pneumonie_pcime"],
+                        chwsData["malnutrition_pcime"],
+                        chwsData["prompt_pcime_diarrhee_24h"],
+                        chwsData["prompt_pcime_diarrhee_48h"],
+                        chwsData["prompt_pcime_diarrhee_72h"],
+                        chwsData["prompt_pcime_paludisme_24h"],
+                        chwsData["prompt_pcime_paludisme_48h"],
+                        chwsData["prompt_pcime_paludisme_72h"],
+                        chwsData["prompt_pcime_pneumonie_24h"],
+                        chwsData["prompt_pcime_pneumonie_48h"],
+                        chwsData["prompt_pcime_pneumonie_72h"],
+                        chwsData["femmes_enceintes_NC"],
+                        chwsData["femme_postpartum_NC"],
+                        chwsData["test_de_grossesse"],
+                        chwsData["pf"]),)
+                
         # Serializing json
         json_object = json.dumps(dhis2DictionaryData, indent=4)
         # Writing to sample.json
@@ -322,25 +323,26 @@ def getThinkMdDataFromCloud(KWARG):
             # outPutData['ErrorMsg']['server_error'] = " Can not connect to server to get Data. Check your Connection or informations you provided !"
             outPutData['ErrorMsg']['server_error'] = " "+ str(err) 
 
-        generateDataFromFinalFile(KWARG)
+        generateDataFromFinalFile(KWARG, True)
 
 
 
 
 
-def generateDataFromFinalFile(KWARG):
+def generateDataFromFinalFile(KWARG, isError = False):
     if KWARG['type'] == 'thinkMd_only':
-        try:
-            allData = getOutPutDataFromFile("thinkMd_output"+"_"+str(KWARG['userId'])+"_output")
-            outPutData["Data"]["head"] = allData['head']
-            finalBody = allData['body']
-            for row in finalBody:
-                rowData = []
-                for r in row:
-                    rowData.append(str(r).replace("'", '’'))
-                outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
-        except:
-            pass
+        if isError != True:
+            try:
+                allData = getOutPutDataFromFile("thinkMd_output_"+str(KWARG['userId'])+"_output")
+                outPutData["Data"]["head"] = allData['head']
+                finalBody = allData['body']
+                for row in finalBody:
+                    rowData = []
+                    for r in row:
+                        rowData.append(str(r).replace("'", '’'))
+                    outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
+            except:
+                pass
         print(str(outPutData).replace("'", '"'))
 
 

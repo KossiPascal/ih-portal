@@ -1,0 +1,448 @@
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="card card-info">
+
+      <h2 class="title" style="text-align: center; color: blue;">Situation Médicament Des ASC</h2>
+
+      <div class="overlay-wrapper">
+
+        <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
+          <div class="text-bold pt-2"> {{initMsg}} </div>
+        </div>
+
+        <div class="card-header">
+          <form [formGroup]="chwsDrugDataForm" (ngSubmit)="initDataFilted()" novalidate>
+            <div class="row">
+              <!-- <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Début</label>
+                  <input type="date" class="form-control" formControlName="start_date" />
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Fin</label>
+                  <input type="date" class="form-control" formControlName="end_date" />
+                </div>
+              </div> -->
+
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Mois</label>
+                  <select *ngIf="Months$.length > 0" class="form-control" formControlName="month">
+                    <!-- <option value="{{month$.id}}">{{month$.label}}</option> -->
+                    <option *ngFor="let m of Months$" value="{{m.id}}">
+                      {{ m.labelFR }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Année</label>
+                  <select *ngIf="Years$.length > 0" class="form-control" formControlName="year">
+                    <!-- <option value="{{year$}}">{{year$}}</option> -->
+                    <option *ngFor="let y of Years$" value="{{y}}">
+                      {{ y }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>District</label>
+                  <select *ngIf="Districts$.length > 0" (change)="genarateSites()" class="form-control"
+                    [multiple]="Districts$.length > 0? 'multiple' : ''" formControlName="districts">
+                    <!-- <option value=""></option> -->
+                    <option *ngFor="let dist of Districts$" value="{{dist.id}}">
+                      {{ dist.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Site</label>
+                  <select (change)="genarateChws()" class="form-control" [multiple]="site$.length > 0? 'multiple' : ''"
+                    formControlName="sites">
+                    <!-- <option value=""></option> -->
+                    <option *ngFor="let site of site$" value="{{site.id}}">
+                      {{ site.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>ASC</label>
+                  <select class="form-control" [multiple]="chw$.length > 0? 'multiple' : ''" formControlName="chws">
+                    <!-- <option value=""></option> -->
+                    <option *ngFor="let chw of chw$" value="{{chw.id}}">
+                      {{chw.name}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label style="color: white;">.</label>
+                  <button class="submit" [disabled]="!chwsDrugDataForm.valid" type="submit"
+                    class="btn btn-primary form-control">
+                    Charger <span class="fa fa-floppy-o fa-right"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content -->
+
+    <div class="content">
+      <div class="container-fluid">
+
+        <div class="col-sm-5">
+          <h2 *ngIf="data_error_messages!=''">
+            <div class="card card-info">
+              <div class="card-body">
+                {{ data_error_messages }}
+              </div>
+            </div>
+          </h2>
+          <h2 *ngIf="data_no_data_found == true">
+            <div class="card card-info">
+              <div class="card-body">
+                Pas de données trouvée avec les paramettres renseignés !
+              </div>
+            </div>
+          </h2>
+        </div>
+
+        <div *ngIf="data_error_messages=='' && FinalChwsOutputData$.length > 0">
+          <div *ngFor="let datas of FinalChwsOutputData$; let i=index">
+              <div id="data-info-{{i}}" [attr.data-district]="datas.chw.site.district.id"
+                [attr.data-site]="datas.chw.site.id" [attr.data-chw]="datas.chw.id"></div>
+              <!-- <div style="height: 500px!important; overflow-y:scroll!important;"> -->
+                <form (submit)="saveOrUpdate($event,i)" novalidate>
+
+                  <div class="card-body p-0" class="card">
+
+                    <div class="card-header">
+                      <div class="card-title">
+                        <p class="chw-info" style="color: blue;font-size:20px">{{ datas.chw.site.district.name }} > {{
+                          datas.chw.site.name }} > <strong>{{ datas.chw.name }}</strong> ( {{ datas.chw.external_id }} )
+                        </p>
+
+                        <ul
+                          *ngIf="editCmm[i]!='edit' && editQtyValidated[i]!='edit' && editQtyDelivered[i]!='edit' && editObservations[i]!='edit' && editTheoreticalQtyOrder[i]!='edit'">
+                          <li><span (click)="excel('export_table'+i)">Excel</span></li>
+                          <li><span (click)="csv('export_table'+i)">CSV</span></li>
+                          <li><span (click)="json('export_table'+i)">JSON</span></li>
+                          <li><span (click)="pdf('export_table'+i)">PDF</span></li>
+                          <li><span (click)="print('export_table'+i)">PRINT</span></li>
+                        </ul>
+
+                        <button
+                          *ngIf="editCmm[i]=='edit' || editQtyValidated[i]=='edit' || editQtyDelivered[i]=='edit' || editObservations[i]=='edit' || editTheoreticalQtyOrder[i]=='edit' || isUpdateLoading[i] == 'true'"
+                          class="submit" [disabled]="isUpdateLoading[i] == 'true'" type="submit" class="submit-btn btn btn-warning">
+                          <i *ngIf="isUpdateLoading[i] == 'true'" style="margin-right: 20px!important;" class="fas fa-1x fa-sync-alt fa-spin"></i>
+                          {{ isUpdateLoading[i] == 'true' ? 'Sauvegarde en cours ...' : 'Mettre à jour'}} 
+                        </button>
+                      </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div style="overflow-x:scroll!important;">
+                      <!-- (click)="sort('export_table'+i)" -->
+                      <table [id]="'export_table'+i" class="table table-sm table-striped" style="margin: auto;">
+                        <thead>
+                          <!-- <tr class="bg-info head-elem">
+                        <th rowspan="2">Id</th>
+                        <th rowspan="2">MEG</th>
+                        <th rowspan="2">Quantité début du mois</th>
+                        <th rowspan="2">Quantité reçue du mois</th>
+                        <th rowspan="2">Quantité totale du mois</th>
+                        <th rowspan="2">Consommation du mois</th>
+                        <th rowspan="2">Quantité théorique restant</th>
+                        <th rowspan="2">Quantité comptée à l'inventaire</th>
+                        <th rowspan="2">Ecart d'inventaire</th>
+                        <th rowspan="2">CMM de l'année N-1  
+                          <i (click)="editCmmClick(i)"  class="fas {{this.editCmm[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                        <th rowspan="2">Quantité théorique à commander 
+                          <i (click)="editTheoreticalQtyOrderClick(i)"  class="fas {{this.editTheoreticalQtyOrder[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                        <th rowspan="2">Quantités à commander</th>
+                        <th rowspan="2">Quantité validée 
+                          <i (click)="editQtyValidatedClick(i)"  class="fas {{editQtyValidated[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                        <th rowspan="2">Quantité livrée 
+                          <i (click)="editQtyDeliveredClick(i)"  class="fas {{editQtyDelivered[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                        <th rowspan="2">Taux de satisfaction</th>
+                        
+                        <th colspan="9">Observation ASC</th>
+                        <th rowspan="2">Observations (Pharmacie) 
+                          <i (click)="editObservationsClick(i)"  class="fas {{editObservations[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                      </tr> -->
+
+                          <tr class="bg-info head-elem">
+                            <th rowspan="2">Id</th>
+                            <th rowspan="2">MEG</th>
+                            <th rowspan="2">
+                              Quantité début du mois <br> 
+                              <small><small>ou la quantité à l'inventaire précédent</small>(A)</small>
+                            </th>
+                            <th rowspan="2">Quantité reçue au cours du mois <small>(B)</small></th>
+                            <th rowspan="2">Quantité totale du mois <small>(C) C=A+B</small></th>
+                            <th rowspan="2">Consommation mensuelle du mois <small>(D)</small></th>
+                            <th rowspan="2">Quantité théorique disponible à l'inventaire <small>E= C-D</small></th>
+                            <th rowspan="2">Quantité comptée à l'inventaire <small>(F)</small></th>
+                            <th rowspan="2">Ecart d'inventaire <small>J = F-E</small></th>
+                            <th rowspan="2">CMM de l'année N-1 <small>(G)</small>
+                              <i (click)="editCmmClick(i)"
+                                class="fas {{this.editCmm[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                            </th>
+                            <th rowspan="2">Quantité théorique à commander <small>(H)</small>
+                              <i (click)="editTheoreticalQtyOrderClick(i)"
+                                class="fas {{this.editTheoreticalQtyOrder[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                            </th>
+                            <th rowspan="2">Quantités à commander <br> <small><small>(Expression besoins ASC)</small>(I)</small>
+                            </th>
+                            <th rowspan="2">Quantité validée
+                              <i (click)="editQtyValidatedClick(i)"
+                                class="fas {{editQtyValidated[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                            </th>
+                            <th rowspan="2">Quantité livrée
+                              <i (click)="editQtyDeliveredClick(i)"
+                                class="fas {{editQtyDelivered[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                            </th>
+                            <th rowspan="2">Taux de satisfaction</th>
+                            <th colspan="9">Observation ASC</th>
+                            
+                            <th rowspan="2">Observations (Pharmacie)
+                              <i (click)="editObservationsClick(i)"
+                                class="fas {{editObservations[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                            </th>
+                          </tr>
+
+                          <tr class="bg-info head-elem">
+                            <!-- 
+                              <th>Autre Mouvement</th>
+                              <th>Quantité</th>
+                              <th>A (Code ASC)</th>
+                              <th>Perte</th>
+                              <th>Avarié</th>
+                              <th>Cassé</th>
+                              <th>Périmé</th>
+                              <th>Autre</th>
+                              <th>Commentaires ASC</th> 
+                            -->
+
+                            <th>Emprunt/Prêt du mois</th>
+                            <th>Quantité Emprunt/Prêt du mois</th>
+                            <th>Nom & Code ASC</th>
+                            <th>Perte du mois</th>
+                            <th>Avarié du mois</th>
+                            <th>Cassé du mois</th>
+                            <th>Périmé du mois</th>
+                            <th>Autre du mois</th>
+                            <th>Commentaires ASC</th>
+                          </tr>
+                          
+                        </thead>
+                        <tbody>
+                          <ng-container *ngFor="let k of objectKeys(datas.data)">
+                            <tr *ngIf="getKey(toChwsDrugData(sortedArray(datas.data), k).key) as key">
+                              <td><b>{{ key }}</b></td>
+                              <td class="ajust-cells"><label><b>{{ getLabel(toChwsDrugData(sortedArray(datas.data),
+                                    k).key) }}</b></label></td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data),
+                                  k).val.month_quantity_beginning) }}</p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.month_quantity_received)
+                                  }}</p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.month_total_quantity) }}
+                                </p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.month_consumption) }}
+                                </p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.theoretical_quantity) }}
+                                </p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.inventory_quantity) }}
+                                </p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.inventory_variance) }}
+                                </p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>
+                                  <span *ngIf="editCmm[i]!='edit'">
+                                    {{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.year_cmm) }}
+                                  </span>
+                                  <input *ngIf="editCmm[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
+                                    id="year_cmm_{{i}}_{{key}}" [attr.data-drug-index]="key" type="number"
+                                    value="{{ toChwsDrugData(sortedArray(datas.data), k).val.year_cmm }}" />
+                                </p>
+                              </td>
+
+                              <td class="ajust-cells">
+                                <p>
+                                  <span *ngIf="editTheoreticalQtyOrder[i]!='edit'">
+                                    {{ convertQty(toChwsDrugData(sortedArray(datas.data),
+                                    k).val.theoretical_quantity_to_order) }}
+                                  </span>
+                                  <input *ngIf="editTheoreticalQtyOrder[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
+                                    id="theoretical_quantity_to_order_{{i}}_{{key}}" [attr.data-drug-index]="key"
+                                    type="number"
+                                    value="{{ toChwsDrugData(sortedArray(datas.data), k).val.theoretical_quantity_to_order }}" />
+                                </p>
+                              </td>
+
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.quantity_to_order) }}</p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>
+                                  <span *ngIf="editQtyValidated[i]!='edit'">
+                                    {{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.quantity_validated) }}
+                                  </span>
+                                  <input *ngIf="editQtyValidated[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
+                                    id="quantity_validated_{{i}}_{{key}}" [attr.data-drug-index]="key" type="number"
+                                    value="{{ toChwsDrugData(sortedArray(datas.data), k).val.quantity_validated }}" />
+                                </p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>
+                                  <span *ngIf="editQtyDelivered[i]!='edit'">
+                                    {{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.delivered_quantity) }}
+                                  </span>
+                                  <input *ngIf="editQtyDelivered[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
+                                    id="delivered_quantity_{{i}}_{{key}}" [attr.data-drug-index]="key" type="number"
+                                    value="{{ toChwsDrugData(sortedArray(datas.data), k).val.delivered_quantity }}" />
+                                </p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ toChwsDrugData(sortedArray(datas.data), k).val.satisfaction_rate }}</p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ toChwsDrugData(sortedArray(datas.data), k).val.loan_borrowing }}</p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.loan_borrowing_quantity)
+                                  }}</p>
+                              </td>
+
+                              <td class="same-line">
+                                <p>{{ toChwsDrugData(sortedArray(datas.data), k).val.loan_borrowing_chws_code }}</p> <i
+                                  *ngIf="toChwsDrugData(sortedArray(datas.data), k).val.loan_borrowing_chws_code!=''"
+                                  (click)="showHideMsg('loan_borrowing_chws_code')" class="fas fa-eye"></i>
+                              </td>
+
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.quantity_loss) }}</p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.quantity_damaged) }}</p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.quantity_broken) }}</p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.quantity_expired) }}</p>
+                              </td>
+                              <td class="ajust-cells">
+                                <p>{{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.other_quantity) }}</p>
+                              </td>
+                              <td class="same-line">
+                                <p>{{ toChwsDrugData(sortedArray(datas.data), k).val.comments }}</p> <i
+                                  *ngIf="toChwsDrugData(sortedArray(datas.data), k).val.comments!=''"
+                                  (click)="showHideMsg('comments')" class="fas fa-eye"></i>
+                              </td>
+                              <td class="same-line">
+                                <span *ngIf="editObservations[i]!='edit'">
+                                  {{ toChwsDrugData(sortedArray(datas.data), k).val.observations }}
+                                </span>
+                                <input *ngIf="editObservations[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-textarea form-control"
+                                  id="observations_{{i}}_{{key}}" [attr.data-drug-index]="key"
+                                  value="{{ toChwsDrugData(sortedArray(datas.data), k).val.observations }}" />
+                                <i *ngIf="toChwsDrugData(sortedArray(datas.data), k).val.observations!=''"
+                                  (click)="showHideMsg('observations')" class="fas fa-eye"></i>
+                              </td>
+                            </tr>
+                          </ng-container>
+                        </tbody>
+
+                      </table>
+                    </div>
+                  </div>
+                </form>
+              <!-- </div> -->
+              <p *ngIf="i < FinalChwsOutputData$.length-1">
+                <br><br>
+              </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <!-- <div *ngIf="selectedChwData!=null" class="modal fade" id="modal-default">
+      <div class="modal-dialog">
+
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2> {{ selectedChwData.chw.name  }} <br> <small>{{ selectedChwData.chw.external_id }}</small> </h2>
+
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+          </div>
+          <div class="modal-body">
+            <div class="row card-body">
+              <div class="{{ showClass(data)}}" *ngFor="let data of selectedChwData.data | keyvalue">
+                <div *ngIf="isNumber(data.value)" style="border: 1px solid black;" class="small-box bg-info">
+                  <div class="inner">
+                    <h3 style="font-size: 45px;text-align: center;"> 222222 </h3>
+                    <p style="font-size: 20px;text-align: center;"><strong> 333333 </strong></p>
+                  </div>
+                  <div class="icon"> <i class="ion ion-stats-bars"></i> </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer justify-content-between">
+            <button id="close-modal" type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- <br><br> -->
+
+  </div>
+</section>
+<!-- /.content -->

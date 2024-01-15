@@ -51,7 +51,7 @@ export class SyncOrgUnitDataComponent implements OnInit {
   initDate!: { start_date: string, end_date: string };
 
   constructor(private store: AppStorageService, private route: ActivatedRoute, private sync: SyncService, private http: HttpClient, private auth: AuthService) { 
-    if(!this.roles.isSuperUser()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+    if(!this.roles.isSuperUser()) location.href = this.auth.userValue()?.defaultRedirectUrl ?? ''!;
     
   }
   

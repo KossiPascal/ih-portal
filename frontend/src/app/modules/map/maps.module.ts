@@ -5,16 +5,17 @@ import { GooglemapComponent } from './goolemap/googlemap.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HighchartMap1Component } from './highchart1/highchart1.component';
 import { HighchartMap2Component } from './highchart2/highchart2.component';
-import { HighchartsChartModule } from 'highcharts-angular';
+//import { HighchartsChartModule } from 'highcharts-angular';
+import { MapChartComponent } from './map-chart/map-chart.component';
 
 @NgModule({
   imports: [
     CommonModule,
     ReactiveFormsModule,
     MapsRoutingModule,
-    HighchartsChartModule
+    //HighchartsChartModule
   ],
-  declarations: [GooglemapComponent, HighchartMap1Component, HighchartMap2Component],
+  declarations: [GooglemapComponent,MapChartComponent, HighchartMap1Component, HighchartMap2Component],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class MapsModule { }

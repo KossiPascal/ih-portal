@@ -4,72 +4,33 @@ import { JsonDatabase } from '../json-data-source';
 
 export class UserController {
 
-    // _repoUser = new JsonDatabase('users');
-    // 
-    // for (let i = 0; i < sites.length; i++) {
-    //     const site = sites[i];
-    //     if (site.external_id == uid) return site.id;
-    // }
+    private static repoUser: JsonDatabase = new JsonDatabase('users');
 
-
-                                
     static allUsers = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const _repoUser = new JsonDatabase('users');
-            var users: User[] = Object.values(_repoUser.all());
-            return res.status(200).json({status:200, data: users});
-            
-            // const rep = await getUserRepository();
-            // const usersFound = await rep.find({ order: { username: "ASC", id: "DESC" } });
-            // var users: User[] = [];
-            // for (let i = 0; i < usersFound.length; i++) {
-            //     const user = usersFound[i];
-            //     user.password = '';
-            //     users.push(user);
-            // }
-            
+            var users: User[] = Object.values(this.repoUser.all());
+            return res.status(200).json({ status: 200, data: users });
         } catch (err: any) {
-            // if (!err.statusCode) err.statusCode = 500;
-            // next(err);
-            return res.status(201).json({status:201, data: `${err}`});
+            return res.status(201).json({ status: 201, data: `${err}` });
         }
     }
-
-
 
     static updateUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            // const repo = await getUserRepository();
-            // const user = await repo.findOneBy({ id: req.body.id });
-
-            // if (user) {
-            //     if (req.body.editPassword && notEmpty(req.body.password)) {
-            //         req.body.password = await user.hashPassword(req.body.password);
-            //     } else {
-            //         delete req.body.password;
-            //     }
-            //     delete req.body.passwordConfirm;
-            //     delete req.body.id;
-            //     delete req.body.editPassword;
-
-            //     req.body.roles = notEmpty(req.body.roles)?`[${req.body.roles}]`:'[]'
-
-            //     const userUpdated = await repo.update({ id: user.id, }, req.body);
-
-            //     return res.status(200).json({status:200, data:userUpdated});
-            // } else {
-            //     return res.status(res.statusCode).json({ status:401, data: 'Not Found' });
-            // }
-            // // const { parse } = require('postgres-array')
-            // // parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
+            const user = this.repoUser.getBy(req.body.id) as User;
+            if (user) {
+                user.roles = req.body.roles;
+                user.groups = req.body.groups;
+                user.meeting_report = req.body.meeting_report;
+                this.repoUser.save(user);
+                var users: User[] = Object.values(this.repoUser.all());
+                return res.status(200).json({ status: 200, data: users });
+            }
+            return res.status(res.statusCode).json({ status: 401, data: 'Not Found' });
         } catch (err: any) {
-            // if (!err.statusCode) err.statusCode = 500;
-            // next(err);
-            return res.status(201).json({status:201, data: `${err}`});
+            return res.status(201).json({ status: 201, data: `${err}` });
         }
     }
-
-
 
     static deleteUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -81,45 +42,39 @@ export class UserController {
             //     return res.status(res.statusCode).json({status:401, data:'Vous ne pouvez pas supprimer cet utilisateur'});
             // }
         } catch (err: any) {
-            // if (!err.statusCode) err.statusCode = 500;
-            // next(err);
-            return res.status(201).json({status:201, data: `${err}`});
+            return res.status(201).json({ status: 201, data: `${err}` });
         }
     }
-
-
-
-
 }
 
 
 
 
-                // {
-                //     order: {
-                //         singer: {
-                //             name: "ASC"
-                //         }
-                //     }
-                // }
+// {
+//     order: {
+//         singer: {
+//             name: "ASC"
+//         }
+//     }
+// }
 
 
 
-            // const { parse } = require('postgres-array')
-            // parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
-            // console.log(usersFound.toString);
+// const { parse } = require('postgres-array')
+// parse('{1,2,3}', (value) => parseInt(value, 10))  //=> [1, 2, 3]
+// console.log(usersFound.toString);
 
-            // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 
-            // let res = await repository.findAndCount({
-            //     where: [{ username : Like(`%${searchValue}%`) }, { action : Like(`%${searchValue}%`) }, { ip : Like(`%${searchValue}%`) }],
-            //     order: { [sortField]: sortOrder === "descend" ? 'DESC' : 'ASC', },
-            //     skip: (current - 1) * pageSize,
-            //     take: pageSize,
-            //   });
+// let res = await repository.findAndCount({
+//     where: [{ username : Like(`%${searchValue}%`) }, { action : Like(`%${searchValue}%`) }, { ip : Like(`%${searchValue}%`) }],
+//     order: { [sortField]: sortOrder === "descend" ? 'DESC' : 'ASC', },
+//     skip: (current - 1) * pageSize,
+//     take: pageSize,
+//   });
 
-            // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 
 
@@ -201,14 +156,14 @@ export class UserController {
 
 
 
-    //   const user = new User();
-    //   user.username = req.body.username;
-    //   user.password = req.body.password;
-    // //   user.price = Number.parseFloat(req.body.price);
-    // //   user.stock = Number.parseInt(req.body.stock);
+//   const user = new User();
+//   user.username = req.body.username;
+//   user.password = req.body.password;
+// //   user.price = Number.parseFloat(req.body.price);
+// //   user.stock = Number.parseInt(req.body.stock);
 
-    //   const result = await repository.save(user);
-    //   res.send(result);
+//   const result = await repository.save(user);
+//   res.send(result);
 
 // const OktaJwtVerifier = require('@okta/jwt-verifier');
 

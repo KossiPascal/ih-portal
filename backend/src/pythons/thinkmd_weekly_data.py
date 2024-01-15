@@ -124,31 +124,33 @@ def getThinkMdWeeklyDataFromDhis2(ARGS):
                         result.write(old)
                         oldOrgUnitLine = newOrgUnitLine
             # file.close()
+        generateThinkMdWeeklyData(ARGS)
     except Exception as err :
         outPutData['Error'] +=1
         if 'server_error' not in outPutData['ErrorMsg']:
             # outPutData['ErrorMsg']['server_error'] = " Can not connect to ThinkMd server to get Data. Check your Connection or informations you provided !"
             outPutData['ErrorMsg']['server_error'] = " "+str(err)
 
-    generateThinkMdWeeklyData(ARGS)
+        generateThinkMdWeeklyData(ARGS, True)
     # getMedicWeeklyData(ARGS)
 
-def generateThinkMdWeeklyData(ARGS):
-    if pathExist(extractPath("weekly_thinkmd_medic_data_"+str(ARGS['userId'])+".csv")):
-        allData = getOutPutDataFromFile("weekly_thinkmd_medic_data_"+str(ARGS['userId']))
-        outPutData["Data"]["head"] = allData['head']
-        finalBody = allData['body']
-        for row in finalBody:
-            rowData = []
-            for r in row:
-                t1 = str(r).replace("'", '`')
-                t2 = t1.replace("'", '`')
-                t3 = t2.replace("’", '`')
-                t4 = t3.replace("’", '`')
-                t5 = t4.replace('\\','')
-                t6 = t5.replace('\\','')
-                rowData.append(t6)
-            outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
+def generateThinkMdWeeklyData(ARGS, isError = False):
+    if isError != True:
+        if pathExist(extractPath("weekly_thinkmd_medic_data_"+str(ARGS['userId'])+".csv")):
+            allData = getOutPutDataFromFile("weekly_thinkmd_medic_data_"+str(ARGS['userId']))
+            outPutData["Data"]["head"] = allData['head']
+            finalBody = allData['body']
+            for row in finalBody:
+                rowData = []
+                for r in row:
+                    t1 = str(r).replace("'", '`')
+                    t2 = t1.replace("'", '`')
+                    t3 = t2.replace("’", '`')
+                    t4 = t3.replace("’", '`')
+                    t5 = t4.replace('\\','')
+                    t6 = t5.replace('\\','')
+                    rowData.append(t6)
+                outPutData["Data"]["body"][str(indexOf(finalBody,row))] = rowData
     print(str(outPutData).replace("'", '"'))
 
 

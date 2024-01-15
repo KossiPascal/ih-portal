@@ -68,7 +68,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
 @NgModule({
   declarations: [
     AppComponent,
-    IndexDbItemListComponent
+    IndexDbItemListComponent,
   ],
   imports: [
     BrowserModule,

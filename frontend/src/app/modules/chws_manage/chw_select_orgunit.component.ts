@@ -39,7 +39,7 @@ export class SelectOrgUnitComponent implements OnInit {
   message: string = '';
 
   constructor(private store: AppStorageService, private db: DatabaseUtilService, private auth: AuthService, private sync: SyncService, private router: Router) {
-    if (!this.roles.isChws()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+    if (!this.roles.isChws()) location.href = this.auth.userValue()?.defaultRedirectUrl ?? ''!;
   }
 
 
@@ -142,7 +142,7 @@ export class SelectOrgUnitComponent implements OnInit {
     if (chw_found!=null && notNull(chw_found)) {
       localStorage.removeItem("chw_found");
       this.store.set("chw_found", JSON.stringify(chw_found));
-      location.href = Functions.getSavedUrl() ?? this.auth.userValue()?.defaultRedirectUrl!;
+      location.href = Functions.getSavedUrl() ?? this.auth.userValue()?.defaultRedirectUrl ?? ''!;
     } else {
       this.message = 'Erreur, veullez rééssayer ou contacter le superviseur!';
     }

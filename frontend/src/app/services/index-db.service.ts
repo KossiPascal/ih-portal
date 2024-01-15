@@ -132,9 +132,6 @@ export class IndexDbService extends Dexie {
         // return  await dbtable.orderBy('id').toArray();
     }
 
-
-
-
 //   async function listFriends() {
 //     return await db.friends
 //       .where("age")
@@ -153,11 +150,11 @@ export class IndexDbService extends Dexie {
       }
 
     // delete data
-   async deleteOne(dbtable: Table, id: any) {
+    async deleteOne(dbtable: Table, id: any) {
         dbtable.delete(id).then((val: any) => console.log(val));
     }
 
-   async clearDb(dbtable: Table) {
+    async clearDb(dbtable: Table) {
         dbtable.clear().then((val: any) => console.log(val));
     }
 
@@ -173,8 +170,6 @@ export class IndexDbService extends Dexie {
         }
         return flag;
     };
-
-
 }
 
 
@@ -442,7 +437,9 @@ export class IndexDbService extends Dexie {
 // inAnyRange(ranges): Collection;
 // keys(): Promise;
 // last(): Promise;
+// yes ca passe vraimen
 // limit(n: number): Collection;
+// il faut faire differencier
 // modify(changeCallback: (obj: T, ctx:{value: T}) => void): Promise;
 // modify(changes: { [keyPath: string]: any } ): Promise;
 // noneOf(keys: Array): Collection;

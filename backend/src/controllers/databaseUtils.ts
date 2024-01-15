@@ -10,7 +10,7 @@ import { Consts } from "../utils/constantes";
 const request = require('request');
 // const axios = require('axios');
 // const fetch = require('node-fetch')
-require('dotenv').config({ path: sslFolder('.env') });
+require('dotenv').config({ path: sslFolder('.ih-env') });
 const { CHT_HOST, PROD_CHT_PORT, DEV_CHT_PORT } = process.env;
 
 export async function databaseEntitiesList(req: Request, res: Response, next: NextFunction) {
@@ -29,7 +29,6 @@ export async function databaseEntitiesList(req: Request, res: Response, next: Ne
         return res.status(201).json({ status: 201, data: err });
     }
 };
-
 
 export async function truncatePostgresMysqlJsonDatabase(req: Request, res: Response, next: NextFunction) {
     const errors = validationResult(req);
@@ -173,8 +172,6 @@ export async function deleteFromCouchDb(req: Request, res: Response, next: NextF
     }
 }
 
-
-
 async function updateChws(chwId: string, data: any) {
     try {
         const _repoChws = await getChwsSyncRepository();
@@ -186,9 +183,7 @@ async function updateChws(chwId: string, data: any) {
 }
 
 export async function updateUserFacilityIdAndContactPlace(req: Request, res: Response, next: NextFunction) {
-
     // const req_params: ChwUserParams = req.body;
-
     request({
         url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/api/v1/users`,
         method: 'GET',

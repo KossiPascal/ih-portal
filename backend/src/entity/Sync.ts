@@ -340,3 +340,232 @@ export async function getChwsDataSyncRepository(): Promise<Repository<ChwsData>>
   return Connection.getRepository(ChwsData);
 }
 
+
+@Entity()
+export class ChwsDrug {
+  constructor() { };
+  @PrimaryColumn({ type: 'varchar', length: 255, nullable: false })
+  id!: string
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  rev?: string
+
+  @Column({ type: 'varchar', nullable: true })
+  source?: string
+
+  @Column({ type: 'varchar', default: '', nullable: true })
+  form?: string
+
+  @Column({ type: 'varchar', nullable: true })
+  activity_date!: string
+
+  @Column({ type: 'varchar', nullable: true })
+  activity_type?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  loan_borrowing_chws_info?: string;
+  
+  @Column({ type: 'float', nullable: true })
+  lumartem?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  alben_400?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  amox_250?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  amox_500?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  pills?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  para_250?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  para_500?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  pregnancy_test?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  sayana?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  sro?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  tdr?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  vit_A1?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  vit_A2?: number;
+  
+  @Column({ type: 'float', nullable: true })
+  zinc?: number;
+
+  @Column({ type: 'float', nullable: true })
+  other_drug?: number;
+  
+  @Column({ type: 'varchar', nullable: true })
+  comments?: string;
+
+
+  @ManyToOne(() => Districts, district => district.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'district_id', referencedColumnName: 'id' })
+  district!: Districts;
+
+  @ManyToOne(() => Sites, site => site.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'site_id', referencedColumnName: 'id' })
+  site!: Sites
+
+  @ManyToOne(() => Chws, chw => chw.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'chw_id', referencedColumnName: 'id' })
+  chw!: Chws
+
+  @Column({ type: 'varchar', nullable: true })
+  reported_date!: string
+}
+export async function getChwsDrugSyncRepository(): Promise<Repository<ChwsDrug>> {
+  return Connection.getRepository(ChwsDrug);
+}
+
+
+@Entity()
+export class ChwsDrugUpdate {
+  constructor() { };
+  @PrimaryColumn({ type: 'varchar' })
+  id?: string
+
+  @ManyToOne(() => Districts, (district) => district.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'district_id', referencedColumnName: 'id' })
+  district!: Districts|null
+
+  @ManyToOne(() => Sites, site => site.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'site_id', referencedColumnName: 'id' })
+  site!: Sites
+
+  @ManyToOne(() => Chws, chw => chw.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'chw_id', referencedColumnName: 'id' })
+  chw!: Chws
+
+  @Column({ type: 'float', nullable: true })
+  year!:number
+
+  @Column({ type: 'varchar', nullable: true })
+  month!:string
+
+  @Column({ type: 'float', nullable: true })
+  drug_index!:number
+
+  @Column({ type: 'varchar', nullable: true })
+  drug_name!:string
+
+  @Column({ type: 'float', nullable: true })
+  year_cmm!:number
+
+  @Column({ type: 'float', nullable: true })
+  quantity_validated!:number
+
+  @Column({ type: 'float', nullable: true })
+  delivered_quantity!:number
+
+  @Column({ type: 'float', nullable: true })
+  theoretical_quantity_to_order!:number
+  
+  @Column({ type: 'varchar', nullable: true })
+  observations!:string
+
+}
+export async function getChwsDrugUpdateSyncRepository(): Promise<Repository<ChwsDrugUpdate>> {
+  return Connection.getRepository(ChwsDrugUpdate);
+}
+
+@Entity()
+export class Teams {
+  constructor() { };
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column({ type: 'varchar', nullable: true })
+  name!:string;
+
+  @Column({type: 'boolean' })
+  show!: boolean;
+}
+export async function GetTeamsRepository(): Promise<Repository<Teams>> {
+  return Connection.getRepository(Teams);
+}
+
+@Entity()
+export class Persons {
+  constructor() { };
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  // @ManyToOne(() => Teams, team => team.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  // @JoinColumn({ name: 'team_id', referencedColumnName: 'id' })
+  // team!:Teams
+
+  @Column({ type: 'varchar', nullable: true })
+  name?:string;
+
+  @Column({ type: 'varchar', nullable: true })
+  email?:string;
+}
+export async function GetPersonsRepository(): Promise<Repository<Persons>> {
+  return Connection.getRepository(Persons);
+}
+
+@Entity()
+export class MeetingReportData {
+  constructor() { };
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column({ type: 'text', nullable: true })
+  title?:string;
+
+  @Column({ type: 'varchar', nullable: true })
+  date?:string;
+
+  @Column({ type: 'varchar', nullable: true })
+  start_hour?:string;
+
+  @Column({ type: 'varchar', nullable: true })
+  end_hour?:string;
+
+  @Column({ type: 'text', nullable: true })
+  agenda?:string;
+
+  @Column({ type: 'text', nullable: true })
+  discussion_topics?:string;
+
+  @Column({ type: 'text', nullable: true })
+  next_steps?:string;
+
+  @ManyToOne(() => Teams, team => team.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'team_id', referencedColumnName: 'id' })
+  team!:Teams
+
+  @Column({ type: 'simple-array', nullable: true })
+  present_persons_ids!: number[]
+
+  @Column({ type: 'simple-array', nullable: true })
+  absent_persons_ids!: number[]
+
+  @Column({ type: 'text', nullable: true })
+  other_persons?:string;
+
+  @Column({ type: 'text', nullable: true })
+  recommandations?:string;
+  
+  @Column({type: 'boolean', default:false})
+  doNotUpdate!: boolean;
+}
+export async function GetMeetingReportDataRepository(): Promise<Repository<MeetingReportData>> {
+  return Connection.getRepository(MeetingReportData);
+}

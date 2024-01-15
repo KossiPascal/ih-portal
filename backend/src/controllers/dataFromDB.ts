@@ -2,13 +2,60 @@ import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import { Between, In } from "typeorm";
 import { ChtOutPutData, DataIndicators } from "../entity/DataAggragate";
-import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository } from "../entity/Sync";
+import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository, ChwsDrug, getChwsDrugSyncRepository, getChwsDrugUpdateSyncRepository, ChwsDrugUpdate, GetPersonsRepository, Persons, Teams, GetTeamsRepository, MeetingReportData, GetMeetingReportDataRepository } from "../entity/Sync";
 import { Consts } from "../utils/constantes";
-import { DateUtils, notEmpty } from "../utils/functions";
+import { DateUtils, Functions, notEmpty } from "../utils/functions";
 import { getChws } from "./orgUnitsFromDB ";
+import { ChwsDrugData, ChwsDrugQantityInfo, ChwsUpdateDrugInfo } from "../utils/appInterface";
 
 const request = require('request');
 // const fetch = require('node-fetch');
+
+export async function GetPersonsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
+  var respData: { status: number, data: any };
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    respData = { status: 201, data: 'Informations you provided are not valid' }
+    return onlyData ? respData : res.status(201).json(respData);
+  }
+  const errorMsg: string = "Your request provides was rejected !";
+  try {
+    const repository = await GetPersonsRepository();
+    var allSync: Persons[] = await repository.findBy({
+        id: notEmpty(req.body.id) ? req.body.id : undefined,
+    });
+    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
+  }
+  catch (err) {
+    // return next(err);
+    respData = { status: 201, data: errorMsg };
+  }
+  return onlyData ? respData : res.status(respData.status).json(respData);
+}
+
+export async function GetTeamsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
+  var respData: { status: number, data: any };
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    respData = { status: 201, data: 'Informations you provided are not valid' }
+    return onlyData ? respData : res.status(201).json(respData);
+  }
+  const errorMsg: string = "Your request provides was rejected !";
+  try {
+    const repository = await GetTeamsRepository();
+    var allSync: Teams[] = await repository.find({
+      where: {
+        id: notEmpty(req.body.id) ? req.body.id : undefined,
+      }
+    });
+    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
+  }
+  catch (err) {
+    // return next(err);
+    respData = { status: 201, data: errorMsg };
+  }
+  return onlyData ? respData : res.status(respData.status).json(respData);
+}
 
 export async function getChwsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };
@@ -41,6 +88,88 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
   }
   return onlyData ? respData : res.status(respData.status).json(respData);
 }
+
+export async function getChwsDrugWithParams(req: any, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
+  var respData: { status: number, data: any };
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    respData = { status: 201, data: 'Informations you provided are not valid' }
+    return onlyData ? respData : res.status(201).json(respData);
+  }
+  const errorMsg: string = "Your request provides was rejected !";
+  try {
+    const repository = await getChwsDrugSyncRepository();
+    var allSync: ChwsDrug[] = await repository.find({
+      where: {
+        id: notEmpty(req.body.id) ? req.body.id : notEmpty(req.params.id) ? req.params.id : undefined,
+        activity_date: notEmpty(req.body.start_date) && notEmpty(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
+        form: notEmpty(req.body.forms) ? In(req.body.forms) : undefined,
+        source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
+        district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+        site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+        chw: notEmpty(req.body.chws) ? { id: In(req.body.chws) } : undefined
+      }
+    });
+    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
+  }
+  catch (err) {
+    // return next(err);
+    respData = { status: 201, data: errorMsg };
+  }
+  return onlyData ? respData : res.status(respData.status).json(respData);
+}
+
+export async function getChwsDrugUpdatedWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
+  var respData: { status: number, data: any };
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    respData = { status: 201, data: 'Informations you provided are not valid' }
+    return onlyData ? respData : res.status(201).json(respData);
+  }
+  const errorMsg: string = "Your request provides was rejected !";
+  try {
+    const repository = await getChwsDrugUpdateSyncRepository();
+
+    var allSync: ChwsDrugUpdate[] = await repository.find({
+      where: {
+        id: notEmpty(req.body.id) ? req.body.id : notEmpty(req.params.id) ? req.params.id : undefined,
+        district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+        site: notEmpty(req.body.site) ? { id: In(req.body.sites) } : undefined,
+        chw: notEmpty(req.body.chw) ? { id: In(req.body.chws) } : undefined,
+        year: notEmpty(req.body.year) ? In(req.body.years) : undefined,
+        month: notEmpty(req.body.month) ? In(req.body.month) : undefined,
+        drug_index: notEmpty(req.body.chw) ? In(req.body.drugs_index) : undefined
+      }
+    });
+    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
+  }
+  catch (err) {
+    // return next(err);
+    respData = { status: 201, data: errorMsg };
+  }
+  return onlyData ? respData : res.status(respData.status).json(respData);
+}
+
+export async function getChwsDrugUpdatedWithCoustomParams(req: { district: string, site: string, chw: string, year: number, month: string, drug_index: number }): Promise<ChwsDrugUpdate[] | undefined> {
+  var allSync: ChwsDrugUpdate[] | undefined;
+  const errorMsg: string = "Your request provides was rejected !";
+  try {
+    const repository = await getChwsDrugUpdateSyncRepository();
+    allSync = await repository.find({
+      where: {
+        district: notEmpty(req.district) ? { id: req.district } : undefined,
+        site: notEmpty(req.site) ? { id: req.site } : undefined,
+        chw: notEmpty(req.chw) ? { id: req.chw } : undefined,
+        year: notEmpty(req.year) ? req.year : undefined,
+        month: notEmpty(req.month) ? req.month : undefined,
+        drug_index: notEmpty(req.chw) ? req.drug_index : undefined
+      }
+    });
+  } catch (err) {
+  }
+  return !allSync ? undefined : allSync;
+}
+
 
 function getChwInfos(chw: Chws[], chwId: string): Chws | null {
   if (notEmpty(chwId)) {
@@ -126,12 +255,12 @@ export async function getDataInformations(req: Request, res: Response, next: Nex
       const details = Object.values(familiesInfos);
 
       for (let d = 0; d < details.length; d++) {
-        const dtl:any = details[d];
-        finalData.family_count+=1;
-        if(dtl.data.isVisited == true){
+        const dtl: any = details[d];
+        finalData.family_count += 1;
+        if (dtl.data.isVisited == true) {
           finalData.total_visited += 1;
         } else {
-          finalData.total_not_visited +=1;
+          finalData.total_not_visited += 1;
         }
       }
 
@@ -157,6 +286,312 @@ export async function fetchIhChtDataPerChw(req: Request, res: Response, next: Ne
     return res.status(200).json({ status: 200, data: dbChwsData });
   } else {
     return res.status(chwsData.status).json({ status: 201, data: 'No data found !' });
+  }
+}
+
+export async function fetchIhDrugDataPerChw(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined) {
+  const outPut = await getIhDrugArrayData(req, res, next, Chw)
+  return res.status(outPut.status).json(outPut);
+}
+
+async function getIhDrugArrayData(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined): Promise<{ status: number; data: { chwId: any, chw: Chws, data: ChwsDrugData }[] | string | undefined; }> {
+  const chwsDrug: { status: number, data: ChwsDrug[] } = await getChwsDrugWithParams(req, res, next, true);
+
+  var chwsDrugFinalOut: { chwId: any, chw: Chws, data: ChwsDrugData }[] = [];
+
+  if (Chw) {
+    if (Chw.id != null && Chw.id != '') {
+      const chwsDrugOutPut = await genarateIhDrugArray(chwsDrug.data, Chw, req, res, next);
+      chwsDrugFinalOut.push({ chwId: Chw.id, chw: Chw, data: chwsDrugOutPut });
+    }
+  } else {
+    const chws: { status: number, data: Chws[] } = await getChws(req, res, next, true);
+    if (chwsDrug.status == 200 && chws.status == 200) {
+      var confirm: string[] = []
+      for (let i = 0; i < chws.data.length; i++) {
+        const asc = chws.data[i];
+        if (asc.id != null && asc.id != '' && !confirm.includes(asc.id!)) {
+          const chwsDrugOutPut = await genarateIhDrugArray(chwsDrug.data, asc, req, res, next);
+          chwsDrugFinalOut.push({ chwId: asc.id, chw: asc, data: chwsDrugOutPut });
+          confirm.push(asc.id!);
+        }
+      }
+    } else {
+      return { status: 201, data: 'No data found !' };
+    }
+  }
+
+  if (!chwsDrugFinalOut) return { status: 201, data: 'No data found !' };
+  return { status: 200, data: chwsDrugFinalOut };
+}
+
+// async function getDrugPrevYearInventoryData(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined): Promise<{ status: number; data: { chwId: any, chw: Chws, data: ChwsDrugData }[] | string | undefined; }> {
+//   const chwsDrug: { status: number, data: ChwsDrug[] } = await getChwsDrugWithParams(req, res, next, true);
+//   var chwsDrugFinalOut: { chwId: any, chw: Chws, data: ChwsDrugData }[] = [];
+//   if (Chw && Chw.id != null && Chw.id != '') {
+//     const chwsDrugOutPut = await genarateIhDrugArray(chwsDrug.data, Chw, req, res, next, true);
+//     chwsDrugFinalOut.push({ chwId: Chw.id, chw: Chw, data: chwsDrugOutPut });
+//   }
+//   if (!chwsDrugFinalOut) return { status: 201, data: 'No data found !' };
+//   return { status: 200, data: chwsDrugFinalOut };
+// }
+
+async function genarateIhDrugArray(data: ChwsDrug[], asc: Chws, req: Request, res: Response, next: NextFunction, onlyInventory: boolean = false): Promise<ChwsDrugData> {
+  return {
+    Albendazole_400_mg_cp_1: await getChwsDrugQantity(data, asc, 1, 'alben_400', req, res, next),
+    Amoxiciline_250_mg_2: await getChwsDrugQantity(data, asc, 2, 'amox_250', req, res, next),
+    Amoxiciline_500_mg_3: await getChwsDrugQantity(data, asc, 3, 'amox_500', req, res, next),
+    Artemether_Lumefantrine_20_120mg_cp_4: await getChwsDrugQantity(data, asc, 4, 'lumartem', req, res, next),
+    Oral_Combination_Pills_5: await getChwsDrugQantity(data, asc, 5, 'pills', req, res, next),
+    Paracetamol_250_mg_6: await getChwsDrugQantity(data, asc, 6, 'para_250', req, res, next),
+    Paracetamol_500_mg_7: await getChwsDrugQantity(data, asc, 7, 'para_500', req, res, next),
+    Pregnancy_Test_8: await getChwsDrugQantity(data, asc, 8, 'pregnancy_test', req, res, next),
+    Sayana_Press_9: await getChwsDrugQantity(data, asc, 9, 'sayana', req, res, next),
+    SRO_10: await getChwsDrugQantity(data, asc, 10, 'sro', req, res, next),
+    TDR_11: await getChwsDrugQantity(data, asc, 11, 'tdr', req, res, next),
+    Vitamine_A_100000UI_12: await getChwsDrugQantity(data, asc, 12, 'vit_A1', req, res, next),
+    Vitamine_A_200000UI_13: await getChwsDrugQantity(data, asc, 13, 'vit_A2', req, res, next),
+    Zinc_14: await getChwsDrugQantity(data, asc, 14, 'zinc', req, res, next)
+  };
+}
+
+async function getChwDrugInventoryQty(Chw: Chws, start_date: string, end_date: string, index: number, fieldId: string, reqt: Request, res: Response, next: NextFunction): Promise<ChwsDrugQantityInfo> {
+  var req = {
+    body: {
+      id: undefined,
+      forms: undefined,
+      start_date: start_date,
+      end_date: end_date,
+      sources: [Chw.source],
+      districts: [Chw.site?.district?.id],
+      sites: [Chw.site?.id],
+      chws: [Chw.id]
+    },
+    params: {
+      id: undefined,
+    }
+  }
+
+  var out: ChwsDrugQantityInfo = { inventory_quantity: 0 };
+  const chwsDrug: { status: number, data: ChwsDrug[] } = await getChwsDrugWithParams(req, res, next, true);
+  if (chwsDrug.status == 200 && chwsDrug.data) {
+    for (let i = 0; i < chwsDrug.data.length; i++) {
+      const data: ChwsDrug = chwsDrug.data[i];
+      if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+        const idSourceValid: boolean = data?.source == 'Tonoudayo';
+        const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+        const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+        const idChwValid: boolean = data?.chw?.id == Chw.id;
+        const isDateValid: boolean = DateUtils.isBetween(`${start_date}`, data.activity_date, `${end_date}`);
+        if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
+          if (data.form == "drug_quantities" && data.activity_type == "c_qty_counted") out.inventory_quantity! += generateDrugQty(data, fieldId);
+        }
+      }
+    }
+  }
+  return out;
+}
+
+async function getChwsDrugQantity(ChwsDataFromDb: ChwsDrug[], Chw: Chws, index: number, fieldId: string, req: Request, res: Response, next: NextFunction): Promise<ChwsDrugQantityInfo> {
+  const { start_date, end_date, sources, districts, sites, chws } = req.body;
+
+  var out: ChwsDrugQantityInfo = {
+    month_quantity_beginning: 0, // A
+    month_quantity_received: 0, // B
+    month_total_quantity: 0, // C = A + B
+    month_consumption: 0, // D
+    theoretical_quantity: 0, // E = C - D
+    inventory_quantity: 0, // F
+    inventory_variance: 0, // J = F - E
+    year_cmm: 0, // N-1, G
+    theoretical_quantity_to_order: 0, // H
+    quantity_to_order: 0, // I
+    quantity_validated: 0,
+    delivered_quantity: 0,
+    satisfaction_rate: '',
+    loan_borrowing: '',
+    loan_borrowing_quantity: 0,
+    loan_borrowing_chws_code: '',
+    quantity_loss: 0,
+    quantity_damaged: 0,
+    quantity_broken: 0,
+    quantity_expired: 0,
+    other_quantity: 0,
+    comments: "",
+    observations: ""
+  };
+
+  for (let i = 0; i < ChwsDataFromDb.length; i++) {
+    var data: ChwsDrug = ChwsDataFromDb[i];
+    if (data && notEmpty(sources) && notEmpty(districts) && notEmpty(sites) && notEmpty(chws) && notEmpty(start_date) && notEmpty(end_date)) {
+      if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+
+        const idSourceValid: boolean = sources?.includes(data?.source) && data?.source == 'Tonoudayo';
+        const idDistrictValid: boolean = districts?.includes(data?.district?.id) && data?.district?.id == Chw.district?.id;
+        const idSiteValid: boolean = sites?.includes(data?.site?.id) && data?.site?.id == Chw.site?.id;
+        const idChwValid: boolean = chws?.includes(data?.chw?.id) && data?.chw?.id == Chw.id;
+        const isDateValid: boolean = DateUtils.isBetween(`${start_date}`, data.activity_date, `${end_date}`);
+
+        if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
+
+          if (data.form == "drug_quantities") {
+            if (data.activity_type == "c_qty_received") out.month_quantity_received! += generateDrugQty(data, fieldId);
+            if (data.activity_type == "c_qty_counted") out.inventory_quantity! += generateDrugQty(data, fieldId);
+            if (data.activity_type == "c_qty_order") out.quantity_to_order! += generateDrugQty(data, fieldId);
+          }
+
+          if (data.form == "drug_movements") {
+            if (data.activity_type == "c_med_loss") out.quantity_loss! += generateDrugQty(data, fieldId);
+            if (data.activity_type == "c_med_expired") out.quantity_expired! += generateDrugQty(data, fieldId);
+
+            if (data.activity_type == "c_med_borrowing") {
+              out.loan_borrowing_quantity! += generateDrugQty(data, fieldId);
+              if (out.loan_borrowing_quantity && out.loan_borrowing_quantity != 0) {
+                out.loan_borrowing_chws_code! += `${data.loan_borrowing_chws_info!}, `;
+                out.loan_borrowing = 'Emprunt';
+              }
+            }
+
+            if (data.activity_type == "c_med_loan") {
+              out.loan_borrowing_quantity! += generateDrugQty(data, fieldId);
+              if (out.loan_borrowing_quantity && out.loan_borrowing_quantity != 0) {
+                out.loan_borrowing_chws_code! += `${data.loan_borrowing_chws_info!}, `;
+                out.loan_borrowing = 'Prêt';
+              }
+            }
+
+            if (data.activity_type == "c_med_damaged") out.quantity_damaged! += generateDrugQty(data, fieldId);
+            if (data.activity_type == "c_med_broken") out.quantity_broken! += generateDrugQty(data, fieldId);
+            if (data.activity_type == "c_others") out.other_quantity! += generateDrugQty(data, fieldId);
+            out.comments! = data.comments ?? '';
+          }
+
+          if (["pcime_c_asc", "pregnancy_family_planning", "fp_follow_up_renewal"].includes(data.form!)) out.month_consumption! += generateDrugQty(data, fieldId);
+        }
+      }
+    }
+  }
+
+  const dateArray = end_date.split('-');
+  const prevM = Functions.previousMonth(dateArray[1]);
+  const prevY = prevM == '12' ? parseInt(dateArray[0]) - 1 : dateArray[0];
+
+  const prevPrevM = Functions.previousMonth(prevM);
+  const prevPrevY = prevPrevM == '12' ? prevY - 1 : prevY;
+
+  const curInventory = await getChwDrugInventoryQty(Chw, start_date, end_date, index, fieldId, req, res, next);
+  const prevInventory = await getChwDrugInventoryQty(Chw, `${prevPrevY}-${prevPrevM}-21`, `${prevY}-${prevM}-20`, index, fieldId, req, res, next);
+
+  if (curInventory) out.inventory_quantity! += curInventory.inventory_quantity ?? 0.
+  if (prevInventory) out.month_quantity_beginning! += prevInventory.inventory_quantity ?? 0.
+
+  const dt = Chw.site?.district?.id;
+  const st = Chw.site?.id;
+  const cw = Chw.id;
+
+  if (dt && st && cw && notEmpty(dateArray)) {
+    const drugUpdateReq = {
+      district: dt,
+      site: st,
+      chw: cw,
+      year: parseInt(dateArray[0]),
+      month: dateArray[1],
+      drug_index: index
+    };
+    const drugUpdated = await getChwsDrugUpdatedWithCoustomParams(drugUpdateReq);
+
+    if (drugUpdated) {
+      for (let zi = 0; zi < drugUpdated.length; zi++) {
+        const found = drugUpdated[zi];
+        out.year_cmm! += found.year_cmm ?? 0;
+        out.quantity_validated! += found.quantity_validated ?? 0;
+        out.delivered_quantity! += found.delivered_quantity ?? 0;
+        out.theoretical_quantity_to_order! += found.theoretical_quantity_to_order ?? 0;
+        out.observations += found.observations ?? '';
+      }
+    }
+  }
+
+  out.month_total_quantity = out.month_quantity_beginning! + out.month_quantity_received!;
+  out.theoretical_quantity = out.month_total_quantity! - out.month_consumption!;
+  out.inventory_variance = out.inventory_quantity! - out.theoretical_quantity;
+
+  if (out.delivered_quantity != 0 && out.quantity_validated != 0) {
+    const rate = out.delivered_quantity! / out.quantity_validated!;
+    out.satisfaction_rate = !Number.isNaN(rate) ? `${(rate * 100).toFixed(2)} %` : 'NA';
+  } else {
+    out.satisfaction_rate = undefined;
+  }
+
+
+  return out;
+}
+
+function generateDrugQty(data: ChwsDrug, fieldId: string): number {
+  if (fieldId == "lumartem" && data.lumartem) return data.lumartem;
+  if (fieldId == "alben_400" && data.alben_400) return data.alben_400!;
+  if (fieldId == "amox_250" && data.amox_250) return data.amox_250!;
+  if (fieldId == "amox_500" && data.amox_500) return data.amox_500!;
+  if (fieldId == "pills" && data.pills) return data.pills!;
+  if (fieldId == "para_250" && data.para_250) return data.para_250!;
+  if (fieldId == "para_500" && data.para_500) return data.para_500!;
+  if (fieldId == "pregnancy_test" && data.pregnancy_test) return data.pregnancy_test!;
+  if (fieldId == "sayana" && data.sayana) return data.sayana!;
+  if (fieldId == "sro" && data.sro) return data.sro!;
+  if (fieldId == "tdr" && data.tdr) return data.tdr!;
+  if (fieldId == "vit_A1" && data.vit_A1) return data.vit_A1!;
+  if (fieldId == "vit_A2" && data.vit_A2) return data.vit_A2!;
+  if (fieldId == "zinc" && data.zinc) return data.zinc!;
+  if (fieldId == "other_drug" && data.other_drug) return data.other_drug!;
+  return 0;
+}
+
+export async function updateDrugPerChw(req: Request, res: Response, next: NextFunction) {
+  const { district, site, chw, year, month, drug_index, drug_name, year_cmm, quantity_validated, delivered_quantity, observations, theoretical_quantity_to_order, forms, sources, userId, dhisusersession } = req.body;
+
+  const _repoChwsDrugUpdate = await getChwsDrugUpdateSyncRepository();
+  const _chwRepo = await getChwsSyncRepository();
+  try {
+    const _sync = new ChwsDrugUpdate();
+
+    _sync.id = `${site}-${chw}-${year}-${month}-${drug_index}`;
+    _sync.district = district;
+    _sync.site = site;
+    _sync.chw = chw;
+    _sync.year = year;
+    _sync.month = month;
+    _sync.drug_index = drug_index;
+    _sync.drug_name = drug_name;
+    _sync.year_cmm = year_cmm;
+    _sync.quantity_validated = quantity_validated;
+    _sync.delivered_quantity = delivered_quantity;
+    _sync.theoretical_quantity_to_order = theoretical_quantity_to_order;
+    _sync.observations = observations;
+    await _repoChwsDrugUpdate.save(_sync);
+
+    const prevM = Functions.previousMonth(month);
+    const prevY = prevM == '12' ? parseInt(year) - 1 : year;
+
+    req.body.start_date = `${prevY}-${prevM}-21`;
+    req.body.end_date = `${year}-${month}-20`;
+    req.body.forms = forms;
+    req.body.sources = sources;
+    req.body.districts = [district];
+    req.body.sites = [site];
+    req.body.chws = [chw];
+
+    var Chw = await _chwRepo.findOneBy({ id: chw });
+    if (Chw) {
+      const updateOutPut = await getIhDrugArrayData(req, res, next, Chw);
+      if (updateOutPut) {
+        return res.status(updateOutPut.status).json(updateOutPut);
+      }
+    }
+    return res.status(201).json({ status: 201, data: 'No data found !' });
+
+  } catch (err: any) {
+    if (!err.statusCode) err.statusCode = 500;
+    return res.status(err.statusCode).json({ status: 201, data: 'No data found !' });
   }
 }
 
@@ -222,9 +657,7 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], Chws$: Chws[], req: Reques
       if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
         if (data.source == 'Tonoudayo') {
 
-          if (Consts.home_visit_form.includes(form!)) {
-            outPutData.home_visit[chw].tonoudayo += 1;
-          }
+          if (Consts.home_visit_form.includes(form!)) outPutData.home_visit[chw].tonoudayo += 1;
 
           if (["pcime_c_asc"].includes(form!)) {
             outPutData.soins_pcime[chw].tonoudayo += 1;
@@ -588,6 +1021,138 @@ function transformChwsData(allDatasFound: ChtOutPutData, Chws$: Chws[], req: Req
 
   return allAggragateData;
 }
+
+export async function FetchMeetingPersons(req: Request, res: Response, next: NextFunction) {
+  try {
+    const _repo = await GetPersonsRepository();
+    const data:Persons[] = await _repo.find();
+    if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
+    return res.status(200).json({ status: 200, data: data });
+  } catch (e) {
+    return res.status(201).json({ status: 201, data: 'No data found !' });
+  }
+}
+
+
+export async function FetchMeetingTeams(req: Request, res: Response, next: NextFunction) {  
+  try {
+    const _repo = await GetTeamsRepository();
+    const data:Teams[] = await _repo.find();
+    if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
+    return res.status(200).json({ status: 200, data: data });
+  } catch (e) {
+    return res.status(201).json({ status: 201, data: 'No data found !' });
+  }
+}
+
+export async function FetchMeetingReports(req: Request, res: Response, next: NextFunction) {  
+  try {
+    const _repo = await GetMeetingReportDataRepository();
+    const data = await _repo.find({where:{team:{id:req.body.team}}});
+    if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
+    return res.status(200).json({ status: 200, data: data });
+  } catch (e) {
+    return res.status(201).json({ status: 201, data: 'No data found !' });
+  }
+}
+
+export async function SaveOrUpdateMeetingTeam(req: Request, res: Response, next: NextFunction) {
+  const _repo = await GetTeamsRepository();
+  const _sync = new Teams();
+  try {
+    _sync.id = req.body.id;
+    _sync.name = req.body.name;
+    _sync.show = req.body.show == true;
+    const data = await _repo.save(_sync);
+    if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
+    return res.status(200).json({ status: 200, data: data });
+  } catch (error) {
+    return res.status(201).json({ status: 201, data: 'No data found !' });
+  }
+}
+
+export async function SaveOrUpdateMeetingPerson(req: Request, res: Response, next: NextFunction) {
+  const _repo = await GetPersonsRepository();
+  const _sync = new Persons();
+  try {
+    _sync.id = req.body.id;
+    // _sync.team = req.body.team;
+    _sync.name = req.body.name;
+    _sync.email = req.body.email;
+    const data = await _repo.save(_sync);
+    if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
+    return res.status(200).json({ status: 200, data: data });
+  } catch (error) {
+    return res.status(201).json({ status: 201, data: 'No data found !' });
+  }
+}
+
+
+export async function SaveOrUpdateMeetingReports(req: Request, res: Response, next: NextFunction) {
+  const _repo = await GetMeetingReportDataRepository();
+  const _sync = new MeetingReportData();
+  try {
+    _sync.id = req.body.id;
+    _sync.title = req.body.title;
+    _sync.date = req.body.date;
+    _sync.start_hour = req.body.start_hour;
+    _sync.end_hour = req.body.end_hour;
+    _sync.agenda = req.body.agenda;
+    _sync.discussion_topics = req.body.discussion_topics;
+    _sync.next_steps = req.body.next_steps;
+    _sync.recommandations = req.body.recommandations;
+    _sync.team = req.body.team;
+    _sync.present_persons_ids = req.body.present_persons_ids;
+    _sync.absent_persons_ids = req.body.absent_persons_ids;
+    _sync.other_persons = req.body.other_persons;
+    _sync.doNotUpdate = req.body.doNotUpdate;
+    
+    await _repo.save(_sync);
+    const data = await _repo.find({where:{team:{id:req.body.team}}});
+
+    if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
+    return res.status(200).json({ status: 200, data: data });
+  } catch (error) {
+    return res.status(201).json({ status: 201, data: 'No data found !' });
+  }
+}
+
+export async function DeleteMeetingReport(req: Request, res: Response, next: NextFunction) { 
+  try {
+    const _repo = await GetMeetingReportDataRepository();
+    const data = await _repo.delete({id:req.body.dataId});
+    return res.status(200).json({ status: 200, data: data });
+  } catch (error) {
+    return res.status(201).json({ status: 201, data: 'No data found !' });
+  }
+}
+
+export async function DeleteMeetingPerson(req: Request, res: Response, next: NextFunction) { 
+  try {
+    const _repo = await GetPersonsRepository();
+    const data = await _repo.delete({id:req.body.dataId});
+    return res.status(200).json({ status: 200, data: data });
+  } catch (error) {
+    return res.status(201).json({ status: 201, data: 'No data found !' });
+  }
+}
+
+export async function DeleteMeetingTeams(req: Request, res: Response, next: NextFunction) { 
+  const _repo = await GetTeamsRepository();
+  const _sync = new Teams();
+  try {
+    _sync.id = req.body.dataId;
+    _sync.show = false;
+    const data = await _repo.save(_sync);
+    if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
+    return res.status(200).json({ status: 200, data: data });
+  } catch (error) {
+    return res.status(201).json({ status: 201, data: 'No data found !' });
+  }
+}
+
+
+
 
 export async function deleteChwsData(req: Request, res: Response, next: NextFunction) { }
 

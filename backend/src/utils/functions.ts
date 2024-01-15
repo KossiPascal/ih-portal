@@ -1,21 +1,20 @@
 import path from "path";
 import https from "https";
 import http from "http";
-import { CouchDbFetchData, Dhis2Sync, MailConfig } from "./appInterface";
-import { token, toMap, User, jwSecretKey } from "../entity/User";
+import { CouchDbFetchData, Dhis2Sync, MailConfig, Roles } from "./appInterface";
+import { token, User, jwSecretKey } from "../entity/User";
 import moment from "moment";
 import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws, Patients } from "../entity/Sync";
 import { Consts } from "./constantes";
+import { JsonDatabase } from "../json-data-source";
 var fs = require('fs');
 var JFile = require('jfile'); //  "npm install jfile --save" required
 
 
 export function logNginx(message: any) {
     try {
-
         let nxFile = new JFile('/var/log/nginx/access.log'); // check path before if exist in your system . IF no , change it with the available path
         nxFile.text += `\n${message}`; //append new line in nginx log file
-
     } catch (error) {
 
     }
@@ -25,7 +24,7 @@ const nodemailer = require("nodemailer");
 const smtpTransport = require('nodemailer-smtp-transport');
 var rootCas = require('ssl-root-cas').create();
 
-require('dotenv').config({ path: sslFolder('.env') });
+require('dotenv').config({ path: sslFolder('.ih-env') });
 const { CHT_USER, CHT_PASS, CHT_HOST, PROD_CHT_PORT, DEV_CHT_PORT, NODE_TLS_REJECT_UNAUTHORIZED } = process.env;
 
 export function httpHeaders(Authorization?: string, withParams: boolean = true) {
@@ -36,7 +35,6 @@ export function httpHeaders(Authorization?: string, withParams: boolean = true) 
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Methods": "DELETE, POST, GET, PUT, OPTIONS",
         "Access-Control-Allow-Headers": "X-API-KEY, Origin, X-Requested-With, Content-Type, Accept,Access-Control-Request-Method, Authorization,Access-Control-Allow-Headers",
-
     }
 
     if (withParams) {
@@ -64,6 +62,13 @@ export class Functions {
     // import * as fs from "fs";
     // const RSA_PRIVATE_KEY = fs.readFileSync('./demos/private.key');
     // const jwtBearerToken = jwt.sign({}, RSA_PRIVATE_KEY, {algorithm: 'RS256', expiresIn: 120,subject: userId}
+
+    static previousMonth(monthId: string): string {
+        let cMonth: number = parseInt(monthId, 10);
+        if (cMonth === 1) return '12';
+        cMonth--;
+        return cMonth < 10 ? `0${cMonth}` : cMonth.toString();
+    }
 
     static date_to_milisecond = (stringDate: string, start: boolean = true): string => {
         if (stringDate != "") {
@@ -303,17 +308,17 @@ export function sslFolder(file_Name_with_extension: string): string {
     return `${dir}/${file_Name_with_extension}`;
     // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/ssl/${file_Name_with_extension}`
 }
-export function extractFolder(file_Name_with_extension: string): string {
-    const folder = Consts.isProdEnv ? 'prod' : 'dev';
+export function extractFolder(file_Name_with_extension: string, withPythonFolder: boolean = false): string {
+    const folder = withPythonFolder == true ? 'python' : Consts.isProdEnv ? 'prod' : 'dev';
     const dir = `${projectFolderParent()}/storage/extracts/${folder}`;
     createDirectories(dir, (e: any) => { });
     return `${dir}/${file_Name_with_extension}`;
 }
 
-export function JsonDbFolder(file_Name_without_extension: string): string {
+export function JsonDbFolder(file_Name_without_extension: string, withPythonFolder: boolean = false): string {
     const fileName: string = file_Name_without_extension.trim().replace(' ', '-').split('.')[0];
     // return `${path.dirname(path.dirname(path.dirname(path.dirname(__dirname))))}/storage/Json/${folder}/${fileName}.json`
-    const folder = Consts.isProdEnv ? 'prod' : 'dev';
+    const folder = withPythonFolder == true ? 'python' : Consts.isProdEnv ? 'prod' : 'dev';
     const dir = `${projectFolderParent()}/storage/Json/${folder}`;
     createDirectories(dir, (e: any) => { });
     return `${dir}/${fileName}.json`
@@ -592,11 +597,12 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
     couchArg.push(`descending=${params.descending == true}`);
     if (notEmpty(params.startKey)) couchArg.push(`key=[${params.startKey}]`);
     if (notEmpty(params.endKey)) couchArg.push(`endkey=[${params.endKey}]`);
+    const port = parseInt((Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT) ?? '443');
     var options = {
         host: CHT_HOST ?? '',
-        port: parseInt((Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT) ?? '443'),
+        port: port,
         path: `${dbCibleUrl}?${couchArg.join('&')}`,
-        url: `${CHT_HOST ?? ''}${dbCibleUrl}?${couchArg.join('&')}`,
+        url: `${CHT_HOST}:${port}${dbCibleUrl}?${couchArg.join('&')}`,
         use_SSL_verification: true,
         user: CHT_USER ?? '',
         pass: CHT_PASS ?? '',
@@ -604,13 +610,10 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
     return Functions.getHttpsOptions(options);
 }
 
-
-
 // export class OldCouchDbSyncConfig {
-
 //     constructor(sync: Sync, viewName: string) {
 //         this.host = sync.medic_host;
-//         this.user = sync.medic_username,
+//         user = sync.medic_username,
 //             this.pass = sync.medic_password,
 //             this.port = sync.port ?? 443,
 //             this.dbCibleUrl = `/medic/_design/medic-client/_view/${viewName}`,
@@ -643,7 +646,7 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
 //             port: this.port,
 //             path: `${this.dbCibleUrl}?${couchArg.join('&')}`,
 //             use_SSL_verification: this.use_SSL_verification,
-//             user: this.user,
+//             user: user,
 //             pass: this.pass
 //         };
 //         return Functions.getHttpsOptions(options);
@@ -705,31 +708,62 @@ export class Dhis2SyncConfig {
         };
         return option;
     }
-
 }
 
-export function generateUserMapData(userFound: User, dhisusersession: string): any {
-    userFound.dhisusersession = dhisusersession;
-    userFound.defaultRedirectUrl = userDefaultRedirectUrl(userFound);
-    userFound.token = token(userFound);
-    userFound.expiresIn = JSON.stringify((moment().add(jwSecretKey({ user: userFound }).expiredIn, 'seconds')).valueOf());
-    return toMap(userFound);
-}
-
-
-function userDefaultRedirectUrl(user: User): string {
-    return isChws(user) ? 'dashboards/dash2' : 'dashboards';
-}
-
-export function isChws(user: User): boolean {
-    if (notEmpty(user.roles)) {
-        return user.roles.includes('c3WyuK3ibsN');
+export function generateUserMapData(user: User, dhisusersession: string): User {
+    const role = UserRole(user);
+    const _repoUser = new JsonDatabase('users');
+    const userFound = _repoUser.getBy(user.id) as User|undefined|null;
+    user.dhisusersession = dhisusersession;
+    user.defaultRedirectUrl = DefaultPage(role);
+    user.token = token(user);
+    user.expiresIn = JSON.stringify((moment().add(jwSecretKey({ user: user }).expiredIn, 'seconds')).valueOf());
+    if(userFound) {
+        user.email = userFound.email;
+        if(role.isReportViewer) user.meeting_report = userFound.meeting_report;
     }
-    if (notEmpty(user.groups)) {
-        return user.groups.includes('enIOT8b8taV');
-    }
-    return false;
+    
+    return user;
 }
+
+export function UserRole(user: User): Roles {
+    var data:Roles = {
+        isSuperUser:false,
+        isUserManager:false,
+        isAdmin:false,
+        isDataManager:false,
+        isOnlySupervisorMentor:false,
+        isSupervisorMentor:false,
+        isChws:false,
+        isReportViewer:false
+    };
+    const userRoles: string[] = user && notEmpty(user) ? user.roles : [];
+    const userGroups: string[] = user && notEmpty(user) ? user.groups : [];
+
+    if (notEmpty(userRoles)) {
+        data.isSuperUser = userRoles.includes('yrB6vc5Ip3r');
+        data.isUserManager = (userRoles.includes('kMykXLnMsfF'));
+        data.isAdmin = (userRoles.includes('FJXxMdr1gIB'));
+        data.isDataManager = (userRoles.includes('KWH2Gl2atF8'));
+        data.isOnlySupervisorMentor = userRoles.includes('Vjhs5PHK4lb');
+        data.isSupervisorMentor = data.isOnlySupervisorMentor || data.isDataManager;
+        data.isChws = userRoles.includes('c3WyuK3ibsN') || notEmpty(userGroups) && userGroups.includes('enIOT8b8taV');
+        data.isReportViewer = userRoles.includes('xpG5HJa5Fmf') || notEmpty(userGroups) && userGroups.includes('dtVEW0CoCPl');
+    }
+    return data;
+}
+
+export function DefaultPage(role: Roles): string {
+    if (role.isChws) {
+        return 'dashboards/dash2';
+    } else if(role.isReportViewer){
+        return 'meetings/reports';
+    }
+    return 'dashboards'
+}
+
+
+
 
 
 // export function generateAuthSuccessData(userFound:User): UserValue {

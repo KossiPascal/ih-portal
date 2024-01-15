@@ -51,11 +51,11 @@ export class SyncComponent implements OnInit {
   Districts$: Districts[] = [];
   Sites$: Sites[] = [];
   Chws$: Chws[] = [];
-  Dhis2Chws$: { code: string, name: string, siteId: string}[] = [];
+  Dhis2Chws$: { code: string, name: string, siteId: string }[] = [];
 
   chws$: Chws[] = [];
   sites$: Sites[] = [];
-  dhis2Chws$: { code: string, name: string, siteId: string}[] = [];
+  dhis2Chws$: { code: string, name: string, siteId: string }[] = [];
 
   Tab1Dhis2Import: { ErrorCount: number, ErrorMsg: string, Created: number, Updated: number, Deleted: number } = {
     ErrorCount: 0,
@@ -73,7 +73,9 @@ export class SyncComponent implements OnInit {
     Deleted: 0
   }
 
-  constructor(private store: AppStorageService, private auth: AuthService, private route: ActivatedRoute, private sync: SyncService) { }
+  constructor(private store: AppStorageService, private auth: AuthService, private route: ActivatedRoute, private sync: SyncService) {
+    if(this.roles.hasNoAccess()) this.auth.logout();
+  }
 
   public roles = new Roles(this.store);
 
@@ -82,7 +84,7 @@ export class SyncComponent implements OnInit {
     this.route.params.subscribe(params => this.activePage = params['cible']);
 
     if (this.activePage === 'dataToDhis2' && !this.roles.isDataManager() ||
-      this.activePage === 'weeklyData' && !this.roles.isSupervisorMentor()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+      this.activePage === 'weeklyData' && !this.roles.isSupervisorMentor()) location.href = this.auth.userValue()?.defaultRedirectUrl ?? '';
 
     this.initAllData();
     this.thinkmdToDhis2Form = this.createThinkmdFormGroup();
@@ -120,9 +122,19 @@ export class SyncComponent implements OnInit {
       weekly_Choosen_Dates: new FormControl(""),
       useToken: new FormControl(true),
       InsertIntoDhis2: new FormControl(false, []),
+      districts: new FormControl("", [Validators.required]),
+      sites: new FormControl("", [Validators.required]),
       // dhis2_username: new FormControl(""),
       // dhis2_password: new FormControl(""),
     });
+  }
+
+  getSiteById(siteId: string): Sites | null {
+    for (let d = 0; d < this.Sites$.length; d++) {
+      const site = this.Sites$[d];
+      if (siteId == site.id) return site;
+    }
+    return null;
   }
 
   createIhChtFormGroup(): FormGroup {
@@ -163,7 +175,7 @@ export class SyncComponent implements OnInit {
             var name2 = name1.replace('’', '`')
             var name = name2.replace("'", '`')
 
-            this.Dhis2Chws$.push({ code: ch.external_id, name: name, siteId:ch.site.id });
+            this.Dhis2Chws$.push({ code: ch.external_id, name: name, siteId: ch.site.id });
           }
           this.genarateWeekyDataChws();
           this.loading3 = false;
@@ -206,11 +218,11 @@ export class SyncComponent implements OnInit {
     }
   }
 
-  getExternalIdByName(nameOrId: string): string{
+  getExternalIdByName(nameOrId: string): string {
     for (let i = 0; i < this.Chws$.length; i++) {
       const ch = this.Chws$[i];
       if (nameOrId == ch.name) return ch.external_id;
-      
+
     }
     return nameOrId;
   }
@@ -375,6 +387,8 @@ export class SyncComponent implements OnInit {
           this.tab1_messages_error = response.toString();
         }
       }, (err: any) => { this.loading1 = false; this.tab1_messages_error = err.toString(); console.log(err.error) });
+
+
     }
   }
 
@@ -470,8 +484,8 @@ export class SyncComponent implements OnInit {
     }
   }
 
-  dateTransform(date:string):string{
-    return DateUtils.getDateInFormat(date,0, 'fr')
+  dateTransform(date: string): string {
+    return DateUtils.getDateInFormat(date, 0, 'fr')
   }
 
   remove(arr: any, what: any) {

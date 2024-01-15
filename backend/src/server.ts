@@ -20,7 +20,7 @@ const cron = require("node-cron");
 const compression = require("compression");
 const responseTime = require('response-time')
 
-require('dotenv').config({ path: sslFolder('.env') });
+require('dotenv').config({ path: sslFolder('.ih-env') });
 const { ACCESS_ALL_AVAILABE_PORT,CAN_ACCESS_INSECURE, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED } = process.env
 
 

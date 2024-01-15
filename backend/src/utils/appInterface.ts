@@ -17,12 +17,11 @@ export interface DataFromPython {
     }
   }
 }
-
 export interface Sync {
   id: any;
   start_date: string;
   end_date: string;
-  dhisusersession:string
+  dhisusersession: string
 
   // thinkmd_host: string;
   // thinkmd_site: string;
@@ -45,12 +44,8 @@ export interface Sync {
   // port: number;
   // ssl_verification: boolean;
 }
-
-
-
-
 export interface CouchDbFetchData {
-  viewName:string,
+  viewName: string,
   startKey?: string[];
   endKey?: string[];
   // medic_host: string;
@@ -59,9 +54,8 @@ export interface CouchDbFetchData {
   // port: number;
   // ssl_verification: boolean;
   descending?: boolean
-  dhisusersession?:string
+  dhisusersession?: string
 }
-
 export interface Dhis2Sync {
   host: string
   port: number
@@ -74,8 +68,6 @@ export interface Dhis2Sync {
   user: string
   dhisusersession: string
 }
-
-
 export interface Dhis2DataFormat {
   event: string
   orgUnit: string
@@ -85,16 +77,12 @@ export interface Dhis2DataFormat {
     value: any
   }[]
 }
-
-
 export interface ChwUserParams {
-  host:string,
-  contact:string, 
-  parent:string,
-  new_parent:string
+  host: string,
+  contact: string,
+  parent: string,
+  new_parent: string
 }
-
-
 export interface MailConfig {
   admin: {
     from: string
@@ -106,15 +94,96 @@ export interface MailConfig {
     text: any
   }
 }
-
-
-export interface UserValue {
-  id: string
-  token: string
-  username: string
-  fullname: string
-  roles:any
-  isActive:boolean
-  expiresIn:any
-  dhisusersession:string
+export interface ChwsDrugQantityInfo {
+  month_quantity_beginning?: number
+  month_quantity_received?: number
+  month_total_quantity?: number
+  month_consumption?: number
+  theoretical_quantity?: number
+  inventory_quantity?: number
+  inventory_variance?: number
+  year_cmm?: number
+  theoretical_quantity_to_order?: number
+  quantity_to_order?: number
+  quantity_validated?: number
+  delivered_quantity?: number
+  satisfaction_rate?: string
+  loan_borrowing?: string
+  loan_borrowing_quantity?: number
+  loan_borrowing_chws_code?: string
+  quantity_loss?: number
+  quantity_damaged?: number
+  quantity_broken?: number
+  quantity_expired?: number
+  other_quantity?: number
+  comments?: string
+  observations?: string
 }
+export interface ChwsDrugData {
+  Albendazole_400_mg_cp_1: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Amoxiciline_250_mg_2: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Amoxiciline_500_mg_3: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Artemether_Lumefantrine_20_120mg_cp_4: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Oral_Combination_Pills_5: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Paracetamol_250_mg_6: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Paracetamol_500_mg_7: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Pregnancy_Test_8: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Sayana_Press_9: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  SRO_10: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  TDR_11: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Vitamine_A_100000UI_12: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Vitamine_A_200000UI_13: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Zinc_14: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+}
+export interface ChwsUpdateDrugInfo {
+  district: string
+  site: string
+  chw: string
+  year: number
+  month: string
+  drug_index: number
+  drug_name: String
+  year_cmm: number
+  quantity_validated: number
+  delivered_quantity: number
+  theoretical_quantity_to_order: number
+  observations: number
+  userId?: string
+  dhisusersession?: string
+}
+export interface Roles {
+  isSuperUser: boolean
+  isUserManager: boolean
+  isAdmin: boolean
+  isDataManager: boolean
+  isOnlySupervisorMentor: boolean
+  isSupervisorMentor: boolean
+  isChws: boolean
+  isReportViewer: boolean
+}
+
+// export interface MeetingReport {
+//   id: string
+//   title: string
+//   date: string
+//   start_hour: string
+//   end_hour: string
+//   agenda: string
+//   discussion_topics: string
+//   next_steps: string
+//   team: Team;
+//   personIds: number[]
+// }
+
+// export interface Person {
+//   team: Team;
+//   id: number;
+//   name: string;
+//   email?: string;
+// }
+
+// export interface Team {
+//   id: number
+//   show: boolean
+//   name: string
+// }

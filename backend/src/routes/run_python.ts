@@ -12,7 +12,7 @@ const pyRouter = express.Router();
 const fs = require("fs");
 const csv = require("csv-parser");
 
-require('dotenv').config({ path: sslFolder('.env') });
+require('dotenv').config({ path: sslFolder('.ih-env') });
 const { TSC_HOST, TSC_SITE, TSC_TOKEN_NAME, TSC_TOKEN_CODE, DHIS_HOST, TSC_USER, TSC_PASS } = process.env;
 
 
@@ -100,9 +100,11 @@ pyRouter.post('/thinkmd_to_dhis2', Middelware.authMiddleware, async (req: Reques
                 ThinkMdOutPutData.dataToSend.success == 'true' &&
                 ThinkMdOutPutData.dataToSend.Error == 0 &&
                 Object.values(ThinkMdOutPutData.dataToSend.Data.body).length > 0) {
+                    
                 // const csvOutputFile = `${srcFolder()}/pythons/extracts/thinkMd_output_for_dhis2_${userId}_output.csv`;
                 // fs.createReadStream(csvOutputFile).pipe(csv()).on("data", (data:any) => { console.log(data) });
-                const jsonOutputFile = extractFolder(`thinkMd_output_for_dhis2_${userId}_output.json`);
+                const jsonOutputFile = extractFolder(`thinkMd_output_for_dhis2_${userId}_output.json`,true);
+
                 let rawdata = fs.readFileSync(jsonOutputFile);
                 ThinkMdOutPutData.DataFordhis2 = JSON.parse(rawdata) as DataIndicators[];
             }

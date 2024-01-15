@@ -34,8 +34,8 @@ export class ErrorComponent implements OnInit {
   }
 
   returnBack(){
-    location.href = this.auth.userValue()?.defaultRedirectUrl ?? 'auths/login';
-  //   this.router.navigate([this.auth.userValue()?.defaultRedirectUrl])
+    location.href = this.auth.userValue()?.defaultRedirectUrl ?? '' ?? 'auths/login';
+  //   this.router.navigate([this.auth.userValue()?.defaultRedirectUrl ?? ''])
   // .then(() => {
   //   window.location.reload();
   // });

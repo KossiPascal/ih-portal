@@ -15,9 +15,10 @@ const routes: Routes = [
   { path: 'fetch', loadChildren: () => import('./modules/sync/syncs.module').then(m => m.SyncsModule)},
   { path: 'maps', loadChildren: () => import('./modules/map/maps.module').then(m => m.MapsModule)},
   { path: 'cache', loadChildren: () => import('./modules/cache/caches.module').then(m => m.CachesModule)},
-  { path: 'truncate_db', loadChildren: () => import('./modules/database/database_utils.module').then(m => m.DatabaseUtilsModule)},
+  { path: 'ihDrug', loadChildren: () => import('./modules/ih_drug/ih_drug.module').then(m => m.IhDrugModule)},
+  { path: 'meetings', loadChildren: () => import('./modules/meeting_reports/mrs.module').then(m => m.IhMeetingReportModule)},
+  { path: 'database', loadChildren: () => import('./modules/database/database_utils.module').then(m => m.DatabaseUtilsModule)},
   { path: 'error', loadChildren: () => import('./modules/error/errors.module').then(m => m.ErrorsModule)},
-    
   { path: '**', redirectTo: 'error' },
 ];
 

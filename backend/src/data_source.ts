@@ -2,7 +2,7 @@
 import { DataSource } from "typeorm"
 import path from "path";
 import { Consts } from "./utils/constantes";
-require('dotenv').config({ path: `${path.dirname(path.dirname(path.dirname(__dirname)))}/ssl/.env` });
+require('dotenv').config({ path: `${path.dirname(path.dirname(path.dirname(__dirname)))}/ssl/.ih-env` });
 
 const { DB_HOST, DB_PORT, PROD_DB_NAME, DEV_DB_NAME, DB_USER, DB_PASS } = process.env
 

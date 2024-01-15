@@ -1,4 +1,4 @@
-import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository } from "../entity/Sync";
+import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository, getChwsDrugSyncRepository, ChwsDrug } from "../entity/Sync";
 import { CouchDbFetchData, Dhis2DataFormat } from "../utils/appInterface";
 import { Dhis2SyncConfig, Functions, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders, notEmpty, logNginx } from "../utils/functions";
 import { NextFunction, Request, Response } from "express";
@@ -8,7 +8,7 @@ import { DataIndicators } from "../entity/DataAggragate";
 
 const fetch = require('node-fetch');
 const request = require('request');
-require('dotenv').config({ path: sslFolder('.env') });
+require('dotenv').config({ path: sslFolder('.ih-env') });
 
 const { DHIS_HOST, NODE_TLS_REJECT_UNAUTHORIZED } = process.env;
 
@@ -159,6 +159,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
         endKey: [Functions.date_to_milisecond(req.body.end_date, false)],
     };
 
+    
     try {
         https.get(CouchDbFetchDataOptions(params), async function (res) {
             var body = "";
@@ -167,7 +168,8 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
             });
             res.on('end', async () => {
                 try {
-                    const repository = await getChwsDataSyncRepository();
+                    const _repoChwsData = await getChwsDataSyncRepository();
+                    const _repoChwsDrug = await getChwsDrugSyncRepository();
                     const _repoSite = await getSiteSyncRepository();
                     var jsonBody: any = JSON.parse(body).rows;
                     if (jsonBody !== undefined && jsonBody !== '' && jsonBody !== null) {
@@ -178,20 +180,72 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                             done++;
                             const row: any = jsonBody[i];
                             if (row.doc.hasOwnProperty('form') && row.doc.hasOwnProperty('fields')) {
-                                if (row.doc.fields.hasOwnProperty('patient_id')) {
-                                    const siteId = row.doc.contact.parent.parent._id;
-                                    var districtId = undefined;
-                                    try {
-                                        districtId = (await _repoSite.findOneBy({ id: siteId }))?.district;
-                                    } catch (error) {
-                                        // console.log('No district found !')
+                                const _syncDrug = new ChwsDrug();
+                                var districtId = undefined;
+                                var siteId = undefined;
+
+                                try {
+                                    siteId = row.doc.contact.parent.parent._id;
+                                    districtId = (await _repoSite.findOneBy({ id: siteId }))?.district;
+                                } catch (error) {
+                                    // console.log('No district found !')
+                                }
+
+
+                                if (["drug_quantities", "drug_movements", "pregnancy_family_planning", "fp_follow_up_renewal", "pcime_c_asc"].includes(row.doc.form)) {
+                                    _syncDrug.source = 'Tonoudayo';
+                                    _syncDrug.id = row.doc._id;
+                                    _syncDrug.rev = row.doc._rev;
+                                    _syncDrug.form = row.doc.form;
+
+                                    if(["drug_quantities", "drug_movements"].includes(row.doc.form)){
+                                        var qtyMvt;
+                                        if(row.doc.form == "drug_quantities" && row.doc.fields.hasOwnProperty("h_drug_quantities") && row.doc.fields.hasOwnProperty("b_drug_quantities")) {
+                                            _syncDrug.activity_date = row.doc.fields.h_drug_quantities.activity_date;
+                                            _syncDrug.activity_type = row.doc.fields.h_drug_quantities.med_operation;
+                                            qtyMvt = row.doc.fields.b_drug_quantities;
+                                        }
+
+                                        if(row.doc.form == "drug_movements" && row.doc.fields.hasOwnProperty("h_drug_movements") && row.doc.fields.hasOwnProperty("b_drug_movements")) {
+                                            _syncDrug.activity_date = row.doc.fields.h_drug_movements.activity_date;
+                                            const mvType = row.doc.fields.h_drug_movements.med_type;
+                                            qtyMvt = row.doc.fields.b_drug_movements;
+                                            _syncDrug.activity_type = mvType;
+                                            
+                                            if(mvType == 'c_med_loan' || mvType == 'c_med_borrowing') _syncDrug.loan_borrowing_chws_info = row.doc.fields.h_drug_movements.med_chw_destination;
+                                            _syncDrug.comments = qtyMvt.med_comment;
+                                        }
+
+                                        if(notEmpty(qtyMvt)){
+                                            _syncDrug.lumartem = notEmpty(qtyMvt.lumartem) ? parseInt(qtyMvt.lumartem) : undefined;
+                                            _syncDrug.alben_400 = notEmpty(qtyMvt.alben_400) ? parseInt(qtyMvt.alben_400) : undefined;
+                                            _syncDrug.amox_250 = notEmpty(qtyMvt.amox_250) ? parseInt(qtyMvt.amox_250) : undefined;
+                                            _syncDrug.amox_500 = notEmpty(qtyMvt.amox_500) ? parseInt(qtyMvt.amox_500) : undefined;
+                                            _syncDrug.pills = notEmpty(qtyMvt.pills) ? parseInt(qtyMvt.pills) : undefined;
+                                            _syncDrug.para_250 = notEmpty(qtyMvt.para_250) ? parseInt(qtyMvt.para_250) : undefined;
+                                            _syncDrug.para_500 = notEmpty(qtyMvt.para_500) ? parseInt(qtyMvt.para_500) : undefined;
+                                            _syncDrug.pregnancy_test = notEmpty(qtyMvt.pregnancy_test) ? parseInt(qtyMvt.pregnancy_test) : undefined;
+                                            _syncDrug.sayana = notEmpty(qtyMvt.sayana) ? parseInt(qtyMvt.sayana) : undefined;
+                                            _syncDrug.sro = notEmpty(qtyMvt.sro) ? parseInt(qtyMvt.sro) : undefined;
+                                            _syncDrug.tdr = notEmpty(qtyMvt.tdr) ? parseInt(qtyMvt.tdr) : undefined;
+                                            _syncDrug.vit_A1 = notEmpty(qtyMvt.vit_A1) ? parseInt(qtyMvt.vit_A1) : undefined;
+                                            _syncDrug.vit_A2 = notEmpty(qtyMvt.vit_A2) ? parseInt(qtyMvt.vit_A2) : undefined;
+                                            _syncDrug.zinc = notEmpty(qtyMvt.zinc) ? parseInt(qtyMvt.zinc) : undefined;
+                                            _syncDrug.other_drug = notEmpty(qtyMvt.other_drug) ? parseInt(qtyMvt.other_drug) : undefined;
+                                        }
+
                                     }
+                                }
+
+                                if (row.doc.fields.hasOwnProperty('patient_id')) {
+                                    
                                     if (districtId && siteId) {
                                         if (!outPutInfo.hasOwnProperty("Données Total")) outPutInfo["Données Total"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
                                         try {
                                             const contactParent = row.doc.fields.inputs.contact.parent;
                                             const contactId = row.doc.fields.inputs.contact._id;
                                             const _sync = new ChwsData();
+                                            
                                             _sync.source = 'Tonoudayo';
                                             _sync.id = row.doc._id;
                                             _sync.rev = row.doc._rev;
@@ -203,13 +257,57 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                             _sync.site = siteId;
                                             _sync.zone = row.doc.contact.parent._id;
                                             _sync.chw = row.doc.contact._id;
-
                                             _sync.family_id = ['home_visit'].includes(row.doc.form) ? contactId : contactParent;
                                             _sync.patient_id = ['home_visit'].includes(row.doc.form) ? null : contactId;
                                             _sync.fields = Functions.getJsonFieldsAsKeyValue('', row.doc.fields);
                                             // _sync.patient_id = row.doc.fields.patient_id;
                                             if (!row.doc.geolocation.hasOwnProperty('code')) _sync.geolocation = Functions.getJsonFieldsAsKeyValue('', row.doc.geolocation);
-                                            await repository.save(_sync);
+                                            await _repoChwsData.save(_sync);
+
+
+                                            // #############################################################
+
+
+                                            if (["pregnancy_family_planning", "fp_follow_up_renewal", "pcime_c_asc"].includes(row.doc.form)) {
+                                                    _syncDrug.activity_type = "distributed";
+                                                    _syncDrug.activity_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
+
+                                                    if(row.doc.form == "pcime_c_asc"){
+                                                        if (row.doc.fields.hasOwnProperty("s_fever_child_TDR")) {
+                                                            if (notEmpty(row.doc.fields.s_fever_child_TDR.s_fever_child_TDR_result)) _syncDrug.tdr = 1;
+                                                        }
+                                            
+                                                        if (row.doc.fields.hasOwnProperty("s_drug_administered")) {
+                                                            const dAdm = row.doc.fields.s_drug_administered;
+                                                            if(notEmpty(dAdm["c_albendazole_400_given"])) _syncDrug.alben_400 = dAdm["c_albendazole_400_given"];
+                                                            if(notEmpty(dAdm["c_amoxicilline_250_given"])) _syncDrug.amox_250 = dAdm["c_amoxicilline_250_given"];
+                                                            if(notEmpty(dAdm["c_amoxicilline_500_given"])) _syncDrug.amox_500 = dAdm["c_amoxicilline_500_given"];
+                                                            if(notEmpty(dAdm["c_paracetamol_250_given"])) _syncDrug.para_250 = dAdm["c_paracetamol_250_given"];
+                                                            if(notEmpty(dAdm["c_paracetamol_500_given"])) _syncDrug.para_500 = dAdm["c_paracetamol_500_given"];
+                                                            if(notEmpty(dAdm["s_zinc_given"])) _syncDrug.zinc = dAdm["s_zinc_given"];
+                                                            if(notEmpty(dAdm["s_ors_given"])) _syncDrug.sro = dAdm["s_ors_given"];
+                                                            if(notEmpty(dAdm["s_lumartem_given"])) _syncDrug.lumartem = dAdm["s_lumartem_given"];
+                                                            if(notEmpty(dAdm["s_vitamine_A1_given"])) _syncDrug.vit_A1 = dAdm["s_vitamine_A1_given"];
+                                                            if(notEmpty(dAdm["s_vitamine_A2_given"])) _syncDrug.vit_A2 = dAdm["s_vitamine_A2_given"];
+                                                            if(notEmpty(dAdm["s_other_drug_given"])) _syncDrug.other_drug = dAdm["s_other_drug_given"];
+                                                        }
+                                                    }
+    
+                                                    if(row.doc.form == "pregnancy_family_planning"){
+                                                        if (row.doc.fields.hasOwnProperty("s_reg_pregnancy_screen")) {
+                                                          if (row.doc.fields.s_reg_pregnancy_screen.s_reg_urine_test == "yes") _syncDrug.pregnancy_test = 1;
+                                                        }
+                                                        if (row.doc.fields.chosen_fp_method == 'oral_combination_pill') _syncDrug.pills = 1;
+                                                        if (row.doc.fields.chosen_fp_method == 'injectible') _syncDrug.sayana = 1;
+                                                    }
+
+                                                    if (row.doc.form == "fp_follow_up_renewal") {
+                                                        if (row.doc.fields.fp_method == 'oral_combination_pill') _syncDrug.pills = 1;
+                                                        if (row.doc.fields.fp_method == 'injectible') _syncDrug.sayana = 1;
+                                                    }
+                                                
+                                            }
+
                                             outPutInfo["Données Total"]["successCount"] += 1;
                                         } catch (err: any) {
                                             outPutInfo["Données Total"]["errorCount"] += 1;
@@ -219,6 +317,17 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                             // outPutInfo["ErrorMsg"] = {}
                                             // outPutInfo["ErrorMsg"]["error"] = err.toString()
                                         }
+                                    }
+                                }
+
+
+                                if (["drug_quantities", "drug_movements", "pregnancy_family_planning", "fp_follow_up_renewal", "pcime_c_asc"].includes(row.doc.form)) {
+                                    if (districtId && siteId) {
+                                        _syncDrug.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                        _syncDrug.district = districtId;
+                                        _syncDrug.site = siteId;
+                                        _syncDrug.chw = row.doc.contact._id;
+                                        await _repoChwsDrug.save(_syncDrug);
                                     }
                                 }
                             }

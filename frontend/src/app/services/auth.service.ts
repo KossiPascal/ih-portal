@@ -87,7 +87,6 @@ export class AuthService {
       return this.http.post(`${Functions.backenUrl()}/user/update`, sendParams, Functions.HttpHeaders(this));
   }
 
-
   deleteUser(user: User): any {
     if (!this.isLoggedIn() || this.userValue() == null) this.logout();
     const thisuser = this.userValue();
@@ -97,11 +96,9 @@ export class AuthService {
   }
 
   alreadyLogin(redirecUrl?: string) {
-    if (this.isLoggedIn()) location.href = redirecUrl??this.userValue()?.defaultRedirectUrl!;
+    if (this.isLoggedIn()) location.href = redirecUrl??this.userValue()?.defaultRedirectUrl??'';
   }
-
-
-
+  
   register(user: User): any {
     const canProcide = !this.isLoggedIn() || this.roles.isSuperUser();
       return canProcide ? this.http.post(`${Functions.backenUrl()}/auth/register`, user, Functions.HttpHeaders(this)) : this.alreadyLogin();
@@ -109,6 +106,7 @@ export class AuthService {
 
   login(username: string, password: string): any {
       const sendParams = { username: username, password: password };
+      console.log(sendParams);
       return !this.isLoggedIn() ? this.http.post(`${Functions.backenUrl()}/auth/login`, sendParams, Functions.HttpHeaders(this)) : this.alreadyLogin();
   }
 
@@ -122,9 +120,6 @@ export class AuthService {
     // this.router.navigate(["auths/login"]);
     location.href = 'auths/login';
   }
-
-
-  
 
   public chwsOrgUnit(): Chws|null {
     try {

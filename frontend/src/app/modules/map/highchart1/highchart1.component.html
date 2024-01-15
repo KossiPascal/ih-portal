@@ -1,8 +1,8 @@
-<section class="content-header">
+<!-- <section class="content-header">
     <div class="container-fluid">
         <div class="card card-info">
 
-            <h2 class="title" style="text-align: center; color: purple;">Activité des ASC</h2>
+            <h2 class="title" style="text-align: center; color: purple;">High Chart 1</h2>
 
             <div class="overlay-wrapper">
                 <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
@@ -61,7 +61,7 @@
                                 </div>
                             </div>
 
-                        </div>
+                        </div> -->
 
                         <!-- <div *ngIf="!roles.isChws()" class="row">
                 <div class="col-sm-4">
@@ -75,30 +75,55 @@
                   </div>
                 </div>
               </div> -->
-
+<!-- 
                     </form>
                 </div>
 
             </div>
         </div>
     </div>
-</section>
+</section> -->
 
 
+<!-- <highcharts-chart 
+  [Highcharts]="Highcharts"
+
+  [constructorType]="chartConstructor"
+  [options]="chartOptions"
+  [callbackFunction]="chartCallback"
+
+  [(update)]="updateFlag"
+  [oneToOne]="oneToOneFlag"
+  [runOutsideAngular]="runOutsideAngular"
+
+  style="width: 100%; height: 400px; display: block;"
+></highcharts-chart> -->
+
+<br>
+<br>
+<br>
+
+<div id="highchart_container"></div>
 
 
-<section *ngIf="roles.isSupervisorMentor() || roles.onlySeeData()" class="content">
+<!-- <section *ngIf="roles.isSupervisorMentor()" class="content">
     <div class="card">
         <div class="card-header">
             <div class="card-title">
-                <!-- <table-export></table-export> -->
+                
             </div>
         </div>
 
         <div class="card-body" style="overflow-y:scroll!important;">
-            <!-- <div id="highchart_container" style="height: 700px; min-width: 310px; max-width: 800px; margin: 0 auto"></div> -->
-            <div id="highchart_container" style="height: 700px; width: 100%; margin: 0 auto; display: block"></div>
+            <div id="highchart_container"></div>
         </div>
 
     </div>
-</section>
+</section> -->
+
+
+
+<!-- <table-export></table-export> -->
+<!-- <div id="highchart_container" style="height: 700px; min-width: 310px; max-width: 800px; margin: 0 auto"></div> -->
+            <!-- <div id="highchart_container" style="height: 700px; width: 100%; margin: 0 auto; display: block"></div> -->
+            

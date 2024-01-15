@@ -12,9 +12,178 @@ export function notNull(data: any): boolean {
 
 export class Functions {
 
-  static range(size:number, startAt:number = 0) {
+  static async Wait(time:number = 2000): Promise<void> {
+    setTimeout(() => {
+      
+    }, time);
+  }
+
+  static months(): { labelEN: string; labelFR: string; id: string; uid: number }[] {
+    return [
+      { labelEN: "January", labelFR: "Janvier", id: "01", uid: 1 },
+      { labelEN: "February", labelFR: "Février", id: "02", uid: 2 },
+      { labelEN: "March", labelFR: "Mars", id: "03", uid: 3 },
+      { labelEN: "April", labelFR: "Avril", id: "04", uid: 4 },
+      { labelEN: "May", labelFR: "Mai", id: "05", uid: 5 },
+      { labelEN: "June", labelFR: "Juin", id: "06", uid: 6 },
+      { labelEN: "July", labelFR: "Juillet", id: "07", uid: 7 },
+      { labelEN: "August", labelFR: "Août", id: "08", uid: 8 },
+      { labelEN: "September", labelFR: "Septembre", id: "09", uid: 9 },
+      { labelEN: "October", labelFR: "Octobre", id: "10", uid: 10 },
+      { labelEN: "November", labelFR: "Novembre", id: "11", uid: 11 },
+      { labelEN: "December", labelFR: "Décembre", id: "12", uid: 12 },
+    ];
+  }
+
+  static monthByArg(arg:any):{ labelEN: string; labelFR: string; id: string; uid: number }{
+    for (let i = 0; i < Functions.months().length; i++) {
+      const m = Functions.months()[i];
+      if (arg == m.labelFR || arg == m.labelEN || arg == m.id || arg == m.uid) {
+        return m;
+      }
+    }
+    return { labelEN: '', labelFR: '', id: '', uid: 0 };
+  }
+
+  static previousMonth(monthId: string): string {
+    let cMonth: number = parseInt(monthId, 10);
+    if (cMonth === 1) return '12';
+    cMonth--;
+    return cMonth < 10 ? `0${cMonth}` : cMonth.toString();
+  }
+
+
+  static getMonthLabelById(id:string, lang:'fr'|'en' = 'fr'):string {
+    for (var i = 0; i < Functions.months().length; i++) {
+      var m = Functions.months()[i];
+      if (m.id == id) return lang == 'fr' ? m.labelFR : m.labelEN;
+    }
+    return '';
+  }
+
+  static getMonthIdByLabel(label:string):string {
+    for (var i = 0; i < Functions.months().length; i++) {
+      var m = Functions.months()[i];
+      if (m.labelFR == label || m.labelEN == label) return m.id ;
+    }
+    return '';
+  }
+
+  static getYearsList(biginYear: number = 2022):number[] {
+    var cYear:number = Functions.currentYear();
+    if (biginYear == cYear) return [cYear];
+    if (biginYear < cYear) {
+      var ys:number[] = [];
+      for (var i = 0; i <= cYear - biginYear; i++) {
+        ys.push(cYear - i);
+      }
+      return ys.sort((a, b) => a - b);
+    }
+    return [biginYear]
+  }
+
+
+
+  static currentYear(date?: string): number {
+    try {
+      const formattedDate = date ? this.formatDate(new Date(date)) : this.formatDate(new Date());
+      return parseInt(formattedDate, 10);
+    } catch (e) {
+      return parseInt(this.formatDate(new Date()), 10);
+    }
+  }
+
+  private static formatDate(date: Date): string {
+    return date.getFullYear().toString();
+  }
+
+  static currentMonth(date?: string): { labelEN: string; labelFR: string; id: string; uid: number } {
+    let month: number;
+    try {
+      month = date ? new Date(date).getMonth() + 1 : new Date().getMonth() + 1;
+    } catch (e) {
+      month = new Date().getMonth() + 1;
+    }
+    const mth = month < 10 ? `0${month}` : `${month}`;
+    
+    for (var i = 0; i < Functions.months().length; i++) {
+      var m = Functions.months()[i];
+      if (m.id == mth) return m;
+    }
+    return { labelEN: '', labelFR: '', id: '', uid: 0 };
+  }
+
+  static currentMonthString(date?: string): string {
+    let month: number;
+    try {
+      month = date ? new Date(date).getMonth() + 1 : new Date().getMonth() + 1;
+    } catch (e) {
+      month = new Date().getMonth() + 1;
+    }
+
+    const formattedMonth = month < 10 ? `0${month}` : `${month}`;
+    return formattedMonth;
+  }
+
+
+  static LatLonToMercator(lat: number, lon: number): { x: number, y: number } {
+    var rMajor = 6378137; //Equatorial Radius, WGS84
+    var shift = Math.PI * rMajor;
+    var x = lon * shift / 180;
+    var y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
+    y = y * shift / 180;
+    return { x: x, y: y };
+  }
+
+  static getXYforLatLng(lat: number, lon: number, zoom?: number): { x: number, y: number } {
+    //max zoom = 22 
+    var zooom = notNull(zoom) ? zoom! : 22;
+    var x = Math.floor((lon + 180) / 360 * Math.pow(2, zooom));
+    var y = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zooom));
+    return { x: x, y: y };
+  }
+
+  static MercatorToLatLon(x: number, y: number): { lat: number, lon: number } {
+
+    var rMajor = 6378137; //Equatorial Radius, WGS84
+    var shift = Math.PI * rMajor;
+    var lon = x / shift * 180.0;
+    var lat = y / shift * 180.0;
+    lat = 180 / Math.PI * (2 * Math.atan(Math.exp(lat * Math.PI / 180.0)) - Math.PI / 2.0);
+
+    return { lat: lat, lon: lon };
+  }
+
+  static degrees2meters(lat: number, lon: number): { x: number, y: number } {
+    var x = lon * 20037508.34 / 180;
+    var y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
+    y = y * 20037508.34 / 180;
+    return { x: x, y: y };
+  }
+
+
+  static meters2degress(x: number, y: number): { lat: number, lon: number } {
+    var lon = x * 180 / 20037508.34;
+    //thanks magichim @ github for the correction
+    var lat = Math.atan(Math.exp(y * Math.PI / 20037508.34)) * 360 / Math.PI - 90;
+    return { lat: lat, lon: lon };
+  }
+
+
+
+  static convertLatLonToXY(data: { lat: number, lon: number, map_width?: number, map_height?: number }): { x: number, y: number } {
+
+    var MAP_WIDTH = notNull(data.map_width) ? data.map_width! : 1000;
+    var MAP_HEIGHT = notNull(data.map_height) ? data.map_height! : 446;
+
+    var y = ((-1 * data.lat) + 90) * (MAP_HEIGHT / 180);
+    var x = (data.lon + 180) * (MAP_WIDTH / 360);
+    return { x: x, y: y };
+  }
+
+  static range(size: number, startAt: number = 0) {
     return [...Array(size).keys()].map(i => i + startAt);
-}
+  }
 
   static returnEmptyArrayIfNul(data: any): string[] {
     return notNull(data) ? data : [];
@@ -28,19 +197,19 @@ export class Functions {
     return notNull(data) ? [data] : [];
   }
 
-  static saveCurrentUrl(router: Router):void{
+  static saveCurrentUrl(router: Router): void {
     const link = router.url.split(Functions.backenUrl(''))[0];
     // const link = location.href;
     // const link = window.location.href;
-      sessionStorage.setItem("redirect_url", link);
+    sessionStorage.setItem("redirect_url", link);
   }
 
-  static getSavedUrl():string | null{
+  static getSavedUrl(): string | null {
     const link = sessionStorage.getItem('redirect_url');
     sessionStorage.removeItem("redirect_url");
     return link;
   }
- 
+
   static loadCssScripts(dynamicCssScripts: string[]) {
     for (let i = 0; i < dynamicCssScripts.length; i++) {
       const src = dynamicCssScripts[i];
@@ -82,19 +251,14 @@ export class Functions {
 
   }
 
-  static backenUrl(cible:string = 'api'): string {
-    if (location.port == '4200') {
-      // const port = location.protocol === 'https:' ? envs.PORT_SECURED : envs.PORT;
-      const isHttps:boolean = location.protocol === 'https:';
-      const prodPort = isHttps ? 9999 : 9990;
-      const devPort = isHttps ? 7777 : 7770;
-      const port = Consts.isProdEnv() ? prodPort : devPort;
-      return `${location.protocol}//${location.hostname}:${port}/${cible}`;
-      // return environment.apiURL;
+  static backenUrl(cible: string = 'api'): string {
+    const portInfo = Consts.getPort();
+    if (portInfo.isLocal == true) {
+      return `${location.protocol}//${location.hostname}:${portInfo.port}/${cible}`;
     }
     return `${location.origin}/${cible}`;
   }
-  
+
   static custumRequest(method: string, http: HttpClient, auth: AuthService, url: string, data?: any, responseType?: any) {
     // console.log(`${baseUrl}/${url}`);
     // console.log('request ' + JSON.stringify(data));
@@ -103,7 +267,7 @@ export class Functions {
       responseType: responseType || 'json',
       observe: 'body',
       headers: {
-        Authorization: auth.userValue()!=null ? `Bearer ${auth.userValue()!.token}` : '',
+        Authorization: auth.userValue() != null ? `Bearer ${auth.userValue()!.token}` : '',
         "Content-Type": "application/json"
       }
     });
@@ -117,14 +281,14 @@ export class Functions {
   static HttpHeaders(auth: AuthService): { headers: HttpHeaders } {
     return {
       headers: new HttpHeaders({
-        Authorization: auth.userValue()!=null ? `Bearer ${auth.userValue()!.token}` : ''
+        Authorization: auth.userValue() != null ? `Bearer ${auth.userValue()!.token}` : ''
         // "Content-Type": "application/json" 
       }),
     };
   }
 
-  static isNumber(n:any):boolean { 
-    return /^-?[\d.]+(?:e-?\d+)?$/.test(n); 
+  static isNumber(n: any): boolean {
+    return /^-?[\d.]+(?:e-?\d+)?$/.test(n);
   }
 }
 
@@ -151,14 +315,24 @@ export function patientAgeDetails(patient: Patients): {
 
 export class DateUtils {
 
-  static getAgeInMilliseconds(birth_date?:string) {
+  static getAgeInMilliseconds(birth_date?: string) {
     if (birth_date != null) {
       return new Date(Date.now() - (new Date(birth_date)).getTime());
     }
     return null;
   }
 
-  static getAgeInYear(birth_date:string, withUtc:boolean = true) {
+  static compareTimes(time1: string, time2: string): number {
+    const [hours1, minutes1] = time1.split(':').map(Number);
+    const [hours2, minutes2] = time2.split(':').map(Number);
+  
+    const totalMinutes1 = hours1 * 60 + minutes1;
+    const totalMinutes2 = hours2 * 60 + minutes2;
+  
+    return totalMinutes1 - totalMinutes2;
+  }
+
+  static getAgeInYear(birth_date: string, withUtc: boolean = true) {
     var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
     if (ageInMs != null) {
       const year = withUtc ? ageInMs.getUTCFullYear() : ageInMs.getFullYear();
@@ -167,8 +341,8 @@ export class DateUtils {
     }
     return null;
   }
-  
-  static getAgeInMonths(birth_date:string, round:boolean = false) {
+
+  static getAgeInMonths(birth_date: string, round: boolean = false) {
     var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
     if (ageInMs != null) {
       const ageInMonth = ageInMs.getTime() / (1000 * 60 * 60 * 24 * 30);
@@ -176,15 +350,15 @@ export class DateUtils {
     }
     return null;
   }
-  static getAgeInDays(birth_date:string) {
+  static getAgeInDays(birth_date: string) {
     var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
-    if (ageInMs!=null) {
+    if (ageInMs != null) {
       return ageInMs.getTime() / (1000 * 60 * 60 * 24);
     }
     return null;
   }
-  
-  static isChildUnder5(birth_date:string):boolean{
+
+  static isChildUnder5(birth_date: string): boolean {
     var childAge = DateUtils.getAgeInMonths(birth_date);
     if (childAge != null) {
       return childAge < 60;
@@ -192,13 +366,13 @@ export class DateUtils {
     return false;
   }
 
-  static isFemaleInCible(data:{birth_date:string, sex:string}){
+  static isFemaleInCible(data: { birth_date: string, sex: string }) {
     const year = DateUtils.getAgeInYear(data.birth_date!);
     if (year != null) return year >= 5 && year < 60 && data.sex == 'F';
     return false;
   }
 
-  static isInCible(data:{birth_date:string, sex:string}):boolean{
+  static isInCible(data: { birth_date: string, sex: string }): boolean {
     return DateUtils.isChildUnder5(data.birth_date) || DateUtils.isFemaleInCible(data);
   }
 
@@ -288,7 +462,7 @@ export class DateUtils {
     var h = String(now.getHours()).padStart(2, '0');
     var mm = String(now.getMinutes()).padStart(2, '0');
     var s = String(now.getSeconds()).padStart(2, '0');
-  
+
     if (m == '00') {
       return new Date(`${y - 1}-12-${d} ${h}:${mm}:${s}`);
     } else {
@@ -311,9 +485,9 @@ export class DateUtils {
     return { start_date: prev, end_date: end };
   }
 
-  static lastDayOfMonth(dateObj: any):string{
+  static lastDayOfMonth(dateObj: any): string {
     var date: Date = dateObj instanceof Date ? dateObj : new Date(dateObj);
-    var d = new Date(date.getFullYear(), date.getMonth()+1, 0);
+    var d = new Date(date.getFullYear(), date.getMonth() + 1, 0);
     return String(d.getDate()).padStart(2, '0');
   }
 
@@ -341,7 +515,7 @@ export class DateUtils {
     var betweenDate = DateUtils.startEnd21and20Date();
     return DateUtils.isGreaterOrEqual(date, betweenDate.start_date) && DateUtils.isLessOrEqual(date, betweenDate.end_date)
   }
-  
+
   static getMondays(dateObj: any, format: string = `en`, withHour: boolean = false): string[] {
     var d = dateObj instanceof Date ? dateObj : new Date(dateObj);
     var month = d.getMonth();

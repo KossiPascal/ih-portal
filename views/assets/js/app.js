@@ -82,10 +82,11 @@ function initDataTable(tableId, paging = true) {
   // .appendTo("#" + tableId + "_wrapper .col-md-6:eq(0)");
 }
 
-function table2csv(fileName = 'fileName', delimiter = ',') {
+function table2csv(fileName = 'fileName', delimiter = ',', id = 'export_table') {
   // Export types, support types: ['json', 'xml', 'png', 'csv', 'txt', 'sql', 'doc', 'excel', 'xlsx', 'pdf'],
   // Default: ['json', 'xml', 'csv', 'txt', 'sql', 'excel']
-  $('#export_table').tableExport({
+
+  $('#'+id).tableExport({
     type: 'csv',
     csvEnclosure: '"',
     csvSeparator: delimiter,
@@ -136,7 +137,7 @@ function table2csv(fileName = 'fileName', delimiter = ',') {
   // });
 }
 
-function table2pdf(fileName = 'fileName', orientation = 'p') {
+function table2pdf(fileName = 'fileName', orientation = 'p', id = 'export_table') {
   var doc = new jsPDF({
     orientation: orientation,
     unit: 'pt',
@@ -156,7 +157,7 @@ function table2pdf(fileName = 'fileName', orientation = 'p') {
   doc.setLineWidth(2);
   // doc.text(200, (y = y + 30), 'TOTAL MARKS OF STUDENTS');
   doc.autoTable({
-    html: '#export_table',
+    html: '#'+id,
     startY: 70,
     theme: 'grid',
     // columnStyles: {
@@ -201,8 +202,8 @@ function table2pdf(fileName = 'fileName', orientation = 'p') {
   doc.save(fileName + '.pdf');
 }
 
-function table2json(fileName) {
-  $('#export_table').tableHTMLExport({
+function table2json(fileName, id = 'export_table') {
+  $('#'+id).tableHTMLExport({
     // csv, txt, json, pdf
     type: 'json',
     filename: fileName + '.json',
@@ -215,8 +216,8 @@ function table2json(fileName) {
   });
 }
 
-function table2excel(fileName) {
-  $('#export_table').table2excel({
+function table2excel(fileName, id = 'export_table') {
+  $('#'+id).table2excel({
     exclude: '.noExl',
     name: fileName + ' data',
     filename: fileName, //do not include extension
@@ -228,8 +229,8 @@ function table2excel(fileName) {
   });
 }
 
-function printTable(fileName) {
-  var divToPrint = document.getElementById('export_table');
+function printTable(fileName, id = 'export_table') {
+  var divToPrint = document.getElementById(id);
   newWin = window.open('');
   newWin.document.write(divToPrint.outerHTML);
   newWin.print();

@@ -10,9 +10,7 @@ import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Roles } from '@ih-app/shared/roles';
 // import { liveQuery } from 'dexie';
-
 declare var sortTable: any;
-
 
 @Component({
   selector: 'app-dashboard-2',
@@ -23,9 +21,9 @@ declare var sortTable: any;
 })
 export class Dashboard2Component implements OnInit {
 
-
   constructor(private store: AppStorageService, private auth: AuthService, private sync: SyncService) {
-    if (!this.roles.isSupervisorMentor() && !this.roles.isChws() && !this.roles.onlySeeData()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+    if(this.roles.hasNoAccess()) this.auth.logout();
+    if (!this.roles.isSupervisorMentor() && !this.roles.isChws()) location.href = this.auth.userValue()?.defaultRedirectUrl ?? ''!;
   }
 
   public roles = new Roles(this.store);
@@ -87,8 +85,8 @@ export class Dashboard2Component implements OnInit {
 
   chws$: Chws[] = [];
   sites$: Sites[] = [];
-  days$: number[] = Functions.range(18, 1);
-  day: number = 18;
+  days$: number[] = Functions.range(24, 1);
+  day: number = 22;
 
 
 

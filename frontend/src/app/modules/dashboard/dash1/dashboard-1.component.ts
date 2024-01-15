@@ -22,7 +22,8 @@ export class Dashboard1Component implements OnInit {
     throw new Error('Method not implemented.');
   }
   constructor(private store: AppStorageService, private auth: AuthService, private sync: SyncService) {
-    if (!this.roles.isSupervisorMentor() && !this.roles.isChws() && !this.roles.onlySeeData()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+    if(this.roles.hasNoAccess()) this.auth.logout();
+    if (!this.roles.isSupervisorMentor() && !this.roles.isChws()) location.href = this.auth.userValue()?.defaultRedirectUrl ?? ''!;
   }
 
   public roles = new Roles(this.store);

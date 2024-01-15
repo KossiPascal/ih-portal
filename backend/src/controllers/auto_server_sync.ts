@@ -1,14 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import { validationResult } from "express-validator";
-import { ChwsData, getChwsDataSyncRepository, getSiteSyncRepository, Sites } from "../entity/Sync";
+import { getSiteSyncRepository, Sites } from "../entity/Sync";
 import { User } from "../entity/User";
 import { JsonDatabase } from "../json-data-source";
-import { CouchDbFetchData } from "../utils/appInterface";
-import { notEmpty, DateUtils, sslFolder, logNginx, delay, CouchDbFetchDataOptions, Functions } from "../utils/functions";
+import { notEmpty, DateUtils, sslFolder, logNginx, Functions } from "../utils/functions";
 import { Consts } from "../utils/constantes";
 const request = require('request');
 
-require('dotenv').config({ path: sslFolder('.env') });
+require('dotenv').config({ path: sslFolder('.ih-env') });
 
 const { DEFAULT_DHIS2_USER_ID, LOCALHOST, CHT_HOST, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED } = process.env
 

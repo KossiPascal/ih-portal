@@ -5,8 +5,10 @@ import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Consts } from '@ih-app/shared/constantes';
 import { Functions, notNull } from '@ih-app/shared/functions';
-import { Roles } from '@ih-app/shared/roles';
+import { Roles, UserGroupsAsArray, UserRole, UserRolesAsArray } from '@ih-app/shared/roles';
 import { User } from '@ih-models/User';
+import { Team } from '@ih-src/app/models/DataAggragate';
+import { SyncService } from '@ih-src/app/services/sync.service';
 // import usersDb from '@ih-databases/users.json'; 
 
 declare var $: any;
@@ -22,37 +24,48 @@ export class UserComponent implements OnInit {
   }
   users$: User[] = [];
 
-  roles$: string[] = [];
+  roles$: { id: string, name: string }[] = UserRolesAsArray();
+  groups$: { id: string, name: string }[] = UserGroupsAsArray();
+  MeetingReport$!: Team[];
 
   userForm!: FormGroup;
   isLoginForm: boolean = false;
   isLoading: boolean = false;
   LoadingMsg: string = "Loading...";
   isEditMode: boolean = false;
-  user!:User|null;
+  selectedUser!:User|null;
   message: string = '';
 
   APP_LOGO: string = Consts.APP_LOGO;
 
-  constructor(private store: AppStorageService, private auth: AuthService, private router: Router) { 
-    if(!this.roles.isSuperUser()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+  constructor(private store: AppStorageService, private auth: AuthService, private sync: SyncService, private router: Router) { 
+    if(!this.roles.isSuperUser()) location.href = this.auth.userValue()?.defaultRedirectUrl??'';
   }
-
+  
   private roles = new Roles(this.store);
   
   ngOnInit(): void {
     this.getUsers();
+    this.GetTeams();
     this.userForm = this.createFormGroup();
+  }
+
+  GetTeams() {
+    this.sync.GetTeams().subscribe(async (_c$: { status: number, data: Team[] | string }) => {
+      if (_c$.status == 200) {
+        this.MeetingReport$ = (_c$.data as Team[]).sort((a, b) => a.name.localeCompare(b.name));
+      }
+    }, (err: any) => { });
   }
 
   getUsers() {
     this.auth.getAllUsers().subscribe((res: {status:number, data:any}) => {
-
       if (res.status === 200){
         this.users$ = [];
         const userfound:User[] = res.data;
         for (let i = 0; i < userfound.length; i++) {
           const user = userfound[i];
+          user.isSuperAdmin = user.roles.includes(UserRole().SuperUser.id);
           // delete user.password;
           this.users$.push(user)
         }
@@ -65,23 +78,24 @@ export class UserComponent implements OnInit {
 
   EditUser(user:User) {
     this.isEditMode = true;
-    user.roles = (user.roles.toString().replace('[','').replace(']','')).split(',')
+    user.roles = (user.roles.toString().replace('[','').replace(']','')).split(',');
+    user.groups = (user.groups.toString().replace('[','').replace(']','')).split(',')
     this.userForm = this.createFormGroup(user);
-    this.selectedUser(user);
+    this.UserSelected(user);
   }
 
-  selectedUser(user:User){
-    this.user = user;
+  UserSelected(user:User){
+    this.selectedUser = user;
   }
  
   DeleteUser() {
     this.isEditMode = false;
-    if (this.user) this.auth.deleteUser(this.user).subscribe((res: {status:number, data:any}) => {
+    if (this.selectedUser) this.auth.deleteUser(this.selectedUser).subscribe((res: {status:number, data:any}) => {
       if (res.status === 200) {
         this.showModalToast('success','Supprimé avec success')
         console.log(`successfully deleted!`);
         this.getUsers();
-        this.user = null;
+        this.selectedUser = null;
         this.isLoading = false;
       } else {
         this.message = res.data;
@@ -97,18 +111,19 @@ export class UserComponent implements OnInit {
   CreateUser() {
     this.isEditMode = false;
     this.userForm = this.createFormGroup();
-    this.user = null;
+    this.selectedUser = null;
   }
-
 
   createFormGroup(user?: User): FormGroup {
     return new FormGroup({
       username: new FormControl(user != null ? user.username : '', [Validators.required, Validators.minLength(4)]),
       fullname: new FormControl(user != null ? user.fullname : '', [Validators.required, Validators.minLength(4)]),
       // email: new FormControl(user != null ? user.email : '', [Validators.required, Validators.email]),
-      password: new FormControl('', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]),
-      passwordConfirm: new FormControl('', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]),
+      // password: new FormControl('', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]),
+      // passwordConfirm: new FormControl('', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]),
       roles: new FormControl(user != null ? user.roles : '', [Validators.required, Validators.minLength(1)]),
+      groups: new FormControl(user != null ? user.groups : '', [Validators.required, Validators.minLength(1)]),
+      meeting_report: new FormControl(user != null ? user.meeting_report : '', [Validators.required, Validators.minLength(1)]),
       isActive: new FormControl(user != null ? user.isActive : false),
       // isSuperAdmin: new FormControl(user != null ? user.isSuperAdmin : false)
       
@@ -150,15 +165,24 @@ export class UserComponent implements OnInit {
   register(): any {
     if (this.auth.isLoggedIn()) {
 
+      var request:any;
+
       if (this.isEditMode) {
-        const editPassword: boolean = notNull(this.userForm.value.password) && notNull(this.userForm.value.passwordConfirm);
-        this.userForm.value['editPassword'] = editPassword;
-        this.userForm.value['id'] = this.user!.id;
+        if (this.selectedUser) {
+          this.selectedUser.groups = this.userForm.value['groups']
+          this.selectedUser.roles = this.userForm.value['roles']
+          this.selectedUser.meeting_report = this.userForm.value['meeting_report']
+          // const editPassword: boolean = notNull(this.userForm.value.password) && notNull(this.userForm.value.passwordConfirm);
+          // this.userForm.value['editPassword'] = editPassword;
+          // this.userForm.value['id'] = this.selectedUser!.id;
+          request = this.auth.updateUser(this.selectedUser);
+        }
+      } else {
+        request = this.auth.register(this.userForm.value);
       }
 
-      return (this.isEditMode ? this.auth.updateUser(this.userForm.value) : this.auth.register(this.userForm.value))
-        .subscribe((res: {status:number, data:any}) => {
-
+      if (request) {
+        return request.subscribe((res: {status:number, data:any}) => {
           if (res.status === 200) {
             this.message = 'Registed successfully !'
             // this.message = 'Registed successfully !'
@@ -175,6 +199,9 @@ export class UserComponent implements OnInit {
           this.isLoading = false;
           // console.log(this.message);
         });
+      }
+
+      
     } else {
       this.auth.logout();
     }

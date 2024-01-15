@@ -1,0 +1,347 @@
+<div class="page-content-wrap">
+  <div class="col-12 col-sm-12">
+    <div class="card card-primary card-tabs-head">
+
+      <div id="navigation-tab" class="card-header p-0 pt-1">
+        <ul class="nav" id="custom-tabs-head" role="tablist">
+          <ng-container *ngFor="let team of Team$">
+            <ng-container *ngIf="team.id as t">
+
+              <li class="team-nav">
+                <a *ngIf="team.show == true" (click)="ClickedIndex(team)" id="custom-mr-{{t}}-tab"
+                  data-toggle="pill" href="#custom-mr-{{t}}" role="tab" [attr.data-aria-controls]="'custom-mr-'+t"
+                  [attr.data-aria-selected]="t==SelectedTeam?.id" (mousedown)="onMouseDown($event, team)"
+                  (mouseup)="onMouseUp()" (mouseleave)="onMouseLeave()">
+                  <div class="{{t==SelectedTeam?.id ? 'active' : ''}}  team-nav-link-active">{{ team.name}}</div>
+                </a>
+                <span *ngIf="team.show == false" id="custom-mr-span-{{t}}-tab" 
+                  (mousedown)="onMouseDown($event,team)" (mouseup)="onMouseUp()"
+                  (mouseleave)="onMouseLeave()">
+                  <div class="team-nav-link-desactive">{{ team.name}}</div>
+                </span>
+              </li>
+
+            </ng-container>
+          </ng-container>
+        </ul>
+
+        <div id="team-utils">
+          <input *ngIf="IsTeamAction" id="team-name" type="text" required class="team-name form-control"
+            placeholder="Team Name" autocomplete="off">
+          <div id="team-name-btn">
+            <i *ngIf="IsTeamAction && !TeamToUpdateId" class="fas fa-save t-1" (click)="SaveOrUpdateTeam($event)"></i>
+            <i *ngIf="IsTeamAction && TeamToUpdateId" class="fas fa-edit t-2" (click)="SaveOrUpdateTeam($event)"></i>
+            <i *ngIf="IsTeamAction && TeamToUpdateId" class="fas fa-trash t-3" (click)="deleteTeam($event)"></i>
+            <i *ngIf="IsTeamAction" class="fas fa-times t-4" (click)="cancelTeamAction($event)"></i>
+
+            <i *ngIf="!IsTeamAction" class="fas fa-pen t-5" (click)="TeamAction($event)"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="custom-tabs-body">
+        <ng-container *ngFor="let team of Team$">
+          <ng-container *ngIf="team.id as t">
+            <div *ngIf="team.show" class="tab-pane fade {{t==SelectedTeam?.id ? 'show active' : ''}}"
+              id="custom-mr-{{t}}" role="tabpanel" [attr.data-aria-labelledby]="'custom-mr-'+t+'-tab'">
+              <div class="card-body custom-tabs-body-chid">
+                <div class="custom-tab-body-left">
+                  <table [id]="'meeting-report-'+t" class="table table-bordered meeting_report">
+                    <tbody>
+                      <tr>
+                        <th colspan="4" style="background-color: white;border:1px solid white;">
+                          <div class="report-title"> RAPPORT DE REUNION </div>
+                        </th>
+                      </tr>
+                      <tr>
+                        <th colspan="3">
+                          <b style="font-size: 25px; color:rgb(206, 32, 32); margin:10px">
+                            {{ team.name | uppercase }}
+                            <ul class="download noExl" *ngIf="AllFieldAreNotEmpty(t, false)">
+                              <li><span (click)="excel('meeting-report-'+t)">Excel</span></li>
+                              <li><span (click)="csv('meeting-report-'+t)">CSV</span></li>
+                              <li><span (click)="json('meeting-report-'+t)">JSON</span></li>
+                              <li><span (click)="pdf('meeting-report-'+t)">PDF</span></li>
+                              <li><span (click)="print('meeting-report-'+t)">PRINT</span></li>
+                            </ul>
+                          </b>
+                        </th>
+                        <td>
+                          <div class="td-container noExl">
+                            <i class="fas fa-edit editReport" *ngIf="SelectedReportExist(t) && CanUpdateReport(t) && showEdit(t,'span')"
+                              (click)="editReport($event,t)"></i>
+                            <i class="fas fa-trash deleteReport" *ngIf="SelectedReportExist(t) && CanUpdateReport(t)"
+                              (click)="deleteReport($event,t)"></i>
+                            <i class="fas fa-times cancelReport" *ngIf="SelectedReportExist(t)"
+                              (click)="cancelReportAction($event,t)"></i>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Titre de la réunion</th>
+                        <td colspan="3">
+                          <div *ngIf="showEdit(t,'span')" 
+                          [innerHTML]="textAreaToString(ViewedReport[t]?.title) | safeHtml"
+                          class="editReportSpan"></div>
+                          <textarea id="title-{{t}}" class="form-control textarea" rows="1" *ngIf="showEdit(t)"
+                            (click)="removeErrorClass('title-'+t)"
+                            [disabled]="!CanUpdateReport(t)">{{ ViewedReport[t]?.title }}</textarea>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <th>Date/Heure début & Fin</th>
+                        <td >
+                          <div *ngIf="showEdit(t,'span')" 
+                          [innerHTML]="textAreaToString(ViewedReport[t]?.date) | safeHtml"
+                          class="editReportSpan"></div>
+                          <input type="date" class="form-control" id="date-{{t}}" (click)="removeErrorClass('date-'+t)"
+                            [disabled]="!CanUpdateReport(t)" *ngIf="showEdit(t)" value="{{ ViewedReport[t]?.date }}" />
+                        </td>
+                        
+                        <td>
+                          <div *ngIf="showEdit(t,'span')" 
+                          [innerHTML]="textAreaToString(ViewedReport[t]?.start_hour) | safeHtml"
+                          class="editReportSpan"></div>
+                          <input (input)="compareTime(t)" type='time' step="3600" class="form-control"
+                            id="start-hour-{{t}}" (click)="removeErrorClass('start-hour-'+t)"
+                            [disabled]="!CanUpdateReport(t)" *ngIf="showEdit(t)"
+                            value="{{ ViewedReport[t]?.start_hour }}">
+                        </td>
+                        <td>
+                          <div *ngIf="showEdit(t,'span')" 
+                          [innerHTML]="textAreaToString(ViewedReport[t]?.end_hour) | safeHtml"
+                          class="editReportSpan"></div>
+                          <input (input)="compareTime(t)" type='time' step="3600" class="form-control"
+                            id="end-hour-{{t}}" (click)="removeErrorClass('end-hour-'+t)"
+                            [disabled]="!CanUpdateReport(t)" *ngIf="showEdit(t)"
+                            value="{{ ViewedReport[t]?.end_hour }}">
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <th>Les Participants</th>
+                        <td colspan="3">
+                          <div id="present-persons-{{t}}" class="person-container editReportSpan">
+                            <div id="present-person-selected-{{t}}"
+                              *ngFor="let p of GetSelectedPersonList(t); let j=index;" class="person-box">
+                              <span
+                                [innerHTML]="GetSeletedPersonName(p, t, j, GetSelectedPersonList(t).length) | safeHtml"
+                                style="font-size:14px;"></span>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <th>Les Absents</th>
+                        <td colspan="3">
+                          <div id="absent-persons-{{t}}" class="person-container editReportSpan">
+                            <div id="absent-person-selected-{{t}}"
+                              *ngFor="let p of GetSelectedPersonList(t, true); let j=index;" class="person-box">
+                              <span
+                                [innerHTML]="GetSeletedPersonName(p, t, j, GetSelectedPersonList(t, true).length) | safeHtml"
+                                style="font-size:14px;"></span>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <th>Autres Participants</th>
+                        <td colspan="3">
+                          <div *ngIf="showEdit(t,'span')" 
+                          [innerHTML]="textAreaToString(ViewedReport[t]?.other_persons) | safeHtml"
+                          class="editReportSpan"></div>
+                          <textarea id="other_persons-{{t}}" class="form-control textarea" rows="1"
+                            (click)="removeErrorClass('other_persons-'+t)" [disabled]="!CanUpdateReport(t)"
+                            *ngIf="showEdit(t)">{{ ViewedReport[t]?.other_persons }}</textarea>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <th>Ordre de jour</th>
+                        <td colspan="3">
+                          <div *ngIf="showEdit(t,'span')" 
+                          [innerHTML]="textAreaToString(ViewedReport[t]?.agenda) | safeHtml"
+                          class="editReportSpan2"></div>
+                          <textarea id="agenda-{{t}}" class="form-control textarea" rows="3"
+                            (click)="removeErrorClass('agenda-'+t)" [disabled]="!CanUpdateReport(t)"
+                            *ngIf="showEdit(t)">{{ ViewedReport[t]?.agenda }}</textarea>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <th>Discussions<br>(grandes lignes)</th>
+                        <td colspan="3">
+                          <div *ngIf="showEdit(t,'span')" 
+                          [innerHTML]="textAreaToString(ViewedReport[t]?.discussion_topics) | safeHtml"
+                          class="editReportSpan2"></div>
+                          <textarea id="discussion-topics-{{t}}" class="form-control textarea" rows="4"
+                            (click)="removeErrorClass('discussion-topics-'+t)" [disabled]="!CanUpdateReport(t)"
+                            *ngIf="showEdit(t)">{{ ViewedReport[t]?.discussion_topics }}</textarea>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <th>
+                          Prochaines étapes<br>
+                          <small><i>(Décisions collectives)</i></small>
+                        </th>
+                        <td colspan="3">
+                          <div *ngIf="showEdit(t,'span')" 
+                          [innerHTML]="textAreaToString(ViewedReport[t]?.next_steps) | safeHtml"
+                          class="editReportSpan2"></div>
+                          <textarea id="next-steps-{{t}}" class="form-control textarea" rows="2"
+                            (click)="removeErrorClass('next-steps-'+t)" [disabled]="!CanUpdateReport(t)"
+                            *ngIf="showEdit(t)">{{ ViewedReport[t]?.next_steps }}</textarea>
+                        </td>
+                      </tr>
+
+                      <tr>
+                        <th>
+                          Recommandations
+                        </th>
+                        <td colspan="3">
+                          <div *ngIf="showEdit(t,'span')" 
+                          [innerHTML]="textAreaToString(ViewedReport[t]?.recommandations) | safeHtml"
+                          class="editReportSpan2"></div>
+                          <textarea id="recommandations-{{t}}" class="form-control textarea" rows="2"
+                            (click)="removeErrorClass('recommandations-'+t)" [disabled]="!CanUpdateReport(t)"
+                            *ngIf="showEdit(t)">{{ ViewedReport[t]?.recommandations }}</textarea>
+                        </td>
+                      </tr>
+
+
+                    </tbody>
+                  </table>
+
+                  <button id="submit-btn-{{t}}"
+                    style="width: 230px; float:right; margin:10px 0px 0px 10px; padding:0px;" class="submit"
+                    (click)="SaveOrUpdateReport($event,t, true)" type="submit" *ngIf="CanUpdateReport(t) && showEdit(t)"
+                    class="btn btn-success form-control">
+                    {{ 'Enrégistrer et ne plus modifier'}}
+                  </button>
+
+                  <button id="submit-btn-{{t}}" style="width: 110px; float:right; margin-top:10px; padding:0px;"
+                    class="submit" (click)="SaveOrUpdateReport($event,t, false)" type="submit"
+                    *ngIf="CanUpdateReport(t) && showEdit(t)"
+                    class="btn btn-{{ SelectedReportExist(t) ? 'warning' : 'primary'}} form-control">
+                    {{SelectedReportExist(t) ? 'Modifier' : 'Enrégistrer'}}
+                  </button>
+
+                </div>
+
+                <div class="custom-tab-body-right">
+                  <div id="person-list">
+                    <table id="person-table-{{t}}" class="person-table table-bordered">
+                      <thead>
+                        <tr>
+                          <th>
+                            <input (input)="personInputIsNotEmpty(t)" id="person-name-{{t}}" type="text" required
+                              class="form-control person-name" placeholder="Person Name" autocomplete="off">
+                            <input (input)="setSearchPerson(t)" id="person-email-{{t}}" type="text"
+                              class="form-control person-email" placeholder="Person Email" autocomplete="off">
+
+                            <div style="margin: 8px 0px 10px 0px;" class="personsActions">
+                              <i style="color: green;" *ngIf="personInputIsNotEmpty(t) && !SelectedPerson"
+                                class="fas fa-save i-1" (click)="SaveOrUpdatePerson($event,t)"></i>
+                              <i style="color: orange;" *ngIf="SelectedPerson" class="fas fa-edit i-2"
+                                (click)="SaveOrUpdatePerson($event,t)"></i>
+                              <i style="color: red;" *ngIf="SelectedPerson" class="fas fa-trash i-3"
+                                (click)="deletePerson($event,t)"></i>
+                              <i style="color: black;" *ngIf="personInputIsNotEmpty(t)" class="fas fa-times i-4"
+                                (click)="cancelPersonAction($event,t)"></i>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr *ngFor="let p of  SearchedPerson$; let j=index;">
+                          <th style="padding: 0px; margin: 0px">
+                            <div id="person-{{t}}-{{p.id}}" style="padding: 2px; margin: 0px 0px 5px 0px;"
+                              class="{{ PersonIsSelected(p, t) ? 'present-person-active-grp' : PersonIsSelected(p, t, true) ? 'absent-person-active-grp' : 'person-deactive-grp' }}">
+                              {{ GetPersonName(p, t) }} <br>
+                              <div class="selectPersonActions">
+                                <span *ngIf="CanUpdateReport(t) && showEdit(t)" (click)="presentPerson($event, p, t)" style="color:green;">Présent</span>
+                                <span *ngIf="CanUpdateReport(t) && showEdit(t)" (click)="absentPerson($event, p, t)" style="color:maroon;">Absent</span>
+                                <span (click)="selectPersonToWork($event, p, t)" style="color:orange;">Editer</span>
+                              </div>
+                            </div>
+                          </th>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div id="report-list">
+                    <ng-container *ngIf="ObjectKeys(Report$[t]) as years">
+                      <h1 *ngIf="years.length > 0">
+                        <strong>Liste des rapports</strong>
+                      </h1>
+                      <ul class="toogleUl">
+                        <li *ngFor="let year of years" class="toogleLi">
+                          <span (click)="toggleVisibility(year)" class="toogleSpan"> {{year}} </span>
+                          <ul *ngIf="isYearVisible(year)" class="toogleUl">
+                            <li *ngFor="let month of ObjectKeys(Report$[t][year])" class="toogleLi">
+                              <span (click)="toggleVisibility(year, month)" class="toogleSpan">
+                                {{MonthName(month)}} </span>
+                              <ul *ngIf="isMonthVisible(year, month)" class="toogleUl">
+                                <li *ngFor="let day of ObjectKeys(Report$[t][year][month])" class="toogleLi">
+                                  <span (click)="toggleVisibility(year, month, day)" class="toogleSpan">
+                                    {{day < 10 ? '0' +day : day}} </span>
+                                      <ul *ngIf="isDayVisible(year, month, day)" class="toogleUl">
+                                        <li *ngFor="let hour of ObjectKeys(Report$[t][year][month][day])" class="toogleLi">
+                                          <ng-container *ngIf="Report$[t][year][month][day][hour] as d">
+
+                                            <span *ngIf="AllFieldAreNotEmpty(t)" (click)="SetModalReport(t, d.report)"
+                                              class="toogleSpan {{ViewedReport[t] && ViewedReport[t]?.id == d.report.id ? 'hourSpanSelected' : 'hourSpan'}}"
+                                              data-toggle="modal" [attr.data-target]="'#modal-logout-' + t">
+                                              {{ d.hour }}
+                                            </span>
+
+                                            <span *ngIf="!AllFieldAreNotEmpty(t)" (click)="ViewReport(t, d.report)"
+                                              class="toogleSpan {{ViewedReport[t] && ViewedReport[t]?.id == d.report.id ? 'hourSpanSelected' : 'hourSpan'}}">
+                                              {{ d.hour }}
+                                            </span>
+
+                                          </ng-container>
+                                        </li>
+                                      </ul>
+                                </li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+            <div class="modal fade" id="modal-logout-{{t}}">
+              <div class="modal-dialog">
+                <div class="modal-content bg-secondary">
+                  <div class="modal-body">
+                    <h1>Vous avez un rapport en cours,</h1>
+                    <h1>souhaitez-vous continuer?</h1>
+                  </div>
+                  <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Non</button>
+                    <button type="button" (click)="EditWithModalReport(t)" data-dismiss="modal" class="btn btn-danger swalDefaultSuccess">Oui</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </ng-container>
+        </ng-container>
+      </div>
+
+    </div>
+  </div>
+</div>

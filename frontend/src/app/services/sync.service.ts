@@ -6,7 +6,7 @@ import { Router } from "@angular/router";
 import { DateUtils, Functions, notNull } from '@ih-app/shared/functions';
 import { AuthService } from "./auth.service";
 import { IndexDbService } from "./index-db.service";
-import { DataIndicators } from "@ih-app/models/DataAggragate";
+import { ChwsUpdateDrugInfo, DataIndicators, MeetingReport, Person, Team } from "@ih-app/models/DataAggragate";
 
 @Injectable({
   providedIn: "root",
@@ -146,6 +146,17 @@ export class SyncService {
     const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
     return this.http.post(`${Functions.backenUrl()}/sync/zones`, sendParams, Functions.HttpHeaders(this.auth));
   }
+  
+  ihDrugUpdateDataPerChw(params: ChwsUpdateDrugInfo) : any{
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (notNull(params)) {
+      params!.userId = user?.id;
+      params!.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/update_drug_per_chw`, sendParams, Functions.HttpHeaders(this.auth));
+  }
 
   getChwsList(params?: FilterParams): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
@@ -256,6 +267,16 @@ export class SyncService {
     return this.http.post(`${Functions.backenUrl()}/sync/ih_cht_data_per_chw`, sendParams, Functions.HttpHeaders(this.auth));
   }
 
+  ihDrugDataPerChw(params: any): any {
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (notNull(params)) {
+      params.userId = user?.id;
+      params.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/ih_drug_data_per_chw`, sendParams, Functions.HttpHeaders(this.auth));
+  }
   insertOrUpdateDhis2Data(chwsDataToDhis2: DataIndicators): any {
     if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
     const user = this.auth.userValue();
@@ -269,7 +290,106 @@ export class SyncService {
     const sendParams = { userId: user?.id, dhisusersession: user?.dhisusersession };
     return this.http.post(`${Functions.backenUrl()}/sync/geojson`, sendParams, Functions.HttpHeaders(this.auth));
   }
+  SaveOrUpdateReport(params: MeetingReport):any{
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (notNull(params)) {
+      params.userId = user?.id;
+      params.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/flush_meeting_reports`, sendParams, Functions.HttpHeaders(this.auth));
+  }
+  
+  GetReports(params?: {team: number, userId?:string, dhisusersession?:string}):any{
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (params && notNull(params)) {
+      params.userId = user?.id;
+      params.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/get_meeting_reports`, sendParams, Functions.HttpHeaders(this.auth));
+  }
 
+  SaveOrUpdatePerson(params:Person):any{
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (notNull(params)) {
+      params.userId = user?.id;
+      params.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/flush_meeting_person`, sendParams, Functions.HttpHeaders(this.auth));
+  }
+
+  GetPersons(params?:Person):any{
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (params && notNull(params)) {
+      params.userId = user?.id;
+      params.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/get_meeting_person`, sendParams, Functions.HttpHeaders(this.auth));
+  }
+
+  SaveOrUpdateTeam(params:Team):any{
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (notNull(params)) {
+      params.userId = user?.id;
+      params.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/flush_meeting_team`, sendParams, Functions.HttpHeaders(this.auth));
+  }
+
+  GetTeams(params?:Team):any{
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (params && notNull(params)) {
+      params.userId = user?.id;
+      params.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/get_meeting_team`, sendParams, Functions.HttpHeaders(this.auth));
+  }
+  
+  DeleteReport(params: { dataId: number, userId?: string, dhisusersession?: string }):any {
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (params && notNull(params)) {
+      params.userId = user?.id;
+      params.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/delete_meeting_report`, sendParams, Functions.HttpHeaders(this.auth));
+  
+  }
+  DeletePerson(params: { dataId: number, userId?: string, dhisusersession?: string }):any {
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (params && notNull(params)) {
+      params.userId = user?.id;
+      params.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/delete_meeting_person`, sendParams, Functions.HttpHeaders(this.auth));
+  
+  }
+  DeleteTeam(params: { dataId: number, userId?: string, dhisusersession?: string }):any {
+    if (!this.auth.isLoggedIn() || this.auth.userValue() == null) this.auth.logout();
+    const user = this.auth.userValue();
+    if (params && notNull(params)) {
+      params.userId = user?.id;
+      params.dhisusersession = user?.dhisusersession!;
+    }
+    const sendParams = notNull(params) ? params : { userId: user?.id, dhisusersession: user?.dhisusersession };
+    return this.http.post(`${Functions.backenUrl()}/sync/delete_meeting_team`, sendParams, Functions.HttpHeaders(this.auth));
+  
+  }
+  
 
   getDataByReportsDateView(syncData: Sync) {
     // const response = this.http.request('get', sync.Url(), sync.headerOption());

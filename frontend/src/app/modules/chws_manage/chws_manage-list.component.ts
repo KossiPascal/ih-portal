@@ -44,7 +44,7 @@ export class ChwsManageComponent implements OnInit {
   APP_LOGO: string = Consts.APP_LOGO;
 
   constructor(private store: AppStorageService,private db: DatabaseUtilService, private auth: AuthService, private sync: SyncService, private router: Router) {
-    if(!this.roles.isSupervisorMentor()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+    if(!this.roles.isSupervisorMentor()) location.href = this.auth.userValue()?.defaultRedirectUrl ?? ''!;
    }
 
     

@@ -1,4 +1,4 @@
-import { getChwsDataWithParams, getDataInformations, deleteChwsData, fetchIhChtDataPerChw } from "../controllers/dataFromDB";
+import { getChwsDataWithParams, getDataInformations, deleteChwsData, updateDrugPerChw, fetchIhChtDataPerChw, fetchIhDrugDataPerChw, SaveOrUpdateMeetingPerson, SaveOrUpdateMeetingTeam, FetchMeetingPersons, FetchMeetingTeams, SaveOrUpdateMeetingReports, FetchMeetingReports,DeleteMeetingReport, DeleteMeetingPerson, DeleteMeetingTeams } from "../controllers/dataFromDB";
 import { getChws, getDistricts, getFamilies, getPatients, getSites, getZones } from "../controllers/orgUnitsFromDB ";
 import { fetchChwsDataFromCouchDb, fetchChwsDataFromDhis2, fetchOrgUnitsFromCouchDb, getDhis2Chws, insertOrUpdateDataToDhis2 } from "../controllers/fetchFormCloud";
 import { Middelware } from "../middleware/auth";
@@ -32,7 +32,7 @@ syncRouter.post('/get/datainfos', Middelware.authMiddleware, getDataInformations
 
 syncRouter.post('/delete/data', Middelware.authMiddleware, deleteChwsData);
 
-
+syncRouter.post('/update_drug_per_chw', Middelware.authMiddleware, updateDrugPerChw);
 
 syncRouter.post(
   '/fetch/all',
@@ -64,13 +64,68 @@ syncRouter.post(
 
 syncRouter.post(
   '/ih_cht_data_per_chw',
-  // [
-  //   body('medic_host').trim().isLength({ min: 5 }).not().isEmpty(),
-  //   body('medic_username').trim().isLength({ min: 3 }).not().isEmpty(),
-  //   body('medic_password').trim().isLength({ min: 8 }).not().isEmpty(),
-  // ],
   Middelware.authMiddleware,
   fetchIhChtDataPerChw
+);
+
+syncRouter.post(
+  '/ih_drug_data_per_chw',
+  Middelware.authMiddleware,
+  fetchIhDrugDataPerChw
+);
+
+syncRouter.post(
+  '/flush_meeting_reports',
+  Middelware.authMiddleware,
+  SaveOrUpdateMeetingReports
+);
+
+syncRouter.post(
+  '/get_meeting_reports',
+  Middelware.authMiddleware,
+  FetchMeetingReports
+);
+
+syncRouter.post(
+  '/flush_meeting_person',
+  Middelware.authMiddleware,
+  SaveOrUpdateMeetingPerson
+);
+
+syncRouter.post(
+  '/get_meeting_person',
+  Middelware.authMiddleware,
+  FetchMeetingPersons
+);
+
+syncRouter.post(
+  '/flush_meeting_team',
+  Middelware.authMiddleware,
+  SaveOrUpdateMeetingTeam
+);
+
+syncRouter.post(
+  '/get_meeting_team',
+  Middelware.authMiddleware,
+  FetchMeetingTeams
+);
+
+syncRouter.post(
+  '/delete_meeting_report',
+  Middelware.authMiddleware,
+  DeleteMeetingReport
+);
+
+syncRouter.post(
+  '/delete_meeting_person',
+  Middelware.authMiddleware,
+  DeleteMeetingPerson
+);
+
+syncRouter.post(
+  '/delete_meeting_team',
+  Middelware.authMiddleware,
+  DeleteMeetingTeams
 );
 
 syncRouter.post('/dhis2/chws', Middelware.authMiddleware, getDhis2Chws);
@@ -86,7 +141,7 @@ syncRouter.post('/dhis2/insert_or_update', Middelware.authMiddleware, insertOrUp
 
 syncRouter.post('/geojson', Middelware.authMiddleware, async (req: Request, res: Response) => {
   try {
-    const geojsonFile = `${srcFolder()}/assets/aires_sanitaires.geojson`;
+    const geojsonFile = `${srcFolder()}/assets/aires_sanitaires.geo.json`;
     const jsonFile = `${srcFolder()}/assets/data.json`;
 
     let geojsondata = fs.readFileSync(geojsonFile);

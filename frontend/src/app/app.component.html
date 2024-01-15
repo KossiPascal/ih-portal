@@ -121,7 +121,7 @@
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
           <!-- Navbar Search -->
-          <li *ngIf="!roles.isChws() && !roles.isOnlySupervisorMentor() && !roles.onlySeeData()" class="nav-item">
+          <li *ngIf="!roles.isChws() && !roles.isOnlySupervisorMentor()" class="nav-item">
             <a class="nav-link" data-widget="navbar-search" href="#" role="button">
               <i class="fas fa-search"></i>
             </a>
@@ -217,9 +217,9 @@
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
 
-              <div *ngIf="roles.isAdmin()" class="dropdowndivider1"></div>
+              <div *ngIf="roles.isAdmin" class="dropdowndivider1"></div>
 
-              <a *ngIf="roles.isAdmin()" class="nav-link" data-widget="fullscreen" href="#" role="button">
+              <a *ngIf="roles.isAdmin" class="nav-link" data-widget="fullscreen" href="#" role="button">
                 <i class="fas fa-expand-arrows-alt"></i> Aggrandir / réduire
               </a>
 
@@ -231,30 +231,43 @@
 
               <div class="dropdowndivider0"></div>
 
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-link" routerLink="dashboards/dash1"
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash1"
                 role="button">
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Activité Des ASC
               </a>
 
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-link" routerLink="dashboards/dash2"
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash2"
                 role="button">
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Données Détaillées Par ASC
               </a>
 
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-link" routerLink="dashboards/dash3"
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash3"
                 role="button">
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Effectifs Des Patients
               </a>
 
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-link" routerLink="dashboards/dash4"
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash4"
                 role="button">
                 <i style="margin-right: 10px;" class="fas far fa-info"></i> Visite de Ménages
               </a>
 
+              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="ihDrug/chws"
+                role="button">
+                <i style="margin-right: 10px;" class="fas far fa-info"></i> Situation Médicament ASC
+              </a>
+
+              <div *ngIf="roles.isReportViewer()" class="dropdowndivider1"></div>
+              <a *ngIf="roles.isReportViewer()" class="nav-link" routerLink="meetings/reports"
+                role="button">
+                <i style="margin-right: 10px;" class="fas far fa-info"></i> RAPPORT DE REUNION
+              </a>
+              
+              
               <div *ngIf="roles.isSuperUser()" class="dropdowndivider1"></div>
               <a *ngIf="roles.isSuperUser()" class="nav-link" routerLink="maps/highchartmap1"
                 role="button">
@@ -358,7 +371,7 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a routerLink="truncate_db" class="nav-link">
+                    <a routerLink="database" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Truncate Database</p>
                     </a>
@@ -397,34 +410,51 @@
 
               <p *ngIf="roles.isDataManager()" style="color: white;">{{ separation }}</p>
 
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
                 <a routerLink="dashboards/dash1" class="nav-link">
                   <!-- <i class="nav-icon fas fa-tachometer-alt"></i> -->
                   <p>Activité Des ASC</p>
                 </a>
               </li>
 
-
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
                 <a routerLink="dashboards/dash2" class="nav-link">
                   <!-- <i class="nav-icon fas fa-chart-pie"></i> -->
                   <p>Données Détaillées Par ASC</p>
                 </a>
               </li>
 
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
                 <a routerLink="dashboards/dash3" class="nav-link">
                   <!-- <i class="nav-icon fas fa-chart-line"></i> -->
                   <p>Effectifs Des Patients</p>
                 </a>
               </li>
 
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" class="nav-item">
+              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
                 <a routerLink="dashboards/dash4" class="nav-link">
                   <!-- <i class="nav-icon fas fa-chart-line"></i> -->
                   <p>Visite de Ménages</p>
                 </a>
               </li>
+
+              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
+                <a routerLink="ihDrug/chws" class="nav-link">
+                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
+                  <p>Situation Médicament ASC</p>
+                </a>
+              </li>
+
+              <li *ngIf="roles.isReportViewer()" class="nav-item">
+                <a routerLink="meetings/reports" class="nav-link">
+                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
+                  <p>RAPPORT DE REUNION</p>
+                </a>
+              </li>
+              
+
+              
+
 
               <li *ngIf="roles.isSuperUser()" class="nav-item">
                 <a routerLink="maps/highchartmap1" class="nav-link">
@@ -441,7 +471,7 @@
               </li>
               
 
-              <p *ngIf="roles.isSupervisorMentor() || roles.isChws() || roles.onlySeeData()" style="color: white;">{{ separation }}</p>
+              <p *ngIf="roles.isSupervisorMentor() || roles.isChws()" style="color: white;">{{ separation }}</p>
 
               <li *ngIf="roles.isChws()" class="nav-item">
                 <a routerLink="chws/select_orgunit" class="nav-link">
@@ -1063,15 +1093,11 @@
                   <p>Informational</p>
                 </a>
               </li> -->
-
-
-
             </ul>
           </nav>
           <!-- /.sidebar-menu -->
 
-          <h3 *ngIf="appVersionExist()" style="margin-top: 50px; text-align: center ;font-size: large; color: white;">
-            Version: {{ appVersion }} </h3>
+          <h3 *ngIf="appVersionExist()" style="position:absolute;bottom:0;width:100%; text-align: center;font-size: large; color: white;">Version: {{ appVersion }}</h3>
         </div>
         <!-- /.sidebar -->
       </aside>
@@ -1136,11 +1162,8 @@
             <button (click)="logout()" type="button" class="btn btn-danger swalDefaultSuccess">Yes</button>
           </div>
         </div>
-        <!-- /.modal-content -->
       </div>
-      <!-- /.modal-dialog -->
     </div>
-    <!-- END MESSAGE BOX-->
 
 
 

@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from '@ih-app/services/auth-guard.service';
 import { ErrorComponent } from './error.component';
+import { SetMetaTags } from '@ih-app/services/set-meta-tags.service';
 
 
 function redirectTo(): string{
@@ -11,7 +12,7 @@ function redirectTo(): string{
 }
 export const routes:Routes = [
   { path: '', redirectTo:redirectTo(), pathMatch: 'full' },
-  { path: ':code', component: ErrorComponent, data: {title: 'Error'}},
+  { path: ':code', component: ErrorComponent, data: {title: 'Error'}, canActivate:[SetMetaTags]},
 ];
 
 

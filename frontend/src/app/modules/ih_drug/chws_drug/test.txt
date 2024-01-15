@@ -1,0 +1,249 @@
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="card card-info">
+      
+      <h2 class="title" style="text-align: center; color: blue;">ASC Données détaillées</h2>
+      
+      <div class="overlay-wrapper">
+        <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
+          <div class="text-bold pt-2"> {{initMsg}}</div>
+        </div>
+
+        <div class="card-header">
+          <form [formGroup]="aggradateDataForm" (ngSubmit)="initDataFilted()" novalidate>
+            <div class="row">
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Début</label>
+                  <input type="date" class="form-control" formControlName="start_date" />
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Fin</label>
+                  <input type="date" class="form-control" formControlName="end_date" />
+                </div>
+              </div>
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>District</label>
+                  <select *ngIf="Districts$.length > 0" (change)="genarateSites()" class="form-control" [multiple]="Districts$.length > 0? 'multiple' : ''" formControlName="districts">
+                    <!-- <option value=""></option> -->
+                    <option *ngFor="let dist of Districts$" value="{{dist.id}}">
+                      {{ dist.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Site</label>
+                  <select (change)="genarateChws()" class="form-control" [multiple]="sites$.length > 0? 'multiple' : ''" formControlName="sites">
+                    <!-- <option value=""></option> -->
+                    <option *ngFor="let site of sites$" value="{{site.id}}">
+                      {{ site.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>ASC</label>
+                  <select class="form-control" [multiple]="chws$.length > 0? 'multiple' : ''" formControlName="chws">
+                    <!-- <option value=""></option> -->
+                    <option *ngFor="let chw of chws$" value="{{chw.id}}">
+                      {{chw.name}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label style="color: white;">.</label>
+                  <button class="submit" [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control">
+                    Charger <span class="fa fa-floppy-o fa-right"></span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Main content -->
+
+    <section class="content">
+      <div class="container-fluid">
+
+        <div class="col-sm-5">
+          <h2 *ngIf="data_error_messages!=''">
+              <div class="card card-info">
+                  <div class="card-body">
+                      {{ data_error_messages }}
+                  </div>
+              </div>
+          </h2>
+          <h2 *ngIf="data_no_data_found == true">
+              <div class="card card-info">
+                  <div class="card-body">
+                      Pas de données trouvée avec les paramettres renseignés !
+                  </div>
+              </div>
+          </h2>
+      </div>
+
+        <div *ngIf="data_error_messages==''  && FinalChwsOutputData$.length > 0" class="card card-info">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <table-export></table-export>
+              </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-0" style="overflow-y:scroll!important;">
+              <table (click)="sort()" id="export_table" class="table table-sm table-striped" style="margin: auto;">
+                <thead>
+                  <tr class="bg-info">
+                    <th>ASC</th>
+                    <th>Nbre Action/Jour</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let datas of FinalChwsOutputData$; let i=index">
+                    <td>
+                      <span style="font-size: 16px;" class="custom-badge"> <b>{{ datas.chw.name }}</b> </span><br>
+                      <span class="custom-badge" style="font-size: 12px;color: gray;">{{ datas.chw.external_id }}</span><br>
+                      <span style="font-size: 16px;color: blue;" class="info"><small>Total Action: </small> <b>{{ sum(datas.data)}}</b> </span>
+                    </td>
+
+                    <td>
+                      <span style="font-size: 18px;">~ </span><span style="font-size: 33px;padding: 1px;"
+                        class="custom-action badge {{ getVadPerDay(datas).class }}"> {{ getVadPerDay(datas).val }} </span>
+                          <br>
+                          <span class="info"><strong>Actions/Jr</strong></span>
+                    </td>
+
+                    
+
+                    <td>
+                      <button style="margin-top: 15px; padding: 2px!important; font-size: 10px;" class="btn btn-info" (click)="seeSelectedChwData(datas)"
+                      data-toggle="modal" data-target="#modal-default">Détails</button>
+                      
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- /.card-body -->
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+
+
+
+
+    <div *ngIf="selectedChwData!=null" class="modal fade" id="modal-default">
+      <div class="modal-dialog">
+
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2> {{ selectedChwData.chw.name  }} <br> <small>{{ selectedChwData.chw.external_id }}</small> </h2>
+
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+          </div>
+          <div class="modal-body">
+            <div class="row card-body">
+              <div class="{{ showClass(data)}}" *ngFor="let data of selectedChwData.data | keyvalue">
+                <div *ngIf="isNumber(data.value)" style="border: 1px solid black;" class="small-box bg-info">
+                  <div class="inner">
+                    <h3 style="font-size: 45px;text-align: center;">{{ generateCount(data.value) }}</h3>
+                    <p style="font-size: 20px;text-align: center;"><strong>{{ capitaliseDataGiven(data.key, '_', ' ') }}</strong></p>
+                  </div>
+                  <div class="icon"> <i class="ion ion-stats-bars"></i> </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer justify-content-between">
+            <button id="close-modal" type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+    <br><br>
+
+  </div>
+</section>
+<!-- /.content -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+<tr class="bg-info head-elem">
+                        <th>Id</th>
+                        <th>MEG</th>
+                        <th>Quantité début du mois <br> <small><small>ou la quantité à l'inventaire précédent</small>(A)</small></th>
+                        <th>Quantité reçue au cours du mois <small>(B)</small></th>
+                        <th>Quantité totale du mois <small>(C) C=A+B</small></th>
+                        <th>Consommation mensuelle du mois <small>(D)</small></th>
+                        <th>Quantité théorique disponible à l'inventaire <small>E= C-D</small></th>
+                        <th>Quantité comptée à l'inventaire <small>(F)</small></th>
+                        <th>Ecart d'inventaire <small>J = F-E</small></th>
+                        <th>CMM de l'année N-1 <small>(G)</small>  
+                          <i (click)="editCmmClick(i)"  class="fas {{this.editCmm[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                        <th>Quantité théorique à commander <small>(H)</small></th>
+                        <th>Quantités à commander <br> <small><small>(Expression besoins ASC)</small>(I)</small> </th>
+                        <th>Quantité validée 
+                          <i (click)="editQtyValidatedClick(i)"  class="fas {{editQtyValidated[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                        <th>Quantité livrée 
+                          <i (click)="editQtyDeliveredClick(i)"  class="fas {{editQtyDelivered[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                        <th>Taux de satisfaction</th>
+                        <th>Autre Mouvement</th>
+                        <th>Quantité</th>
+                        <th>A (Code ASC)</th>
+                        <th>Perte</th>
+                        <th>Avarié</th>
+                        <th>Cassé</th>
+                        <th>Périmé</th>
+                        <th>Autre</th>
+                        <th>Commentaires ASC</th>
+                        <th>Observations (Pharmacie) 
+                          <i (click)="editObservationsClick(i)"  class="fas {{editObservations[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                      </tr>

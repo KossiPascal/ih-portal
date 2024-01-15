@@ -86,13 +86,13 @@ export class LoginComponent implements OnInit {
           if (res.status === 200) {
             this.message = 'Login successfully !';
             this.store.set("user", JSON.stringify(res.data));
-            // this.router.navigate([redirectUrl || this.auth.userValue()?.defaultRedirectUrl]);
+            // this.router.navigate([redirectUrl || this.auth.userValue()?.defaultRedirectUrl ?? '']);
             var roles = new Roles(this.store);
 
             if (roles.isChws()) {
-              location.href = this.auth.userValue()?.defaultRedirectUrl!;
+              location.href = this.auth.userValue()?.defaultRedirectUrl ?? ''!;
             } else {
-              location.href = Functions.getSavedUrl() ?? this.auth.userValue()?.defaultRedirectUrl!;
+              location.href = Functions.getSavedUrl() ?? this.auth.userValue()?.defaultRedirectUrl ?? ''!;
             }
           } else {
             this.message = res.data;

@@ -1,9 +1,7 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
-import { NavigationEnd, Router, ActivatedRoute } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
-import { filter, map, takeWhile } from 'rxjs/operators';
+import { takeWhile } from 'rxjs/operators';
 import { AuthService } from '@ih-services/auth.service';
-import { TitleService } from '@ih-services/title.service';
 import { interval, Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService } from './services/config.service';
@@ -12,6 +10,7 @@ import { User } from './models/User';
 import { AppStorageService } from './services/cookie.service';
 import { Chws } from './models/Sync';
 import { Consts } from './shared/constantes';
+import { Title } from '@angular/platform-browser';
 
 declare var $: any;
 @Component({
@@ -42,7 +41,7 @@ export class AppComponent implements OnInit {
   appVersion: any;
   updateSubscription?: Subscription;
 
-  constructor(private store: AppStorageService, private conf: ConfigService, public translate: TranslateService, private auth: AuthService, private router: Router, private sw: SwUpdate, private titleService: TitleService, private activatedRoute: ActivatedRoute) {
+  constructor(private titleService: Title, private store: AppStorageService, private conf: ConfigService, public translate: TranslateService, private auth: AuthService, private sw: SwUpdate) {
     this.isAuthenticated = this.auth.isLoggedIn();
     this.isOnline = false;
     this.modalVersion = false;
@@ -59,29 +58,11 @@ export class AppComponent implements OnInit {
 
   public roles = new Roles(this.store);
 
-
-
   ngOnInit(): void {
     this.chwOU = this.auth.chwsOrgUnit();
     this.UpdateVersion(false);
     const appTitle = this.titleService.getTitle();
     this.checkForAppNewVersion = true;
-
-    this.router
-      .events.pipe(
-        filter(event => event instanceof NavigationEnd),
-        map(() => {
-          const child = this.activatedRoute.firstChild;
-          if (child) {
-            if (child.snapshot.data['title']) {
-              return child.snapshot.data['title'];
-            }
-          }
-          return appTitle;
-        })
-      ).subscribe((ttl: string) => {
-        this.titleService.setTitle(ttl);
-      });
 
     this.getMsg('offlinemsg');
     this.errorFound = window.location.pathname.includes('error/');

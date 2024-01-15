@@ -48,7 +48,7 @@ export class DatabaseUtilsComponent implements OnInit {
 
 
   constructor(private store: AppStorageService, private sync: SyncService, private auth: AuthService, private dbUtils: DatabaseUtilService, private router: Router) {
-    if(!this.roles.isSuperUser()) location.href = this.auth.userValue()?.defaultRedirectUrl!;
+    if(!this.roles.isSuperUser()) location.href = this.auth.userValue()?.defaultRedirectUrl ?? ''!;
    }
   
   

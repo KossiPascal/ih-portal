@@ -122,7 +122,7 @@ export interface FilterParams {
   userId?: string
   dhisusersession?: string
   params?:any
-  withDhis2Data:boolean
+  withDhis2Data?:boolean
 }
 
 export interface ChwsDataFormDb {
@@ -141,6 +141,36 @@ export interface ChwsDataFormDb {
   reported_date: string
   reported_full_date: string
   geolocation: any
+}
+
+export interface ChwsDrugFormDb {
+  id: string
+  rev: string
+  source: string
+  form: string
+  activity_date: string
+  activity_type: string;
+  loan_borrowing_chws_info: string;
+  lumartem: number;
+  alben_400: number;
+  amox_250: number;
+  amox_500: number;
+  pills: number;
+  para_250: number;
+  para_500: number;
+  pregnancy_test: number;
+  sayana: number;
+  sro: number;
+  tdr: number;
+  vit_A1: number;
+  vit_A2: number;
+  zinc: number;
+  other_drug: number;
+  comments: string;
+  district: Districts;
+  site: Sites
+  chw: Chws
+  reported_date: string
 }
 
 export interface Districts {

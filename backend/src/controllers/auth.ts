@@ -22,10 +22,8 @@ export class AuthController {
                                 const userData = generateUserMapData(user, dhisuserAuthorization);
                                 const _repoUser = new JsonDatabase('users');
                                 _repoUser.save(userData);
-        
                                 return res.status(200).json({ status: 200, data: userData });
                             }).catch(err => res.status(201).json({ status: 201, data: 'No user found with this crediential, retry!' }))
-        
                         } else {
                             return res.status(201).json({ status: 201, data: 'Problem found when trying to connect' });
                         }
