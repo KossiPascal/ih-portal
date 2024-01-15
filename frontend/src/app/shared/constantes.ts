@@ -14,7 +14,7 @@ export class Consts {
       const isHttps: boolean = location.protocol === 'https:';
       const prodPort = isHttps ? 9999 : 9990;
       const devPort = isHttps ? 7777 : 7770;
-      return { isLocal: true, port: Consts.isProdEnv() != true ? prodPort : devPort };
+      return { isLocal: true, port: Consts.isProdEnv() == true ? prodPort : devPort };
       // return environment.apiURL;
     }
     return { isLocal: false, port: parseInt(location.port) };
