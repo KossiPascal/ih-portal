@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { getSiteSyncRepository, Sites } from "../entity/Sync";
-import { User } from "../entity/User";
+import { User, getUserRepository } from "../entity/User";
 import { JsonDatabase } from "../json-data-source";
 import { notEmpty, DateUtils, sslFolder, logNginx, Functions } from "../utils/functions";
 import { Consts } from "../utils/constantes";
@@ -24,13 +24,13 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
     const customDate = data != null && notEmpty(data.customDate) && data.customDate != null ? data.customDate : null;
 
     if (DEFAULT_DHIS2_USER_ID != null && DEFAULT_DHIS2_USER_ID != undefined && DEFAULT_DHIS2_USER_ID != "") {
-      const _repoUser = new JsonDatabase('users');
+      const _repoUser = await getUserRepository();
       const _repoSync = new JsonDatabase('syncs');
-      const user = _repoUser.getBy(DEFAULT_DHIS2_USER_ID) as User;
-      if (notEmpty(user)) {
+      const user = await _repoUser.findOneBy({id:DEFAULT_DHIS2_USER_ID});
+      if (user) {
         var initDate: {start_date: string,end_date: string};
 
-        if (notEmpty(customDate) && customDate != null) {
+        if (customDate) {
           initDate = customDate;
         } else {
           const initD =  DateUtils.startEnd21and20Date();

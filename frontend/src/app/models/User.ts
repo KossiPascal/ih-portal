@@ -5,15 +5,18 @@ export interface User {
   email?: string
   roles:string[]
   groups:string[]
+  actions:string[]
+  meeting_report:string[]
   isActive: boolean
   isSuperAdmin: boolean
-  expiresIn?:any
-  token?: string
+  expiresIn:any
+  token: string
   dhisusersession:string
-  userLogo?:any
+  userLogo:any
   defaultRedirectUrl:string
-  meeting_report?:string[]
 }
+
+
 
 
 

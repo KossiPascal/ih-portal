@@ -2,7 +2,7 @@ import path from "path";
 import https from "https";
 import http from "http";
 import { CouchDbFetchData, Dhis2Sync, MailConfig, Roles } from "./appInterface";
-import { token, User, jwSecretKey } from "../entity/User";
+import { token, User, jwSecretKey, getUserRepository } from "../entity/User";
 import moment from "moment";
 import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws, Patients } from "../entity/Sync";
 import { Consts } from "./constantes";
@@ -710,14 +710,15 @@ export class Dhis2SyncConfig {
     }
 }
 
-export function generateUserMapData(user: User, dhisusersession: string): User {
+export async function generateUserMapData(user: User, dhisusersession: string): Promise<User> {
     const role = UserRole(user);
-    const _repoUser = new JsonDatabase('users');
-    const userFound = _repoUser.getBy(user.id) as User|undefined|null;
+    const _repoUser = await getUserRepository();
+    const userFound = await _repoUser.findOneBy({ id: user.id });
     user.dhisusersession = dhisusersession;
     user.defaultRedirectUrl = DefaultPage(role);
-    user.token = token(user);
-    user.expiresIn = JSON.stringify((moment().add(jwSecretKey({ user: user }).expiredIn, 'seconds')).valueOf());
+    user.token = await token(user);
+    const secret = await jwSecretKey({ user: user });
+    user.expiresIn = JSON.stringify((moment().add(secret.expiredIn, 'seconds')).valueOf());
     if(userFound) {
         user.email = userFound.email;
         if(role.isReportViewer) user.meeting_report = userFound.meeting_report;
@@ -727,16 +728,7 @@ export function generateUserMapData(user: User, dhisusersession: string): User {
 }
 
 export function UserRole(user: User): Roles {
-    var data:Roles = {
-        isSuperUser:false,
-        isUserManager:false,
-        isAdmin:false,
-        isDataManager:false,
-        isOnlySupervisorMentor:false,
-        isSupervisorMentor:false,
-        isChws:false,
-        isReportViewer:false
-    };
+    var data:Roles = new Roles();
     const userRoles: string[] = user && notEmpty(user) ? user.roles : [];
     const userGroups: string[] = user && notEmpty(user) ? user.groups : [];
 

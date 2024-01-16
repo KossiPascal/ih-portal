@@ -16,8 +16,8 @@ export function UserRole() {
 
 export function UserGroup() {
   return {
-    Chws: {id:'enIOT8b8taV', name:'isChws'},
-    ReportViewer: {id:'dtVEW0CoCPl', name:'isReportViewer'},
+    Chws: { id: 'enIOT8b8taV', name: 'isChws' },
+    ReportViewer: { id: 'dtVEW0CoCPl', name: 'isReportViewer' },
   }
 }
 
@@ -28,24 +28,48 @@ export function UserRolesAsArray(): { id: string, name: string }[] {
 export function UserGroupsAsArray(): { id: string, name: string }[] {
   return Object.values(UserGroup()) as { id: string, name: string }[];
 }
- 
+
+export function ActionsAsArray(): string[] {
+  return [
+    'canCreateTeam',
+    'canCreatePerson',
+    'canCreateReport',
+    'canUpdateTeam',
+    'canUpdatePerson',
+    'canUpdateReport',
+    'canDeleteTeam',
+    'canDeletePerson',
+    'canDeleteReport'
+  ];
+}
+
 export class Roles {
 
-  constructor(private store:AppStorageService){ }
+  constructor(private store: AppStorageService) { }
 
   private userValue(): User | null {
     const data = this.store.get('user');
     return notNull(data) ? JSON.parse(data) : null;
   }
 
-  private getRoles = (): string[] => {
+  public getRoles = (): string[] => {
     const userValue = this.userValue();
-    return userValue && notNull(userValue) ? userValue.roles : [];
+    return userValue && notNull(userValue) ? userValue.roles??[] : [];
   }
 
-  private getGroups = (): string[] => {
+  public getGroups = (): string[] => {
     const userValue = this.userValue();
-    return userValue && notNull(userValue) ? userValue.groups : [];
+    return userValue && notNull(userValue) ? userValue.groups??[] : [];
+  }
+
+  public getActions = (): string[] => {
+    const userValue = this.userValue();
+    return userValue && notNull(userValue) ? userValue.actions??[] : [];
+  }
+
+  public getMeetingReport = (): string[] => {
+    const userValue = this.userValue();
+    return userValue && notNull(userValue) ? userValue.meeting_report??[] : [];
   }
 
   isSuperUser = (): boolean => {
@@ -77,11 +101,40 @@ export class Roles {
   }
 
   isReportViewer = (): boolean => {
-    return this.getRoles().includes(UserRole().ReportViewer.id) || this.getGroups().includes(UserGroup().ReportViewer.id)  || this.isSuperUser();
+    return this.getRoles().includes(UserRole().ReportViewer.id) || this.getGroups().includes(UserGroup().ReportViewer.id) || this.isSuperUser();
   }
 
   hasNoAccess = (): boolean => {
     return !this.isSuperUser() && !this.isUserManager() && !this.isAdmin() && !this.isDataManager() && !this.isOnlySupervisorMentor() && !this.isChws() && !this.isReportViewer();
+  }
+
+
+  canCreateTeam = ():boolean => {
+    return this.getActions().includes('canCreateTeam');
+  }
+  canCreatePerson = ():boolean => {
+    return this.getActions().includes('canCreatePerson');
+  }
+  canCreateReport = ():boolean => {
+    return this.getActions().includes('canCreateReport');
+  }
+  canUpdateTeam = ():boolean => {
+    return this.getActions().includes('canUpdateTeam');
+  }
+  canUpdatePerson = ():boolean => {
+    return this.getActions().includes('canUpdatePerson');
+  }
+  canUpdateReport = ():boolean => {
+    return this.getActions().includes('canUpdateReport');
+  }
+  canDeleteTeam = ():boolean => {
+    return this.getActions().includes('canDeleteTeam');
+  }
+  canDeletePerson = ():boolean => {
+    return this.getActions().includes('canDeletePerson');
+  }
+  canDeleteReport = ():boolean => {
+    return this.getActions().includes('canDeleteReport');
   }
 
 } 

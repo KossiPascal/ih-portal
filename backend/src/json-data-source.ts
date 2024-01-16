@@ -5,7 +5,7 @@ const JSONFileStorage = require('node-json-file-storage');
 
 export class JsonDatabase {
     storage: any;
-    constructor(file_Name: 'users' | 'districts' | 'sites' | 'zones' | 'chws' | 'families' | 'patients' | 'configs' | 'syncs') {
+    constructor(file_Name: 'districts' | 'sites' | 'zones' | 'chws' | 'families' | 'patients' | 'configs' | 'syncs') {
         this.storage = new JSONFileStorage(`${JsonDbFolder(file_Name)}`);
     }
 

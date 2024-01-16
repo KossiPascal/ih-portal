@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, Router } from 'express';
-import { User } from '../entity/User';
+import { User, getUserRepository } from '../entity/User';
 import { generateUserMapData } from '../utils/functions';
 import { JsonDatabase } from '../json-data-source';
 import { userLoginStatus, getMe } from '../utils/dhis2-api-functions';
@@ -8,28 +8,29 @@ export class AuthController {
     
     static login = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const username = req.body.username;
-            const password = req.body.password;
-            if (username && password) {
-                const dhisuserAuthorization = Buffer.from(username + ':' + password).toString('base64');
-                await userLoginStatus(dhisuserAuthorization)
-                    .then(r =>  {
-                        if(r == true){
-                            getMe(dhisuserAuthorization).then((user: User) => {
-                                if (user.isActive !== true) {
-                                    return res.status(201).json({ status: 201, data: "You don't have permission to login!" });
-                                }
-                                const userData = generateUserMapData(user, dhisuserAuthorization);
-                                const _repoUser = new JsonDatabase('users');
-                                _repoUser.save(userData);
-                                return res.status(200).json({ status: 200, data: userData });
-                            }).catch(err => res.status(201).json({ status: 201, data: 'No user found with this crediential, retry!' }))
-                        } else {
-                            return res.status(201).json({ status: 201, data: 'Problem found when trying to connect' });
-                        }
-                    }).catch(err => res.status(201).json({ status: 201, data: 'Error When getting user informations, retry!' }));
-            } else {
+            const { username, password } = req.body;
+            if (!username || !password) {
                 return res.status(201).json({ status: 201, data: !username ? 'No username given' : !password ? 'You not give password!' : 'crediential error' });
+            }
+            const dhisuserAuthorization = Buffer.from(`${username}:${password}`).toString('base64');
+            const isUserAuthorized = await userLoginStatus(dhisuserAuthorization);
+
+            if (isUserAuthorized) {
+                try {
+                    const user = await getMe(dhisuserAuthorization);
+                    if (!user.isActive) {
+                        return res.status(201).json({ status: 201, data: "You don't have permission to login!" });
+                    }
+                    const _repoUser = await getUserRepository();
+                    const userFound = await _repoUser.findOneBy({id:user.id});
+                    const userData = await generateUserMapData(userFound ? userFound : user, dhisuserAuthorization);
+                    const finalUser = await _repoUser.save(userData);
+                    return res.status(200).json({ status: 200, data: finalUser });
+                } catch (err) {
+                    return res.status(201).json({ status: 201, data: 'No user found with these credentials, retry!' });
+                }
+            } else {
+                return res.status(201).json({ status: 201, data: 'Problem found when trying to connect' });
             }
         }
         catch (err: any) {

@@ -28,7 +28,10 @@
                                 <th>Username</th>
                                 <th>Full name</th>
                                 <th>Email</th>
-                                <th>Role</th>
+                                <th>Rôles</th>
+                                <th>Groupes</th>
+                                <th>Actions</th>
+                                <th>Mettingteam</th>
                                 <th colspan="2">Actions</th>
                                 <th>InActifs</th>
                                 <th>IsSuperAdmin</th>
@@ -37,6 +40,10 @@
                                     <th>isOdd</th> -->
                             </tr>
                         </thead>
+                        
+
+
+
 
                         
 
@@ -48,7 +55,10 @@
                                 <td>{{ user.username }}</td>
                                 <td>{{ user.fullname }}</td>
                                 <td>{{ user.email }}</td>
-                                <td>{{ user.roles }}</td>
+                                <td [innerHTML]="ToStringNewLine(user.roles, 'roles') | safeHtml"></td>
+                                <td [innerHTML]="ToStringNewLine(user.groups, 'groups') | safeHtml"></td>
+                                <td [innerHTML]="ToStringNewLine(user.actions, 'actions') | safeHtml"></td>
+                                <td [innerHTML]="ToStringNewLine(user.meeting_report, 'meeting_report') | safeHtml"></td>
                                 <td>
                                     <i (click)="EditUser(user)" class="btn-warning fas fa-edit" data-toggle="modal" data-target="#modal-default"></i>
                                 </td>
@@ -164,6 +174,21 @@
                     <!-- <option value="">Select All</option> -->
                     <option *ngFor="let group of groups$" value="{{group.id}}">
                       {{ group.name }}
+                    </option>
+                  </select>
+                <div class="input-group-append">
+                    <div class="input-group-text">
+                        <span class="fas fa-lock"></span>
+                    </div>
+                </div>
+            </div>
+
+            <label *ngIf="isEditMode" for="">Actions</label>
+            <div class="input-group mb-3">
+                <select class="form-control" multiple="multiple" formControlName="actions">
+                    <!-- <option value="">Select All</option> -->
+                    <option *ngFor="let action of actions$" value="{{action}}">
+                      {{ action }}
                     </option>
                   </select>
                 <div class="input-group-append">

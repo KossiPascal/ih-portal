@@ -1,10 +1,6 @@
 import * as jwt from 'jsonwebtoken';
-import { JsonDatabase } from '../json-data-source';
 import { UserRole, } from '../utils/functions';
-import { Entity, PrimaryGeneratedColumn, Column, Repository, DataSource, BeforeInsert } from "typeorm"
-// import * as bcrypt from 'bcryptjs';
-// import { response } from 'express';
-import { notEmpty } from "../utils/functions";
+import { Entity, Column, Repository, DataSource, PrimaryColumn } from "typeorm"
 import { AppDataSource } from '../data_source';
 
 let Connection: DataSource = AppDataSource.manager.connection;
@@ -17,23 +13,22 @@ let Connection: DataSource = AppDataSource.manager.connection;
 })
 export class User {
     constructor() { };
-    @PrimaryGeneratedColumn()
+    // @PrimaryGeneratedColumn()
+    // id!: string
+    @PrimaryColumn({ type: 'varchar', nullable: false })
     id!: string
 
-    @Column({ unique: true, type: 'varchar' })
+    @Column({ unique: true, type: 'varchar', nullable: false })
     username!: string
 
     @Column({ nullable: true })
     fullname!: string
 
-    @Column({ unique: true, type: 'varchar' })
+    @Column({ unique: true, type: 'varchar', nullable: true })
     email!: string
 
-    @Column({ type: 'varchar', nullable: false })
-    password!: string
-
-    @Column({ nullable: false, default: false })
-    isActive!: boolean
+    // @Column({ type: 'varchar', nullable: false })
+    // password!: string
 
     @Column({ type: 'simple-array', nullable: true })
     roles!: string[]
@@ -44,18 +39,23 @@ export class User {
     @Column({ type: 'simple-array', nullable: true })
     meeting_report!: string[]
 
-    @Column({ type: 'varchar', nullable: true })
+    @Column({ type: 'simple-array', nullable: true })
+    actions!: string[]
+
+    @Column({ type: 'varchar', nullable: false })
     expiresIn!: string
 
-    @Column({ type: 'varchar', nullable: true })
+    @Column({ type: 'varchar', nullable: false })
     dhisusersession!: string
 
-    @Column({ type: 'varchar', nullable: true })
+    @Column({ type: 'varchar', nullable: false })
     token!: string
 
-    @Column({ type: 'varchar', nullable: true })
+    @Column({ type: 'varchar', nullable: false })
     defaultRedirectUrl!: string
 
+    @Column({ nullable: false, default: false })
+    isActive!: boolean
 }
 
 export async function getUserRepository(): Promise<Repository<User>> {
@@ -63,21 +63,20 @@ export async function getUserRepository(): Promise<Repository<User>> {
 }
 
 
-
-// export class User {
-// }
-
-export function token(user: User) {
-    return jwt.sign({ id: `${user.id}`, username: user.username, roles: user.roles, groups: user.groups, isActive: user.isActive }, jwSecretKey({ user: user }).secretOrPrivateKey, { expiresIn: `${jwSecretKey({ user: user }).expiredIn}s` });
+export async function token(user: User) {
+    const secret = await jwSecretKey({ user: user });
+    return jwt.sign({ id: `${user.id}`, username: user.username, roles: user.roles, groups: user.groups, isActive: user.isActive }, secret.secretOrPrivateKey, { expiresIn: `${secret.expiredIn}s` });
 }
 
-export function jwSecretKey(data: { userId?: string, user?: User }): { expiredIn: string, secretOrPrivateKey: string } {
+export async function jwSecretKey(data: { userId?: string, user?: User }): Promise<{ expiredIn: string; secretOrPrivateKey: string; }> {
     var userIsChws: boolean = false;
-    if (notEmpty(data.user)) {
-        userIsChws = UserRole(data.user!).isChws;
-    } else if (notEmpty(data.userId)) {
-        const jData = (new JsonDatabase('users')).getBy(data.userId!) as User;
-        if (notEmpty(jData)) userIsChws = UserRole(jData).isChws;
+    if (data.user) {
+        userIsChws = UserRole(data.user).isChws;
+    } else if (data.userId) {
+        const _repoUser = await getUserRepository();
+        const user = await _repoUser.findOneBy({id:data.userId});
+
+        if (user) userIsChws = UserRole(user).isChws;
     }
     const second1 = 1000 * 60 * 60 * 24 * 366;
     const second2 = 1000 * 60 * 60 * 24 * 366;

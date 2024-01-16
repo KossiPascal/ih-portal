@@ -45,8 +45,6 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  
-
   showHidePassword(){
     this.passwordType = this.passwordType == 'password' ? 'text' : 'password';
   }
@@ -56,7 +54,6 @@ export class LoginComponent implements OnInit {
     // this.message = this.auth.isLoggedIn$ ?
     // 'Vous êtes connecté.' : 'Identifiant ou mot de passe incorrect.';
   }
-
 
   // redirectTo: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   //   return ['topics', route.data.topics[0]];
@@ -75,8 +72,6 @@ export class LoginComponent implements OnInit {
       agreeTermsOrRemenberMe: new FormControl(false, []),
     });
   }
-
-
 
   login(): any {
     if (!this.auth.isLoggedIn()) {

@@ -4,9 +4,9 @@ import { Router } from "@angular/router";
 import { User } from "@ih-models/User";
 import moment from "moment";
 import { Functions, notNull } from "@ih-app/shared/functions";
-import { Roles } from "../shared/roles";
 import { AppStorageService } from "./cookie.service";
 import { Chws } from "@ih-app/models/Sync";
+import { Roles } from "../shared/roles";
 
 Functions
 @Injectable({
@@ -20,15 +20,11 @@ export class AuthService {
 
   public userValue(): User | null {
       try {
-        if (notNull(this.store.get('user'))) {
-          var userData: User = JSON.parse(this.store.get('user') ?? '');
+        const data = this.store.get('user');
+          var userData: User = JSON.parse(data);
           userData.userLogo = 'assets/images/default_icon.png';
-          // if( typeof(your_variable) === 'string' ) { ... }
           return userData;
-        };
-      } catch (error) {
-        
-      }
+      } catch (error) {}
       return null;
   }
 

@@ -1,14 +1,13 @@
 import { Request, Response, NextFunction, Router } from 'express';
-import { User } from '../entity/User';
+import { User, getUserRepository } from '../entity/User';
 import { JsonDatabase } from '../json-data-source';
 
 export class UserController {
 
-    private static repoUser: JsonDatabase = new JsonDatabase('users');
-
     static allUsers = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            var users: User[] = Object.values(this.repoUser.all());
+            const _repoUser = await getUserRepository();
+            var users: User[] = await _repoUser.find();
             return res.status(200).json({ status: 200, data: users });
         } catch (err: any) {
             return res.status(201).json({ status: 201, data: `${err}` });
@@ -17,16 +16,20 @@ export class UserController {
 
     static updateUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const user = this.repoUser.getBy(req.body.id) as User;
+            const _repoUser = await getUserRepository();
+            const { userId, dhisusersession } = req.body;
+            const { id, roles, groups, meeting_report, actions } = req.body.user_to_update;
+            const user = await _repoUser.findOneBy({ id: id });
             if (user) {
-                user.roles = req.body.roles;
-                user.groups = req.body.groups;
-                user.meeting_report = req.body.meeting_report;
-                this.repoUser.save(user);
-                var users: User[] = Object.values(this.repoUser.all());
-                return res.status(200).json({ status: 200, data: users });
+                user.roles = roles;
+                user.groups = groups;
+                user.meeting_report = meeting_report;
+                user.actions = actions;
+                const finalUser = await _repoUser.save(user);
+                //var users: User[] = await _repoUser.find();
+                return res.status(200).json({ status: 200, data: finalUser });
             }
-            return res.status(res.statusCode).json({ status: 401, data: 'Not Found' });
+            return res.status(201).json({ status: 201, data: 'Not Found' });
         } catch (err: any) {
             return res.status(201).json({ status: 201, data: `${err}` });
         }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { UsersRoutingModule } from './users-routing.module';
 import { UserComponent } from './user-list.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { UserSafeHtmlPipe } from '@ih-src/app/pipes/userpipe';
 
 @NgModule({
   imports: [
@@ -10,7 +11,10 @@ import { ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule,
     UsersRoutingModule
   ],
-  declarations: [UserComponent]
+  declarations: [
+    UserComponent,
+    UserSafeHtmlPipe
+  ]
 })
 export class UsersModule { }
 

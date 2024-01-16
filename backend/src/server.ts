@@ -4,6 +4,7 @@ import { json, urlencoded } from 'body-parser';
 import { Functions, logNginx, projectFolder, sslFolder } from './utils/functions';
 import { AppDataSource } from './data_source';
 import cors from "cors";
+//const cors = require('cors');
 import bearerToken from "express-bearer-token";
 import { Errors } from "./routes/error";
 import authRouter from "./routes/auth";
@@ -41,8 +42,16 @@ AppDataSource
   })
   .catch(error => {console.log(`${error}`); logNginx(`${error}`)});
 
+  // const corsOptions = {
+  //   origin: '*',
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  //   allowedHeaders: 'Content-Type,Authorization',
+  //   optionsSuccessStatus: 200,
+  // };
+
 const app = express()
-  .use(cors())
+  //.options('*', cors(corsOptions))
+  .use(cors()) //.use(cors(corsOptions))
   .use(json())
   .use(responseTime())
   .use(compression())
@@ -76,6 +85,11 @@ const app = express()
   .all('*', (req, res) => res.status(200).redirect("/"))
   .use(Errors.get404)
   .use(Errors.get500);
+
+  // app.get('/api/assets/i18n/en-lang.json', (req, res) => {
+  //   // Your route logic here
+  //   res.json({ message: 'Hello, this is your JSON response!' });
+  // });
 
 const appSecured = app;
 const credentials = {

@@ -151,16 +151,19 @@ export interface ChwsUpdateDrugInfo {
   userId?: string
   dhisusersession?: string
 }
-export interface Roles {
-  isSuperUser: boolean
-  isUserManager: boolean
-  isAdmin: boolean
-  isDataManager: boolean
-  isOnlySupervisorMentor: boolean
-  isSupervisorMentor: boolean
-  isChws: boolean
-  isReportViewer: boolean
+export class Roles {
+  isSuperUser: boolean = false;
+  isUserManager: boolean = false;
+  isAdmin: boolean = false;
+  isDataManager: boolean = false;
+  isOnlySupervisorMentor: boolean = false;
+  isSupervisorMentor: boolean = false;
+  isChws: boolean = false;
+  isReportViewer: boolean = false;
 }
+
+
+
 
 // export interface MeetingReport {
 //   id: string

@@ -8,6 +8,7 @@ import { ForgotPasswordComponent } from './forgot-password.component';
 import { LockScreenComponent } from './lockscreen.component';
 import { RecoverPasswordComponent } from './recover-password.component';
 
+
 @NgModule({
   imports: [
     CommonModule,

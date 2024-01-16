@@ -7,7 +7,7 @@
           <ng-container *ngFor="let team of Team$">
             <ng-container *ngIf="team.id as t">
 
-              <li class="team-nav">
+              <li class="team-nav" *ngIf="hasTeamPageAccess(t)">
                 <a *ngIf="team.show == true" (click)="ClickedIndex(team)" id="custom-mr-{{t}}-tab"
                   data-toggle="pill" href="#custom-mr-{{t}}" role="tab" [attr.data-aria-controls]="'custom-mr-'+t"
                   [attr.data-aria-selected]="t==SelectedTeam?.id" (mousedown)="onMouseDown($event, team)"
@@ -25,13 +25,12 @@
           </ng-container>
         </ul>
 
-        <div id="team-utils">
-          <input *ngIf="IsTeamAction" id="team-name" type="text" required class="team-name form-control"
-            placeholder="Team Name" autocomplete="off">
+        <div id="team-utils" *ngIf="roles.canCreateTeam() || roles.canUpdateTeam() || roles.canDeleteTeam()">
+          <input *ngIf="IsTeamAction" id="team-name" type="text" required class="team-name form-control" placeholder="Team Name" autocomplete="off">
           <div id="team-name-btn">
-            <i *ngIf="IsTeamAction && !TeamToUpdateId" class="fas fa-save t-1" (click)="SaveOrUpdateTeam($event)"></i>
-            <i *ngIf="IsTeamAction && TeamToUpdateId" class="fas fa-edit t-2" (click)="SaveOrUpdateTeam($event)"></i>
-            <i *ngIf="IsTeamAction && TeamToUpdateId" class="fas fa-trash t-3" (click)="deleteTeam($event)"></i>
+            <i *ngIf="IsTeamAction && !TeamToUpdateId && roles.canCreateTeam()" class="fas fa-save t-1" (click)="SaveOrUpdateTeam($event)"></i>
+            <i *ngIf="IsTeamAction && TeamToUpdateId && roles.canUpdateTeam()" class="fas fa-edit t-2" (click)="SaveOrUpdateTeam($event)"></i>
+            <i *ngIf="IsTeamAction && TeamToUpdateId && roles.canDeleteTeam()" class="fas fa-trash t-3" (click)="deleteTeam($event)"></i>
             <i *ngIf="IsTeamAction" class="fas fa-times t-4" (click)="cancelTeamAction($event)"></i>
 
             <i *ngIf="!IsTeamAction" class="fas fa-pen t-5" (click)="TeamAction($event)"></i>
@@ -57,7 +56,7 @@
                         <th colspan="3">
                           <b style="font-size: 25px; color:rgb(206, 32, 32); margin:10px">
                             {{ team.name | uppercase }}
-                            <ul class="download noExl" *ngIf="AllFieldAreNotEmpty(t, false)">
+                            <ul class="download noExl" *ngIf="AllFieldAreNotEmpty(t, false) && roles.isSuperUser()">
                               <li><span (click)="excel('meeting-report-'+t)">Excel</span></li>
                               <li><span (click)="csv('meeting-report-'+t)">CSV</span></li>
                               <li><span (click)="json('meeting-report-'+t)">JSON</span></li>
@@ -68,9 +67,9 @@
                         </th>
                         <td>
                           <div class="td-container noExl">
-                            <i class="fas fa-edit editReport" *ngIf="SelectedReportExist(t) && CanUpdateReport(t) && showEdit(t,'span')"
+                            <i class="fas fa-edit editReport" *ngIf="SelectedReportExist(t) && CanUpdateReport(t) && showEdit(t,'span') && roles.canUpdateReport()"
                               (click)="editReport($event,t)"></i>
-                            <i class="fas fa-trash deleteReport" *ngIf="SelectedReportExist(t) && CanUpdateReport(t)"
+                            <i class="fas fa-trash deleteReport" *ngIf="SelectedReportExist(t) && CanUpdateReport(t) && roles.canDeleteReport()"
                               (click)="deleteReport($event,t)"></i>
                             <i class="fas fa-times cancelReport" *ngIf="SelectedReportExist(t)"
                               (click)="cancelReportAction($event,t)"></i>
@@ -218,14 +217,14 @@
 
                   <button id="submit-btn-{{t}}"
                     style="width: 230px; float:right; margin:10px 0px 0px 10px; padding:0px;" class="submit"
-                    (click)="SaveOrUpdateReport($event,t, true)" type="submit" *ngIf="CanUpdateReport(t) && showEdit(t)"
+                    (click)="SaveOrUpdateReport($event,t, true)" type="submit" *ngIf="CanUpdateReport(t) && showEdit(t) && (roles.canCreateReport() || roles.canUpdateReport())"
                     class="btn btn-success form-control">
                     {{ 'Enrégistrer et ne plus modifier'}}
                   </button>
 
                   <button id="submit-btn-{{t}}" style="width: 110px; float:right; margin-top:10px; padding:0px;"
                     class="submit" (click)="SaveOrUpdateReport($event,t, false)" type="submit"
-                    *ngIf="CanUpdateReport(t) && showEdit(t)"
+                    *ngIf="CanUpdateReport(t) && showEdit(t) && (roles.canCreateReport() || roles.canUpdateReport())"
                     class="btn btn-{{ SelectedReportExist(t) ? 'warning' : 'primary'}} form-control">
                     {{SelectedReportExist(t) ? 'Modifier' : 'Enrégistrer'}}
                   </button>
@@ -235,20 +234,18 @@
                 <div class="custom-tab-body-right">
                   <div id="person-list">
                     <table id="person-table-{{t}}" class="person-table table-bordered">
-                      <thead>
+                      <thead  *ngIf="SelectedPerson || roles.canCreatePerson() || roles.canUpdatePerson() || roles.canDeletePerson()">
                         <tr>
-                          <th>
-                            <input (input)="personInputIsNotEmpty(t)" id="person-name-{{t}}" type="text" required
-                              class="form-control person-name" placeholder="Person Name" autocomplete="off">
-                            <input (input)="setSearchPerson(t)" id="person-email-{{t}}" type="text"
-                              class="form-control person-email" placeholder="Person Email" autocomplete="off">
+                          <th >
+                              <input (input)="personInputIsNotEmpty(t)" id="person-name-{{t}}" type="text" required class="form-control person-name" placeholder="Person Name" autocomplete="off">
+                              <input (input)="setSearchPerson(t)" id="person-email-{{t}}" type="text" class="form-control person-email" placeholder="Person Email" autocomplete="off">
 
                             <div style="margin: 8px 0px 10px 0px;" class="personsActions">
-                              <i style="color: green;" *ngIf="personInputIsNotEmpty(t) && !SelectedPerson"
+                              <i style="color: green;" *ngIf="personInputIsNotEmpty(t) && !SelectedPerson && roles.canCreatePerson()"
                                 class="fas fa-save i-1" (click)="SaveOrUpdatePerson($event,t)"></i>
-                              <i style="color: orange;" *ngIf="SelectedPerson" class="fas fa-edit i-2"
+                              <i style="color: orange;" *ngIf="SelectedPerson && roles.canUpdatePerson()" class="fas fa-edit i-2"
                                 (click)="SaveOrUpdatePerson($event,t)"></i>
-                              <i style="color: red;" *ngIf="SelectedPerson" class="fas fa-trash i-3"
+                              <i style="color: red;" *ngIf="SelectedPerson && roles.canDeletePerson()" class="fas fa-trash i-3"
                                 (click)="deletePerson($event,t)"></i>
                               <i style="color: black;" *ngIf="personInputIsNotEmpty(t)" class="fas fa-times i-4"
                                 (click)="cancelPersonAction($event,t)"></i>
@@ -266,7 +263,7 @@
                               <div class="selectPersonActions">
                                 <span *ngIf="CanUpdateReport(t) && showEdit(t)" (click)="presentPerson($event, p, t)" style="color:green;">Présent</span>
                                 <span *ngIf="CanUpdateReport(t) && showEdit(t)" (click)="absentPerson($event, p, t)" style="color:maroon;">Absent</span>
-                                <span (click)="selectPersonToWork($event, p, t)" style="color:orange;">Editer</span>
+                                <span *ngIf="roles.canCreatePerson() || roles.canUpdatePerson() || roles.canDeletePerson()" (click)="selectPersonToWork($event, p, t)" style="color:orange;">Voir</span>
                               </div>
                             </div>
                           </th>

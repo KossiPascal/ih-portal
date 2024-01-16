@@ -5,7 +5,7 @@ import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Consts } from '@ih-app/shared/constantes';
 import { Functions, notNull } from '@ih-app/shared/functions';
-import { Roles, UserGroupsAsArray, UserRole, UserRolesAsArray } from '@ih-app/shared/roles';
+import { ActionsAsArray, Roles, UserGroupsAsArray, UserRole, UserRolesAsArray } from '@ih-app/shared/roles';
 import { User } from '@ih-models/User';
 import { Team } from '@ih-src/app/models/DataAggragate';
 import { SyncService } from '@ih-src/app/services/sync.service';
@@ -26,6 +26,7 @@ export class UserComponent implements OnInit {
 
   roles$: { id: string, name: string }[] = UserRolesAsArray();
   groups$: { id: string, name: string }[] = UserGroupsAsArray();
+  actions$:string[] = ActionsAsArray();
   MeetingReport$!: Team[];
 
   userForm!: FormGroup;
@@ -79,7 +80,8 @@ export class UserComponent implements OnInit {
   EditUser(user:User) {
     this.isEditMode = true;
     user.roles = (user.roles.toString().replace('[','').replace(']','')).split(',');
-    user.groups = (user.groups.toString().replace('[','').replace(']','')).split(',')
+    user.groups = ((user.groups??[]).toString().replace('[','').replace(']','')).split(',');
+    user.actions = ((user.actions??[]).toString().replace('[','').replace(']','')).split(',');
     this.userForm = this.createFormGroup(user);
     this.UserSelected(user);
   }
@@ -121,9 +123,10 @@ export class UserComponent implements OnInit {
       // email: new FormControl(user != null ? user.email : '', [Validators.required, Validators.email]),
       // password: new FormControl('', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]),
       // passwordConfirm: new FormControl('', this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]),
-      roles: new FormControl(user != null ? user.roles : '', [Validators.required, Validators.minLength(1)]),
-      groups: new FormControl(user != null ? user.groups : '', [Validators.required, Validators.minLength(1)]),
-      meeting_report: new FormControl(user != null ? user.meeting_report : '', [Validators.required, Validators.minLength(1)]),
+      roles: new FormControl(user != null ? user.roles : ''),
+      groups: new FormControl(user != null ? user.groups : ''),
+      actions: new FormControl(user != null ? user.actions : ''),
+      meeting_report: new FormControl(user != null ? user.meeting_report : ''),
       isActive: new FormControl(user != null ? user.isActive : false),
       // isSuperAdmin: new FormControl(user != null ? user.isSuperAdmin : false)
       
@@ -161,6 +164,26 @@ export class UserComponent implements OnInit {
     };
   }
 
+  // ToStringNewLine(value:string[]):string{
+  // }
+
+  ToStringNewLine(value: string[], type:'roles' | 'groups' | 'actions' | 'meeting_report'): string {
+    var data:{ id: string, name: string }[] = [];
+    if (type=='roles') {
+      data = this.roles$;
+    } else if('groups'){
+      //data = this.groups$;
+    }
+
+    if (data.length > 0) {
+      const roles: string[] = data.filter(r => value.includes(r.id)).map(r => r.name);
+      return roles.join('<br>');
+    }
+    return `${value}`.toString().replace(/,/g, '<br>');
+
+
+}
+
 
   register(): any {
     if (this.auth.isLoggedIn()) {
@@ -169,8 +192,9 @@ export class UserComponent implements OnInit {
 
       if (this.isEditMode) {
         if (this.selectedUser) {
-          this.selectedUser.groups = this.userForm.value['groups']
-          this.selectedUser.roles = this.userForm.value['roles']
+          this.selectedUser.groups = this.userForm.value['groups'];
+          this.selectedUser.roles = this.userForm.value['roles'];
+          this.selectedUser.actions = this.userForm.value['actions'];
           this.selectedUser.meeting_report = this.userForm.value['meeting_report']
           // const editPassword: boolean = notNull(this.userForm.value.password) && notNull(this.userForm.value.passwordConfirm);
           // this.userForm.value['editPassword'] = editPassword;
@@ -187,8 +211,15 @@ export class UserComponent implements OnInit {
             this.message = 'Registed successfully !'
             // this.message = 'Registed successfully !'
             this.closeModal();
-            console.log(`successfully !`);
             this.getUsers();
+            const currentUser = this.auth.userValue();
+            const user:User = res.data as User;
+            if (currentUser && user && currentUser.id == user.id) {
+              this.store.set("user", JSON.stringify(res.data));
+            }
+
+            // console.log(`successfully !`);
+
           } else {
             this.message = res.data;
           }

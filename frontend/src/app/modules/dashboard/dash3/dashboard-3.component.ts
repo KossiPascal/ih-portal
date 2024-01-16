@@ -5,7 +5,7 @@ import { SyncService } from '@ih-app/services/sync.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { IndexDbService } from '@ih-app/services/index-db.service'; // db index start
-import { DateUtils, Functions, notNull, patientAgeDetails } from '@ih-app/shared/functions';
+import { Functions, notNull, patientAgeDetails } from '@ih-app/shared/functions';
 import { AuthService } from '@ih-app/services/auth.service';
 import { AppStorageService } from '@ih-app/services/cookie.service';
 import { Roles } from '@ih-app/shared/roles';

@@ -34,6 +34,10 @@ export class MeetingReportComponent implements OnInit {
   public roles = new Roles(this.store);
   private pressTimer: any;
 
+  hasTeamPageAccess(teamId: number):boolean{
+    return this.roles.getMeetingReport().includes(`${teamId}`);
+  }
+
   ChwOU: Chws | null = null;
   visibleItems: { [key: string]: boolean } = {};
 
