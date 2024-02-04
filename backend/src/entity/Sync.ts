@@ -2,7 +2,7 @@
 
 import { Entity, PrimaryGeneratedColumn, Column, Repository, DataSource, PrimaryColumn, CreateDateColumn, UpdateDateColumn, OneToMany, JoinColumn, ManyToOne, Unique, Index } from "typeorm"
 import { AppDataSource } from "../data_source"
-import { DateUtils } from "../utils/functions";
+import { User } from "./User";
 
 // export enum FlightType { DOMESTIC = "domestic", INTERNATIONAL = "international" }
 let Connection: DataSource = AppDataSource.manager.connection;
@@ -428,6 +428,20 @@ export class ChwsDrug {
 
   @Column({ type: 'varchar', nullable: true })
   reported_date!: string
+
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
+  createdBy!:User
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt!: Date;
+
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
+  updatedBy!:User
+  
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  updatedAt!: Date;
 }
 export async function getChwsDrugSyncRepository(): Promise<Repository<ChwsDrug>> {
   return Connection.getRepository(ChwsDrug);
@@ -479,6 +493,20 @@ export class ChwsDrugUpdate {
   @Column({ type: 'varchar', nullable: true })
   observations!:string
 
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
+  createdBy!:User
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt!: Date;
+
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
+  updatedBy!:User
+  
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  updatedAt!: Date;
+
 }
 export async function getChwsDrugUpdateSyncRepository(): Promise<Repository<ChwsDrugUpdate>> {
   return Connection.getRepository(ChwsDrugUpdate);
@@ -495,6 +523,20 @@ export class Teams {
 
   @Column({type: 'boolean' })
   show!: boolean;
+
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
+  createdBy!:User
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt!: Date;
+
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
+  updatedBy!:User
+  
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  updatedAt!: Date;
 }
 export async function GetTeamsRepository(): Promise<Repository<Teams>> {
   return Connection.getRepository(Teams);
@@ -515,6 +557,20 @@ export class Persons {
 
   @Column({ type: 'varchar', nullable: true })
   email?:string;
+
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
+  createdBy!:User
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt!: Date;
+
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
+  updatedBy!:User
+  
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  updatedAt!: Date;
 }
 export async function GetPersonsRepository(): Promise<Repository<Persons>> {
   return Connection.getRepository(Persons);
@@ -565,6 +621,20 @@ export class MeetingReportData {
   
   @Column({type: 'boolean', default:false})
   doNotUpdate!: boolean;
+
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
+  createdBy!:User
+
+  @CreateDateColumn({ type: 'timestamp', nullable: false, default: () => 'CURRENT_TIMESTAMP' })
+  createdAt!: Date;
+
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
+  updatedBy!:User
+  
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  updatedAt!: Date;
 }
 export async function GetMeetingReportDataRepository(): Promise<Repository<MeetingReportData>> {
   return Connection.getRepository(MeetingReportData);

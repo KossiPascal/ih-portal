@@ -31,7 +31,7 @@
 
   var lastKill = null;
 
-  // Internal generic kill function, used by several mapped kill "family" functions.
+  // Internal generic kill function, used by several mapped kill "family" 
   function _kill(cm, from, to, ring, text) {
     if (text == null) text = cm.getRange(from, to);
 

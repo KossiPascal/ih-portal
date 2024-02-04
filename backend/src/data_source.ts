@@ -6,7 +6,7 @@ require('dotenv').config({ path: `${path.dirname(path.dirname(path.dirname(__dir
 
 const { DB_HOST, DB_PORT, PROD_DB_NAME, DEV_DB_NAME, DB_USER, DB_PASS } = process.env
 
-// const appdirname = Functions.appDirectory();
+// const appdirname = appDirectory();
 // `${appdirname}/ssl/server.key`
 
 export const AppDataSource = new DataSource({

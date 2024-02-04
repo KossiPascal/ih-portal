@@ -1,31 +1,30 @@
+import { UserRoles } from "./Roles"
+import { Chws } from "./Sync"
+
 export interface User {
-  id: any
+  id: string
   username: string
   fullname: string
   email?: string
-  roles:string[]
-  groups:string[]
-  actions:string[]
-  meeting_report:string[]
+  password?: string
+  roles: UserRoles[]|string[]
+  meeting_report: string[]
   isActive: boolean
-  isSuperAdmin: boolean
-  expiresIn:any
+  expiresIn: number|undefined|null
   token: string
-  dhisusersession:string
-  userLogo:any
-  defaultRedirectUrl:string
+  dhisusername?: string
+  dhispassword?: string
+  userLogo: string
+  mustLogin:boolean
+  useLocalStorage:boolean
+  chw_found:Chws|null
+  // pages:string[]
+  // actions:string[]
+  // default_page:string
+
 }
-
-
-
-
 
 export interface Configs {
-  id:any
-  showRegisterPage:boolean
+  id: any
+  showRegisterPage: boolean
 }
-
-// export enum Role {
-//   User = 'User',
-//   Admin = 'Admin'
-// }

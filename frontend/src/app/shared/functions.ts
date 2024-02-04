@@ -3,6 +3,8 @@ import { Router } from "@angular/router";
 import { Patients } from "@ih-app/models/Sync";
 import { AuthService } from "@ih-services/auth.service";
 import { Consts } from "./constantes";
+import { isChildUnder5, isFemaleInCible, getAgeInYear, getAgeInMonths, getAgeInDays } from "./dates-utils";
+import { AppStorageService } from "../services/local-storage.service";
 // import { envs } from '@ih-backendEnv/env';
 // const httpOptions: { headers: HttpHeaders } = {headers: new HttpHeaders({ "Content-Type": "application/json" }),};
 
@@ -10,286 +12,283 @@ export function notNull(data: any): boolean {
   return data != '' && data != null && data != undefined && typeof data != undefined && data.length != 0; // && Object.keys(data).length != 0;
 }
 
-export class Functions {
 
-  static async Wait(time:number = 2000): Promise<void> {
-    setTimeout(() => {
-      
-    }, time);
-  }
+export async function Wait(time: number = 2000): Promise<void> {
+  setTimeout(() => {
 
-  static months(): { labelEN: string; labelFR: string; id: string; uid: number }[] {
-    return [
-      { labelEN: "January", labelFR: "Janvier", id: "01", uid: 1 },
-      { labelEN: "February", labelFR: "Février", id: "02", uid: 2 },
-      { labelEN: "March", labelFR: "Mars", id: "03", uid: 3 },
-      { labelEN: "April", labelFR: "Avril", id: "04", uid: 4 },
-      { labelEN: "May", labelFR: "Mai", id: "05", uid: 5 },
-      { labelEN: "June", labelFR: "Juin", id: "06", uid: 6 },
-      { labelEN: "July", labelFR: "Juillet", id: "07", uid: 7 },
-      { labelEN: "August", labelFR: "Août", id: "08", uid: 8 },
-      { labelEN: "September", labelFR: "Septembre", id: "09", uid: 9 },
-      { labelEN: "October", labelFR: "Octobre", id: "10", uid: 10 },
-      { labelEN: "November", labelFR: "Novembre", id: "11", uid: 11 },
-      { labelEN: "December", labelFR: "Décembre", id: "12", uid: 12 },
-    ];
-  }
+  }, time);
+}
 
-  static monthByArg(arg:any):{ labelEN: string; labelFR: string; id: string; uid: number }{
-    for (let i = 0; i < Functions.months().length; i++) {
-      const m = Functions.months()[i];
-      if (arg == m.labelFR || arg == m.labelEN || arg == m.id || arg == m.uid) {
-        return m;
-      }
-    }
-    return { labelEN: '', labelFR: '', id: '', uid: 0 };
-  }
+export function months(): { labelEN: string; labelFR: string; id: string; uid: number }[] {
+  return [
+    { labelEN: "January", labelFR: "Janvier", id: "01", uid: 1 },
+    { labelEN: "February", labelFR: "Février", id: "02", uid: 2 },
+    { labelEN: "March", labelFR: "Mars", id: "03", uid: 3 },
+    { labelEN: "April", labelFR: "Avril", id: "04", uid: 4 },
+    { labelEN: "May", labelFR: "Mai", id: "05", uid: 5 },
+    { labelEN: "June", labelFR: "Juin", id: "06", uid: 6 },
+    { labelEN: "July", labelFR: "Juillet", id: "07", uid: 7 },
+    { labelEN: "August", labelFR: "Août", id: "08", uid: 8 },
+    { labelEN: "September", labelFR: "Septembre", id: "09", uid: 9 },
+    { labelEN: "October", labelFR: "Octobre", id: "10", uid: 10 },
+    { labelEN: "November", labelFR: "Novembre", id: "11", uid: 11 },
+    { labelEN: "December", labelFR: "Décembre", id: "12", uid: 12 },
+  ];
+}
 
-  static previousMonth(monthId: string): string {
-    let cMonth: number = parseInt(monthId, 10);
-    if (cMonth === 1) return '12';
-    cMonth--;
-    return cMonth < 10 ? `0${cMonth}` : cMonth.toString();
-  }
-
-
-  static getMonthLabelById(id:string, lang:'fr'|'en' = 'fr'):string {
-    for (var i = 0; i < Functions.months().length; i++) {
-      var m = Functions.months()[i];
-      if (m.id == id) return lang == 'fr' ? m.labelFR : m.labelEN;
-    }
-    return '';
-  }
-
-  static getMonthIdByLabel(label:string):string {
-    for (var i = 0; i < Functions.months().length; i++) {
-      var m = Functions.months()[i];
-      if (m.labelFR == label || m.labelEN == label) return m.id ;
-    }
-    return '';
-  }
-
-  static getYearsList(biginYear: number = 2022):number[] {
-    var cYear:number = Functions.currentYear();
-    if (biginYear == cYear) return [cYear];
-    if (biginYear < cYear) {
-      var ys:number[] = [];
-      for (var i = 0; i <= cYear - biginYear; i++) {
-        ys.push(cYear - i);
-      }
-      return ys.sort((a, b) => a - b);
-    }
-    return [biginYear]
-  }
-
-
-
-  static currentYear(date?: string): number {
-    try {
-      const formattedDate = date ? this.formatDate(new Date(date)) : this.formatDate(new Date());
-      return parseInt(formattedDate, 10);
-    } catch (e) {
-      return parseInt(this.formatDate(new Date()), 10);
+export function monthByArg(arg: any): { labelEN: string; labelFR: string; id: string; uid: number } {
+  for (let i = 0; i < months().length; i++) {
+    const m = months()[i];
+    if (arg == m.labelFR || arg == m.labelEN || arg == m.id || arg == m.uid) {
+      return m;
     }
   }
+  return { labelEN: '', labelFR: '', id: '', uid: 0 };
+}
 
-  private static formatDate(date: Date): string {
-    return date.getFullYear().toString();
+export function previousMonth(monthId: string): string {
+  let cMonth: number = parseInt(monthId, 10);
+  if (cMonth === 1) return '12';
+  cMonth--;
+  return cMonth < 10 ? `0${cMonth}` : cMonth.toString();
+}
+
+
+export function getMonthLabelById(id: string, lang: 'fr' | 'en' = 'fr'): string {
+  for (var i = 0; i < months().length; i++) {
+    var m = months()[i];
+    if (m.id == id) return lang == 'fr' ? m.labelFR : m.labelEN;
   }
+  return '';
+}
 
-  static currentMonth(date?: string): { labelEN: string; labelFR: string; id: string; uid: number } {
-    let month: number;
-    try {
-      month = date ? new Date(date).getMonth() + 1 : new Date().getMonth() + 1;
-    } catch (e) {
-      month = new Date().getMonth() + 1;
+export function getMonthIdByLabel(label: string): string {
+  for (var i = 0; i < months().length; i++) {
+    var m = months()[i];
+    if (m.labelFR == label || m.labelEN == label) return m.id;
+  }
+  return '';
+}
+
+export function getYearsList(biginYear: number = 2022): number[] {
+  var cYear: number = currentYear();
+  if (biginYear == cYear) return [cYear];
+  if (biginYear < cYear) {
+    var ys: number[] = [];
+    for (var i = 0; i <= cYear - biginYear; i++) {
+      ys.push(cYear - i);
     }
-    const mth = month < 10 ? `0${month}` : `${month}`;
-    
-    for (var i = 0; i < Functions.months().length; i++) {
-      var m = Functions.months()[i];
-      if (m.id == mth) return m;
+    return ys.sort((a, b) => a - b);
+  }
+  return [biginYear]
+}
+
+
+
+export function currentYear(date?: string): number {
+  try {
+    const formattedDate = date ? formatDate(new Date(date)) : formatDate(new Date());
+    return parseInt(formattedDate, 10);
+  } catch (e) {
+    return parseInt(formatDate(new Date()), 10);
+  }
+}
+
+function formatDate(date: Date): string {
+  return date.getFullYear().toString();
+}
+
+export function currentMonth(date?: string): { labelEN: string; labelFR: string; id: string; uid: number } {
+  let month: number;
+  try {
+    month = date ? new Date(date).getMonth() + 1 : new Date().getMonth() + 1;
+  } catch (e) {
+    month = new Date().getMonth() + 1;
+  }
+  const mth = month < 10 ? `0${month}` : `${month}`;
+
+  for (var i = 0; i < months().length; i++) {
+    var m = months()[i];
+    if (m.id == mth) return m;
+  }
+  return { labelEN: '', labelFR: '', id: '', uid: 0 };
+}
+
+export function currentMonthString(date?: string): string {
+  let month: number;
+  try {
+    month = date ? new Date(date).getMonth() + 1 : new Date().getMonth() + 1;
+  } catch (e) {
+    month = new Date().getMonth() + 1;
+  }
+
+  const formattedMonth = month < 10 ? `0${month}` : `${month}`;
+  return formattedMonth;
+}
+
+
+export function LatLonToMercator(lat: number, lon: number): { x: number, y: number } {
+  var rMajor = 6378137; //Equatorial Radius, WGS84
+  var shift = Math.PI * rMajor;
+  var x = lon * shift / 180;
+  var y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
+  y = y * shift / 180;
+  return { x: x, y: y };
+}
+
+export function getXYforLatLng(lat: number, lon: number, zoom?: number): { x: number, y: number } {
+  //max zoom = 22 
+  var zooom = notNull(zoom) ? zoom! : 22;
+  var x = Math.floor((lon + 180) / 360 * Math.pow(2, zooom));
+  var y = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zooom));
+  return { x: x, y: y };
+}
+
+export function MercatorToLatLon(x: number, y: number): { lat: number, lon: number } {
+
+  var rMajor = 6378137; //Equatorial Radius, WGS84
+  var shift = Math.PI * rMajor;
+  var lon = x / shift * 180.0;
+  var lat = y / shift * 180.0;
+  lat = 180 / Math.PI * (2 * Math.atan(Math.exp(lat * Math.PI / 180.0)) - Math.PI / 2.0);
+
+  return { lat: lat, lon: lon };
+}
+
+export function degrees2meters(lat: number, lon: number): { x: number, y: number } {
+  var x = lon * 20037508.34 / 180;
+  var y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
+  y = y * 20037508.34 / 180;
+  return { x: x, y: y };
+}
+
+
+export function meters2degress(x: number, y: number): { lat: number, lon: number } {
+  var lon = x * 180 / 20037508.34;
+  //thanks magichim @ github for the correction
+  var lat = Math.atan(Math.exp(y * Math.PI / 20037508.34)) * 360 / Math.PI - 90;
+  return { lat: lat, lon: lon };
+}
+
+
+
+export function convertLatLonToXY(data: { lat: number, lon: number, map_width?: number, map_height?: number }): { x: number, y: number } {
+
+  var MAP_WIDTH = notNull(data.map_width) ? data.map_width! : 1000;
+  var MAP_HEIGHT = notNull(data.map_height) ? data.map_height! : 446;
+
+  var y = ((-1 * data.lat) + 90) * (MAP_HEIGHT / 180);
+  var x = (data.lon + 180) * (MAP_WIDTH / 360);
+  return { x: x, y: y };
+}
+
+export function range(size: number, startAt: number = 0) {
+  return [...Array(size).keys()].map(i => i + startAt);
+}
+
+export function returnEmptyArrayIfNul(data: any): string[] {
+  return notNull(data) ? data : [];
+}
+
+export function returnDataAsArray(data: any): string[] {
+  return notNull(data) ? [data] : [];
+}
+
+export function convertToArray(data: any): string[] {
+  return notNull(data) ? [data] : [];
+}
+
+export function saveCurrentUrl(router: Router): void {
+  const link = router.url.split(backenUrl(''))[0];
+  // const link = location.href;
+  // const link = window.location.href;
+  sessionStorage.setItem("redirect_url", link);
+}
+
+export function getSavedUrl(): string | null {
+  const link = sessionStorage.getItem('redirect_url');
+  sessionStorage.removeItem("redirect_url");
+  return link;
+}
+
+export function loadCssScripts(dynamicCssScripts: string[]) {
+  for (let i = 0; i < dynamicCssScripts.length; i++) {
+    const src = dynamicCssScripts[i];
+    const ext = src.slice(src.length - 3);
+
+    if (ext === 'css') {
+      let link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.type = "text/css";
+      link.id = "theme";
+      link.href = src;
+      document.getElementsByTagName('head')[0].appendChild(link);
     }
-    return { labelEN: '', labelFR: '', id: '', uid: 0 };
-  }
 
-  static currentMonthString(date?: string): string {
-    let month: number;
-    try {
-      month = date ? new Date(date).getMonth() + 1 : new Date().getMonth() + 1;
-    } catch (e) {
-      month = new Date().getMonth() + 1;
-    }
-
-    const formattedMonth = month < 10 ? `0${month}` : `${month}`;
-    return formattedMonth;
-  }
-
-
-  static LatLonToMercator(lat: number, lon: number): { x: number, y: number } {
-    var rMajor = 6378137; //Equatorial Radius, WGS84
-    var shift = Math.PI * rMajor;
-    var x = lon * shift / 180;
-    var y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
-    y = y * shift / 180;
-    return { x: x, y: y };
-  }
-
-  static getXYforLatLng(lat: number, lon: number, zoom?: number): { x: number, y: number } {
-    //max zoom = 22 
-    var zooom = notNull(zoom) ? zoom! : 22;
-    var x = Math.floor((lon + 180) / 360 * Math.pow(2, zooom));
-    var y = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zooom));
-    return { x: x, y: y };
-  }
-
-  static MercatorToLatLon(x: number, y: number): { lat: number, lon: number } {
-
-    var rMajor = 6378137; //Equatorial Radius, WGS84
-    var shift = Math.PI * rMajor;
-    var lon = x / shift * 180.0;
-    var lat = y / shift * 180.0;
-    lat = 180 / Math.PI * (2 * Math.atan(Math.exp(lat * Math.PI / 180.0)) - Math.PI / 2.0);
-
-    return { lat: lat, lon: lon };
-  }
-
-  static degrees2meters(lat: number, lon: number): { x: number, y: number } {
-    var x = lon * 20037508.34 / 180;
-    var y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
-    y = y * 20037508.34 / 180;
-    return { x: x, y: y };
-  }
-
-
-  static meters2degress(x: number, y: number): { lat: number, lon: number } {
-    var lon = x * 180 / 20037508.34;
-    //thanks magichim @ github for the correction
-    var lat = Math.atan(Math.exp(y * Math.PI / 20037508.34)) * 360 / Math.PI - 90;
-    return { lat: lat, lon: lon };
-  }
-
-
-
-  static convertLatLonToXY(data: { lat: number, lon: number, map_width?: number, map_height?: number }): { x: number, y: number } {
-
-    var MAP_WIDTH = notNull(data.map_width) ? data.map_width! : 1000;
-    var MAP_HEIGHT = notNull(data.map_height) ? data.map_height! : 446;
-
-    var y = ((-1 * data.lat) + 90) * (MAP_HEIGHT / 180);
-    var x = (data.lon + 180) * (MAP_WIDTH / 360);
-    return { x: x, y: y };
-  }
-
-  static range(size: number, startAt: number = 0) {
-    return [...Array(size).keys()].map(i => i + startAt);
-  }
-
-  static returnEmptyArrayIfNul(data: any): string[] {
-    return notNull(data) ? data : [];
-  }
-
-  static returnDataAsArray(data: any): string[] {
-    return notNull(data) ? [data] : [];
-  }
-
-  static convertToArray(data: any): string[] {
-    return notNull(data) ? [data] : [];
-  }
-
-  static saveCurrentUrl(router: Router): void {
-    const link = router.url.split(Functions.backenUrl(''))[0];
-    // const link = location.href;
-    // const link = window.location.href;
-    sessionStorage.setItem("redirect_url", link);
-  }
-
-  static getSavedUrl(): string | null {
-    const link = sessionStorage.getItem('redirect_url');
-    sessionStorage.removeItem("redirect_url");
-    return link;
-  }
-
-  static loadCssScripts(dynamicCssScripts: string[]) {
-    for (let i = 0; i < dynamicCssScripts.length; i++) {
-      const src = dynamicCssScripts[i];
-      const ext = src.slice(src.length - 3);
-
-      if (ext === 'css') {
-        let link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.type = "text/css";
-        link.id = "theme";
-        link.href = src;
-        document.getElementsByTagName('head')[0].appendChild(link);
-      }
-
-      if (ext === '.js') {
-        const script = document.createElement('script');
-        script.src = src;
-        script.type = 'text/javascript';
-        script.async = true;
-        script.charset = 'utf-8';
-        document.getElementsByTagName('head')[0].appendChild(script);
-      }
+    if (ext === '.js') {
+      const script = document.createElement('script');
+      script.src = src;
+      script.type = 'text/javascript';
+      script.async = true;
+      script.charset = 'utf-8';
+      document.getElementsByTagName('head')[0].appendChild(script);
     }
   }
+}
 
 
 
 
-  static capitaliseDataGiven(str: any, inputSeparator: string = ' ', outPutSeparator: string = ' '): string {
-    const arr = str.toString().split(inputSeparator);
-    //loop through each element of the array and capitalize the first letter.
-    for (var i = 0; i < arr.length; i++) {
-      arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+export function capitaliseDataGiven(str: any, inputSeparator: string = ' ', outPutSeparator: string = ' '): string {
+  const arr = str.toString().split(inputSeparator);
+  //loop through each element of the array and capitalize the first letter.
+  for (var i = 0; i < arr.length; i++) {
+    arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+  }
+  //Join all the elements of the array back into a string 
+  //using a blankspace as a separator 
+  const str2 = arr.join(" ");
+  return str2;
+
+}
+
+export function backenUrl(cible: string = 'api'): string {
+  const portInfo = Consts.getPort();
+  if (portInfo.isLocal == true) {
+    return `${location.protocol}//${location.hostname}:${portInfo.port}/${cible}`;
+  }
+  return `${location.origin}/${cible}`;
+}
+
+export function custumRequest(method: string, http: HttpClient, store: AppStorageService, url: string, data?: any, responseType?: any) {
+  const token = store.get('expiresIn');
+  const result = http.request(method, url, {
+    body: data,
+    responseType: responseType || 'json',
+    observe: 'body',
+    headers: {
+      Authorization: token && token!='' ? `Bearer ${token}` : '',
+      "Content-Type": "application/json"
     }
-    //Join all the elements of the array back into a string 
-    //using a blankspace as a separator 
-    const str2 = arr.join(" ");
-    return str2;
+  });
 
-  }
+  return new Promise<any>((resolve, reject) => {
+    result.subscribe(resolve, reject);
+  });
+}
 
-  static backenUrl(cible: string = 'api'): string {
-    const portInfo = Consts.getPort();
-    if (portInfo.isLocal == true) {
-      return `${location.protocol}//${location.hostname}:${portInfo.port}/${cible}`;
-    }
-    return `${location.origin}/${cible}`;
-  }
+export function CustomHttpHeaders(store: AppStorageService): { headers: HttpHeaders } {
+  const token = store.get('expiresIn');
+  return {
+    headers: new HttpHeaders({
+      Authorization: token && token!='' ? `Bearer ${token}` : ''
+      // "Content-Type": "application/json" 
+    }),
+  };
+}
 
-  static custumRequest(method: string, http: HttpClient, auth: AuthService, url: string, data?: any, responseType?: any) {
-    // console.log(`${baseUrl}/${url}`);
-    // console.log('request ' + JSON.stringify(data));
-    const result = http.request(method, url, {
-      body: data,
-      responseType: responseType || 'json',
-      observe: 'body',
-      headers: {
-        Authorization: auth.userValue() != null ? `Bearer ${auth.userValue()!.token}` : '',
-        "Content-Type": "application/json"
-      }
-    });
-
-    return new Promise<any>((resolve, reject) => {
-      result.subscribe(resolve, reject);
-    });
-  }
-
-
-  static HttpHeaders(auth: AuthService): { headers: HttpHeaders } {
-    return {
-      headers: new HttpHeaders({
-        Authorization: auth.userValue() != null ? `Bearer ${auth.userValue()!.token}` : ''
-        // "Content-Type": "application/json" 
-      }),
-    };
-  }
-
-  static isNumber(n: any): boolean {
-    return /^-?[\d.]+(?:e-?\d+)?$/.test(n);
-  }
+export function isNumber(n: any): boolean {
+  return /^-?[\d.]+(?:e-?\d+)?$/.test(n);
 }
 
 
@@ -301,236 +300,15 @@ export function patientAgeDetails(patient: Patients): {
   age_in_month: number | null,
   age_in_day: number | null,
 } {
-  const is_child_in_cible = DateUtils.isChildUnder5(patient.date_of_birth!);
-  const is_female_in_cible = DateUtils.isFemaleInCible({ birth_date: patient.date_of_birth!, sex: patient.sex! });
+  const is_child_in_cible = isChildUnder5(patient.date_of_birth!);
+  const is_female_in_cible = isFemaleInCible({ birth_date: patient.date_of_birth!, sex: patient.sex! });
   const is_in_cible = is_child_in_cible || is_female_in_cible;
-  const age_in_year = DateUtils.getAgeInYear(patient.date_of_birth!);
-  const age_in_month = DateUtils.getAgeInMonths(patient.date_of_birth!);
-  const age_in_day = DateUtils.getAgeInDays(patient.date_of_birth!);
+  const age_in_year = getAgeInYear(patient.date_of_birth!);
+  const age_in_month = getAgeInMonths(patient.date_of_birth!);
+  const age_in_day = getAgeInDays(patient.date_of_birth!);
 
   return { is_in_cible: is_in_cible, is_child_in_cible: is_child_in_cible, is_female_in_cible: is_female_in_cible, age_in_year: age_in_year, age_in_month: age_in_month, age_in_day: age_in_day }
 
 }
 
 
-export class DateUtils {
-
-  static getAgeInMilliseconds(birth_date?: string) {
-    if (birth_date != null) {
-      return new Date(Date.now() - (new Date(birth_date)).getTime());
-    }
-    return null;
-  }
-
-  static compareTimes(time1: string, time2: string): number {
-    const [hours1, minutes1] = time1.split(':').map(Number);
-    const [hours2, minutes2] = time2.split(':').map(Number);
-  
-    const totalMinutes1 = hours1 * 60 + minutes1;
-    const totalMinutes2 = hours2 * 60 + minutes2;
-  
-    return totalMinutes1 - totalMinutes2;
-  }
-
-  static getAgeInYear(birth_date: string, withUtc: boolean = true) {
-    var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
-    if (ageInMs != null) {
-      const year = withUtc ? ageInMs.getUTCFullYear() : ageInMs.getFullYear();
-      return Math.abs(year - 1970);
-      // return Math.round(ageInMs.getTime() / (1000 * 60 * 60 * 24 *365));
-    }
-    return null;
-  }
-
-  static getAgeInMonths(birth_date: string, round: boolean = false) {
-    var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
-    if (ageInMs != null) {
-      const ageInMonth = ageInMs.getTime() / (1000 * 60 * 60 * 24 * 30);
-      return round ? Math.round(ageInMonth) : ageInMonth;
-    }
-    return null;
-  }
-  static getAgeInDays(birth_date: string) {
-    var ageInMs = DateUtils.getAgeInMilliseconds(birth_date);
-    if (ageInMs != null) {
-      return ageInMs.getTime() / (1000 * 60 * 60 * 24);
-    }
-    return null;
-  }
-
-  static isChildUnder5(birth_date: string): boolean {
-    var childAge = DateUtils.getAgeInMonths(birth_date);
-    if (childAge != null) {
-      return childAge < 60;
-    }
-    return false;
-  }
-
-  static isFemaleInCible(data: { birth_date: string, sex: string }) {
-    const year = DateUtils.getAgeInYear(data.birth_date!);
-    if (year != null) return year >= 5 && year < 60 && data.sex == 'F';
-    return false;
-  }
-
-  static isInCible(data: { birth_date: string, sex: string }): boolean {
-    return DateUtils.isChildUnder5(data.birth_date) || DateUtils.isFemaleInCible(data);
-  }
-
-  static isGreater(d1: any, d2: any): boolean {
-    try {
-      let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
-      let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
-      if (date1 > date2) return true;
-    } catch (error) {
-
-    }
-    return false;
-  }
-  static isGreaterOrEqual(d1: any, d2: any): boolean {
-    try {
-      let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
-      let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
-      if (date1 >= date2) return true;
-    } catch (error) {
-
-    }
-    return false;
-  }
-
-  static isLess(d1: any, d2: any): boolean {
-    try {
-      let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
-      let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
-      if (date1 < date2) return true;
-    } catch (error) {
-
-    }
-    return false;
-  }
-
-  static isLessOrEqual(d1: any, d2: any): boolean {
-    try {
-      let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
-      let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
-      if (date1 <= date2) return true;
-    } catch (error) {
-
-    }
-    return false;
-  }
-
-  static isEqual(d1: any, d2: any): boolean {
-    try {
-      let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
-      let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
-      if (date1 == date2) return true;
-    } catch (error) {
-
-    }
-    return false;
-  }
-
-  static isBetween(start: string, dateToCompare: string, end: string): boolean {
-    if (DateUtils.isGreaterOrEqual(dateToCompare, start) && DateUtils.isLessOrEqual(dateToCompare, end)) return true;
-    return false;
-  }
-
-  static getDateInFormat(dateObj: any, day: number = 0, format: string = `en`, withHour: boolean = false): string {
-    var now: Date = dateObj instanceof Date ? dateObj : new Date(dateObj);
-
-    var m = String(now.getMonth() + 1).padStart(2, '0');
-    var d = String(day !== 0 ? day : now.getDate()).padStart(2, '0');
-    var y = now.getFullYear();
-    var h = now.getHours();
-    var mm = String(now.getMinutes()).padStart(2, '0');
-    var s = String(now.getSeconds()).padStart(2, '0');
-    if (withHour === true) {
-      if (format === `fr`) return `${d}/${m}/${y} ${h}:${mm}:${s}`;
-      return `${y}-${m}-${d} ${h}:${mm}:${s}`;
-    } else {
-      if (format === `fr`) return `${d}/${m}/${y}`;
-      return `${y}-${m}-${d}`;
-    }
-  }
-
-  static previousDate(dateObj: any): Date {
-    var now: Date = dateObj instanceof Date ? dateObj : new Date(dateObj);
-
-    var y = now.getFullYear();
-    var m = String(now.getMonth()).padStart(2, '0');
-    var d = String(now.getDate()).padStart(2, '0');
-    var h = String(now.getHours()).padStart(2, '0');
-    var mm = String(now.getMinutes()).padStart(2, '0');
-    var s = String(now.getSeconds()).padStart(2, '0');
-
-    if (m == '00') {
-      return new Date(`${y - 1}-12-${d} ${h}:${mm}:${s}`);
-    } else {
-      return new Date(`${y}-${m}-${d} ${h}:${mm}:${s}`);
-    }
-
-  }
-
-  static startEnd21and20Date(): { start_date: string, end_date: string } {
-    const now = new Date();
-
-    var prev: string, end: string;
-    if (now.getDate() < 21) {
-      prev = DateUtils.getDateInFormat(DateUtils.previousDate(now), 21);
-      end = DateUtils.getDateInFormat(now, 20);
-    } else {
-      prev = DateUtils.getDateInFormat(now, 21);
-      end = DateUtils.getDateInFormat(now, parseInt(DateUtils.lastDayOfMonth(now)));
-    }
-    return { start_date: prev, end_date: end };
-  }
-
-  static lastDayOfMonth(dateObj: any): string {
-    var date: Date = dateObj instanceof Date ? dateObj : new Date(dateObj);
-    var d = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-    return String(d.getDate()).padStart(2, '0');
-  }
-
-
-  static daysDiff(d1: any, d2: any): number {
-    try {
-      let date1 = d1 instanceof Date ? d1.getTime() : new Date(d1).getTime();
-      let date2 = d2 instanceof Date ? d2.getTime() : new Date(d2).getTime()
-      let difference = date1 - date2;
-      let TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
-      return TotalDays < 0 ? -1 * TotalDays : TotalDays;
-    } catch (error) {
-
-    }
-    return 0;
-  }
-
-  static isDayInDate(date: any, day: any): boolean {
-    var d: string = String((date instanceof Date ? date : new Date(date)).getDate()).padStart(2, '0');
-
-    return d == `${day}`;
-  }
-
-  static isBetween21and20(date: string): boolean {
-    var betweenDate = DateUtils.startEnd21and20Date();
-    return DateUtils.isGreaterOrEqual(date, betweenDate.start_date) && DateUtils.isLessOrEqual(date, betweenDate.end_date)
-  }
-
-  static getMondays(dateObj: any, format: string = `en`, withHour: boolean = false): string[] {
-    var d = dateObj instanceof Date ? dateObj : new Date(dateObj);
-    var month = d.getMonth();
-    var mondays = [];
-    d.setDate(1);
-    // Get the first Monday in the month
-    while (d.getDay() !== 1) {
-      d.setDate(d.getDate() + 1);
-    }
-    // Get all the other Mondays in the month
-    while (d.getMonth() === month) {
-      const dt: Date = new Date(d.getTime());
-      mondays.push(DateUtils.getDateInFormat(dt, 0, format, withHour));
-      d.setDate(d.getDate() + 7);
-    }
-    return mondays;
-  }
-}

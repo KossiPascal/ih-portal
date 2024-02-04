@@ -26,15 +26,15 @@ export async function databaseEntitiesList(req: Request, res: Response, next: Ne
         return res.status(200).json({ status: 200, data: entitiesElements });
     } catch (err) {
         // return next(err);
-        return res.status(201).json({ status: 201, data: err });
+        return res.status(500).json({ status: 500, data: err });
     }
 };
 
 export async function truncatePostgresMysqlJsonDatabase(req: Request, res: Response, next: NextFunction) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
-    if (req.body.procide == true) {
-        try {
+    try {
+        if (req.body.procide == true) {
             const Connection: DataSource = AppDataSource.manager.connection;
             const entities: { name: string, table: string }[] = req.body.entities;
             for (const entity of entities) {
@@ -42,17 +42,16 @@ export async function truncatePostgresMysqlJsonDatabase(req: Request, res: Respo
                 await repository.query(`TRUNCATE ${entity.table} RESTART IDENTITY CASCADE;`);
             }
             return res.status(200).json({ status: 200, data: 'Done successfully' });
-        } catch (err) {
-            // return next(err);
-            return res.status(201).json({ status: 201, data: err });
+        } else {
+            return res.status(201).json({ status: 201, data: "You don't have permission de procide action" });
         }
-    } else {
-        return res.status(201).json({ status: 201, data: "You don't have permission de procide action" });
+    } catch (err) {
+        // return next(err);
+        return res.status(500).json({ status: 500, data: err });
     }
 };
 
 export async function getChwDataToBeDeleteFromCouchDb(req: Request, resp: Response, next: NextFunction) {
-
     var reqSource = req.body.sources;
     var reqDist = req.body.districts;
     var reqSite = req.body.sites;
@@ -151,7 +150,6 @@ export async function deleteFromCouchDb(req: Request, res: Response, next: NextF
             if (err) {
                 return res.status(201).json({ status: 201, data: err });
             } else {
-
                 if (reqType == 'data') {
                     const _repoData = await getChwsDataSyncRepository();
                     _repoData.delete({ id: In(allIds) });
@@ -162,10 +160,8 @@ export async function deleteFromCouchDb(req: Request, res: Response, next: NextF
                     const _repoFamily = await getFamilySyncRepository();
                     _repoFamily.delete({ id: In(allIds) });
                 }
-
                 return res.status(200).json({ status: 200, data: body })
             }
-
         });
     } else {
         return res.status(201).json({ status: 201, data: 'No Data Provided' });
@@ -213,7 +209,6 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
                                     headers: httpHeaders()
                                 }, function (error: any, response: any, body: any) {
                                     if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
-
                                     request({
                                         url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/medic/${req.body.contact}`,
                                         method: 'GET',
@@ -240,11 +235,11 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
                                                         return res.status(201).json({ status: 201, message: "Erruer trouvée, Contacter immédiatement l'administrateur!" });
                                                     }
                                                 } catch (err: any) {
-                                                    return res.status(201).json({ status: 201, message: err.toString() });
+                                                    return res.status(500).json({ status: 500, message: err.toString() });
                                                 }
                                             });
                                         } catch (err: any) {
-                                            return res.status(201).json({ status: 201, message: err.toString() });
+                                            return res.status(500).json({ status: 500, message: err.toString() });
                                         }
                                     });
                                 });
@@ -256,7 +251,7 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
 
             if (dataFound.length <= 0) return res.status(201).json({ status: 201, message: "Pas d'ASC trouvé pour procéder à l'opération, Réessayer !" });
         } catch (err: any) {
-            return res.status(201).json({ status: 201, message: err.toString() });
+            return res.status(500).json({ status: 500, message: err.toString() });
         }
 
     });

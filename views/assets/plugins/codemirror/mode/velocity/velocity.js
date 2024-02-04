@@ -108,9 +108,9 @@ CodeMirror.defineMode("velocity", function() {
             if (keywords && keywords.propertyIsEnumerable(word))
                 return "keyword";
             // is it one of the listed functions?
-            if (functions && functions.propertyIsEnumerable(word) ||
+            if (functions && propertyIsEnumerable(word) ||
                     (stream.current().match(/^#@?[a-z0-9_]+ *$/i) && stream.peek()=="(") &&
-                     !(functions && functions.propertyIsEnumerable(word.toLowerCase()))) {
+                     !(functions && propertyIsEnumerable(word.toLowerCase()))) {
                 state.beforeParams = true;
                 state.lastTokenWasBuiltin = false;
                 return "keyword";

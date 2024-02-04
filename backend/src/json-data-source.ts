@@ -1,7 +1,7 @@
 import { JsonDbFolder } from "./utils/functions";
 const JSONFileStorage = require('node-json-file-storage');
 
-// const chws_uri = `${Functions.JsonDbFolder('chws')}`;
+// const chws_uri = `${JsonDbFolder('chws')}`;
 
 export class JsonDatabase {
     storage: any;

@@ -1,7 +1,7 @@
 import * as jwt from 'jsonwebtoken';
-import { UserRole, } from '../utils/functions';
-import { Entity, Column, Repository, DataSource, PrimaryColumn } from "typeorm"
+import { Entity, Column, Repository, DataSource, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm"
 import { AppDataSource } from '../data_source';
+import { Roles, GetRolesListOrNamesList } from './Roles';
 
 let Connection: DataSource = AppDataSource.manager.connection;
 
@@ -15,6 +15,7 @@ export class User {
     constructor() { };
     // @PrimaryGeneratedColumn()
     // id!: string
+    
     @PrimaryColumn({ type: 'varchar', nullable: false })
     id!: string
 
@@ -24,64 +25,83 @@ export class User {
     @Column({ nullable: true })
     fullname!: string
 
-    @Column({ unique: true, type: 'varchar', nullable: true })
+    @Column({ type: 'varchar', nullable: true })
     email!: string
 
-    // @Column({ type: 'varchar', nullable: false })
-    // password!: string
+    @Column({ type: 'varchar', nullable: true })
+    password!: string
+
+    // @ManyToOne(() => Roles, role => role.id, { eager: true, nullable: true })
+    // @JoinColumn({ name: 'role_id', referencedColumnName: 'id' })
+    // role!:Roles
 
     @Column({ type: 'simple-array', nullable: true })
-    roles!: string[]
-
-    @Column({ type: 'simple-array', nullable: true })
-    groups!: string[]
+    roles!: string[] | Roles[]
 
     @Column({ type: 'simple-array', nullable: true })
     meeting_report!: string[]
 
-    @Column({ type: 'simple-array', nullable: true })
-    actions!: string[]
+    @Column({ type: 'varchar', nullable: true })
+    expiresIn!: number
 
-    @Column({ type: 'varchar', nullable: false })
-    expiresIn!: string
-
-    @Column({ type: 'varchar', nullable: false })
-    dhisusersession!: string
-
-    @Column({ type: 'varchar', nullable: false })
+    @Column({ type: 'varchar', nullable: true })
     token!: string
-
-    @Column({ type: 'varchar', nullable: false })
-    defaultRedirectUrl!: string
 
     @Column({ nullable: false, default: false })
     isActive!: boolean
+
+    @Column({ nullable: false, default: false })
+    isDeleted!: boolean
+
+    @Column({ nullable: false, default: false })
+    mustLogin!: boolean
+
+    @Column({ nullable: false, default: false })
+    useLocalStorage!: boolean
+
+    @Column({ type: 'timestamp', nullable: true })
+    deletedAt!: Date;
 }
 
-export async function getUserRepository(): Promise<Repository<User>> {
-   return Connection.getRepository(User);
+export async function getUsersRepository(): Promise<Repository<User>> {
+    return Connection.getRepository(User);
+}
+
+export async function jwSecretKey(data: { userId?: string, user?: User }): Promise<{ expiredIn: number; secretOrPrivateKey: string; }> {
+    var userIsChws: boolean = false;
+    if (data.user) {
+        const roleNames = (await GetRolesListOrNamesList(data.user.roles, true));
+        userIsChws = roleNames ? (roleNames as string[])[0] == 'chws' : false;
+    } else if (data.userId) {
+        const userRepo = await getUsersRepository();
+        const user = await userRepo.findOneBy({ id: data.userId });
+        if (user) {
+            const roleNames = (await GetRolesListOrNamesList(user.roles, true));
+            userIsChws = roleNames ? (roleNames as string[])[0] == 'chws' : false;
+        }
+    }
+
+    const second1 = 1000 * 60 * 60 * 24 * 366;
+    const second2 = 1000 * 60 * 60 * 12;
+
+    return {
+        expiredIn: userIsChws ? second1 : second2,
+        secretOrPrivateKey: 'kossi-secretfortoken',
+    }
 }
 
 
 export async function token(user: User) {
     const secret = await jwSecretKey({ user: user });
-    return jwt.sign({ id: `${user.id}`, username: user.username, roles: user.roles, groups: user.groups, isActive: user.isActive }, secret.secretOrPrivateKey, { expiresIn: `${secret.expiredIn}s` });
+    return jwt.sign({ id: `${user.id}`, username: user.username, email: user.email, roles: user.roles, isActive: user.isActive }, secret.secretOrPrivateKey, { expiresIn: `${secret.expiredIn}s` });
 }
 
-export async function jwSecretKey(data: { userId?: string, user?: User }): Promise<{ expiredIn: string; secretOrPrivateKey: string; }> {
-    var userIsChws: boolean = false;
-    if (data.user) {
-        userIsChws = UserRole(data.user).isChws;
-    } else if (data.userId) {
-        const _repoUser = await getUserRepository();
-        const user = await _repoUser.findOneBy({id:data.userId});
-
-        if (user) userIsChws = UserRole(user).isChws;
-    }
-    const second1 = 1000 * 60 * 60 * 24 * 366;
-    const second2 = 1000 * 60 * 60 * 24 * 366;
-    return {
-        expiredIn: userIsChws ? `${second1}` : `${second2}`,
-        secretOrPrivateKey: 'kossi-secretfortoken',
-    }
+export async function UpdateUserData(user: User): Promise<User> {
+    user.token = await token(user);
+    const secret = await jwSecretKey({ user: user });
+    const expireDate = Date.now() + secret.expiredIn;
+    user.expiresIn = expireDate;
+    const roleNames = (await GetRolesListOrNamesList(user.roles, true));
+    user.useLocalStorage = roleNames ? (roleNames as string[])[0] == 'chws' : false;
+    return user;
 }

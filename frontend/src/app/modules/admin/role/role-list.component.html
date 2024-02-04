@@ -1,0 +1,213 @@
+<div class="page-title card card-primary card-outline">
+    <div class="card-body">
+        <span style="float: left;" class="fas fa-user"> Roles List</span>
+        <button (click)="CreateRole()" style="float: right;" type="button" class="btn btn-default" data-toggle="modal"
+            data-target="#modal-default">
+            Add Role
+        </button>
+    </div>
+</div>
+
+<div class="page-content-wrap">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- START DEFAULT DATATABLE -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+
+                </div>
+                <div class="panel-body">
+                    <table class="table datatable">
+                        <thead>
+                            <tr>
+                                <!-- <th>N°</th> -->
+                                <th>id</th>
+                                <th>Name</th>
+                                <!-- <th>Pages</th>
+                                <th>Actions</th> -->
+                                <th>DefaultPage</th>
+                                <th colspan="2">Actions</th>
+                            </tr>
+                        </thead>
+
+
+                        <tbody *ngFor="let role of roles$; let index = index; let isFirst = first; let isOdd = odd;">
+                            <tr>
+                                <!-- <td>{{ index+1 }}</td> -->
+                                <td>{{ role.id }}</td>
+                                <td>{{ role.name }}</td>
+                                <!-- <td [innerHTML]="ToStringNewLine(role.pages, 'pages') | safeHtml"></td>
+                                <td [innerHTML]="ToStringNewLine(role.actions, 'actions') | safeHtml"></td> -->
+                                <td>{{ role.default_page }}</td>
+                                <td>
+                                    <i (click)="EditRole(role)" class="btn-warning fas fa-edit" data-toggle="modal"
+                                        data-target="#modal-default"></i>
+                                </td>
+                                <td>
+                                    <i (click)="RoleSelected(role)" class="btn-danger fas fa-trash-alt"
+                                        data-toggle="modal" data-target="#modal-danger"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- END DEFAULT DATATABLE -->
+        </div>
+    </div>
+</div>
+<!-- PAGE CONTENT WRAPPER -->
+
+
+
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <form [formGroup]="roleForm" (ngSubmit)="CreateOrUpdateRole()" novalidate class="form-horizontal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <img height="30" class="modal-title" src="{{ APP_LOGO}}" alt="" srcset="">
+
+                    <strong style="text-align: center;" class="login-box-msg"><span
+                            class=" btn-{{ isEditMode?'warning':'success' }}">
+                            {{ isEditMode ? 'Modifier un utilisateur' :'Ajouter un utilisateur' }}</span></strong>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p *ngIf="message!=''" class="login-box-msg"><strong>{{ message }}</strong></p>
+
+                    <h1 *ngIf="isEditMode">Name</h1>
+
+                    <div class="input-group mb-3">
+                        <input id="name" type="text" class="form-control" placeholder="Name" formControlName="name" />
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-user"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="row">
+                        <h1> <input style="zoom: 1.5;" type="checkbox" [checked]="selectedPage.length == pages$.length"
+                                (click)="SelectAllPages()"> <span style="margin-left: 5px;">Pages</span></h1>
+                        <ng-container *ngFor="let page of pages$; let index = index;">
+                            <div class="col-md-6" [ngClass]="{'custom-class': index <= pages$.length / 2}">
+                                <p>
+                                    <input type="checkbox" [checked]="containsPage(page)"
+                                        (click)="AddOrRemovePage(page)">
+                                    <span style="margin-left: 5px; cursor:pointer;" (click)="AddOrRemovePage(page)">{{
+                                        page }}</span>
+                                </p>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <br>
+
+                    <div class="row">
+                        <h1><input style="zoom: 1.5;" type="checkbox" [checked]="selectedAction.length == actions$.length"
+                                (click)="SelectAllActions()"> <span style="margin-left: 5px;">Actions</span></h1>
+
+                        <ng-container *ngFor="let action of actions$; let index = index;">
+                            <div class="col-md-6" [ngClass]="{'custom-class': index <= actions$.length / 2}">
+                                <p>
+                                    <input type="checkbox" [checked]="containsAction(action)"
+                                        (click)="AddOrRemoveAction(action)">
+                                    <span style="margin-left: 5px; cursor:pointer;"
+                                        (click)="AddOrRemoveAction(action)">{{action }}</span>
+                                </p>
+                            </div>
+                        </ng-container>
+                    </div>
+
+                    <br>
+
+                    <h1 *ngIf="isEditMode">DefaultPage</h1>
+                    <div class="input-group mb-3">
+                        <select class="form-control" formControlName="default_page">
+                            <option value=""></option>
+                            <option *ngFor="let page of selectedPage" value="{{page}}">
+                                {{ page }}
+                            </option>
+                        </select>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <!-- 
+                    <label *ngIf="isEditMode" for="">Pages</label>
+                    <div class="input-group mb-3">
+                        <select class="form-control" multiple="multiple" formControlName="pages">
+                            <option *ngFor="let page of pages$" value="{{page}}">
+                                {{ page }}
+                            </option>
+                        </select>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label *ngIf="isEditMode" for="">Actions</label>
+                    <div class="input-group mb-3">
+                        <select class="form-control" multiple="multiple" formControlName="actions">
+                            <option *ngFor="let action of actions$" value="{{action}}">
+                                {{ action }}
+                            </option>
+                        </select>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div> -->
+
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button id="close-modal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button [disabled]="!roleForm.valid" type="submit"
+                        class="btn btn-{{isEditMode ? 'warning': 'success'}}">{{isEditMode ? 'Modifier':'Sauvegarder'}}
+                    </button>
+                </div>
+            </div>
+        </form>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-danger">
+    <div class="modal-dialog">
+        <div class="modal-content bg-danger">
+            <div class="modal-header">
+
+                <h4 class="modal-title">Suppression d'utilisateur</h4>
+                <button id="close-delete-modal" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Cette action est iréversible! Êtes vous sûr de procéder à la suppression ?
+
+                <p class="login-box-msg"><strong>{{ message }}</strong></p>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                <button (click)="DeleteRole()" type="button" class="btn btn-danger swalDefaultSuccess">Oui Supprimer
+                    !</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

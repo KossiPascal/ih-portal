@@ -4,9 +4,10 @@ import { Between, In } from "typeorm";
 import { ChtOutPutData, DataIndicators } from "../entity/DataAggragate";
 import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository, ChwsDrug, getChwsDrugSyncRepository, getChwsDrugUpdateSyncRepository, ChwsDrugUpdate, GetPersonsRepository, Persons, Teams, GetTeamsRepository, MeetingReportData, GetMeetingReportDataRepository } from "../entity/Sync";
 import { Consts } from "../utils/constantes";
-import { DateUtils, Functions, notEmpty } from "../utils/functions";
+import { notEmpty, previousMonth } from "../utils/functions";
 import { getChws } from "./orgUnitsFromDB ";
-import { ChwsDrugData, ChwsDrugQantityInfo, ChwsUpdateDrugInfo } from "../utils/appInterface";
+import { ChwsDrugData, ChwsDrugQantityInfo } from "../utils/appInterface";
+import { getDateInFormat, isBetween } from "../utils/date-utils";
 
 const request = require('request');
 // const fetch = require('node-fetch');
@@ -22,7 +23,7 @@ export async function GetPersonsDataWithParams(req: Request, res: Response, next
   try {
     const repository = await GetPersonsRepository();
     var allSync: Persons[] = await repository.findBy({
-        id: notEmpty(req.body.id) ? req.body.id : undefined,
+      id: notEmpty(req.body.id) ? req.body.id : undefined,
     });
     respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
   }
@@ -170,12 +171,11 @@ export async function getChwsDrugUpdatedWithCoustomParams(req: { district: strin
   return !allSync ? undefined : allSync;
 }
 
-
 function getChwInfos(chw: Chws[], chwId: string): Chws | null {
   if (notEmpty(chwId)) {
     for (let i = 0; i < chw.length; i++) {
       const asc: Chws = chw[i];
-      if (asc != null && asc != undefined && asc.id === chwId) return asc;
+      if (asc && asc.id === chwId) return asc;
     }
   }
   return null;
@@ -231,8 +231,8 @@ export async function getDataInformations(req: Request, res: Response, next: Nex
 
       for (let d = 0; d < chwsData.length; d++) {
         const data = chwsData[d];
-        if (data.family_id != null && data.family_id != undefined && data.family_id != "" && data.form != undefined && data.form != null) {
-          var found = `${DateUtils.getDateInFormat(data.reported_date)}-${data.family_id}`;
+        if (data.family_id && data.family_id != "" && data.form && data.form != "") {
+          var found = `${getDateInFormat(data.reported_date)}-${data.family_id}`;
 
           try {
             if (!hasVisit.includes(found)) {
@@ -281,7 +281,9 @@ export async function fetchIhChtDataPerChw(req: Request, res: Response, next: Ne
   const chwsData: { status: number, data: ChwsData[] } = await getChwsDataWithParams(req, res, next, true);
   const chws: { status: number, data: Chws[] } = await getChws(req, res, next, true);
   if (chwsData.status == 200 && chws.status == 200) {
-    const dbChwsData: { chw: Chws, data: DataIndicators }[] = getAllAboutData(chwsData.data, chws.data, req, res);
+    const chwRepo = await getChwsSyncRepository();
+    const allChws = await chwRepo.find();
+    const dbChwsData: { chw: Chws, data: DataIndicators }[] = getAllAboutData(chwsData.data, chws.data, allChws, req, res);
     if (!dbChwsData) return res.status(201).json({ status: 201, data: 'No data found !' });
     return res.status(200).json({ status: 200, data: dbChwsData });
   } else {
@@ -300,7 +302,7 @@ async function getIhDrugArrayData(req: Request, res: Response, next: NextFunctio
   var chwsDrugFinalOut: { chwId: any, chw: Chws, data: ChwsDrugData }[] = [];
 
   if (Chw) {
-    if (Chw.id != null && Chw.id != '') {
+    if (Chw.id && Chw.id != '') {
       const chwsDrugOutPut = await genarateIhDrugArray(chwsDrug.data, Chw, req, res, next);
       chwsDrugFinalOut.push({ chwId: Chw.id, chw: Chw, data: chwsDrugOutPut });
     }
@@ -310,7 +312,7 @@ async function getIhDrugArrayData(req: Request, res: Response, next: NextFunctio
       var confirm: string[] = []
       for (let i = 0; i < chws.data.length; i++) {
         const asc = chws.data[i];
-        if (asc.id != null && asc.id != '' && !confirm.includes(asc.id!)) {
+        if (asc.id && asc.id != '' && !confirm.includes(asc.id!)) {
           const chwsDrugOutPut = await genarateIhDrugArray(chwsDrug.data, asc, req, res, next);
           chwsDrugFinalOut.push({ chwId: asc.id, chw: asc, data: chwsDrugOutPut });
           confirm.push(asc.id!);
@@ -328,7 +330,7 @@ async function getIhDrugArrayData(req: Request, res: Response, next: NextFunctio
 // async function getDrugPrevYearInventoryData(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined): Promise<{ status: number; data: { chwId: any, chw: Chws, data: ChwsDrugData }[] | string | undefined; }> {
 //   const chwsDrug: { status: number, data: ChwsDrug[] } = await getChwsDrugWithParams(req, res, next, true);
 //   var chwsDrugFinalOut: { chwId: any, chw: Chws, data: ChwsDrugData }[] = [];
-//   if (Chw && Chw.id != null && Chw.id != '') {
+//   if (Chw && Chw.id && Chw.id != '') {
 //     const chwsDrugOutPut = await genarateIhDrugArray(chwsDrug.data, Chw, req, res, next, true);
 //     chwsDrugFinalOut.push({ chwId: Chw.id, chw: Chw, data: chwsDrugOutPut });
 //   }
@@ -382,7 +384,7 @@ async function getChwDrugInventoryQty(Chw: Chws, start_date: string, end_date: s
         const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
         const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
         const idChwValid: boolean = data?.chw?.id == Chw.id;
-        const isDateValid: boolean = DateUtils.isBetween(`${start_date}`, data.activity_date, `${end_date}`);
+        const isDateValid: boolean = isBetween(`${start_date}`, data.activity_date, `${end_date}`);
         if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
           if (data.form == "drug_quantities" && data.activity_type == "c_qty_counted") out.inventory_quantity! += generateDrugQty(data, fieldId);
         }
@@ -430,7 +432,7 @@ async function getChwsDrugQantity(ChwsDataFromDb: ChwsDrug[], Chw: Chws, index: 
         const idDistrictValid: boolean = districts?.includes(data?.district?.id) && data?.district?.id == Chw.district?.id;
         const idSiteValid: boolean = sites?.includes(data?.site?.id) && data?.site?.id == Chw.site?.id;
         const idChwValid: boolean = chws?.includes(data?.chw?.id) && data?.chw?.id == Chw.id;
-        const isDateValid: boolean = DateUtils.isBetween(`${start_date}`, data.activity_date, `${end_date}`);
+        const isDateValid: boolean = isBetween(`${start_date}`, data.activity_date, `${end_date}`);
 
         if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
 
@@ -473,10 +475,10 @@ async function getChwsDrugQantity(ChwsDataFromDb: ChwsDrug[], Chw: Chws, index: 
   }
 
   const dateArray = end_date.split('-');
-  const prevM = Functions.previousMonth(dateArray[1]);
+  const prevM = previousMonth(dateArray[1]);
   const prevY = prevM == '12' ? parseInt(dateArray[0]) - 1 : dateArray[0];
 
-  const prevPrevM = Functions.previousMonth(prevM);
+  const prevPrevM = previousMonth(prevM);
   const prevPrevY = prevPrevM == '12' ? prevY - 1 : prevY;
 
   const curInventory = await getChwDrugInventoryQty(Chw, start_date, end_date, index, fieldId, req, res, next);
@@ -547,7 +549,7 @@ function generateDrugQty(data: ChwsDrug, fieldId: string): number {
 }
 
 export async function updateDrugPerChw(req: Request, res: Response, next: NextFunction) {
-  const { district, site, chw, year, month, drug_index, drug_name, year_cmm, quantity_validated, delivered_quantity, observations, theoretical_quantity_to_order, forms, sources, userId, dhisusersession } = req.body;
+  const { district, site, chw, year, month, drug_index, drug_name, year_cmm, quantity_validated, delivered_quantity, observations, theoretical_quantity_to_order, forms, sources, userId } = req.body;
 
   const _repoChwsDrugUpdate = await getChwsDrugUpdateSyncRepository();
   const _chwRepo = await getChwsSyncRepository();
@@ -567,9 +569,12 @@ export async function updateDrugPerChw(req: Request, res: Response, next: NextFu
     _sync.delivered_quantity = delivered_quantity;
     _sync.theoretical_quantity_to_order = theoretical_quantity_to_order;
     _sync.observations = observations;
+    _sync.updatedBy = userId;
+    _sync.updatedAt = new Date();
+
     await _repoChwsDrugUpdate.save(_sync);
 
-    const prevM = Functions.previousMonth(month);
+    const prevM = previousMonth(month);
     const prevY = prevM == '12' ? parseInt(year) - 1 : year;
 
     req.body.start_date = `${prevY}-${prevM}-21`;
@@ -595,9 +600,11 @@ export async function updateDrugPerChw(req: Request, res: Response, next: NextFu
   }
 }
 
-function getAllAboutData(ChwsDataFromDb$: ChwsData[], Chws$: Chws[], req: Request, res: Response): { chw: Chws, data: DataIndicators }[] {
+function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], AllDbChws$: Chws[], req: Request, res: Response): { chw: Chws, data: DataIndicators }[] {
   // 'Démarrage du calcule des indicateurs ...'
   const { start_date, end_date, sources, districts, sites, chws, withDhis2Data } = req.body;
+
+  var Chws$: Chws[] = SelectedChws$;
 
   var outPutData: ChtOutPutData = {
     home_visit: {},
@@ -630,10 +637,10 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], Chws$: Chws[], req: Reques
 
   for (let i = 0; i < Chws$.length; i++) {
     const ascId = Chws$[i].id;
-    if (ascId != null && ascId != '') {
+    if (ascId && ascId != '') {
+      console.log(ascId)
       Object.entries(outPutData).map(([key, val]) => {
-        const vals: any = val as any;
-        if (!vals.hasOwnProperty(ascId)) vals[ascId] = { chwId: ascId, tonoudayo: 0, dhis2: 0 }
+        if (!val.hasOwnProperty(ascId)) val[ascId] = { chwId: ascId, tonoudayo: 0, dhis2: 0 }
       });
     }
   }
@@ -643,18 +650,27 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], Chws$: Chws[], req: Reques
     if (data) {
       const form = data.form;
       const field = data.fields;
-      const source: string = data.source != null && data.source != '' ? data.source : '';
-      const district: string = data.district.id != null ? data.district.id != null && data.district.id != '' ? data.district.id : '' : '';
-      const site: string = data.site != null ? data.site.id != null && data.site.id != '' ? data.site.id : '' : '';
-      const chw: string = data.chw != null ? data.chw.id != null && data.chw.id != '' ? data.chw.id : '' : '';
+      const chw: string = data.chw?.id ?? '';
 
-      const idSourceValid: boolean = notEmpty(source) && notEmpty(sources) && sources?.includes(source) || !notEmpty(sources);
-      const idDistrictValid: boolean = notEmpty(district) && notEmpty(districts) && districts?.includes(district) || !notEmpty(districts);
-      const idSiteValid: boolean = notEmpty(site) && notEmpty(sites) && sites?.includes(site) || !notEmpty(sites);
+      const idSourceValid: boolean = notEmpty(data.source) && notEmpty(sources) && sources?.includes(data.source) || !notEmpty(sources);
+      const idDistrictValid: boolean = notEmpty(data.district?.id) && notEmpty(districts) && districts?.includes(data.district?.id) || !notEmpty(districts);
+      const idSiteValid: boolean = notEmpty(data.site?.id) && notEmpty(sites) && sites?.includes(data.site?.id) || !notEmpty(sites);
       const idChwValid: boolean = notEmpty(chw) && notEmpty(chws) && chws?.includes(chw) || !notEmpty(chws);
-      const isDateValid: boolean = notEmpty(start_date) && notEmpty(end_date) ? DateUtils.isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
+      const isDateValid: boolean = notEmpty(start_date) && notEmpty(end_date) ? isBetween(`${start_date}`, data.reported_date, `${end_date}`) : false;
 
       if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
+
+        Object.entries(outPutData).map(([key, val]) => {
+          if (!val.hasOwnProperty(chw)) {
+            const chwFound = getChwInfos(AllDbChws$, chw);
+            if (chwFound) {
+              const isDInData: boolean = Chws$.some(ch => ch.id === chwFound.id);
+              if (!isDInData) Chws$.push(chwFound);
+            }
+            val[chw] = { chwId: chw, tonoudayo: 0, dhis2: 0 }
+          }
+        });
+
         if (data.source == 'Tonoudayo') {
 
           if (Consts.home_visit_form.includes(form!)) outPutData.home_visit[chw].tonoudayo += 1;
@@ -1025,7 +1041,7 @@ function transformChwsData(allDatasFound: ChtOutPutData, Chws$: Chws[], req: Req
 export async function FetchMeetingPersons(req: Request, res: Response, next: NextFunction) {
   try {
     const _repo = await GetPersonsRepository();
-    const data:Persons[] = await _repo.find();
+    const data: Persons[] = await _repo.find();
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
     return res.status(200).json({ status: 200, data: data });
   } catch (e) {
@@ -1033,11 +1049,10 @@ export async function FetchMeetingPersons(req: Request, res: Response, next: Nex
   }
 }
 
-
-export async function FetchMeetingTeams(req: Request, res: Response, next: NextFunction) {  
+export async function FetchMeetingTeams(req: Request, res: Response, next: NextFunction) {
   try {
     const _repo = await GetTeamsRepository();
-    const data:Teams[] = await _repo.find();
+    const data: Teams[] = await _repo.find();
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
     return res.status(200).json({ status: 200, data: data });
   } catch (e) {
@@ -1045,10 +1060,10 @@ export async function FetchMeetingTeams(req: Request, res: Response, next: NextF
   }
 }
 
-export async function FetchMeetingReports(req: Request, res: Response, next: NextFunction) {  
+export async function FetchMeetingReports(req: Request, res: Response, next: NextFunction) {
   try {
     const _repo = await GetMeetingReportDataRepository();
-    const data = await _repo.find({where:{team:{id:req.body.team}}});
+    const data = await _repo.find({ where: { team: { id: req.body.team } } });
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
     return res.status(200).json({ status: 200, data: data });
   } catch (e) {
@@ -1060,9 +1075,20 @@ export async function SaveOrUpdateMeetingTeam(req: Request, res: Response, next:
   const _repo = await GetTeamsRepository();
   const _sync = new Teams();
   try {
-    _sync.id = req.body.id;
+
+    const id: any = req.body.id;
+
+    _sync.id = id;
     _sync.name = req.body.name;
     _sync.show = req.body.show == true;
+
+    if (id && notEmpty(id)) {
+      _sync.updatedBy = req.body.userId;
+      _sync.updatedAt = new Date();
+    } else {
+      _sync.createdBy = req.body.userId;
+      // _sync.createdAt = new Date();
+    }
     const data = await _repo.save(_sync);
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
     return res.status(200).json({ status: 200, data: data });
@@ -1075,10 +1101,20 @@ export async function SaveOrUpdateMeetingPerson(req: Request, res: Response, nex
   const _repo = await GetPersonsRepository();
   const _sync = new Persons();
   try {
-    _sync.id = req.body.id;
+
+    const id: any = req.body.id;
+
+    _sync.id = id;
     // _sync.team = req.body.team;
     _sync.name = req.body.name;
     _sync.email = req.body.email;
+    if (id && notEmpty(id)) {
+      _sync.updatedBy = req.body.userId;
+      _sync.updatedAt = new Date();
+    } else {
+      _sync.createdBy = req.body.userId;
+      // _sync.createdAt = new Date();
+    }
     const data = await _repo.save(_sync);
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
     return res.status(200).json({ status: 200, data: data });
@@ -1087,12 +1123,13 @@ export async function SaveOrUpdateMeetingPerson(req: Request, res: Response, nex
   }
 }
 
-
 export async function SaveOrUpdateMeetingReports(req: Request, res: Response, next: NextFunction) {
   const _repo = await GetMeetingReportDataRepository();
   const _sync = new MeetingReportData();
   try {
-    _sync.id = req.body.id;
+    const id: any = req.body.id;
+
+    _sync.id = id;
     _sync.title = req.body.title;
     _sync.date = req.body.date;
     _sync.start_hour = req.body.start_hour;
@@ -1106,9 +1143,16 @@ export async function SaveOrUpdateMeetingReports(req: Request, res: Response, ne
     _sync.absent_persons_ids = req.body.absent_persons_ids;
     _sync.other_persons = req.body.other_persons;
     _sync.doNotUpdate = req.body.doNotUpdate;
-    
+    if (id && notEmpty(id)) {
+      _sync.updatedBy = req.body.userId;
+      _sync.updatedAt = new Date();
+    } else {
+      _sync.createdBy = req.body.userId;
+      _sync.createdAt = new Date();
+    }
+
     await _repo.save(_sync);
-    const data = await _repo.find({where:{team:{id:req.body.team}}});
+    const data = await _repo.find({ where: { team: { id: req.body.team } } });
 
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
     return res.status(200).json({ status: 200, data: data });
@@ -1117,27 +1161,27 @@ export async function SaveOrUpdateMeetingReports(req: Request, res: Response, ne
   }
 }
 
-export async function DeleteMeetingReport(req: Request, res: Response, next: NextFunction) { 
+export async function DeleteMeetingReport(req: Request, res: Response, next: NextFunction) {
   try {
     const _repo = await GetMeetingReportDataRepository();
-    const data = await _repo.delete({id:req.body.dataId});
+    const data = await _repo.delete({ id: req.body.dataId });
     return res.status(200).json({ status: 200, data: data });
   } catch (error) {
     return res.status(201).json({ status: 201, data: 'No data found !' });
   }
 }
 
-export async function DeleteMeetingPerson(req: Request, res: Response, next: NextFunction) { 
+export async function DeleteMeetingPerson(req: Request, res: Response, next: NextFunction) {
   try {
     const _repo = await GetPersonsRepository();
-    const data = await _repo.delete({id:req.body.dataId});
+    const data = await _repo.delete({ id: req.body.dataId });
     return res.status(200).json({ status: 200, data: data });
   } catch (error) {
     return res.status(201).json({ status: 201, data: 'No data found !' });
   }
 }
 
-export async function DeleteMeetingTeams(req: Request, res: Response, next: NextFunction) { 
+export async function DeleteMeetingTeams(req: Request, res: Response, next: NextFunction) {
   const _repo = await GetTeamsRepository();
   const _sync = new Teams();
   try {
@@ -1150,9 +1194,6 @@ export async function DeleteMeetingTeams(req: Request, res: Response, next: Next
     return res.status(201).json({ status: 201, data: 'No data found !' });
   }
 }
-
-
-
 
 export async function deleteChwsData(req: Request, res: Response, next: NextFunction) { }
 

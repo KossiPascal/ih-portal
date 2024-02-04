@@ -1,17 +1,16 @@
 import "reflect-metadata"
 import express from 'express';
 import { json, urlencoded } from 'body-parser';
-import { Functions, logNginx, projectFolder, sslFolder } from './utils/functions';
+import { ServerStart, appVersion, getIPAddress, logNginx, normalizePort, projectFolder, sslFolder } from './utils/functions';
 import { AppDataSource } from './data_source';
 import cors from "cors";
 //const cors = require('cors');
 import bearerToken from "express-bearer-token";
 import { Errors } from "./routes/error";
-import authRouter from "./routes/auth";
+import authRouter from "./routes/auth-user";
 import configRouter from "./routes/config";
 import pyRouter from "./routes/run_python";
 import syncRouter from "./routes/sync";
-import userRouter from "./routes/user";
 import fs from "fs";
 import databaseRouter from "./routes/database";
 import { AutoSyncDataFromCloud } from "./controllers/auto_server_sync";
@@ -25,9 +24,9 @@ require('dotenv').config({ path: sslFolder('.ih-env') });
 const { ACCESS_ALL_AVAILABE_PORT,CAN_ACCESS_INSECURE, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED } = process.env
 
 
-const hostnames = Functions.getIPAddress(ACCESS_ALL_AVAILABE_PORT == 'true');
-const port = Functions.normalizePort((Consts.isProdEnv ? PROD_PORT : DEV_PORT) || Consts.defaultPort);
-const portSecured = Functions.normalizePort((Consts.isProdEnv ? PROD_PORT_SECURED : DEV_PORT_SECURED) || Consts.defaultSecurePort);
+const hostnames = getIPAddress(ACCESS_ALL_AVAILABE_PORT == 'true');
+const port = normalizePort((Consts.isProdEnv ? PROD_PORT : DEV_PORT) || Consts.defaultPort);
+const portSecured = normalizePort((Consts.isProdEnv ? PROD_PORT_SECURED : DEV_PORT_SECURED) || Consts.defaultSecurePort);
 
 // const cookieParser = require('cookie-parser')
 var session = require('express-session');
@@ -37,8 +36,8 @@ AppDataSource
   .then(async () => {
     console.log("initialize success !");
     logNginx("initialize success !");
-    console.log(`App Version: ${Functions.appVersion()}`);
-    logNginx(`App Version: ${Functions.appVersion()}`);
+    console.log(`App Version: ${appVersion()}`);
+    logNginx(`App Version: ${appVersion()}`);
   })
   .catch(error => {console.log(`${error}`); logNginx(`${error}`)});
 
@@ -72,13 +71,11 @@ const app = express()
     resave: true
   }))
   .use(bearerToken())
-  .use('/api/auth', authRouter)
+  .use('/api/auth-user', authRouter)
   .use('/api/sync', syncRouter)
   .use('/api/python', pyRouter)
-  .use('/api/user', userRouter)
   .use('/api/configs', configRouter)
   .use('/api/database', databaseRouter)
-
   .use('/api/assets', express.static(__dirname + '/assets'))
   .use(express.static(path.join(projectFolder(), "views")))
   .use("/", (req, res) => res.sendFile(path.join(projectFolder(), "views/index.html")))
@@ -87,7 +84,6 @@ const app = express()
   .use(Errors.get500);
 
   // app.get('/api/assets/i18n/en-lang.json', (req, res) => {
-  //   // Your route logic here
   //   res.json({ message: 'Hello, this is your JSON response!' });
   // });
 
@@ -127,7 +123,7 @@ cron.schedule("00 59 23 * * *", function () {
 // uploadData();
 
 if (CAN_ACCESS_INSECURE == 'true') {
-  Functions.ServerStart({ isSecure: false, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: port, hostnames: hostnames })
+  ServerStart({ isSecure: false, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: port, hostnames: hostnames })
 }
-Functions.ServerStart({ isSecure: true, credential: credentials, app: appSecured, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: portSecured, hostnames: hostnames })
+ServerStart({ isSecure: true, credential: credentials, app: appSecured, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: portSecured, hostnames: hostnames })
 

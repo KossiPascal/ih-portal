@@ -1,6 +1,6 @@
 /** ## jquery.flot.browser.js
 
-This plugin is used to make available some browser-related utility functions.
+This plugin is used to make available some browser-related utility 
 
 ### Methods
 */

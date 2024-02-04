@@ -14357,7 +14357,7 @@
 		 */
 		type: {
 			/**
-			 * Type detection functions.
+			 * Type detection 
 			 *
 			 * The functions defined in this object are used to automatically detect
 			 * a column's type, making initialisation of DataTables super easy, even
@@ -14375,7 +14375,7 @@
 			 * Each function is expected to return:
 			 *
 			 * * `{string|null}` Data type detected, or null if unknown (and thus
-			 *   pass it on to the other type detection functions.
+			 *   pass it on to the other type detection 
 			 *
 			 *  @type array
 			 *
@@ -14456,7 +14456,7 @@
 			 * `{type}-asc` and `{type}-desc` together. It is generally recommended
 			 * that only `{type}-pre` is used, as this provides the optimal
 			 * implementation in terms of speed, although the others are provided
-			 * for compatibility with existing Javascript sort functions.
+			 * for compatibility with existing Javascript sort 
 			 *
 			 * `{type}-pre`: Functions defined take a single parameter:
 			 *
@@ -14882,7 +14882,7 @@
 	
 	
 	
-	// Filter formatting functions. See model.ext.ofnSearch for information about
+	// Filter formatting  See model.ext.ofnSearch for information about
 	// what is required from these methods.
 	// 
 	// Note that additional search methods are added for the html numbers and
@@ -15096,7 +15096,7 @@
 	} );
 	
 	/*
-	 * Public helper functions. These aren't used internally by DataTables, or
+	 * Public helper  These aren't used internally by DataTables, or
 	 * called by any of the options passed into DataTables, but they can be used
 	 * externally by developers working with DataTables. They are helper functions
 	 * to make working with DataTables a little bit easier.

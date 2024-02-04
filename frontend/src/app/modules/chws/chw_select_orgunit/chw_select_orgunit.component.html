@@ -1,0 +1,93 @@
+<div class="page-title card card-primary card-outline">
+    <div class="card-body">
+        <div style="text-align: center; font-weight: bold;font-size: large;">Choisir district, site et code </div><br><br>
+
+
+        <b *ngIf="message!=''" class="login-box-msg"><strong>{{ message }}</strong></b>
+
+        <div class="overlay-wrapper">
+            <div *ngIf="isLoading" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                <div class="text-bold pt-2">{{LoadingMsg}}</div>
+            </div>
+
+            <form [formGroup]="orgUnitForm" (ngSubmit)="updateChwsOrgUnit()" novalidate>
+                <div class="row">
+                    <div class="col-sm-3 col-1"></div>
+
+                    <div class="col-sm-6 col-10">
+                        <div class="row">
+                            <div class="col-sm-12 col-12">
+                                <div class="form-group">
+                                    <label>District</label>
+                                    <select (change)="genarateSites()" class="form-control" formControlName="districts">
+                                        <option value=""></option>
+                                        <option *ngFor="let district of District$" value="{{district.id}}">
+                                            {{ district.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+        
+                            <div class="col-sm-12 col-12">
+                                <div class="form-group">
+                                    <label>Site</label>
+                                    <select (change)="genarateChws()" class="form-control" formControlName="sites">
+                                        <option value=""></option>
+                                        <option *ngFor="let site of sites$" value="{{site.id}}">
+                                            {{ site.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+        
+                            <div class="col-sm-12 col-12">
+                                <div class="form-group">
+                                    <label>Asc</label>
+                                    <select class="form-control" formControlName="chws">
+                                        <option value=""></option>
+                                        <option *ngFor="let chw of chws$" value="{{chw.id}}">
+                                            {{ chw.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+        
+                            <div class="col-sm-12 col-12">
+                                <div class="row">
+                                    <div class="col-sm-3 col-3"></div>
+                                    <div class="col-sm-6 col-6">
+                                        <div class="form-group">
+                                            <br>
+                                            <button [disabled]="!orgUnitForm.valid" type="submit" class="btn btn-warning form-control">
+                                                Valider <span class="fa fa-floppy-o fa-right"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3 col-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3 col-1"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="page-content-wrap">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+
+                </div>
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

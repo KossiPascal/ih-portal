@@ -1,15 +1,9 @@
 <div (mousedown)="pageTouched($event)" (mouseenter)="pageTouched($event)" (mouseup)="pageTouched($event)"
   (mouseleave)="pageTouched($event)" (click)="pageTouched($event)" class="box">
 
-  <!-- <div class="row my-1">
-    <div class="col text-end"> Status:</div>
-    <div class="col">
-        
-      <span class="badge bg-"></span>
-    </div>
-  </div> -->
+  <span id="logout-reload" data-toggle="modal" data-target="#modal-logout-reload"></span>
 
-  <div class="modal fade" id="modal-update-version">
+  <!-- <div class="modal fade" id="modal-update-version">
     <div class="modal-dialog">
       <div class="modal-content bg-default">
         <div class="modal-header">
@@ -32,10 +26,10 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 
 
-  <div *ngIf="roles.isSuperUser()">
+  <div *ngIf="roles().isSuperAdmin()">
 
     <div class="w-100 btn btn-success onlinemsg">
       <span class="badge bg-success" *ngIf="isOnline">Ok</span> You are Online
@@ -45,42 +39,13 @@
       <span class="badge bg-danger" *ngIf="!isOnline">Ooops!</span> You are Offline
     </div>
 
-    <!-- <div class="" *ngIf="modalVersion">
-      <div class="alert alert-secondary m-2">
-        <button type="button" class="btn-close" aria-label="Close" (click)="closeVersion()">Ignore</button>
-        A new version ( {{updateCheckText}} ) of this app is available. <a href="" (click)="updateVersion()">Update
-          now</a>
-      </div>
-    </div> -->
-
-    <!-- <div class="w-100 position-absolute bottom-0" *ngIf="modalPwaPlatform === 'android' || modalPwaPlatform === 'ios'">
-      <div class="alert alert-secondary m-2">
-        <button type="button" class="btn-close position-absolute top-0 end-0 m-1" aria-label="Close"
-          (click)="closePwa()"></button>
-        <div *ngIf="modalPwaPlatform === 'android'" (click)="addToHomeScreen()">
-          Add this WEB app to home screen
-        </div>
-        <div *ngIf="modalPwaPlatform === 'ios'">
-          To install this WEB app on your device, tap the "Menu" button
-          <img
-            src="https://res.cloudinary.com/rodrigokamada/image/upload/v1641089482/Blog/angular-pwa/safari_action_button_38x50.png"
-            class="ios-menu m-0" />
-          and then "Add to home screen" button
-          <i class="bi bi-plus-square"></i>
-        </div>
-      </div>
-    </div> -->
-
   </div>
 
 
-  <div *ngIf="isAuthenticated && !errorFound">
+  <div *ngIf="isAuthenticated() && !errorFound()">
 
     <div class="wrapper">
-      <!-- Preloader -->
-      <div class="preloader flex-column justify-content-center align-items-center">
-        <!-- <img class="animation__shake" src="{{ APP_LOGO}}" alt="Integrate Health" height="60" width="60"> -->
-
+      <!-- <div class="preloader flex-column justify-content-center align-items-center">
         <div id="nb-global-spinner" class="spinner">
           <div class="blob blob-0"></div>
           <div class="blob blob-1"></div>
@@ -89,40 +54,19 @@
           <div class="blob blob-4"></div>
           <div class="blob blob-5"></div>
         </div>
-      </div>
+      </div> -->
 
-      <!-- Navbar -->
       <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-        <!-- Left navbar links -->
-        <ul class="navbar-nav">
-
-          <li *ngIf="!roles.isChws()" class="nav-item">
-            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        <ul *ngIf="roles().canViewLeftNavigation()" class="navbar-nav">
+          <li *ngIf="!roles().isChws()" class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" (click)="cancelDefaultAction($event)" role="button"><i
+                class="fas fa-bars"></i></a>
           </li>
-
-          <!-- <li *ngIf="roles.isChws()" class="nav-item">
-            <span class="brand-link" style="text-align: center;">
-              <span class="brand-text font-weight-light">
-                <img src="{{appLogo}}" alt="Integrate Health" class="" style="opacity: .8; width: 150px!important;">
-              </span>
-            </span>
-          </li> -->
-
-
-          <!-- <li  routerLink="dashboards/dash1" class="nav-link">Dashboard 1</a>
-          </li>class="nav-item d-none d-sm-inline-block">
-            <a
-  
-          <li class="nav-item d-none d-sm-inline-block">
-            <a routerLink="dashboards/dash2" class="nav-link">Dashboard 2</a>
-          </li> -->
         </ul>
 
-        <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
-          <!-- Navbar Search -->
-          <li *ngIf="!roles.isChws() && !roles.isOnlySupervisorMentor()" class="nav-item">
-            <a class="nav-link" data-widget="navbar-search" href="#" role="button">
+          <!-- <li *ngIf="!roles().isChws() && !roles().isOnlySupervisorMentor()" class="nav-item">
+            <a class="nav-link" data-widget="navbar-search" href="#" (click)="cancelDefaultAction($event)" role="button">
               <i class="fas fa-search"></i>
             </a>
             <div class="navbar-search-block">
@@ -141,1016 +85,163 @@
                 </div>
               </form>
             </div>
-          </li>
-
-          <!-- Messages Dropdown Menu -->
-          <!-- <li *ngIf="roles.isSuperUser()" class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#">
-              <i class="far fa-comments"></i>
-              <span class="badge badge-danger navbar-badge">3</span>
-            </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-              <a href="#" class="dropdown-item">
-                <div class="media">
-                  <img src="assets/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 mr-3 img-circle">
-                  <div class="media-body">
-                    <h3 class="dropdown-item-title">
-                      Brad Diesel
-                      <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-                    </h3>
-                    <p class="text-sm">Call me whenever you can...</p>
-                    <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-                  </div>
-                </div>
-              </a>
-              <div class="dropdowndivider1"></div>
-              <a href="#" class="dropdown-item">
-                <div class="media">
-                  <img src="assets/img/user8-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
-                  <div class="media-body">
-                    <h3 class="dropdown-item-title">
-                      John Pierce
-                      <span class="float-right text-sm text-muted"><i class="fas fa-star"></i></span>
-                    </h3>
-                    <p class="text-sm">I got your message bro</p>
-                    <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-                  </div>
-                </div>
-              </a>
-              <div class="dropdowndivider1"></div>
-              <a href="#" class="dropdown-item">
-                <div class="media">
-                  <img src="assets/img/user3-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
-                  <div class="media-body">
-                    <h3 class="dropdown-item-title">
-                      Nora Silvester
-                      <span class="float-right text-sm text-warning"><i class="fas fa-star"></i></span>
-                    </h3>
-                    <p class="text-sm">The subject goes here</p>
-                    <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-                  </div>
-                </div>
-              </a>
-              <div class="dropdowndivider1"></div>
-              <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
-            </div>
           </li> -->
 
-
-
-          <!-- <li *ngIf="roles.isChws()" class="nav-item">
-            
-        </li> -->
-
-
-
           <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#"
+            <a class="nav-link" data-toggle="dropdown" href="#" (click)="cancelDefaultAction($event)"
               style="text-align: center; color: blue !important;display: inline-block;">
-              <!-- <i style="font-size: 25px;" class="fas fa-th-large"></i> -->
-              <!-- <span class="badge badge-warning navbar-badge">Infos</span> -->
-              <img style="margin-top: -12px;" src="{{ userData?.userLogo }}" width="40" class="img-circle elevation-2"
-                alt="User Image">
+              <img style="margin-top: -12px;" src="{{ currentUser()?.userLogo }}" width="40"
+                class="img-circle elevation-2" alt="User Image">
 
-              <span style="margin-left: 5px;">{{ roles.isChws() ? chwOU?.name: userData?.username }}</span>
+              <span style="margin-left: 5px;">{{ roles().isChws() ? chwOU()?.name: currentUser()?.username }}</span>
 
             </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+            <div *ngIf="roles().canViewTopNavigation()" class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
 
-              <div *ngIf="roles.isAdmin" class="dropdowndivider1"></div>
+              <div *ngIf="roles().isSuperAdmin()" class="dropdowndivider1"></div>
 
-              <a *ngIf="roles.isAdmin" class="nav-link" data-widget="fullscreen" href="#" role="button">
+              <a *ngIf="roles().isSuperAdmin()" class="nav-link" data-widget="fullscreen" href="#"
+                (click)="cancelDefaultAction($event)" role="button">
                 <i class="fas fa-expand-arrows-alt"></i> Aggrandir / réduire
               </a>
 
-              <div *ngIf="roles.isSuperUser()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSuperUser()" class="nav-link" data-widget="control-sidebar" data-slide="true" href="#"
-                role="button">
+              <div *ngIf="roles().isSuperAdmin()" class="dropdowndivider1"></div>
+              <a *ngIf="roles().isSuperAdmin()" class="nav-link" data-widget="control-sidebar" data-slide="true"
+                href="#" role="button">
                 <i class="fas far fa-bell"></i> Menu de controle
               </a>
 
               <div class="dropdowndivider0"></div>
 
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash1"
-                role="button">
-                <i style="margin-right: 10px;" class="fas far fa-info"></i> Activité Des ASC
-              </a>
-
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash2"
-                role="button">
-                <i style="margin-right: 10px;" class="fas far fa-info"></i> Données Détaillées Par ASC
-              </a>
-
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash3"
-                role="button">
-                <i style="margin-right: 10px;" class="fas far fa-info"></i> Effectifs Des Patients
-              </a>
-
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="dashboards/dash4"
-                role="button">
-                <i style="margin-right: 10px;" class="fas far fa-info"></i> Visite de Ménages
-              </a>
-
-              <div *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-link" routerLink="ihDrug/chws"
-                role="button">
-                <i style="margin-right: 10px;" class="fas far fa-info"></i> Situation Médicament ASC
-              </a>
-
-              <div *ngIf="roles.isReportViewer()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isReportViewer()" class="nav-link" routerLink="meetings/reports"
-                role="button">
-                <i style="margin-right: 10px;" class="fas far fa-info"></i> RAPPORT DE REUNION
-              </a>
-              
-              
-              <div *ngIf="roles.isSuperUser()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSuperUser()" class="nav-link" routerLink="maps/highchartmap1"
-                role="button">
-                <i style="margin-right: 10px;" class="fas far fa-info"></i> M . A . P - 1
-              </a>
-
-              <div *ngIf="roles.isSuperUser()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSuperUser()" class="nav-link" routerLink="maps/highchartmap2"
-                role="button">
-                <i style="margin-right: 10px;" class="fas far fa-info"></i> M . A . P - 2
-              </a>
-
-              
+              <ng-container *ngIf="SHOW_CHWS_PAGES()">
+                <div *ngFor="let item of CHWS_PAGES">
+                  <div *ngIf="HasPageAccess(item.link)" class="dropdowndivider1"></div>
+                  <a *ngIf="HasPageAccess(item.link)" class="nav-link" href="#" (click)="NavigateTo($event,item.link)"
+                    role="button">
+                    <i style="margin-right: 10px;" [class]="item.icon"></i>
+                    <span style="color: black;">{{ item.label }}</span>
+                  </a>
+                </div>
+              </ng-container>
 
 
-
-              <div *ngIf="roles.isSupervisorMentor()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor()" class="nav-link" routerLink="chws/" role="button">
-                <i style="margin-right: 10px;" class="fas far fa-info"></i> Gestion ASC Remplaçantes
-              </a>
-
-              <div *ngIf="roles.isSupervisorMentor()" class="dropdowndivider1"></div>
-              <a *ngIf="roles.isSupervisorMentor()" class="nav-link" [routerLink]="[ '/fetch/data','weeklyData']"
-                role="button">
-                <i style="margin-right: 10px;" class="fas far fa-info"></i> Données ThinkMd par semaine
-              </a>
-
-
-              <div *ngIf="!roles.isChws()" class="dropdowndivider1"></div>
-              <a *ngIf="!roles.isChws()" class="nav-link" routerLink="/cache/list" role="button">
-                <i class="fas far fa-bell"></i> Cache Cleaner
-              </a>
-
-              <div class="dropdowndivider3"></div>
-              <a href="#" class="nav-link" data-toggle="modal" data-target="#modal-logout">
-                <i class="fa fa-sign-out-alt"></i> Se déconnecter
-              </a>
+              <div *ngIf="roles().canLogOut()">
+                <div class="dropdowndivider3"></div>
+                <a href="#" (click)="logout($event)" class="nav-link" data-toggle="modal" data-target="#modal-logout">
+                  <i class="fa fa-sign-out-alt"></i> Se déconnecter
+                </a>
+              </div>
 
               <div class="dropdowndivider1"></div>
 
-              <!-- <a clas   -->
             </div>
           </li>
         </ul>
       </nav>
-      <!-- /.navbar -->
 
-
-      <!-- Main Sidebar Container -->
-      <aside *ngIf="!roles.isChws()" class="main-sidebar sidebar-dark-primary elevation-4">
-        <!-- Brand Logo -->
-        <a href="#" class="brand-link" style="text-align: center;">
+      <aside *ngIf="roles().canViewLeftNavigation()" style="height: 100%!important;"
+        class="main-sidebar sidebar-dark-primary elevation-4">
+        <a href="#" class="brand-link" style="text-align: center;" (click)="cancelDefaultAction($event)">
           <span class="brand-text font-weight-light">
             <img src="{{appLogo}}" alt="Integrate Health" class="" style="opacity: .8; width: 150px!important;">
           </span>
         </a>
 
-        <!-- Sidebar -->
-        <div class="sidebar">
-          <!-- Sidebar user panel (optional) -->
-          <!-- <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <div class="image">
-              <img src="{{ userData?.userLogo }}" class="img-circle elevation-2" alt="User Image">
-            </div>
-            <div class="info">
-              <a href="#" class="d-block">{{ roles.isChws() ? chwOU?.name: userData?.fullname }}</a>
-            </div>
-          </div> -->
-
-          <!-- SidebarSearch Form -->
-          <!-- <div class="form-inline">
-            <div class="input-group" data-widget="sidebar-search">
-              <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
-              <div class="input-group-append">
-                <button class="btn btn-sidebar">
-                  <i class="fas fa-search fa-fw"></i>
-                </button>
-              </div>
-            </div>
-          </div> -->
-
-          <!-- Sidebar Menu -->
+        <div class="sidebar" style="height: 80%!important;">
           <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-              <!-- Add icons to the links using the .nav-icon class
-                 with font-awesome or any other icon font library -->
               <br>
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-sync fa-spin"></i>
-                  <p>
-                    Admin
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a routerLink="users" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Users</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a routerLink="database" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Truncate Database</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
 
+              <ng-container *ngFor="let item of ADMIN">
+                <li *ngIf="HasPageAccess(item.link)" class="nav-item">
+                  <a href="#" (click)="NavigateTo($event,item.link)" class="nav-link">
+                    <i [class]="item.icon"></i>
+                    <p>{{ item.label }}</p>
+                  </a>
+                </li>
+              </ng-container>
 
-              <p *ngIf="roles.isSuperUser()" style="color: white;">{{ separation }}</p>
+              <p class="separation"></p>
 
-              <li *ngIf="roles.isDataManager()" class="nav-item">
-                <a [routerLink]="[ '/fetch/sync','syncAllDataOneTime']" class="nav-link">
-                  <!-- <i class="far fa-circle nav-icon"></i> -->
-                  <p>Sync All One Time</p>
-                </a>
-              </li>
-              
+              <ng-container *ngFor="let item of VOIR_DONNEES_ASC">
+                <li *ngIf="HasPageAccess(item.link)" class="nav-item">
+                  <a href="#" (click)="NavigateTo($event,item.link)" class="nav-link">
+                    <i [class]="item.icon"></i>
+                    <p>{{ item.label }}</p>
+                  </a>
+                </li>
+              </ng-container>
 
-              <li *ngIf="roles.isDataManager()" class="nav-item">
-                <a [routerLink]="[ '/fetch/sync','syncDataOneByOne']" class="nav-link">
-                  <!-- <i class="far fa-circle nav-icon"></i> -->
-                  <p>Sync OrgUnits & Data</p>
-                </a>
-              </li>
+              <p class="separation"></p>
 
-              <li *ngIf="roles.isDataManager()" class="nav-item">
-                <a [routerLink]="[ '/fetch/data','dataToDhis2']" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-th"></i> -->
-                  <p>
-                    Données Apps vers Dhis2
-                    <!-- <span class="right badge badge-danger">New</span> -->
-                  </p>
-                </a>
-              </li>
+              <ng-container *ngFor="let item of GESTION_DE_DONNEES">
+                <li *ngIf="HasPageAccess(item.link)" class="nav-item">
+                  <a href="#" (click)="NavigateTo($event,item.link)" class="nav-link">
+                    <i [class]="item.icon"></i>
+                    <p>{{ item.label }}</p>
+                  </a>
+                </li>
+              </ng-container>
 
+              <p class="separation"></p>
 
-              <p *ngIf="roles.isDataManager()" style="color: white;">{{ separation }}</p>
+              <ng-container *ngFor="let item of GESTIONS_DE_RAPPORTS">
+                <li *ngIf="HasPageAccess(item.link)" class="nav-item">
+                  <a href="#" (click)="NavigateTo($event,item.link)" class="nav-link">
+                    <i [class]="item.icon"></i>
+                    <p>{{ item.label }}</p>
+                  </a>
+                </li>
+              </ng-container>
 
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
-                <a routerLink="dashboards/dash1" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-tachometer-alt"></i> -->
-                  <p>Activité Des ASC</p>
-                </a>
-              </li>
+              <p class="separation"></p>
 
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
-                <a routerLink="dashboards/dash2" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-chart-pie"></i> -->
-                  <p>Données Détaillées Par ASC</p>
-                </a>
-              </li>
+              <ng-container *ngFor="let item of GESTIONS_DES_ASC">
+                <li *ngIf="HasPageAccess(item.link)" class="nav-item">
+                  <a href="#" (click)="NavigateTo($event,item.link)" class="nav-link">
+                    <i [class]="item.icon"></i>
+                    <p>{{ item.label }}</p>
+                  </a>
+                </li>
+              </ng-container>
 
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
-                <a routerLink="dashboards/dash3" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
-                  <p>Effectifs Des Patients</p>
-                </a>
-              </li>
+              <p class="separation"></p>
 
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
-                <a routerLink="dashboards/dash4" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
-                  <p>Visite de Ménages</p>
-                </a>
-              </li>
-
-              <li *ngIf="roles.isSupervisorMentor() || roles.isChws()" class="nav-item">
-                <a routerLink="ihDrug/chws" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
-                  <p>Situation Médicament ASC</p>
-                </a>
-              </li>
-
-              <li *ngIf="roles.isReportViewer()" class="nav-item">
-                <a routerLink="meetings/reports" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
-                  <p>RAPPORT DE REUNION</p>
-                </a>
-              </li>
-              
-
-              
-
-
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a routerLink="maps/highchartmap1" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
-                  <p>M . A . P - 1</p>
-                </a>
-              </li>
-
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a routerLink="maps/highchartmap2" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
-                  <p>M . A . P - 2</p>
-                </a>
-              </li>
-              
-
-              <p *ngIf="roles.isSupervisorMentor() || roles.isChws()" style="color: white;">{{ separation }}</p>
-
-              <li *ngIf="roles.isChws()" class="nav-item">
-                <a routerLink="chws/select_orgunit" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-chart-line"></i> -->
-                  <p>Choisir ASC</p>
-                </a>
-              </li>
-
-              <p *ngIf="roles.isChws()" style="color: white;">{{ separation }}</p>
-
-
-              <li *ngIf="roles.isSupervisorMentor()" class="nav-item">
-                <a routerLink="chws/" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-plus-square"></i> -->
-                  <p>Gestion ASC Remplaçantes</p>
-                </a>
-              </li>
-              <p *ngIf="roles.isSupervisorMentor()" style="color: white;">{{ separation }}</p>
-
-              <!-- <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-tachometer-alt"></i>
-                  <p>
-                    Dashboard
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a routerLink="dashboards/dash1" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Dashboard v1</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a routerLink="dashboards/dash2" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Dashboard v2</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a routerLink="dashboards" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Dashboard v3</p>
-                    </a>
-                  </li>
-                </ul>
-              </li> -->
-
-
-              <li *ngIf="roles.isSupervisorMentor()" class="nav-item">
-                <a [routerLink]="[ '/fetch/data','weeklyData']" class="nav-link">
-                  <!-- <i class="nav-icon fas fa-book"></i> -->
-                  <p>
-                    Données ThinkMd par semaine
-                  </p>
-                </a>
-              </li>
-
-              <p *ngIf="roles.isSupervisorMentor()" style="color: white;">{{ separation }}</p>
-
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a routerLink="docs" class="nav-link">
-                  <i class="nav-icon fas fa-file"></i>
-                  <p>
-                    Documentation
-                  </p>
-                </a>
-              </li>
-              <!-- Notifications Dropdown Menu -->
-
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <form class="form-inline nav-link">
-                  <div class="input-group input-group-sm">
-                    <select #langSelect (change)="translate.use(langSelect.value)">
-                      <option *ngFor="let lang of translate.getLangs()" [value]="lang"
-                        [selected]="lang === translate.currentLang">{{ lang }}</option>
-                    </select>
-                  </div>
-                </form>
-
-                <br>
-                <p>{{ 'HOME.TITLE' | translate }}</p>
-                <p>{{ 'HOME.SELECT' | translate }}</p>
-              </li>
-
-              <p *ngIf="roles.isSupervisorMentor()" style="color: white;">{{ separation }}</p>
-
-              <!-- <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-chart-pie"></i>
-                  <p>
-                    Charts
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="pages/charts/chartjs.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>ChartJS</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/charts/flot.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Flot</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/charts/inline.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Inline</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-tree"></i>
-                  <p>
-                    UI Elements
-                    <i class="fas fa-angle-left right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="pages/UI/general.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>General</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/UI/icons.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Icons</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/UI/buttons.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Buttons</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/UI/sliders.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Sliders</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/UI/modals.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Modals & Alerts</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/UI/navbar.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Navbar & Tabs</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/UI/timeline.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Timeline</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/UI/ribbons.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Ribbons</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-edit"></i>
-                  <p>
-                    Forms
-                    <i class="fas fa-angle-left right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="pages/forms/general.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>General Elements</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/forms/advanced.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Advanced Elements</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/forms/editors.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Editors</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/forms/validation.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Validation</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-table"></i>
-                  <p>
-                    Tables
-                    <i class="fas fa-angle-left right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="pages/tables/simple.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Simple Tables</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/tables/data.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>DataTables</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/tables/jsgrid.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>jsGrid</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-header">EXAMPLES</li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="pages/calendar.html" class="nav-link">
-                  <i class="nav-icon far fa-calendar-alt"></i>
-                  <p>
-                    Calendar
-                    <span class="badge badge-info right">2</span>
-                  </p>
-                </a>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="pages/gallery.html" class="nav-link">
-                  <i class="nav-icon far fa-image"></i>
-                  <p>
-                    Gallery
-                  </p>
-                </a>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon far fa-envelope"></i>
-                  <p>
-                    Mailbox
-                    <i class="fas fa-angle-left right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="pages/mailbox/mailbox.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Inbox</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/mailbox/compose.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Compose</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/mailbox/read-mail.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Read</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-book"></i>
-                  <p>
-                    Pages
-                    <i class="fas fa-angle-left right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="pages/examples/invoice.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Invoice</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/profile.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Profile</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/e-commerce.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>E-commerce</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/projects.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Projects</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/project-add.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Project Add</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/project-edit.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Project Edit</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/project-detail.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Project Detail</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/contacts.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Contacts</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/faq.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>FAQ</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/contact-us.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Contact us</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon far fa-plus-square"></i>
-                  <p>
-                    Extras
-                    <i class="fas fa-angle-left right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>
-                        Login & Register v1
-                        <i class="fas fa-angle-left right"></i>
-                      </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                      <li class="nav-item">
-                        <a href="pages/examples/login.html" class="nav-link">
-                          <i class="far fa-circle nav-icon"></i>
-                          <p>Login v1</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="pages/examples/register.html" class="nav-link">
-                          <i class="far fa-circle nav-icon"></i>
-                          <p>Register v1</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="pages/examples/forgot-password.html" class="nav-link">
-                          <i class="far fa-circle nav-icon"></i>
-                          <p>Forgot Password v1</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="pages/examples/recover-password.html" class="nav-link">
-                          <i class="far fa-circle nav-icon"></i>
-                          <p>Recover Password v1</p>
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>
-                        Login & Register v2
-                        <i class="fas fa-angle-left right"></i>
-                      </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                      <li class="nav-item">
-                        <a href="pages/examples/login-v2.html" class="nav-link">
-                          <i class="far fa-circle nav-icon"></i>
-                          <p>Login v2</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="pages/examples/register-v2.html" class="nav-link">
-                          <i class="far fa-circle nav-icon"></i>
-                          <p>Register v2</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="pages/examples/forgot-password-v2.html" class="nav-link">
-                          <i class="far fa-circle nav-icon"></i>
-                          <p>Forgot Password v2</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="pages/examples/recover-password-v2.html" class="nav-link">
-                          <i class="far fa-circle nav-icon"></i>
-                          <p>Recover Password v2</p>
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/lockscreen.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Lockscreen</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/legacy-user-menu.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Legacy User Menu</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/language-menu.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Language Menu</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/404.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Error 404</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/500.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Error 500</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/pace.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Pace</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/examples/blank.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Blank Page</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="starter.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Starter Page</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-search"></i>
-                  <p>
-                    Search
-                    <i class="fas fa-angle-left right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="pages/search/simple.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Simple Search</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="pages/search/enhanced.html" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Enhanced</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-header">MISCELLANEOUS</li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="https://adminlte.io/docs/3.1/" class="nav-link">
-                  <i class="nav-icon fas fa-file"></i>
-                  <p>Documentation</p>
-                </a>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-header">MULTI LEVEL EXAMPLE</li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-circle nav-icon"></i>
-                  <p>Level 1</p>
-                </a>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-circle"></i>
-                  <p>
-                    Level 1
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Level 2</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>
-                        Level 2
-                        <i class="right fas fa-angle-left"></i>
-                      </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                      <li class="nav-item">
-                        <a href="#" class="nav-link">
-                          <i class="far fa-dot-circle nav-icon"></i>
-                          <p>Level 3</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="#" class="nav-link">
-                          <i class="far fa-dot-circle nav-icon"></i>
-                          <p>Level 3</p>
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a href="#" class="nav-link">
-                          <i class="far fa-dot-circle nav-icon"></i>
-                          <p>Level 3</p>
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Level 2</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-circle nav-icon"></i>
-                  <p>Level 1</p>
-                </a>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-header">LABELS</li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon far fa-circle text-danger"></i>
-                  <p class="text">Important</p>
-                </a>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon far fa-circle text-warning"></i>
-                  <p>Warning</p>
-                </a>
-              </li>
-  
-              <li *ngIf="roles.isSuperUser()" class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon far fa-circle text-info"></i>
-                  <p>Informational</p>
-                </a>
-              </li> -->
+              <br>
             </ul>
           </nav>
-          <!-- /.sidebar-menu -->
-
-          <h3 *ngIf="appVersionExist()" style="position:absolute;bottom:0;width:100%; text-align: center;font-size: large; color: white;">Version: {{ appVersion }}</h3>
         </div>
-        <!-- /.sidebar -->
+
+        <!-- <form *ngIf="roles().isSuperAdmin()" class="form-inline nav-link input-group input-group-sm">
+          <select #langSelect (change)="translate.use(langSelect.value)">
+            <option *ngFor="let lang of translate.getLangs()" [value]="lang"
+              [selected]="lang === translate.currentLang">{{ lang }}</option>
+          </select>
+          {{ 'HOME.TITLE' | translate }}:{{ 'HOME.SELECT' | translate }}
+        </form> -->
+
+
+        <h3 *ngIf="appVersionExist()"
+          style="position:relative;bottom:0;width:100%; text-align: center;font-size: large; color: white;">
+          Version: {{ appVersion }}
+        </h3>
+
       </aside>
-      <!-- Content Wrapper. Contains page content -->
-      <div class="content-wrapper iframe-mode" data-widget="iframe" data-loading-screen="750">
 
-
-        <!-- <h2>
-    Now {{time}}
-    
-    <hr /> 
-  </h2> -->
-        <!-- <app-breadcrumb></app-breadcrumb> -->
+      <div *ngIf="roles().canViewLeftNavigation()" class="content-wrapper iframe-mode" data-widget="iframe"
+        data-loading-screen="750">
         <ng-container *ngTemplateOutlet="template"></ng-container>
-        <!-- <div class="tab-content">
-            <div class="tab-empty">
-              <h2 class="display-4">No tab selected!</h2>
-            </div>
-            <div class="tab-loading">
-              <div>
-                <h2 class="display-4">Tab is loading <i class="fa fa-sync fa-spin"></i></h2>
-              </div>
-            </div>
-          </div> -->
       </div>
-      <!-- <app-footer></app-footer> -->
-      <!-- Control Sidebar -->
+
+      <div *ngIf="!roles().canViewLeftNavigation()">
+        <ng-container *ngTemplateOutlet="template"></ng-container>
+      </div>
+
       <aside class="control-sidebar control-sidebar-dark">
-        <!-- Control sidebar content goes here -->
       </aside>
     </div>
 
-    <!-- MESSAGE BOX-->
-    <!-- <div class="message-box animated fadeIn" data-sound="alert" id="mb-signout">
-      <div class="mb-container">
-        <div class="mb-middle">
-          <div class="mb-title"><span class="fa fa-sign-out"></span> Log <strong>Out</strong> ?</div>
-          <div class="mb-content">
-            <p>Are you sure you want to log out?</p>
-            <p>Press No if youwant to continue work. Press Yes to logout current user.</p>
-          </div>
-          <div class="mb-footer">
-            <div class="pull-right">
-              <button (click)="logout()" class="btn btn-success btn-lg mb-control-confirm">Yes</button>
-              <button class="btn btn-default btn-lg mb-control-close">No</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-
-    <div class="modal fade" id="modal-logout">
+    <!-- <div class="modal fade" id="modal-logout">
       <div class="modal-dialog">
         <div class="modal-content bg-secondary">
           <div class="modal-body">
@@ -1163,27 +254,38 @@
           </div>
         </div>
       </div>
+    </div> -->
+
+    <div class="modal fade" id="modal-logout-reload">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body" style="text-align: center;">
+            <span style="font-size: 20px;color:red;text-align: center;">
+              {{ infosModalMessage }} <br><br>
+              <strong style="font-size: 25px;">{{ countdown }}</strong> <br><br>
+              secondes.
+            </span>
+            
+            <span id="logout-reload-dismiss" class="close" data-dismiss="modal" aria-label="Close"></span>
+
+          </div>
+        </div>
+      </div>
     </div>
 
 
 
-    <!-- START PRELOADS -->
     <audio id="audio-alert" src="assets/audio/alert.mp3" preload="auto"></audio>
     <audio id="audio-fail" src="assets/audio/fail.mp3" preload="auto"></audio>
-    <!-- END PRELOADS -->
   </div>
 
-  <div *ngIf="!isAuthenticated || errorFound">
+  <div *ngIf="!isAuthenticated() || errorFound()">
     <ng-container *ngTemplateOutlet="template"></ng-container>
   </div>
 
   <ng-template #template>
     <router-outlet></router-outlet>
   </ng-template>
-
-  <!-- <ng-template #trigger>
-    template to trigger changes...
-  </ng-template> -->
 
 
 </div>

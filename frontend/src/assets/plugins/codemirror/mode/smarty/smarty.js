@@ -143,7 +143,7 @@
         while (c = stream.eat(regs.validIdentifier)) {
           str += c;
         }
-        for (var i=0, j=keyFunctions.length; i<j; i++) {
+        for (var i=0, j=keylength; i<j; i++) {
           if (keyFunctions[i] == str) {
             return cont("keyword", "keyword");
           }

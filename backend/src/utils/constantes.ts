@@ -4,7 +4,7 @@ export class Consts {
     private static projectFolderName = path.basename(path.dirname(path.dirname(path.dirname(__dirname))));
 
     static isProdEnv:boolean = this.projectFolderName === 'ih-portal' ;
-    //static isProdEnv:boolean = this.projectFolderName === 'ih-portal-dev' ;
+    // static isProdEnv:boolean = this.projectFolderName === 'ih-portal-dev' ;
 
     static child_forms = [
         "pcime_c_asc",

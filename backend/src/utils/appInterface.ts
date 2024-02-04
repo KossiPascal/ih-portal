@@ -1,5 +1,3 @@
-import { Moment } from "moment";
-
 export interface DataFromPython {
   errorToSend: {
     ErrorCount: number
@@ -21,7 +19,8 @@ export interface Sync {
   id: any;
   start_date: string;
   end_date: string;
-  dhisusersession: string
+  dhisusername: string;
+  dhispassword: string;
 
   // thinkmd_host: string;
   // thinkmd_site: string;
@@ -54,7 +53,8 @@ export interface CouchDbFetchData {
   // port: number;
   // ssl_verification: boolean;
   descending?: boolean
-  dhisusersession?: string
+  dhisusername?: string
+  dhispassword?: string
 }
 export interface Dhis2Sync {
   host: string
@@ -66,7 +66,8 @@ export interface Dhis2Sync {
   fields?: string[]
   order?: string
   user: string
-  dhisusersession: string
+  dhisusername?: string
+  dhispassword?: string
 }
 export interface Dhis2DataFormat {
   event: string
@@ -149,21 +150,20 @@ export interface ChwsUpdateDrugInfo {
   theoretical_quantity_to_order: number
   observations: number
   userId?: string
-  dhisusersession?: string
-}
-export class Roles {
-  isSuperUser: boolean = false;
-  isUserManager: boolean = false;
-  isAdmin: boolean = false;
-  isDataManager: boolean = false;
-  isOnlySupervisorMentor: boolean = false;
-  isSupervisorMentor: boolean = false;
-  isChws: boolean = false;
-  isReportViewer: boolean = false;
+  dhisusername?: string
+  dhispassword?: string
 }
 
-
-
+// export class Roles {
+//   isSuperUser: boolean = false;
+//   isUserManager: boolean = false;
+//   isAdmin: boolean = false;
+//   isDataManager: boolean = false;
+//   isOnlySupervisorMentor: boolean = false;
+//   isSupervisorMentor: boolean = false;
+//   isChws: boolean = false;
+//   isReportViewer: boolean = false;
+// }
 
 // export interface MeetingReport {
 //   id: string

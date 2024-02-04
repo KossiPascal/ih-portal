@@ -20,8 +20,9 @@ export interface Sync {
   end_date: string
   weekly_Choosen_Dates: string[]
   InsertIntoDhis2: boolean
-  dhisusersession: string
-  userId?: string
+  dhisusername?: string
+  dhispassword?: string
+  userId?: string | null | undefined
 
   // thinkmd_host: string
   // thinkmd_site: string
@@ -119,8 +120,9 @@ export interface FilterParams {
   patients?: string[]
   families?: string[]
   type?: any
-  userId?: string
-  dhisusersession?: string
+  userId?: string | null | undefined
+  dhisusername?: string
+  dhispassword?: string
   params?:any
   withDhis2Data?:boolean
 }
@@ -246,8 +248,9 @@ export interface Dhis2Sync {
   fields?: string[]
   username?: string
   password?: string
-  userId?: string
-  dhisusersession?: string
+  userId?: string | null | undefined
+  dhisusername?: string
+  dhispassword?: string
 }
 
 
@@ -259,8 +262,9 @@ export interface SyncOrgUnit {
   family: boolean
   patient: boolean
   chw: boolean
-  userId: string 
-  dhisusersession?: string
+  userId: string | null | undefined
+  dhisusername?: string
+  dhispassword?: string
 }
 
 export interface CompareData {

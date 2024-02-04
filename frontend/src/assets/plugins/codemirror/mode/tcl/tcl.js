@@ -74,7 +74,7 @@ CodeMirror.defineMode("tcl", function() {
         var word = stream.current().toLowerCase();
         if (keywords && keywords.propertyIsEnumerable(word))
           return "keyword";
-        if (functions && functions.propertyIsEnumerable(word)) {
+        if (functions && propertyIsEnumerable(word)) {
           state.beforeParams = true;
           return "keyword";
         }

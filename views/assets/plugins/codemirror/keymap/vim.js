@@ -5278,7 +5278,7 @@
     */
     function doReplace(cm, confirm, global, lineStart, lineEnd, searchCursor, query,
         replaceWith, callback) {
-      // Set up all the functions.
+      // Set up all the 
       cm.state.vim.exMode = true;
       var done = false;
       var lastPos, modifiedLineNumber, joined;

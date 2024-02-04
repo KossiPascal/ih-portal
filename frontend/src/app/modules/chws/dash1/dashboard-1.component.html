@@ -1,0 +1,104 @@
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="card card-info">
+
+      <h2 class="title" style="text-align: center; color: purple;">Activité des ASC</h2>
+
+      <div class="overlay-wrapper">
+        <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
+          <div class="text-bold pt-2"> {{initMsg}}</div>
+        </div>
+
+        <div class="card-header">
+          <form [formGroup]="aggradateDataForm" (ngSubmit)="initDataFilted()" novalidate>
+            <div class="row">
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Début</label>
+                  <input type="date" class="form-control" formControlName="start_date" />
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Fin</label>
+                  <input type="date" class="form-control" formControlName="end_date" />
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label style="color: white;">.</label>
+                  <button class="submit" [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control">
+                    OK <span class="fa fa-floppy-o fa-right"></span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<section *ngIf="FinalChwsOutputData$.length > 0" class="content">
+  <div class="card">
+    <div class="card-body">
+      <table id="compare_data" class="table table-bordered table-hover">
+        <thead *ngFor="let item of FinalChwsOutputData$">
+          <tr class="bg-default">
+            <th colspan="3"> {{ item.chw.name }} ( {{ item.chw.external_id }} )</th>
+          </tr>
+        </thead>
+        <thead>
+          <tr class="bg-info">
+            <th style="font-size: 20px;">Type</th>
+            <th style="font-size: 20px;">Application</th>
+            <th style="font-size: 20px;">Fiche récape</th>
+          </tr>
+        </thead>
+
+        <tbody *ngFor="let item of FinalChwsOutputData$">
+          <tr>
+            <th style="font-size: 20px;"> Pcime</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.sum_soins_suivi.tonoudayo }}</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.sum_soins_suivi.dhis2 }}</th>
+          </tr>
+
+          <tr>
+            <th style="font-size: 20px;"> Maternel</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.sum_enceinte_postpartum.tonoudayo }}</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.sum_enceinte_postpartum.dhis2 }}</th>
+          </tr>
+
+          <tr>
+            <th style="font-size: 20px;"> PF</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.pf.tonoudayo }}</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.pf.dhis2 }}</th>
+          </tr>
+
+          <tr>
+            <th style="font-size: 20px;"> Recherche</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.home_visit.tonoudayo }}</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.home_visit.dhis2 }}</th>
+          </tr>
+
+          <tr>
+            <th style="font-size: 20px;"> Total</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.total_vad.tonoudayo }}</th>
+            <th style="font-size: 20px; text-align: center;">{{ item.data.total_vad.dhis2 }}</th>
+          </tr>
+
+          <tr>
+            <th colspan="3" style="font-size: 20px; text-align: center;"> Total Action: {{ item.data.sum_total_vad }} </th>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

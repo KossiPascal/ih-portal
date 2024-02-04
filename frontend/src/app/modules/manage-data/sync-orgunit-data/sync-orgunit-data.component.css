@@ -1,0 +1,91 @@
+ 
+  input[type="checkbox"]:checked  {
+    filter: invert(90%) hue-rotate(45deg) brightness(1.7);
+    height: 18px;
+    width: 18px;
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -o-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+  }
+
+  input[type="checkbox"] {
+    /* border-color: black; */
+    height: 18px;
+    width: 18px;
+  }
+
+  .form-check-label {
+    margin-top: 5px;
+    margin-left: 5px;
+  }
+
+
+  .mat-calendar-body-cell.notSelected {
+    background-color: steelblue;
+    border-radius: 100%;
+    width:50px;
+    height:50px
+  
+  }
+  .mat-calendar-body-cell.selected {
+    background-color:red!important;
+    border-radius: 100%;
+    width:50px;
+    height:50px
+  
+  }
+
+/* .drop-calendar {
+  width:30rem
+} */
+
+
+.results {
+  background-color: blanchedalmond;
+  min-height: 100px;
+  width: 500px;
+}
+
+/* mat-calendar {
+  width: 500px;
+} */
+
+.org-unit-success {
+  padding-left: 10px;
+  color: green;
+}
+
+.org-unit-error {
+  padding-left: 20px;
+  color: red;
+}
+
+
+.borderError {
+  border: solid red 2px;
+}
+
+
+.danger {
+  color: red;
+  font-weight: bold;
+}
+
+.warning {
+  color: orange;
+  font-weight: bold;
+}
+
+.infos {
+  color: blueviolet;
+  font-weight: bold;
+}
+
+.good {
+  /* color: green; */
+  font-weight: bold;
+}
+
+  

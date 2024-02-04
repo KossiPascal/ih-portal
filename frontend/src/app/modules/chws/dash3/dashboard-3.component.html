@@ -1,0 +1,31 @@
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="card card-warning">
+
+      <h1 style="text-align: center;">Effectifs des patients</h1>
+
+      <div class="overlay-wrapper">
+        <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
+          <div class="text-bold pt-2"> {{initMsg}}</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="row card-body">
+      <div class="col-sm-3 col-6" *ngFor="let data of allAggragateData; trackBy:identifyAggragateData">
+        <div class="small-box {{data.color}}">
+          <div class="inner">
+            <h3 style="font-size: 40px;">{{ data.count }}</h3>
+            <p><strong>{{ data.label }}</strong></p>
+          </div>
+          <div class="icon"> <i class="ion {{data.icon}}"></i> </div>
+        </div>
+      </div>
+    </div>
+
+    <br><br>
+
+  </div>
+</section>
+<!-- /.content -->

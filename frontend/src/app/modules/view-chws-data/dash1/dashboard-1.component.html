@@ -1,0 +1,135 @@
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="card card-info">
+
+      <h2 class="title" style="text-align: center; color: purple;">Activité des ASC</h2>
+
+      <div class="overlay-wrapper">
+        <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
+          <div class="text-bold pt-2"> {{initMsg}}</div>
+        </div>
+
+        <div class="card-header">
+          <form [formGroup]="aggradateDataForm" (ngSubmit)="initDataFilted()" novalidate>
+            <div class="row">
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Début</label>
+                  <input type="date" class="form-control" formControlName="start_date" />
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Date Fin</label>
+                  <input type="date" class="form-control" formControlName="end_date" />
+                </div>
+              </div>
+
+              <div class="col-sm-3 col-6">
+                <div class="form-group">
+                  <label>District</label>
+                  <select (change)="genarateSites()" class="form-control" formControlName="districts">
+                    <option value=""></option>
+                    <option *ngFor="let district of Districts$" value="{{district.id}}">
+                      {{ district.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-sm-3 col-6">
+                <div class="form-group">
+                  <label>Site</label>
+                  <select (change)="genarateChws()" class="form-control" formControlName="sites">
+                    <option value=""></option>
+                    <option *ngFor="let site of sites$" value="{{site.id}}">
+                      {{ site.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label style="color: white;">.</label>
+                  <button class="submit" [disabled]="!aggradateDataForm.valid" type="submit" class="btn btn-warning form-control">
+                    OK <span class="fa fa-floppy-o fa-right"></span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section *ngIf="FinalChwsOutputData$.length > 0" class="content">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <table-export></table-export>
+      </div>
+    </div>
+
+
+    <!-- /.card-header -->
+    <div class="card-body" style="overflow-y:scroll!important;">
+      <table border="1 solid" id="export_table" class="table table-bordered table-hover border">
+        <thead>
+          <tr>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="chw.external_id" class="bg-info" style="width: 50px">Code ASC</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="chw.name" class="bg-info" style="width: 150px">Nom ASC</th>
+
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.sum_soins_suivi.tonoudayo" class="bg-warning" style="width: 40px">Pcime <br> Appli.</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.sum_soins_suivi.dhis2" class="bg-warning" style="width: 40px">Pcime <br> Saisie</th>
+
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.sum_enceinte_postpartum.tonoudayo" class="bg-primary" style="width: 40px">Maternel <br> Appli.</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.sum_enceinte_postpartum.dhis2" class="bg-primary" style="width: 40px">Maternel <br> Saisie</th>
+
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.pf.tonoudayo" class="bg-warning" style="width: 40px">PF <br> Appli.</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.pf.dhis2" class="bg-warning" style="width: 40px">PF <br> Saisie</th>
+
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.home_visit.tonoudayo" class="bg-primary" style="width: 40px">Recherche <br> Appli.</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.home_visit.dhis2" class="bg-primary" style="width: 40px">Recherche <br> Saisie</th>
+
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.total_vad.tonoudayo" class="bg-success" style="width: 40px">Somme <br> Appli.</th>
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.total_vad.dhis2" class="bg-success" style="width: 40px">Somme <br> Saisie</th>
+
+            <th [appSort]="FinalChwsOutputData$" data-order="desc" data-name="data.sum_total_vad" class="bg-info" style="width: 40px">Total <br> Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of FinalChwsOutputData$">
+            <td class="info">{{ item.chw.external_id }}</td>
+            <td class="info">{{ item.chw.name }}</td>
+
+            <td class="warning">{{ item.data.sum_soins_suivi.tonoudayo }}</td>
+            <td class="warning">{{ item.data.sum_soins_suivi.dhis2 }}</td>
+
+            <td class="primary">{{ item.data.sum_enceinte_postpartum.tonoudayo }}</td>
+            <td class="primary">{{ item.data.sum_enceinte_postpartum.dhis2 }}</td>
+
+            <td class="warning">{{ item.data.pf.tonoudayo }}</td>
+            <td class="warning">{{ item.data.pf.dhis2 }}</td>
+
+            <td class="primary">{{ item.data.home_visit.tonoudayo }}</td>
+            <td class="primary">{{ item.data.home_visit.dhis2 }}</td>
+
+            <td class="final">{{ item.data.total_vad.tonoudayo }}</td>
+            <td class="final">{{ item.data.total_vad.dhis2 }}</td>
+
+            <td class="info"> <strong>{{ item.data.sum_total_vad }}</strong> </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

@@ -1,6 +1,6 @@
 import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository, getChwsDrugSyncRepository, ChwsDrug } from "../entity/Sync";
 import { CouchDbFetchData, Dhis2DataFormat } from "../utils/appInterface";
-import { Dhis2SyncConfig, Functions, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders, notEmpty, logNginx } from "../utils/functions";
+import { Dhis2SyncConfig, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders, notEmpty, logNginx, date_to_milisecond, getJsonFieldsAsKeyValue, milisecond_to_date } from "../utils/functions";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import https from 'https';
@@ -19,12 +19,13 @@ export async function getDhis2Chws(req: Request, res: Response, next: NextFuncti
         return res.status(201).json({ status: 201, data: 'Error when getting chws from dhis2' });
     }
     try {
+        const {dhisusername, dhispassword} = req.body;
         const link = `https://${DHIS_HOST}/api/options`;
         const params = `.json?paging=false&filter=optionSet.id:eq:uOKgQa2W8tn&fields=id,code,name,optionSet&order=created:desc`;
         request({
             url: link + params,
             method: 'GET',
-            headers: httpHeaders('Basic ' + req.body.dhisusersession)
+            headers: httpHeaders(dhisusername, dhispassword)
         }, async function (err: any, response: any, body: any) {
             if (err) return res.status(201).json({ status: 201, data: 'Error when getting chws from dhis2' });
             const jsonBody = JSON.parse(body);
@@ -88,7 +89,7 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
                                         _dhis2Sync.id = row.event;
                                         _dhis2Sync.rev = row.event;
                                         _dhis2Sync.form = getValue(row.dataValues, 'plW6bCSnXKU');
-                                        _dhis2Sync.reported_date = Functions.milisecond_to_date(dateVal, 'dateOnly');
+                                        _dhis2Sync.reported_date = milisecond_to_date(dateVal, 'dateOnly');
                                         _dhis2Sync.district = districtId;
                                         _dhis2Sync.site = siteId;
                                         _dhis2Sync.chw = chwsId;
@@ -155,8 +156,8 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
 
     var params: CouchDbFetchData = {
         viewName: 'reports_by_date',
-        startKey: [Functions.date_to_milisecond(req.body.start_date, true)],
-        endKey: [Functions.date_to_milisecond(req.body.end_date, false)],
+        startKey: [date_to_milisecond(req.body.start_date, true)],
+        endKey: [date_to_milisecond(req.body.end_date, false)],
     };
 
     
@@ -251,17 +252,17 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                             _sync.rev = row.doc._rev;
                                             _sync.form = row.doc.form;
                                             _sync.phone = row.doc.from;
-                                            _sync.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
-                                            _sync.reported_full_date = Functions.milisecond_to_date(row.doc.reported_date, 'fulldate');
+                                            _sync.reported_date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                            _sync.reported_full_date = milisecond_to_date(row.doc.reported_date, 'fulldate');
                                             _sync.district = districtId;
                                             _sync.site = siteId;
                                             _sync.zone = row.doc.contact.parent._id;
                                             _sync.chw = row.doc.contact._id;
                                             _sync.family_id = ['home_visit'].includes(row.doc.form) ? contactId : contactParent;
                                             _sync.patient_id = ['home_visit'].includes(row.doc.form) ? null : contactId;
-                                            _sync.fields = Functions.getJsonFieldsAsKeyValue('', row.doc.fields);
+                                            _sync.fields = getJsonFieldsAsKeyValue('', row.doc.fields);
                                             // _sync.patient_id = row.doc.fields.patient_id;
-                                            if (!row.doc.geolocation.hasOwnProperty('code')) _sync.geolocation = Functions.getJsonFieldsAsKeyValue('', row.doc.geolocation);
+                                            if (!row.doc.geolocation.hasOwnProperty('code')) _sync.geolocation = getJsonFieldsAsKeyValue('', row.doc.geolocation);
                                             await _repoChwsData.save(_sync);
 
 
@@ -270,7 +271,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
 
                                             if (["pregnancy_family_planning", "fp_follow_up_renewal", "pcime_c_asc"].includes(row.doc.form)) {
                                                     _syncDrug.activity_type = "distributed";
-                                                    _syncDrug.activity_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                                    _syncDrug.activity_date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
 
                                                     if(row.doc.form == "pcime_c_asc"){
                                                         if (row.doc.fields.hasOwnProperty("s_fever_child_TDR")) {
@@ -323,7 +324,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
 
                                 if (["drug_quantities", "drug_movements", "pregnancy_family_planning", "fp_follow_up_renewal", "pcime_c_asc"].includes(row.doc.form)) {
                                     if (districtId && siteId) {
-                                        _syncDrug.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                        _syncDrug.reported_date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
                                         _syncDrug.district = districtId;
                                         _syncDrug.site = siteId;
                                         _syncDrug.chw = row.doc.contact._id;
@@ -377,8 +378,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
 
     var params: CouchDbFetchData = {
         viewName: 'contacts_by_date', //'contacts_by_type',
-        startKey: [Functions.date_to_milisecond(req.body.start_date, true)],
-        endKey: [Functions.date_to_milisecond(req.body.end_date, false)],
+        startKey: [date_to_milisecond(req.body.start_date, true)],
+        endKey: [date_to_milisecond(req.body.end_date, false)],
     };
 
     try {
@@ -454,8 +455,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                         _syncSite.rev = row.doc._rev;
                                         _syncSite.name = row.doc.name;
                                         _syncSite.external_id = row.doc.external_id;
-                                        _syncSite.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
-                                        _syncSite.reported_full_date = Functions.milisecond_to_date(row.doc.reported_date, 'fulldate');
+                                        _syncSite.reported_date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                        _syncSite.reported_full_date = milisecond_to_date(row.doc.reported_date, 'fulldate');
                                         await _repoSite.save(_syncSite);
                                         outPutInfo["Sites"]["successCount"] += 1;
                                     } catch (err: any) {
@@ -494,8 +495,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                         _syncZone.district = districtId;
                                         _syncZone.site = siteId;
                                         _syncZone.chw_id = row.doc.contact._id;
-                                        _syncZone.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
-                                        _syncZone.reported_full_date = Functions.milisecond_to_date(row.doc.reported_date, 'fulldate');
+                                        _syncZone.reported_date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                        _syncZone.reported_full_date = milisecond_to_date(row.doc.reported_date, 'fulldate');
                                         await _repoZone.save(_syncZone);
                                         outPutInfo["Zones"]["successCount"] += 1;
                                     } catch (err: any) {
@@ -532,8 +533,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                             _syncFamily.rev = row.doc._rev;
                                             _syncFamily.name = row.doc.name;
                                             _syncFamily.external_id = row.doc.external_id;
-                                            _syncFamily.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
-                                            _syncFamily.reported_full_date = Functions.milisecond_to_date(row.doc.reported_date, 'fulldate');
+                                            _syncFamily.reported_date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                            _syncFamily.reported_full_date = milisecond_to_date(row.doc.reported_date, 'fulldate');
                                             _syncFamily.district = districtId;
                                             _syncFamily.site = siteId;
                                             _syncFamily.zone = row.doc.parent._id;
@@ -579,8 +580,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                                 _syncPatient.role = row.doc.role;
                                                 _syncPatient.date_of_birth = row.doc.date_of_birth;
                                                 _syncPatient.sex = sx == 'male' ? 'M' : sx == 'female' ? 'F' : undefined;
-                                                _syncPatient.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
-                                                _syncPatient.reported_full_date = Functions.milisecond_to_date(row.doc.reported_date, 'fulldate');
+                                                _syncPatient.reported_date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                                _syncPatient.reported_full_date = milisecond_to_date(row.doc.reported_date, 'fulldate');
                                                 _syncPatient.district = districtId;
                                                 _syncPatient.site = siteId;
                                                 _syncPatient.zone = row.doc.parent.parent._id;
@@ -625,8 +626,8 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                             _syncChws.name = row.doc.name;
                                             _syncChws.external_id = row.doc.external_id;
                                             _syncChws.role = row.doc.role;
-                                            _syncChws.reported_date = Functions.milisecond_to_date(row.doc.reported_date, 'dateOnly');
-                                            _syncChws.reported_full_date = Functions.milisecond_to_date(row.doc.reported_date, 'fulldate');
+                                            _syncChws.reported_date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                            _syncChws.reported_full_date = milisecond_to_date(row.doc.reported_date, 'fulldate');
                                             _syncChws.district = districtId;
                                             _syncChws.site = siteId;
                                             _syncChws.zone = row.doc.parent._id;
@@ -682,7 +683,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
 }
 
 export async function insertOrUpdateDataToDhis2(req: Request, res: Response, next: NextFunction) {
-    const { dhisusersession, chwsDataToDhis2 } = req.body;
+    const { dhisusername, dhispassword, chwsDataToDhis2 } = req.body;
     const chwsData = chwsDataToDhis2 as DataIndicators;
 
     try {
@@ -696,7 +697,7 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
             const program = jsonData['program'];
             const data_filter = "JC752xYegbJ:EQ:" + dist + ",JkMyqI3e6or:like:" + chw + ",lbHrQBTbY1d:EQ:" + date + ",FW6z2Ha2GNr:like:" + srce;
             const fields = "event,eventDate,dataValues[dataElement, value]";
-            const headers = httpHeaders('Basic ' + dhisusersession);
+            const headers = httpHeaders(dhisusername, dhispassword);
             const link = `https://${DHIS_HOST}/api/events`;
             const params = `.json?paging=false&program=${program}&orgUnit=${sit}&filter=${data_filter}&fields=${fields}&order=created:desc`;
 

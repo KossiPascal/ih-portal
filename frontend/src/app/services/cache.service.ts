@@ -10,7 +10,6 @@ export class CacheService {
     private cacheName: string;
 
     constructor() {
-        // TODO: AF idealmente este cache name debería estar en configuración
         this.cacheName = 'ngsw:1:data:dynamic:bin-api-performance:cache';
 
         // this.clearCacheStorage().then(() => {

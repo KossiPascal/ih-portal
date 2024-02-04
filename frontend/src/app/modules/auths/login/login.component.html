@@ -1,0 +1,71 @@
+<style>
+    label {
+        display: block;
+    }
+</style>
+
+<div class="login-page register-page">
+
+    <div class="login-box register-box">
+
+        <div class="card card-outline card-primary">
+            <div class="card-header text-center">
+                <img src="{{APP_LOGO}}" alt="Integrate Health" srcset="" height="100px">
+                <!-- <a href="" class="h1"><b>Admin</b></a> -->
+            </div>
+
+            <div class="card-body">
+                <div class="overlay-wrapper">
+                    <div *ngIf="isLoading" class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i>
+                        <div class="text-bold pt-2">{{LoadingMsg}}</div>
+                    </div>
+
+                    <p *ngIf="message!=''" class="login-box-msg"><strong>{{ message }}</strong></p>
+
+                    <form [formGroup]="authForm" (ngSubmit)="login()" novalidate class="form-horizontal">
+                        <div class="input-group mb-3">
+                            <input id="username" type="text" class="form-control" placeholder="Username / Email"
+                                formControlName="credential" />
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-user"></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="input-group mb-3" style="margin-bottom: 5px!important;">
+                            <input id="password" type="{{passwordType}}" class="form-control" placeholder="Password"
+                                formControlName="password" />
+                            <div class="input-group-append">
+                                <div (click)="showHidePassword()" class="input-group-text">
+                                    <span class="fas fa-lock"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mb-1" style="width: 100%;text-align: right;"><a routerLink="/auths/forgot-password">Mot de passe oublié</a></p>
+                        
+                        <br>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="icheck-primary">
+                                    <input type="checkbox" id="agreeTerms" name="terms" formControlName="remenber_me">
+                                    <label for="agreeTerms">Se Souvenir</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <button color="accent" [disabled]="!authForm.valid" type="submit"
+                                    class="btn btn-primary btn-block">Connexion</button>
+                            </div>
+                        </div>
+                        <!-- <a *ngIf="showRegisterPage" routerLink="/auths/register" class="text-center">S'enrégistrer</a> -->
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

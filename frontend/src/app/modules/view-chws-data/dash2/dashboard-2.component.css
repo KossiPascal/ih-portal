@@ -1,0 +1,35 @@
+.custom-badge {
+  font-size: 18px;
+  color: black;
+}
+
+.custom-action {
+  font-size: 25px;
+  color: black;
+  text-align: center!important;
+}
+
+.info {
+  text-align: center!important;
+}
+
+
+
+/* testttttttttttttttttttttttttt */
+.box {
+  width: 600px;
+  height: 300px;
+  border: 1px solid black;
+  padding: 2px 4px;
+  overflow-y: scroll;
+  overflow-x: auto;
+}
+
+.log {
+  margin-top: 8px;
+  font-family: monospace;
+}
+
+input,select,label,.submit, .title  {
+  margin-bottom: -10px!important;
+}

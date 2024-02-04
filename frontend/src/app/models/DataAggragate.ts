@@ -202,8 +202,9 @@ export interface ChwsUpdateDrugInfo {
     delivered_quantity: number
     theoretical_quantity_to_order: number
     observations: number
-    userId?: string
-    dhisusersession?: string
+    userId?: string | null | undefined
+    dhisusername?: string
+    dhispassword?: string
     forms: string[]
     sources: string[]
 }
@@ -223,8 +224,9 @@ export interface MeetingReport {
   absent_persons_ids: number[]
   other_persons: string
   doNotUpdate: boolean
-  dhisusersession?: string
-  userId?: string
+  dhisusername?: string
+  dhispassword?: string
+  userId?: string | null | undefined
 }
 
 export interface Person {
@@ -232,14 +234,16 @@ export interface Person {
 //   team: Team|number;
   name: string;
   email?: string;
-  dhisusersession?: string
-  userId?: string
+  dhisusername?: string
+  dhispassword?: string
+  userId?: string | null | undefined
 }
 
 export interface Team {
   id?: number
   show: boolean
   name: string
-  dhisusersession?: string
-  userId?: string
+  dhisusername?: string
+  dhispassword?: string
+  userId?: string | null | undefined
 }

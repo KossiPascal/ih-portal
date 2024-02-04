@@ -2,130 +2,151 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { User } from "@ih-models/User";
-import moment from "moment";
-import { Functions, notNull } from "@ih-app/shared/functions";
-import { AppStorageService } from "./cookie.service";
-import { Chws } from "@ih-app/models/Sync";
-import { Roles } from "../shared/roles";
+import { CustomHttpHeaders, backenUrl, notNull, saveCurrentUrl } from "@ih-app/shared/functions";
+import { GetRolesIdsOrNames, UserRoles } from "../models/Roles";
+import { AppStorageService } from "./local-storage.service";
 
-Functions
 @Injectable({
   providedIn: "root",
 })
 export class AuthService {
+  private objectStoreName: string = 'userData';
 
-  constructor(private store:AppStorageService, private router: Router, private http: HttpClient) { }
+  constructor(private router: Router, private http: HttpClient, private store: AppStorageService) { }
 
-  private roles = new Roles(this.store);
-
-  public userValue(): User | null {
-      try {
-        const data = this.store.get('user');
-          var userData: User = JSON.parse(data);
-          userData.userLogo = 'assets/images/default_icon.png';
-          return userData;
-      } catch (error) {}
-      return null;
+  setUser(user: User): void {
+    const uLogo = user.userLogo;
+    user.userLogo = uLogo && uLogo != '' ? uLogo : 'assets/images/default_icon.png';
+    this.store.set(this.objectStoreName, JSON.stringify(user), user.useLocalStorage);
   }
 
-  public tokenIsNotEmpty(): boolean {
-    if (this.userValue() != null) {
-      const token = this.userValue()!.token;
-      return token != null && token != undefined && token != "" && token.length > 0;
+  currentUser(): User | null {
+    try {
+      return JSON.parse(this.store.get(this.objectStoreName)) || null;
+    } catch (error) {
+      return null;
     }
+  }
 
-    return false;
+  getToken(): string | null | undefined {
+    return this.currentUser()?.token;
+  }
+
+  getExpiresIn(): number | null | undefined {
+    return this.currentUser()?.expiresIn;
+  }
+
+  getUserId(): string | null | undefined {
+    return this.currentUser()?.id;
+  }
+
+  getDefaultPage(): string | null | undefined {
+    const user = this.currentUser();
+    if (user) {
+      const defaultPages = GetRolesIdsOrNames(user?.roles as UserRoles[], 'default_page');
+      return defaultPages ? (defaultPages as string[])[0] : '';
+    }
+    return;
   }
 
   public isLoggedIn(): boolean {
-    if (this.getExpiration()) {
-      return moment().isBefore(this.getExpiration());
-    }
-    return false;
-  }
-
-  isLoggedOut() {
-    return !this.isLoggedIn();
-  }
-
-  getExpiration(): moment.Moment | null {
-    if (this.userValue()) {
-      const expiration = this.userValue()!.expiresIn;
-      if (expiration) {
-        const expiresAt = JSON.parse(expiration);
-        return moment(expiresAt);
-      }
-    }
-    return null;
+    const expiresIn = this.currentUser()?.expiresIn;
+    return expiresIn ? Date.now() < expiresIn : false;
   }
 
   getAllUsers(): any {
-    if (!this.isLoggedIn() || this.userValue() == null) this.logout();
-    const user = this.userValue();
-    const sendParams = { userId: user?.id, dhisusersession: user?.dhisusersession };
-
-      return this.http.post(`${Functions.backenUrl()}/user/all`, sendParams, Functions.HttpHeaders(this));
+    const userId = this.getUserId();
+    const sendParams = { userId: userId, dhisusername: undefined, dhispassword: undefined };
+    return this.http.post(`${backenUrl()}/auth-user/users-list`, sendParams, CustomHttpHeaders(this.store));
   }
 
   getUserBy(id: string): any {
-    if (!this.isLoggedIn() || this.userValue() == null) this.logout();
-    const user = this.userValue();
-    const sendParams = { userId: user?.id, dhisusersession: user?.dhisusersession };
-
-      return this.http.post(`${Functions.backenUrl()}/user/${id}`, sendParams, Functions.HttpHeaders(this));
+    const userId = this.getUserId();
+    const sendParams = { userId: userId, dhisusername: undefined, dhispassword: undefined };
+    return this.http.post(`${backenUrl()}/auth-user/${id}`, sendParams, CustomHttpHeaders(this.store));
   }
 
   updateUser(user: User): any {
-    if (!this.isLoggedIn() || this.userValue() == null) this.logout();
-    const thisuser = this.userValue();
-    const sendParams = { userId: thisuser?.id, dhisusersession: thisuser?.dhisusersession, user_to_update: user };
-
-      return this.http.post(`${Functions.backenUrl()}/user/update`, sendParams, Functions.HttpHeaders(this));
+    const userId = this.getUserId();
+    user.dhisusername = undefined;
+    user.dhispassword = undefined;
+    const sendParams = { userId: userId, user: user };
+    return this.http.post(`${backenUrl()}/auth-user/update-user`, sendParams, CustomHttpHeaders(this.store));
   }
 
   deleteUser(user: User): any {
-    if (!this.isLoggedIn() || this.userValue() == null) this.logout();
-    const thisuser = this.userValue();
-    const sendParams = { userId: thisuser?.id, dhisusersession: thisuser?.dhisusersession , user_to_delete: user};
-
-    return this.http.post(`${Functions.backenUrl()}/user/delete`, sendParams, Functions.HttpHeaders(this));
+    const userId = this.getUserId();
+    user.dhisusername = undefined;
+    user.dhispassword = undefined;
+    const sendParams = { userId: userId, user: user };
+    return this.http.post(`${backenUrl()}/auth-user/delete-user`, sendParams, CustomHttpHeaders(this.store));
   }
 
-  alreadyLogin(redirecUrl?: string) {
-    if (this.isLoggedIn()) location.href = redirecUrl??this.userValue()?.defaultRedirectUrl??'';
-  }
-  
-  register(user: User): any {
-    const canProcide = !this.isLoggedIn() || this.roles.isSuperUser();
-      return canProcide ? this.http.post(`${Functions.backenUrl()}/auth/register`, user, Functions.HttpHeaders(this)) : this.alreadyLogin();
+  public AlreadyLogin() {
+    if (this.isLoggedIn()) {
+      return this.GoToDefaultPage();
+    }
   }
 
-  login(username: string, password: string): any {
-      const sendParams = { username: username, password: password };
-      console.log(sendParams);
-      return !this.isLoggedIn() ? this.http.post(`${Functions.backenUrl()}/auth/login`, sendParams, Functions.HttpHeaders(this)) : this.alreadyLogin();
+  public GoToDefaultPage() {
+    const default_page = this.getDefaultPage();
+    if (default_page && default_page!='') {
+      // location.href = dpUrl;
+      this.router.navigate([default_page]);
+      return;
+    }
+    this.logout();
+    return;
+  }
+
+  register(user: User, forceRegister: boolean = false): any {
+    return this.http.post(`${backenUrl()}/auth-user/register`, user, CustomHttpHeaders(this.store));
+  }
+
+  login(params: { credential: string, password: string }): any {
+    return this.http.post(`${backenUrl()}/auth-user/login`, params, CustomHttpHeaders(this.store));
+  }
+
+  NewUserToken(updateReload:boolean = false): any {
+    const userId = this.getUserId();
+    return this.http.post(`${backenUrl()}/auth-user/newToken`, { userId: userId, updateReload:updateReload, dhisusername: undefined, dhispassword: undefined }, CustomHttpHeaders(this.store));
+  }
+
+  CheckReloadUser(): any {
+    const userId = this.getUserId();
+    return this.http.post(`${backenUrl()}/auth-user/check-reload-user`, { userId: userId, dhisusername: undefined, dhispassword: undefined }, CustomHttpHeaders(this.store));
+  }
+
+  GetAllRoles(): any {
+    return this.http.post(`${backenUrl()}/auth-user/roles-list`, CustomHttpHeaders(this.store));
+  }
+
+  CreateRole(params: UserRoles): any {
+    return this.http.post(`${backenUrl()}/auth-user/create-role`, params, CustomHttpHeaders(this.store));
+  }
+
+  UpdateRole(params: UserRoles): any {
+    return this.http.post(`${backenUrl()}/auth-user/update-role`, params, CustomHttpHeaders(this.store));
+  }
+
+  DeleteRole(params: UserRoles): any {
+    return this.http.post(`${backenUrl()}/auth-user/delete-role`, params, CustomHttpHeaders(this.store));
+  }
+
+  UserActionsList(): any {
+    return this.http.post(`${backenUrl()}/auth-user/actions-list`, CustomHttpHeaders(this.store));
+  }
+
+  UserPagesList(): any {
+    return this.http.post(`${backenUrl()}/auth-user/pages-list`, CustomHttpHeaders(this.store));
   }
 
   logout() {
-    Functions.saveCurrentUrl(this.router);
-    localStorage.removeItem("user");
-    localStorage.removeItem("chw_found");
+    saveCurrentUrl(this.router);
+    this.store.delete(this.objectStoreName);
     localStorage.removeItem("IFrame");
-    
-    
-    // this.router.navigate(["auths/login"]);
-    location.href = 'auths/login';
+    // location.href = 'auths/login';
+    this.router.navigate(["auths/login"]);
   }
-
-  public chwsOrgUnit(): Chws|null {
-    try {
-      if (notNull(this.store.get('chw_found'))) {
-        return JSON.parse(this.store.get('chw_found') ?? '') as Chws;
-      };
-    } catch (error) {
-      
-    }
-    return null;
-}
 
 }

@@ -1,16 +1,18 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
-import { SwUpdate } from '@angular/service-worker';
-import { takeWhile } from 'rxjs/operators';
 import { AuthService } from '@ih-services/auth.service';
-import { interval, Subscription } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigService } from './services/config.service';
-import { Roles } from './shared/roles';
 import { User } from './models/User';
-import { AppStorageService } from './services/cookie.service';
+
 import { Chws } from './models/Sync';
 import { Consts } from './shared/constantes';
-import { Title } from '@angular/platform-browser';
+import { GetRolesIdsOrNames, Roles, UserRoles } from './models/Roles';
+import { AppLink } from './models/Interfaces';
+import { Router } from '@angular/router';
+import { ServiceWorkerService } from './services/service-worker.service';
+import { notNull } from './shared/functions';
+import { interval, Subject } from 'rxjs';
+import { takeWhile, takeUntil } from 'rxjs/operators';
+import { AppStorageService } from './services/local-storage.service';
 
 declare var $: any;
 @Component({
@@ -20,253 +22,354 @@ declare var $: any;
 })
 
 export class AppComponent implements OnInit {
-  isAuthenticated!: boolean;
-  errorFound!: boolean;
-  updateCheckText = '';
-  isOnline!: boolean;
-  modalVersion!: boolean;
-  modalPwaEvent!: any;
-  modalPwaPlatform: 'ios' | 'android' | undefined;
-  private readonly retryFailedUpdateAfterSec = 5 * 60;
-  private existingUpdateLoop?: any;
-
+  isOnline: boolean = false;
   appLogo: any = Consts.APP_LOGO_1
-  userData: User | null = this.auth.userValue()
-  chwOU: Chws | null = null;
-  checkForAppNewVersion: boolean = true;
-
+  infosModalMessage: string = '';
+  private onDestroy$ = new Subject<void>();
+  countdown: number = 10;
+  // updateSubscription?: Subscription;
   separation: string = '_____________________________________';
 
-  @HostBinding('attr.app-version')
-  appVersion: any;
-  updateSubscription?: Subscription;
+  checkChangeForUser!: boolean;
 
-  constructor(private titleService: Title, private store: AppStorageService, private conf: ConfigService, public translate: TranslateService, private auth: AuthService, private sw: SwUpdate) {
-    this.isAuthenticated = this.auth.isLoggedIn();
-    this.isOnline = false;
-    this.modalVersion = false;
-
-    translate.addLangs(['en', 'fr']);
-    translate.setDefaultLang('en');
-    const browserLang = translate.getBrowserLang();
-    translate.use(browserLang?.match(/en|fr/) ? browserLang : 'en'); //this enabled setting lang automatically
-    // translate.use('en');
-    // this.updateService.checkForUpdates();
-    // if(this.auth.isLoggedIn()) this.sync.syncAllToLocalStorage();
-
+  constructor(public translate: TranslateService, private auth: AuthService, private store: AppStorageService, private swService: ServiceWorkerService, private router: Router) {
+    this.CheckReloadUser();
   }
-
-  public roles = new Roles(this.store);
 
   ngOnInit(): void {
-    this.chwOU = this.auth.chwsOrgUnit();
-    this.UpdateVersion(false);
-    const appTitle = this.titleService.getTitle();
-    this.checkForAppNewVersion = true;
+    this.translate.addLangs(['en', 'fr']);
+    this.translate.setDefaultLang('en');
+    const browserLang = this.translate.getBrowserLang();
+    this.translate.use(browserLang?.match(/en|fr/) ? browserLang : 'en');
 
-    this.getMsg('offlinemsg');
-    this.errorFound = window.location.pathname.includes('error/');
-    this.isAuthenticated = this.auth.isLoggedIn();
-
-    this.updateOnlineStatus();
-    window.addEventListener('online', this.updateOnlineStatus.bind(this));
-    window.addEventListener('offline', this.updateOnlineStatus.bind(this));
-    // this.checkForUpdates();
-    // this.versionUpdateChecker();
-    this.updateChecker();
-    this.appVersion = localStorage.getItem('appVersion');
+    this.swService.registerServiceWorker();
+    this.swService.checkForUpdates();
+    this.checkChangeForUser = this.isAuthenticated();
   }
 
-
-  versionUpdateChecker() {
-    // This avoids multiple updates retrying in parallel
-    if (this.existingUpdateLoop) {
-      clearTimeout(this.existingUpdateLoop);
-      this.existingUpdateLoop = undefined;
-    }
-
-    window.navigator.serviceWorker.getRegistrations()
-      .then((registrations) => {
-        const registration = registrations && registrations.length && registrations[0];
-        if (!registration) {
-          console.warn('Cannot update service worker - no active workers found');
-          return;
-        }
-
-        registration.onupdatefound = () => {
-          const installingWorker = registration.installing;
-          if (installingWorker != null) {
-            installingWorker.onstatechange = () => {
-              switch (installingWorker.state) {
-                case 'activated':
-                  registration.onupdatefound = null;
-                  this.ShowUpdateVersionModal();
-                  break;
-                case 'redundant':
-                  console.warn(
-                    'Service worker failed to install or marked as redundant. ' +
-                    `Retrying install in ${this.retryFailedUpdateAfterSec}secs.`
-                  );
-                  this.existingUpdateLoop = setTimeout(() => this.versionUpdateChecker(), this.retryFailedUpdateAfterSec * 1000);
-                  registration.onupdatefound = null;
-                  break;
-                default:
-                  console.debug(`Service worker state changed to ${installingWorker.state}!`);
-              }
-            };
-          }
-        };
-
-        registration.update();
-      });
+  roles(): Roles {
+    return new Roles(this.auth);
+  }
+  cancelDefaultAction(event: Event) {
+    event.preventDefault();
   }
 
-
-
-  updateChecker() {
-    if (this.sw.isEnabled) {
-      this.sw.available.subscribe(() => {
-        // if (confirm("New version available. Load New Version?")) window.location.reload();
-        this.ShowUpdateVersionModal();
-      });
-    }
+  currentUser(): User | null {
+    return this.auth.currentUser();
   }
 
+  chwOU(): Chws | null | undefined {
+    return this.currentUser()?.chw_found;
+  };
 
-  async checkForUpdates() {
-    console.log('Service Worker is Enable: ', this.sw.isEnabled);
-    if (this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion) this.checkForAvailableVersion();
-    interval(30000)
-      .pipe(takeWhile(() => this.sw.isEnabled && this.auth.isLoggedIn() && this.checkForAppNewVersion))
+  userPages(): string[] {
+    return (GetRolesIdsOrNames(this.currentUser()?.roles as UserRoles[], 'pages') ?? []) as string[];
+  };
+
+  @HostBinding('attr.app-version')
+  appVersion(): string | null {
+    return localStorage.getItem('appVersion');
+  }
+
+  errorFound(): boolean {
+    return window.location.pathname.includes('auths/error/');
+  }
+
+  isAuthenticated(): boolean {
+    return this.auth.isLoggedIn();
+  }
+
+  ngOnDestroy() {
+    this.onDestroy$.next();
+    this.onDestroy$.complete();
+  }
+
+  CheckReloadUser() {
+    interval(5000)
+      .pipe(
+        takeWhile(() => this.checkChangeForUser),
+        takeUntil(this.onDestroy$)
+      )
       .subscribe(() => {
-        this.sw.checkForUpdate().then((updateFound) => {
-          if (updateFound) this.checkForAvailableVersion();
-        });
+        console.log('Code executed every 5 seconds');
+        this.auth.CheckReloadUser().subscribe((res: { status: number, data: User | string }) => {
+          if (res.status != 200) {
+            this.checkChangeForUser = false;
+            this.infosModalMessage = 'Actualisation de la page imminente dans';
+            $('#logout-reload').trigger('click');
+            this.startCountdown(10, 'reload');
+          } else {
+            this.auth.setUser(res.data as User)
+          }
+        }, (err: any) => { });
       });
   }
 
-  private checkForAvailableVersion(): void {
-    this.sw.activateUpdate().then((activate) => {
-      if (activate) {
-        this.sw.versionUpdates.subscribe(evt => {
-          switch (evt.type) {
-            case 'VERSION_DETECTED':
-              // console.log(`Downloading new app version: ${evt.version.hash}`);
-              this.ShowUpdateVersionModal();
-              break;
-            case 'VERSION_READY':
-              // console.log(`Current app version: ${evt.currentVersion.hash}`);
-              // console.log(`Last app version: ${evt.latestVersion.hash}`);
-              break;
-            case 'NO_NEW_VERSION_DETECTED':
-              // console.log(`Current app version: '${evt.version.hash}'`);
-              break;
-            case 'VERSION_INSTALLATION_FAILED':
-              // console.log(`Failed to install app version '${evt.version.hash}': ${evt.error}`);
-              break;
-          }
-        });
-      } else {
-        // console.log('Service Worker for Update is Inactive');
+  startCountdown(count: number, action: 'reload' | 'inactivity'): void {
+    this.countdown = count;
+    const countdownInterval = setInterval(() => {
+      this.countdown--;
+      if (this.countdown <= 0) {
+        clearInterval(countdownInterval);
+        if (action == 'reload') {
+          // this.logAllOut();
+          this.UpdateUserToken(true);
+        }
+        else if (action == 'inactivity') {
+
+        }
       }
-    });
+    }, 1000);
   }
-
-  clickModal(btnId: string) {
-    $('#' + btnId).trigger('click');
-  }
-
-  
-
-  ShowUpdateVersionModal() {
-    this.checkForAppNewVersion = false;
-    this.clickModal('active-update-modal')
-  }
-
-  UpdateVersion(reload: boolean = true) {
-    this.conf.appVersion().subscribe((newVersion: any) => {
-      if (reload) this.ShowUpdateVersionModal()
-      localStorage.setItem('appVersion', newVersion);
-      this.appVersion = newVersion;
-      if (reload) this.clickModal('close-update-modal');
-      if (reload) window.location.reload();
-    }, (err: any) => { console.log(err.toString()) });
-  }
-
 
   appVersionExist(): boolean {
-    var nullField: any[] = [undefined, 'undefined', null, 'null', ''];
-    return !nullField.includes(this.appVersion);
+    return notNull(this.appVersion());
   }
 
-  private updateOnlineStatus(): void {
-    this.isOnline = window.navigator.onLine;
-    console.info(`isOnline=[${this.isOnline}]`);
+  logout(event: Event) {
+    event.preventDefault();
+    if (confirm("DECONNEXION\nSouhaitez-vous vraiment vous déconnecter?")) {
+      this.logAllOut();
+    }
   }
 
-  // private loadModalPwa(): void {
-  //   if (this.platform.ANDROID) {
-  //     window.addEventListener('beforeinstallprompt', (event: any) => {
-  //       event.preventDefault();
-  //       this.modalPwaEvent = event;
-  //       this.modalPwaPlatform = 'android';
-  //     });
-  //   }
-
-  //   if (this.platform.IOS && this.platform.SAFARI) {
-  //     const isInStandaloneMode = ('standalone' in window.navigator) && ((<any>window.navigator)['standalone']);
-  //     if (!isInStandaloneMode) {
-  //       this.modalPwaPlatform = 'ios';
-  //     }
-  //   }
-  // }
-
-  public closeVersion(): void {
-    this.modalVersion = false;
+  LongInactivityAction(count: number) {
+    this.infosModalMessage = "Long moment d'inactivité, veuillez bouger la souris pour ne pas être déconnecté. Temps restant";
+    $('#logout-reload').trigger('click');
+    this.startCountdown(count, 'inactivity');
   }
 
-
-
-  public addToHomeScreen(): void {
-    this.modalPwaEvent.prompt();
-    this.modalPwaPlatform = undefined;
-  }
-
-  public closePwa(): void {
-    this.modalPwaPlatform = undefined;
-  }
-
-  logout() {
+  logAllOut() {
+    this.swService.unregisterServiceWorker();
     this.auth.logout();
   }
 
-
-  // function msg
-  getMsg(msgClass: string) {
-    let element = document.querySelector('.' + msgClass)!;
-    if (element != null) {
-      element.className += " movedown";
-      setTimeout(() => {
-        element.classList.forEach(classname => {
-          classname == "movedown" ? undefined : element.classList.remove('movedown');
-        })
-      }, 4000);
-    }
-  }
-
-
   pageTouched(event: Event) {
-    const d1 = this.auth.getExpiration()?.toDate();
-    const d2 = new Date();
-    if (d1) {
-      const d11 = d1.getTime();
-      const d22 = d2.getTime();
-      if ((d11 - 300000) < d22) { // avant 5 min d'action
-        this.conf.NewUserToken().subscribe((res: any) => {
-          this.store.set("user", JSON.stringify(res.data));
-        }, (err: any) => { console.log(err.error) });
+    const expiresIn = this.auth.getExpiresIn();
+    if (expiresIn) {
+      // const restOfTime = Math.floor((Date.now() - expiresIn) / 1000);
+      if ((Number(expiresIn) - (1000 * 60 * 5)) < Date.now()) { // avant 5 min d'action
+        this.UpdateUserToken();
       }
     }
   }
+
+  UpdateUserToken(reloadApp: boolean = false) {
+    this.auth.NewUserToken(reloadApp).subscribe((res: { status: number, data: User | string }) => {
+      if (res.status == 200) {
+        if (reloadApp) {
+          if (confirm("Mise à jour disponible!\nAppliquer les modifications.\nLa page va se recharger, veuillez sauvegarder vos données")) {
+            this.auth.setUser(res.data as User);
+            // window.location.reload();
+          }
+        } else {
+          this.auth.setUser(res.data as User);
+        }
+      }
+      $('#logout-reload-dismiss').trigger('click');
+      this.checkChangeForUser = true;
+    }, (err: any) => { console.log(err.error) });
+  }
+
+  NavigateTo(event: Event, link: string) {
+    event.preventDefault();
+    this.router.navigate([link]);
+  }
+
+  HasPageAccess(link: string): boolean {
+    return this.userPages().includes(link.trim())
+  }
+
+  SHOW_ADMIN(): boolean {
+    console.log(this.userPages);
+    return this.ADMIN.some(apl => this.userPages().includes(apl.link.trim()));
+  }
+  SHOW_VOIR_DONNEES_ASC(): boolean {
+    return this.VOIR_DONNEES_ASC.some(apl => this.userPages().includes(apl.link.trim()));
+  }
+  SHOW_GESTION_DE_DONNEES(): boolean {
+    return this.GESTION_DE_DONNEES.some(apl => this.userPages().includes(apl.link.trim()));
+  }
+  SHOW_GESTIONS_DE_RAPPORTS(): boolean {
+    return this.GESTIONS_DE_RAPPORTS.some(apl => this.userPages().includes(apl.link.trim()));
+  }
+  SHOW_GESTIONS_DES_ASC(): boolean {
+    return this.GESTIONS_DES_ASC.some(apl => this.userPages().includes(apl.link.trim()));
+  }
+  SHOW_CHWS_PAGES(): boolean {
+    return this.CHWS_PAGES.some(apl => this.userPages().includes(apl.link.trim()));
+  }
+
+
+  ADMIN: AppLink[] = [
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'admin/users-list',
+      label: 'Admin Users',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'admin/roles-list',
+      label: 'Admin Roles',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'admin/database-utils',
+      label: 'Admin Truncate Database',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'admin/documentations',
+      label: 'Documentation',
+      show: true
+    }
+  ];
+  VOIR_DONNEES_ASC: AppLink[] = [
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'view-chws-data/dashboard1',
+      label: 'Activité Des ASC',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'view-chws-data/dashboard2',
+      label: 'Détails Par ASC',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'view-chws-data/dashboard3',
+      label: 'Effectifs Des Patients',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'view-chws-data/dashboard4',
+      label: 'Visite de Ménages',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'view-chws-data/highchartmap1',
+      label: 'M . A . P - 1',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'view-chws-data/highchartmap2',
+      label: 'M . A . P - 2',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'view-chws-data/highchartmap3',
+      label: 'M . A . P - 3',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'view-chws-data/googlemap',
+      label: 'GOOGLE MAP',
+      show: true
+    }
+  ];
+  GESTION_DE_DONNEES: AppLink[] = [
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'manage-data/auto-full-sync',
+      label: 'Sync All One Time',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'manage-data/sync-steply',
+      label: 'Sync OrgUnits & Data',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'manage-data/sync-to-dhis2',
+      label: 'Données Apps vers Dhis2',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'manage-data/sync-weekly-data',
+      label: 'ThinkMd par semaine',
+      show: true
+    }
+  ];
+  GESTIONS_DE_RAPPORTS: AppLink[] = [
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'manage-reports/meeting-report',
+      label: 'RAPPORT DE REUNION',
+      show: true
+    }
+  ];
+  GESTIONS_DES_ASC: AppLink[] = [
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'manage-chws/replacements',
+      label: 'Gestion ASC Remplaçantes',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'manage-chws/chws-drug',
+      label: 'Situation Médicament ASC',
+      show: true
+    },
+  ];
+  CHWS_PAGES: AppLink[] = [
+    {
+      icon: 'fas far fa-info',
+      link: 'chws/dashboard1',
+      label: 'Activité Des ASC',
+      show: true
+    },
+    {
+      icon: 'fas far fa-info',
+      link: 'chws/dashboard2',
+      label: 'Détails Par ASC',
+      show: true
+    },
+    {
+      icon: 'fas far fa-info',
+      link: 'chws/dashboard3',
+      label: ' Effectifs Des Patients',
+      show: true
+    },
+    {
+      icon: 'fas far fa-info',
+      link: 'chws/dashboard4',
+      label: 'Visite de Ménages',
+      show: true
+    },
+    {
+      icon: 'fas far fa-info',
+      link: 'chws/select_orgunit',
+      label: 'Choisir ASC',
+      show: true
+    },
+    {
+      icon: 'fas far fa-bell',
+      link: 'auths/cache-list',
+      label: 'Effacer Le Cache',
+      show: true
+    },
+  ];
+
+  //   auths/login
+  //   auths/register
+  //   auths/lock-screen
+  //   auths/change-password
+  //   auths/forgot-password
+  //   auths/error
+
 }
 
