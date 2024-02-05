@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { User, getUsersRepository, UpdateUserData } from '../entity/User';
 import { notEmpty } from '../utils/functions';
 import { Roles, GetRolesListOrNamesList, getRolesRepository } from '../entity/Roles';
-const crypto = require('crypto');
+import crypto from 'crypto';
 // const { v4: uuidv4 } = require('uuid');
 // const { shortid } = require('shortid');
 
@@ -13,6 +13,21 @@ const crypto = require('crypto');
 //     } while (datas.some((data: any) => (data as { id: string }).id === newId));
 //     return newId;
 // }
+
+function hashPassword(password:string):{ salt: string, hashedPassword: string } {
+    // Generate a random salt
+    const salt = crypto.randomBytes(16).toString('hex');
+    // Hash the password with the salt using SHA-256
+    const hashedPassword = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha256').toString('hex');
+    return { salt, hashedPassword };
+}
+
+function verifyPassword(password: string, salt: string, hashedPassword: string): boolean {
+    // Hash the provided password and salt
+    const inputHashedPassword = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha256').toString('hex');
+    // Compare the stored hash with the newly generated hash
+    return inputHashedPassword === hashedPassword;
+  }
 
 function generateShortId(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -39,55 +54,58 @@ export async function CurrentUser(currentUserId: string): Promise<User | null> {
 }
 
 export class AuthUserController {
-    static loginTest = async (username:string, password:string) => {
-            const userRepo = await getUsersRepository();
-            const rolRepo = await getRolesRepository();
+    static loginTest = async (username: string, password: string) => {
+        const userRepo = await getUsersRepository();
+        const rolRepo = await getRolesRepository();
 
-            const roleLs = [
-                'super_admin',
-                'user_manager',
-                'admin',
-                'data_manager',
-                'chws_data_viewer',
-                'reports_manager',
-                'chws_manager',
-                'chws'
-            ];
+        const roleLs = [
+            'super_admin',
+            'user_manager',
+            'admin',
+            'data_manager',
+            'chws_data_viewer',
+            'reports_manager',
+            'chws_manager',
+            'chws'
+        ];
 
-            for (let i = 0; i < roleLs.length; i++) {
-                const r = roleLs[i];
-                const role: Roles = new Roles();
-                role.id = i+1;
-                role.name = r;
-                role.pages = this.pagesList;
-                role.actions = this.actionsList;
-                role.default_page = this.pagesList[0];
-                await rolRepo.save(role);
-            }
+        for (let i = 0; i < roleLs.length; i++) {
+            const r = roleLs[i];
+            const role: Roles = new Roles();
+            role.id = i + 1;
+            role.name = r;
+            role.pages = this.pagesList;
+            role.actions = this.actionsList;
+            role.default_page = this.pagesList[0];
+            await rolRepo.save(role);
+        }
 
-            const user = await userRepo.findOneBy({id:'zearydbk253'});
+        const user = await userRepo.findOneBy({ id: 'zearydbk253' });
 
-            if(user){
-                user.id = 'zA7a5Wy9bkF';
-                user.username = username;
-                user.fullname = 'Kossi TSOLEGNAGBO';
-                user.email = 'kossi.tsolegnagbo@aiesec.net';
-                // user.password = await bcrypt.hash(password, 12);
-                user.roles = ['1', '2', '3', '4', '5'];
-                user.meeting_report = [];
-                user.expiresIn = 0;
-                user.token = '';
-                user.isActive = true;
-                user.isDeleted = false;
-                user.mustLogin = true;
-                user.useLocalStorage = false;
+        if (user) {
+            const { salt, hashedPassword } = hashPassword(password);
 
-                const finalUser = await UpdateUserData(user);
-    
-                await userRepo.update('zearydbk253',finalUser);
+            user.id = 'zA7a5Wy9bkF';
+            user.username = username;
+            user.fullname = 'Kossi TSOLEGNAGBO';
+            user.email = 'kossi.tsolegnagbo@aiesec.net';
+            user.password = hashedPassword;
+            user.salt = salt;
+            user.roles = ['1', '2', '3', '4', '5'];
+            user.meeting_report = [];
+            user.expiresIn = 0;
+            user.token = '';
+            user.isActive = true;
+            user.isDeleted = false;
+            user.mustLogin = true;
+            user.useLocalStorage = false;
 
-                console.log(finalUser)
-            }
+            const finalUser = await UpdateUserData(user);
+
+            await userRepo.update('zearydbk253', finalUser);
+
+            console.log(finalUser)
+        }
 
 
     }
@@ -110,11 +128,13 @@ export class AuthUserController {
             if (!userFound || !userFound.isActive || userFound.isDeleted) {
                 return res.status(201).json({ status: 201, data: 'Invalid user or inactive' });
             }
+            
+            const { salt, hashedPassword } = hashPassword(password);
+            const isPasswordValid = verifyPassword(password, salt, hashedPassword);
 
-            // const isEqual = await bcrypt.compare(password, userFound.password);
-            // if (!isEqual) {
-            //     return res.status(201).json({ status: 201, data: 'Invalid password' });
-            // }
+            if (!isPasswordValid) {
+                return res.status(201).json({ status: 201, data: 'Invalid password' });
+            }
 
             const finalUser = await UpdateUserData(userFound);
 
@@ -142,13 +162,16 @@ export class AuthUserController {
 
             if (userFound && notEmpty(userFound)) return res.status(201).json({ status: 201, data: 'Username or email already in use' });
             var users: User[] = await userRepo.find();
+            
+            const { salt, hashedPassword } = hashPassword(password);
 
             const user = new User();
             user.id = availableUid(users);
             user.username = username;
             user.fullname = fullname;
             user.email = email;
-            // user.password = await bcrypt.hash(password, 12);
+            user.password = hashedPassword;
+            user.salt = salt;
             user.roles = roles;
             user.meeting_report = meeting_report;
             user.expiresIn = expiresIn;
@@ -165,14 +188,14 @@ export class AuthUserController {
 
     static newToken = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {userId, updateReload} = req.body;
+            const { userId, updateReload } = req.body;
             if (userId) {
                 const userRepo = await getUsersRepository();
                 const user = await userRepo.findOneBy({ id: userId });
                 if (!user || user && (!user.isActive || user.isDeleted)) return res.status(201).json({ status: 201, data: 'error' });
 
                 const userData = await UpdateUserData(user);
-                if(updateReload == true) userData.mustLogin = false;
+                if (updateReload == true) userData.mustLogin = false;
                 const finalUser = await userRepo.save(userData);
                 finalUser.password = '';
 
@@ -236,7 +259,11 @@ export class AuthUserController {
             const userFound = await userRepo.findOneBy({ id: id });
             if (!userFound) return res.status(201).json({ status: 201, data: 'User not found' });
 
-            // if (password && notEmpty(password)) userFound.password = await bcrypt.hash(password, 12);
+            if (password && notEmpty(password)) {
+                const { salt, hashedPassword } = hashPassword(password);
+                userFound.password = hashedPassword;
+                userFound.salt = salt;
+            }
             if (fullname && notEmpty(fullname)) userFound.fullname = fullname;
             if (email && notEmpty(email)) userFound.email = email;
             if (roles && notEmpty(roles)) userFound.roles = roles;
@@ -267,9 +294,13 @@ export class AuthUserController {
             if (!userFound) return res.status(201).json({ status: 201, data: 'User not found' });
 
             if (old_password && notEmpty(old_password) && new_password && notEmpty(new_password)) {
-                // const isOldPasswordValid = await bcrypt.compare(old_password, userFound.password);
-                // if (!isOldPasswordValid) return res.status(201).json({ status: 201, data: 'Old password does not match' });
-                // if (new_password && notEmpty(new_password)) userFound.password = await bcrypt.hash(new_password, 12);
+                const isOldPasswordValid = verifyPassword(old_password, userFound.salt, userFound.password);
+                if (!isOldPasswordValid) return res.status(201).json({ status: 201, data: 'Old password does not match' });
+                if (new_password && notEmpty(new_password)) {
+                    const { salt, hashedPassword } = hashPassword(new_password);
+                    userFound.password = hashedPassword;
+                    userFound.salt = salt;
+                }
             }
             userFound.mustLogin = true;
             await userRepo.save(userFound);

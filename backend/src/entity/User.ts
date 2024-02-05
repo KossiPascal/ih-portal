@@ -31,6 +31,9 @@ export class User {
     @Column({ type: 'varchar', nullable: true })
     password!: string
 
+    @Column({ type: 'varchar', nullable: true })
+    salt!: string
+
     // @ManyToOne(() => Roles, role => role.id, { eager: true, nullable: true })
     // @JoinColumn({ name: 'role_id', referencedColumnName: 'id' })
     // role!:Roles
