@@ -7,17 +7,16 @@ export interface User {
   fullname: string
   email?: string
   // password?: string
-  roles: UserRoles[]|string[]
+  roles: UserRoles[] | string[]
   meeting_report: string[]
   isActive: boolean
-  expiresIn: number|undefined|null
+  expiresIn: number | undefined | null
   token: string
   dhisusername?: string
   dhispassword?: string
   userLogo: string
-  mustLogin:boolean
-  useLocalStorage:boolean
-  chw_found:Chws|null
+  mustLogin: boolean
+  useLocalStorage: boolean
   // pages:string[]
   // actions:string[]
   // default_page:string

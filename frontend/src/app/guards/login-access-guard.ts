@@ -19,7 +19,7 @@ export class LoginAccessGuard implements CanActivate, OnDestroy {
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
         const roles = new Roles(this.auth);
-        if (!this.auth.isLoggedIn() || roles.hasNoAccess()) {
+        if (!this.auth.isLoggedIn()) {
             this.auth.logout();
             return false;
         }

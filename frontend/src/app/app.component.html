@@ -93,7 +93,7 @@
               <img style="margin-top: -12px;" src="{{ currentUser()?.userLogo }}" width="40"
                 class="img-circle elevation-2" alt="User Image">
 
-              <span style="margin-left: 5px;">{{ roles().isChws() ? chwOU()?.name: currentUser()?.username }}</span>
+              <span style="margin-left: 5px;">{{ roles().isChws() ? ChwLogged()?.name: currentUser()?.username }}</span>
 
             </a>
             <div *ngIf="roles().canViewTopNavigation()" class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
@@ -272,8 +272,6 @@
         </div>
       </div>
     </div>
-
-
 
     <audio id="audio-alert" src="assets/audio/alert.mp3" preload="auto"></audio>
     <audio id="audio-fail" src="assets/audio/fail.mp3" preload="auto"></audio>

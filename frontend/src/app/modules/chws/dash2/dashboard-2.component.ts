@@ -89,7 +89,7 @@ export class ChwsDashboard2Component implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.auth.currentUser();
-    this.chwOU = this.currentUser?.chw_found;
+    this.chwOU = this.auth.ChwLogged();
     if (this.chwOU == null || !notNull(this.chwOU)) {
       // location.href = 'chws/select_orgunit';
       this.router.navigate(['chws/select_orgunit']);

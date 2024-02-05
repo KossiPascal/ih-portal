@@ -41,7 +41,7 @@ export class SelectOrgUnitComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.auth.currentUser();
-    this.chwOU = this.currentUser?.chw_found;
+    this.chwOU = this.auth.ChwLogged();
     this.initAllData();
     this.orgUnitForm = this.createFilterFormGroup();
   }
@@ -121,7 +121,7 @@ export class SelectOrgUnitComponent implements OnInit {
 
   updateChwsOrgUnit() {
     const chwId = this.orgUnitForm.value.chws;
-    const chw_found = this.getChwInfo(returnDataAsArray(notNull(chwId)?chwId:this.chwOU!.id) as string[]);
+    const chwFound = this.getChwInfo(returnDataAsArray(notNull(chwId)?chwId:this.chwOU!.id) as string[]);
     // const filter: any = {
     //   districts: returnDataAsArray(this.orgUnitForm.value.districts) as string[],
     //   sites: returnDataAsArray(this.orgUnitForm.value.sites) as string[],
@@ -129,9 +129,9 @@ export class SelectOrgUnitComponent implements OnInit {
     //   name: chwFound!=null ? chwFound.name : ''
     // }
 
-    if (chw_found!=null && notNull(chw_found)) {
+    if (chwFound!=null && notNull(chwFound)) {
       if (this.currentUser) {
-        this.currentUser.chw_found = chw_found;
+        this.auth.setChwLogged(chwFound);
         this.auth.setUser(this.currentUser);
         const savedUrl = getSavedUrl();
         if (savedUrl && notNull(savedUrl)) {

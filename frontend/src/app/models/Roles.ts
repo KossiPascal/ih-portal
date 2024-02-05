@@ -87,39 +87,39 @@ export class Roles {
         return this.roleName().includes('user_manager') || this.isSuperAdmin();
     }
 
-    isAdmin = (): boolean => {
-        return this.roleName().includes('admin') || this.isSuperAdmin();
-    }
+    // isAdmin = (): boolean => {
+    //     return this.roleName().includes('admin') || this.isSuperAdmin();
+    // }
 
-    isDataManager = (): boolean => {
-        return this.roleName().includes('data_manager') || this.isSuperAdmin();
-    }
+    // isDataManager = (): boolean => {
+    //     return this.roleName().includes('data_manager') || this.isSuperAdmin();
+    // }
 
-    isReportsManager = (): boolean => {
-        return this.roleName().includes('reports_manager') || this.isSuperAdmin();
-    }
+    // isReportsManager = (): boolean => {
+    //     return this.roleName().includes('reports_manager') || this.isSuperAdmin();
+    // }
 
-    isChwsDataViewer = (): boolean => {
-        return this.roleName().includes('chws_data_viewer') || this.isSuperAdmin();
-    }
+    // isChwsDataViewer = (): boolean => {
+    //     return this.roleName().includes('chws_data_viewer') || this.isSuperAdmin();
+    // }
 
-    isChwsManager = (): boolean => {
-        return this.roleName().includes('chws_manager') || this.isSuperAdmin();
-    }
+    // isChwsManager = (): boolean => {
+    //     return this.roleName().includes('chws_manager') || this.isSuperAdmin();
+    // }
+
     isChws = (): boolean => {
         return this.roleName().includes('chws');
     }
 
     
-    hasNoAccess = (): boolean => {
-        return !this.isSuperAdmin() && !this.isUserManager() && !this.isAdmin() && !this.isDataManager() && !this.isReportsManager() && !this.isChwsDataViewer() && !this.isChwsManager() && !this.isChws();
-    }
+    // hasNoAccess = (): boolean => {
+    //     return !this.isSuperAdmin() && !this.isUserManager() && !this.isAdmin() && !this.isDataManager() && !this.isReportsManager() && !this.isChwsDataViewer() && !this.isChwsManager() && !this.isChws();
+    // }
 
 
     canViewLeftNavigation = (): boolean => {
         return this.actions().includes('can_view_left_navigation') || this.isSuperAdmin();
     }
-
     canViewTopNavigation = (): boolean => {
         return this.actions().includes('can_view_top_navigation') || this.isChws() || this.canLogOut() || this.isSuperAdmin();
     }

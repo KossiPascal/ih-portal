@@ -58,9 +58,10 @@ export class AppComponent implements OnInit {
     return this.auth.currentUser();
   }
 
-  chwOU(): Chws | null | undefined {
-    return this.currentUser()?.chw_found;
-  };
+  ChwLogged(): Chws | null |undefined {
+    return this.auth.ChwLogged();
+  }
+  
 
   userPages(): string[] {
     return (GetRolesIdsOrNames(this.currentUser()?.roles as UserRoles[], 'pages') ?? []) as string[];

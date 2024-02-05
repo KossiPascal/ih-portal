@@ -65,12 +65,11 @@ export class MeetingReportComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.auth.currentUser();
-    this.ChwOU = this.currentUser?.chw_found;
+    this.ChwOU = this.auth.ChwLogged();
     if (this.roles.isChws() && (this.ChwOU == null || !notNull(this.ChwOU))){
       // location.href = 'chws/select_orgunit';
       this.router.navigate(['chws/select_orgunit']);
     }
-      
     this.GetPerson();
     this.GetTeams();
     this.GetReports();
@@ -105,7 +104,6 @@ export class MeetingReportComponent implements OnInit {
         && (report.present_persons_ids.map(String)).includes(`${p.id}`) 
         && (report.team as Team).id == teamId;
       });
-     
       this.AbsentPersonsList[teamId] = this.Person$.filter(p => {
         return p.id && report.absent_persons_ids 
         && (report.absent_persons_ids.map(String)).includes(`${p.id}`) 

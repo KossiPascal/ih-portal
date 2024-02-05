@@ -5,6 +5,7 @@ import { User } from "@ih-models/User";
 import { CustomHttpHeaders, backenUrl, notNull, saveCurrentUrl } from "@ih-app/shared/functions";
 import { GetRolesIdsOrNames, UserRoles } from "../models/Roles";
 import { AppStorageService } from "./local-storage.service";
+import { Chws } from "../models/Sync";
 
 @Injectable({
   providedIn: "root",
@@ -26,6 +27,18 @@ export class AuthService {
     } catch (error) {
       return null;
     }
+  }
+
+  ChwLogged(): Chws | null | undefined {
+    try {
+      return JSON.parse(this.store.get('chw_found')) || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  setChwLogged(chws:Chws): void {
+      this.store.set('chw_found', JSON.stringify(chws), true);
   }
 
   getToken(): string | null | undefined {
@@ -191,6 +204,8 @@ export class AuthService {
   logout() {
     saveCurrentUrl(this.router);
     this.store.delete(this.objectStoreName);
+    this.store.delete('chw_found');
+    
     localStorage.removeItem("IFrame");
     // location.href = 'auths/login';
     this.router.navigate(["auths/login"]);
