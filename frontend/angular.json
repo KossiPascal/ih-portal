@@ -199,8 +199,8 @@
           "options": {
             "browserTarget": "app:build",
             "ssl": true,
-            "sslKey": "../local-ssl/localhost.key",
-            "sslCert": "../local-ssl/localhost.crt"
+            "sslKey": "../../ssl/server.key",
+            "sslCert": "../../ssl/server.crt"
         },
         "configurations": {
             "production": {
