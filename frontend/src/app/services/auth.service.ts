@@ -79,11 +79,21 @@ export class AuthService {
     }
   }
 
-  public GoToDefaultPage() {
+  public GoToDefaultPage(forcelogout:boolean = false) {
+    if(forcelogout){
+      this.logout();
+      return;
+    }
     const default_page = this.getDefaultPage();
     if (default_page && default_page!='') {
       // location.href = dpUrl;
       this.router.navigate([default_page]);
+      return;
+    }
+    const roles = this.RolePagesActions('roles');
+    if (roles && roles.length<=0) {
+      const msg = "Vous n'avez aucun role attribué, Contacter votre administrateur!";
+      this.router.navigate([`auths/error/500/${msg}`]);
       return;
     }
     this.logout();
@@ -133,7 +143,7 @@ export class AuthService {
   login(params: { credential: string, password: string }): any {
     const fparams = this.ApiParams(params, false);
     if (this.isLoggedIn()) {
-      return this.GoToDefaultPage();
+      this.GoToDefaultPage();
     }
     return this.http.post(`${backenUrl()}/auth-user/login`, fparams, CustomHttpHeaders(this.store));
   }

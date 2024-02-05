@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { AuthService } from '@ih-services/auth.service';
 import { User } from '@ih-app/models/User';
@@ -24,7 +24,7 @@ export class LoginComponent implements OnInit {
   APP_LOGO: string = Consts.APP_LOGO;
 
 
-  constructor(private auth: AuthService, private router: Router) { }
+  constructor(private auth: AuthService, private router: Router,private cdr: ChangeDetectorRef) { }
 
   public roles = new Roles(this.auth);
 
@@ -44,11 +44,11 @@ export class LoginComponent implements OnInit {
 
   createFormGroup(): FormGroup {
     return new FormGroup({
-      credential: new FormControl("ktsolegnagbo", [
+      credential: new FormControl("", [
         Validators.required,
         Validators.minLength(3),
       ]),
-      password: new FormControl("PaKo@263", [
+      password: new FormControl("", [
         Validators.required,
         Validators.minLength(7),
       ]),
@@ -57,15 +57,13 @@ export class LoginComponent implements OnInit {
   }
 
   login(): any {
-    if (this.auth.isLoggedIn()) {
-      return this.auth.GoToDefaultPage();
-    }
     this.isLoading = true;
     return this.auth.login({ credential: this.authForm.value.credential, password: this.authForm.value.password })
       .subscribe((res: { status: number, data: User | string }) => {
         if (res.status === 200) {
           this.message = 'Login successfully !';
-          this.auth.setUser(res.data as User);
+          this.cdr.detectChanges();
+          this.auth.setUser( res.data as User);
           var default_page = this.auth.getDefaultPage();
           if (!this.roles.isChws()) {
             const savedUrl = getSavedUrl();
@@ -73,15 +71,18 @@ export class LoginComponent implements OnInit {
             // location.href = default_page;
           }
           this.router.navigate([default_page]);
+          return;
         } else {
-          this.message = res.data;
+          this.message = `${res.data ?? 'Error'}`;
           this.isLoading = false;
+          return;
         }
 
       }, (err: any) => {
         this.isLoading = false;
         this.message = err;
         console.log(this.message);
+        return;
       });
   }
 

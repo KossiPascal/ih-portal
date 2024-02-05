@@ -202,7 +202,13 @@ export function saveCurrentUrl(router: Router): void {
   const link = router.url.split(backenUrl(''))[0];
   // const link = location.href;
   // const link = window.location.href;
-  sessionStorage.setItem("redirect_url", link);
+
+  if (!link.includes('/error') && !link.includes('/login')) {
+    sessionStorage.setItem("redirect_url", link);
+    return;
+  }
+  sessionStorage.removeItem("redirect_url");
+  return;
 }
 
 export function getSavedUrl(): string | null {
@@ -258,6 +264,7 @@ export function backenUrl(cible: string = 'api'): string {
     return `${location.protocol}//${location.hostname}:${portInfo.port}/${cible}`;
   }
   return `${location.origin}/${cible}`;
+  // return 'https://portal-integratehealth.org:9999/api'
 }
 
 export function custumRequest(method: string, http: HttpClient, store: AppStorageService, url: string, data?: any, responseType?: any) {

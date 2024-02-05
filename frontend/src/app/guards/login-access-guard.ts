@@ -28,8 +28,6 @@ export class LoginAccessGuard implements CanActivate, OnDestroy {
         this.setRouteTitle(value);
         const requestedRoute = state.url.substring(1);
 
-        console.log(roles.pages())
-
         if (!roles.pages().includes(requestedRoute)) {
             this.auth.GoToDefaultPage();
             return false;

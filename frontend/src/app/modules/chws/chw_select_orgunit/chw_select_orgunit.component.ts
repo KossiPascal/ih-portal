@@ -120,10 +120,8 @@ export class SelectOrgUnitComponent implements OnInit {
   }
 
   updateChwsOrgUnit() {
-
     const chwId = this.orgUnitForm.value.chws;
     const chw_found = this.getChwInfo(returnDataAsArray(notNull(chwId)?chwId:this.chwOU!.id) as string[]);
-
     // const filter: any = {
     //   districts: returnDataAsArray(this.orgUnitForm.value.districts) as string[],
     //   sites: returnDataAsArray(this.orgUnitForm.value.sites) as string[],

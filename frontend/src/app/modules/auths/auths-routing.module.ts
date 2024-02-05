@@ -20,7 +20,8 @@ const routes: Routes = [
   { path: 'change-password', component: ChangePasswordComponent, data: {title: 'Recover Password'}, canActivate:[LoginAccessGuard] },
   { path: 'cache-list', component: CacheComponent, data: {title: 'Error'}, canActivate:[LoginAccessGuard]},
   { path: 'error', redirectTo: 'error/404', pathMatch: 'full'},
-  { path: 'error/:code', component: ErrorComponent, data: {title: 'Error'}, canActivate:[LoginAccessGuard]},
+  { path: 'error/:code', component: ErrorComponent, data: {title: 'Error'}, canActivate:[]},
+  { path: 'error/:code/:param', component: ErrorComponent, data: {title: 'Error'}, canActivate:[]},
 ];
 
 @NgModule({

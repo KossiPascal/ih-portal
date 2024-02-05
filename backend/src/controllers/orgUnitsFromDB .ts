@@ -93,7 +93,7 @@ export async function getChws(req: Request, res: Response, next: NextFunction, o
         respData = { status: 201, data: 'Informations you provided are not valid' }
         return onlyData ? respData : res.status(201).json(respData);
     }
-    console.log(req.body)
+    // console.log(req.body)
     
     // try {
         const _chwRepo = await getChwsSyncRepository();

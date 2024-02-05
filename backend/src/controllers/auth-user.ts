@@ -54,69 +54,59 @@ export async function CurrentUser(currentUserId: string): Promise<User | null> {
 }
 
 export class AuthUserController {
-    static loginTest = async (username: string, password: string) => {
+    static DefaultAdminCreation = async () => {
         const userRepo = await getUsersRepository();
         const rolRepo = await getRolesRepository();
 
-        const roleLs = [
-            'super_admin',
-            'user_manager',
-            'admin',
-            'data_manager',
-            'chws_data_viewer',
-            'reports_manager',
-            'chws_manager',
-            'chws'
-        ];
+        const users = await userRepo.find();
+        const roles = await rolRepo.find();
 
-        for (let i = 0; i < roleLs.length; i++) {
-            const r = roleLs[i];
-            const role: Roles = new Roles();
-            role.id = i + 1;
-            role.name = r;
-            role.pages = this.pagesList;
-            role.actions = this.actionsList;
-            role.default_page = this.pagesList[0];
-            await rolRepo.save(role);
+        if (roles && roles.length <= 0) {
+            const roleLs = [
+                'super_admin',
+                'user_manager',
+                'admin',
+                'data_manager',
+                'chws_data_viewer',
+                'reports_manager',
+                'chws_manager',
+                'chws'
+            ];
+
+            for (let i = 0; i < roleLs.length; i++) {
+                const r = roleLs[i];
+                const role: Roles = new Roles();
+                role.id = i + 1;
+                role.name = r;
+                role.pages = this.pagesList;
+                role.actions = this.actionsList;
+                role.default_page = this.pagesList[0];
+                await rolRepo.save(role);
+            }
         }
 
-        const user = await userRepo.findOneBy({ id: 'zearydbk253' });
-
-        if (user) {
-            const { salt, hashedPassword } = hashPassword(password);
-
-            user.id = 'zA7a5Wy9bkF';
-            user.username = username;
-            user.fullname = 'Kossi TSOLEGNAGBO';
-            user.email = 'kossi.tsolegnagbo@aiesec.net';
-            user.password = hashedPassword;
-            user.salt = salt;
-            user.roles = ['1', '2', '3', '4', '5'];
-            user.meeting_report = [];
-            user.expiresIn = 0;
-            user.token = '';
-            user.isActive = true;
-            user.isDeleted = false;
-            user.mustLogin = true;
-            user.useLocalStorage = false;
-
-            const finalUser = await UpdateUserData(user);
-
-            await userRepo.update('zearydbk253', finalUser);
-
-            console.log(finalUser)
+        if (users && users.length <= 0) {
+            const user = new User();
+            if (user) {
+                const { salt, hashedPassword } = hashPassword('admin');
+                user.id = 'Wy9bzA7a5kF';
+                user.username = 'admin';
+                user.fullname = 'Admin';
+                user.password = hashedPassword;
+                user.salt = salt;
+                user.roles = ['1', '2', '3', '4', '5'];
+                user.meeting_report = [];
+                user.isActive = true;
+                user.mustLogin = true;
+                const finalUser = await UpdateUserData(user);
+                await userRepo.update('zearydbk253', finalUser);
+            }
         }
-
-
     }
-
-
 
     static login = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { credential, password } = req.body;
-
-            // await AuthUserController.loginTest(credential, password);
 
             if (!credential || !password) {
                 return res.status(201).json({ status: 201, data: 'Invalid credentials' });

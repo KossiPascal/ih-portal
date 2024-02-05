@@ -26,15 +26,17 @@ const errors:any = {
 })
 export class ErrorComponent implements OnInit {
   error:any; 
+  param:any; 
 
   constructor(private route: ActivatedRoute, private router:Router, private auth:AuthService) { }
 
   ngOnInit() {
     this.error = errors[this.route.snapshot.params['code']] || errors['404'];
+    this.param = this.route.snapshot.params['param'] || '';
   }
 
   returnBack(){
-    this.auth.GoToDefaultPage();
+    this.auth.GoToDefaultPage(this.param && this.param!='');
   }
 
 }

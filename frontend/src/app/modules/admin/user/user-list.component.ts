@@ -208,7 +208,6 @@ export class UserComponent implements OnInit {
         request = this.auth.updateUser(finalSelectedUser);
       }
     } else {
-
       delete this.userForm.value.passwordConfirm;
       this.userForm.value["roles"] = this.selectedRole;
       this.userForm.value["meeting_report"] = this.selectedMR;

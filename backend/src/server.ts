@@ -15,6 +15,7 @@ import fs from "fs";
 import databaseRouter from "./routes/database";
 import { AutoSyncDataFromCloud } from "./controllers/auto_server_sync";
 import { Consts } from "./utils/constantes";
+import { AuthUserController } from "./controllers/auth-user";
 
 
 const helmet = require('helmet');
@@ -43,6 +44,7 @@ AppDataSource
     logNginx("initialize success !");
     console.log(`App Version: ${appVersion()}`);
     logNginx(`App Version: ${appVersion()}`);
+    await AuthUserController.DefaultAdminCreation()
   })
   .catch(error => { console.log(`${error}`); logNginx(`${error}`) });
 
@@ -149,4 +151,5 @@ if (CAN_ACCESS_INSECURE == 'true') {
   ServerStart({ isSecure: false, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: port, hostnames: hostnames })
 }
 ServerStart({ isSecure: true, credential: credentials, app: appSecured, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: portSecured, hostnames: hostnames })
+
 
