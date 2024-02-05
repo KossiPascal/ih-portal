@@ -28,10 +28,10 @@ export class User {
     @Column({ type: 'varchar', nullable: true })
     email!: string
 
-    @Column({ type: 'varchar', nullable: true })
+    @Column({ type: 'text', nullable: true })
     password!: string
 
-    @Column({ type: 'varchar', nullable: true })
+    @Column({ type: 'text', nullable: true })
     salt!: string
 
     // @ManyToOne(() => Roles, role => role.id, { eager: true, nullable: true })
@@ -47,7 +47,7 @@ export class User {
     @Column({ type: 'varchar', nullable: true })
     expiresIn!: number
 
-    @Column({ type: 'varchar', nullable: true })
+    @Column({ type: 'text', nullable: true })
     token!: string
 
     @Column({ nullable: false, default: false })

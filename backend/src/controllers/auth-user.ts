@@ -14,7 +14,7 @@ import crypto from 'crypto';
 //     return newId;
 // }
 
-function hashPassword(password:string):{ salt: string, hashedPassword: string } {
+function hashPassword(password: string): { salt: string, hashedPassword: string } {
     // Generate a random salt
     const salt = crypto.randomBytes(16).toString('hex');
     // Hash the password with the salt using SHA-256
@@ -27,7 +27,7 @@ function verifyPassword(password: string, salt: string, hashedPassword: string):
     const inputHashedPassword = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha256').toString('hex');
     // Compare the stored hash with the newly generated hash
     return inputHashedPassword === hashedPassword;
-  }
+}
 
 function generateShortId(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -121,16 +121,18 @@ export class AuthUserController {
             if (!credential || !password) {
                 return res.status(201).json({ status: 201, data: 'Invalid credentials' });
             }
-
             const userRepo = await getUsersRepository();
             const userFound = await userRepo.findOne({ where: [{ username: credential }, { email: credential }] });
 
-            if (!userFound || !userFound.isActive || userFound.isDeleted) {
-                return res.status(201).json({ status: 201, data: 'Invalid user or inactive' });
+            if (!userFound) {
+                return res.status(201).json({ status: 201, data: 'No user with this credential' });
             }
-            
-            const { salt, hashedPassword } = hashPassword(password);
-            const isPasswordValid = verifyPassword(password, salt, hashedPassword);
+
+            if (!userFound.isActive || userFound.isDeleted) {
+                return res.status(201).json({ status: 201, data: "Sorry! You don't have permission to login. Contact the administrator." });
+            }
+
+            const isPasswordValid = verifyPassword(password, userFound.salt ?? 'ZerD2345~@PRET', userFound.password);
 
             if (!isPasswordValid) {
                 return res.status(201).json({ status: 201, data: 'Invalid password' });
@@ -148,7 +150,7 @@ export class AuthUserController {
 
             return res.status(200).json({ status: 200, data: finalUser });
         } catch (err: any) {
-            return res.status(500).json({ status: 500, data: `${err.message || 'Internal Server Error'}` });
+            return res.status(500).json({ status: 500, data: `${err || 'Internal Server Error'}` });
         }
     };
 
@@ -162,7 +164,7 @@ export class AuthUserController {
 
             if (userFound && notEmpty(userFound)) return res.status(201).json({ status: 201, data: 'Username or email already in use' });
             var users: User[] = await userRepo.find();
-            
+
             const { salt, hashedPassword } = hashPassword(password);
 
             const user = new User();
