@@ -93,9 +93,8 @@ export async function getChws(req: Request, res: Response, next: NextFunction, o
         respData = { status: 201, data: 'Informations you provided are not valid' }
         return onlyData ? respData : res.status(201).json(respData);
     }
-    // console.log(req.body)
     
-    // try {
+    try {
         const _chwRepo = await getChwsSyncRepository();
         const userId: string = req.body.userId;
         var chws: Chws[] = await _chwRepo.find({
@@ -112,11 +111,10 @@ export async function getChws(req: Request, res: Response, next: NextFunction, o
             },
         });
         respData = !chws ? { status: 201, data: 'No Data Found !' } : { status: 200, data: chws }
-    // } catch (err) {
-        
-    //     // return next(err);
-    //     respData = { status: 201, data: err };
-    // }
+    } catch (err) {
+        // return next(err);
+        respData = { status: 201, data: err };
+    }
     return onlyData ? respData : res.status(respData.status).json(respData);
 };
 

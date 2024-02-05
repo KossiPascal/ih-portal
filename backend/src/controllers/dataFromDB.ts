@@ -646,7 +646,6 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], All
   for (let i = 0; i < Chws$.length; i++) {
     const ascId = Chws$[i].id;
     if (ascId && ascId != '') {
-      console.log(ascId)
       Object.entries(outPutData).map(([key, val]) => {
         if (!val.hasOwnProperty(ascId)) val[ascId] = { chwId: ascId, tonoudayo: 0, dhis2: 0 }
       });
