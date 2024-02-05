@@ -1,8 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { ErrorHandlerService } from "./error-handler.service";
 import { Chws, Dhis2Sync, Families, FilterParams, ChwsDataFormDb, Patients, Sites, Sync, Zones, SyncOrgUnit } from "@ih-app/models/Sync";
-import { Router } from "@angular/router";
 import { CustomHttpHeaders, backenUrl, notNull } from '@ih-app/shared/functions';
 import { AuthService } from "./auth.service";
 import { IndexDbService } from "./index-db/index-db.service";
@@ -77,314 +75,170 @@ export class SyncService {
   //   return false;
   // }
 
-
-  getAllChwsDataWithParams(params?: FilterParams): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params!.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
+  private ApiParams(params?:any, mustLoggedIn:boolean = true){
+    if (mustLoggedIn && !this.auth.isLoggedIn()) {
+      return this.auth.logout();
     }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/get/data`, sendParams, CustomHttpHeaders(this.store));
+    const fparams:any = notNull(params) ? params : {};
+    fparams['userId'] = this.auth.getUserId();
+    fparams['appLoadToken'] = this.auth.getAppLoadToken();
+    fparams['accessRoles'] = this.auth.RolePagesActions('roles');
+    fparams['accessPages'] = this.auth.RolePagesActions('pages');
+    fparams['accessActions'] = this.auth.RolePagesActions('actions');
+    fparams['dhisusername'] = undefined;
+    fparams['dhispassword'] = undefined;
+    return fparams;
   }
 
 
+  getAllChwsDataWithParams(params?: FilterParams): any {
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/get/data`, fparams, CustomHttpHeaders(this.store));
+  }
+
   getDataInformations(params?: FilterParams): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params!.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/get/datainfos`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/get/datainfos`, fparams, CustomHttpHeaders(this.store));
   }
 
 
   syncDhis2ChwsData(params: Dhis2Sync): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/dhis2/data`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/dhis2/data`, fparams, CustomHttpHeaders(this.store));
   }
 
 
   getDistrictsList(params?: FilterParams): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params!.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/districts`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/districts`, fparams, CustomHttpHeaders(this.store));
   }
 
   getSitesList(params?: FilterParams): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params!.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/sites`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/sites`, fparams, CustomHttpHeaders(this.store));
   }
 
   getZonesList(params?: FilterParams): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params!.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/zones`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/zones`, fparams, CustomHttpHeaders(this.store));
   }
 
   ihDrugUpdateDataPerChw(params: ChwsUpdateDrugInfo): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params!.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/update_drug_per_chw`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/update_drug_per_chw`, fparams, CustomHttpHeaders(this.store));
   }
 
   getChwsList(params?: FilterParams): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params!.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/app/chws`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/app/chws`, fparams, CustomHttpHeaders(this.store));
   }
 
   getDhis2Chws(): any {
-    const userId = this.auth.getUserId();
-    return this.http.post(`${backenUrl()}/sync/dhis2/chws`, { userId: userId, dhisusername: undefined, dhispassword: undefined }, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams();
+    return this.http.post(`${backenUrl()}/sync/dhis2/chws`, fparams, CustomHttpHeaders(this.store));
   }
 
   getFamilyList(params?: FilterParams): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params!.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/families`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/families`, fparams, CustomHttpHeaders(this.store));
   }
 
   getPatientsList(params?: FilterParams): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params!.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/patients`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/patients`, fparams, CustomHttpHeaders(this.store));
   }
 
   syncCouchDbChwsData(params: Sync): any {
-    const userId = this.auth.getUserId();
-    // if (params.ssl_verification !== true) console.log(this.sslMsg);
-    if (notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/fetch/data`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/fetch/data`, fparams, CustomHttpHeaders(this.store));
   }
 
   syncThinkMdWeeklyChwsData(params: Sync): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/python/thinkmd_weekly`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/python/thinkmd_weekly`, fparams, CustomHttpHeaders(this.store));
   }
 
 
-  syncAll(params: { start_date: string, end_date: string, userId?: string | null | undefined, dhisusername?: string, dhispassword?: string }): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/fetch/all`, sendParams, CustomHttpHeaders(this.store));
+  syncAll(params: { start_date: string, end_date: string }): any {
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/fetch/all`, fparams, CustomHttpHeaders(this.store));
   }
 
 
   syncOrgUnits(params: SyncOrgUnit): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/fetch/orgunits`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/fetch/orgunits`, fparams, CustomHttpHeaders(this.store));
   }
 
 
   thinkmdToDhis2Script(params: Sync): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/python/thinkmd_to_dhis2`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/python/thinkmd_to_dhis2`, fparams, CustomHttpHeaders(this.store));
   }
 
   ihChtDataPerChw(params: any): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/ih_cht_data_per_chw`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/ih_cht_data_per_chw`, fparams, CustomHttpHeaders(this.store));
   }
 
   ihDrugDataPerChw(params: any): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/ih_drug_data_per_chw`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/ih_drug_data_per_chw`, fparams, CustomHttpHeaders(this.store));
   }
+
   insertOrUpdateDhis2Data(chwsDataToDhis2: DataIndicators): any {
-    const userId = this.auth.getUserId();
-    const sendParams = { chwsDataToDhis2: chwsDataToDhis2, userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/dhis2/insert_or_update`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams({ chwsDataToDhis2: chwsDataToDhis2});
+    return this.http.post(`${backenUrl()}/sync/dhis2/insert_or_update`, fparams, CustomHttpHeaders(this.store));
   }
 
   syncGeojsonData(): any {
-    const userId = this.auth.getUserId();
-    const sendParams = { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/geojson`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams();
+    return this.http.post(`${backenUrl()}/sync/geojson`, fparams, CustomHttpHeaders(this.store));
   }
 
   SaveOrUpdateReport(params: MeetingReport): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/flush_meeting_reports`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/flush_meeting_reports`, fparams, CustomHttpHeaders(this.store));
   }
 
-  GetReports(params?: { team: number, userId?: string | null | undefined, dhisusername?: string, dhispassword?: string }): any {
-    const userId = this.auth.getUserId();
-    if (params && notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/get_meeting_reports`, sendParams, CustomHttpHeaders(this.store));
+  GetReports(team: number): any {
+    const fparams = this.ApiParams({team:team});
+    return this.http.post(`${backenUrl()}/sync/get_meeting_reports`, fparams, CustomHttpHeaders(this.store));
   }
 
   SaveOrUpdatePerson(params: Person): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/flush_meeting_person`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/flush_meeting_person`, fparams, CustomHttpHeaders(this.store));
   }
 
   GetPersons(params?: Person): any {
-    const userId = this.auth.getUserId();
-    if (params && notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/get_meeting_person`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/get_meeting_person`, fparams, CustomHttpHeaders(this.store));
   }
 
   SaveOrUpdateTeam(params: Team): any {
-    const userId = this.auth.getUserId();
-    if (notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/flush_meeting_team`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/flush_meeting_team`, fparams, CustomHttpHeaders(this.store));
   }
 
   GetTeams(params?: Team): any {
-    const userId = this.auth.getUserId();
-    if (params && notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/get_meeting_team`, sendParams, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/get_meeting_team`, fparams, CustomHttpHeaders(this.store));
   }
 
-  DeleteReport(params: { dataId: number, userId?: string | null | undefined, dhisusername?: string, dhispassword?: string }): any {
-    const userId = this.auth.getUserId();
-    if (params && notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/delete_meeting_report`, sendParams, CustomHttpHeaders(this.store));
+  DeleteReport(dataId: number): any {
+    const fparams = this.ApiParams({ dataId: dataId });
+    return this.http.post(`${backenUrl()}/sync/delete_meeting_report`, fparams, CustomHttpHeaders(this.store));
 
   }
-  DeletePerson(params: { dataId: number, userId?: string | null | undefined, dhisusername?: string, dhispassword?: string }): any {
-    const userId = this.auth.getUserId();
-    if (params && notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/delete_meeting_person`, sendParams, CustomHttpHeaders(this.store));
+  DeletePerson(dataId: number): any {
+    const fparams = this.ApiParams({ dataId: dataId });
+    return this.http.post(`${backenUrl()}/sync/delete_meeting_person`, fparams, CustomHttpHeaders(this.store));
 
   }
-  DeleteTeam(params: { dataId: number, userId?: string | null | undefined, dhisusername?: string, dhispassword?: string }): any {
-    const userId = this.auth.getUserId();
-    if (params && notNull(params)) {
-      params.userId = userId;
-      params!.dhisusername = undefined;
-      params!.dhispassword = undefined;
-    }
-    const sendParams = notNull(params) ? params : { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/sync/delete_meeting_team`, sendParams, CustomHttpHeaders(this.store));
+  DeleteTeam(dataId: number): any {
+    const fparams = this.ApiParams({ dataId: dataId });
+    return this.http.post(`${backenUrl()}/sync/delete_meeting_team`, fparams, CustomHttpHeaders(this.store));
 
   }
 

@@ -34,20 +34,45 @@ export async function getRolesRepository(): Promise<Repository<Roles>> {
 }
 
 
-export async function GetRolesListOrNamesList(rolesIds: any[], getOnlyNames: boolean = false): Promise<string[] | Roles[] | undefined> {
-    if (rolesIds && notEmpty(rolesIds)) {
-        const repo = await getRolesRepository();
-        var roles: Roles[] = await repo.find();
-        if (getOnlyNames == true) {
-            return rolesIds
-                .map(roleId => roles.find(role => role.id === parseInt(roleId.trim(), 10)))
-                .filter(role => notEmpty(role?.name))
-                .map(role => role?.name || 'Unknown Role');
-        } else {
-            return rolesIds
-                .map(roleId => roles.find(role => role.id === parseInt(roleId.trim(), 10)))
-                .filter(role => role?.name !== undefined) as Roles[];
+export async function GetRolesAndNamesPagesActionsList(rolesIds: any[]): Promise<{ rolesObjects: Roles[], rolesNames: string[], pages: string[], actions: string[], } | undefined> {
+    try {
+        if (rolesIds && notEmpty(rolesIds)) {
+            const repo = await getRolesRepository();
+            var roles: Roles[] = await repo.find();
+
+            if (roles && notEmpty(roles)) {
+
+                const rolesObjects = rolesIds
+                    .map(roleId => roles.find(role => role.id === parseInt(roleId.trim(), 10)))
+                    .filter(role => notEmpty(role?.name)) as Roles[];
+
+                const rolesNames = rolesIds
+                    .map(roleId => roles.find(role => role.id === parseInt(roleId.trim(), 10)))
+                    .filter(role => notEmpty(role?.name))
+                    .map(role => (role as Roles).name);
+
+                const pages: string[] = Array.from(new Set(
+                    rolesIds
+                        .map(roleId => roles.find(role => role.id === parseInt(roleId.trim(), 10)))
+                        .filter(role => notEmpty(role?.name) && notEmpty(role?.pages))
+                        .flatMap(role => role?.pages as string[])
+                ));
+
+                const actions: string[] = Array.from(new Set(
+                    rolesIds
+                        .map(roleId => roles.find(role => role.id === parseInt(roleId.trim(), 10)))
+                        .filter(role => notEmpty(role?.name) && notEmpty(role?.actions))
+                        .flatMap(role => role?.actions as string[])
+                ));
+
+                return { rolesNames: rolesNames, rolesObjects: rolesObjects, pages: pages, actions: actions }
+            }
+
         }
+    } catch (error) {
+
     }
     return undefined;
 }
+
+

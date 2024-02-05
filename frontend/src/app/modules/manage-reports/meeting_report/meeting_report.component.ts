@@ -167,7 +167,7 @@ export class MeetingReportComponent implements OnInit {
 
   GetReports() {
     if (this.SelectedTeam && this.SelectedTeam.id) {
-      this.sync.GetReports({ team: this.SelectedTeam.id! }).subscribe(async (_c$: { status: number, data: MeetingReport[] | string }) => {
+      this.sync.GetReports(this.SelectedTeam.id!).subscribe(async (_c$: { status: number, data: MeetingReport[] | string }) => {
         if (_c$.status == 200) {
           this.AllReports$ = _c$.data as MeetingReport[];
           this.generateReport();
@@ -329,7 +329,7 @@ export class MeetingReportComponent implements OnInit {
   deleteReport(event: Event, teamId: number) {
     event.preventDefault();
     if (this.ViewedReport && this.ViewedReport[teamId]?.id) {
-      this.sync.DeleteReport({ dataId: this.ViewedReport[teamId]?.id! }).subscribe(async (_c$: { status: number, data: any }) => {
+      this.sync.DeleteReport(this.ViewedReport[teamId]?.id!).subscribe(async (_c$: { status: number, data: any }) => {
         if (_c$.status == 200) {
           this.AllReports$ = this.AllReports$.filter(p => p.id !== this.ViewedReport[teamId]?.id);
           this.generateReport();
@@ -435,7 +435,7 @@ export class MeetingReportComponent implements OnInit {
   deletePerson(event: Event, teamId: number) {
     event.preventDefault();
     if (this.SelectedPerson && this.SelectedPerson.id) {
-      this.sync.DeletePerson({ dataId: this.SelectedPerson.id }).subscribe(async (_c$: { status: number, data: any }) => {
+      this.sync.DeletePerson(this.SelectedPerson.id).subscribe(async (_c$: { status: number, data: any }) => {
         if (_c$.status == 200) {
           this.Person$ = this.Person$.filter(p => p.id !== this.SelectedPerson!.id);
           this.cancelPersonAction(event, teamId);
@@ -447,7 +447,7 @@ export class MeetingReportComponent implements OnInit {
   deleteTeam(event: Event) {
     event.preventDefault();
     if (this.SelectedTeam && this.SelectedTeam.id) {
-      this.sync.DeleteTeam({ dataId: this.SelectedTeam.id }).subscribe(async (_c$: { status: number, data: any }) => {
+      this.sync.DeleteTeam(this.SelectedTeam.id).subscribe(async (_c$: { status: number, data: any }) => {
         if (_c$.status == 200) {
           this.SelectedTeam!.show = false;
           this.cancelTeamAction(event);

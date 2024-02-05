@@ -57,33 +57,32 @@ export class LoginComponent implements OnInit {
   }
 
   login(): any {
-    if (!this.auth.isLoggedIn()) {
-      this.isLoading = true;
-      return this.auth.login({ credential: this.authForm.value.credential, password: this.authForm.value.password })
-        .subscribe((res: { status: number, data: User | string }) => {
-          if (res.status === 200) {
-            this.message = 'Login successfully !';
-            this.auth.setUser(res.data as User);
-            var default_page = this.auth.getDefaultPage();
-            if (!this.roles.isChws()) {
-              const savedUrl = getSavedUrl();
-              default_page = savedUrl && savedUrl != 'auths/login' && savedUrl != '' ? savedUrl : default_page;
-              // location.href = default_page;
-            }
-            this.router.navigate([default_page]);
-          } else {
-            this.message = res.data;
-            this.isLoading = false;
-          }
-
-        }, (err: any) => {
-          this.isLoading = false;
-          this.message = err;
-          console.log(this.message);
-        });
-    } else {
-      this.auth.GoToDefaultPage();
+    if (this.auth.isLoggedIn()) {
+      return this.auth.GoToDefaultPage();
     }
+    this.isLoading = true;
+    return this.auth.login({ credential: this.authForm.value.credential, password: this.authForm.value.password })
+      .subscribe((res: { status: number, data: User | string }) => {
+        if (res.status === 200) {
+          this.message = 'Login successfully !';
+          this.auth.setUser(res.data as User);
+          var default_page = this.auth.getDefaultPage();
+          if (!this.roles.isChws()) {
+            const savedUrl = getSavedUrl();
+            default_page = savedUrl && savedUrl != 'auths/login' && savedUrl != '' ? savedUrl : default_page;
+            // location.href = default_page;
+          }
+          this.router.navigate([default_page]);
+        } else {
+          this.message = res.data;
+          this.isLoading = false;
+        }
+
+      }, (err: any) => {
+        this.isLoading = false;
+        this.message = err;
+        console.log(this.message);
+      });
   }
 
 

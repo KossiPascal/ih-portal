@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { CustomHttpHeaders, backenUrl } from "@ih-app/shared/functions";
+import { CustomHttpHeaders, backenUrl, notNull } from "@ih-app/shared/functions";
 import { AuthService } from './auth.service';
 import { AppStorageService } from './local-storage.service';
 
@@ -9,13 +9,29 @@ export class ConfigService {
 
     constructor(private auth: AuthService, private http: HttpClient, private store: AppStorageService) { }
 
+    private ApiParams(params?:any, mustLoggedIn:boolean = true){
+        if (mustLoggedIn && !this.auth.isLoggedIn()) {
+          return this.auth.logout();
+        }
+        const fparams:any = notNull(params) ? params : {};
+        fparams['userId'] = this.auth.getUserId();
+        fparams['appLoadToken'] = this.auth.getAppLoadToken();
+        fparams['accessRoles'] = this.auth.RolePagesActions('roles');
+        fparams['accessPages'] = this.auth.RolePagesActions('pages');
+        fparams['accessActions'] = this.auth.RolePagesActions('actions');
+        fparams['dhisusername'] = undefined;
+        fparams['dhispassword'] = undefined;
+        return fparams;
+      }
+
     getConfigs(): any {
-        const userId = this.auth.getUserId()!;
-        return this.http.post(`${backenUrl()}/configs`, { userId: userId, dhisusername: undefined, undefined: undefined }, CustomHttpHeaders(this.store));
+        const fparams = this.ApiParams();
+        return this.http.post(`${backenUrl()}/configs`, fparams, CustomHttpHeaders(this.store));
     }
 
     appVersion(): any {
-        return this.http.post(`${backenUrl()}/configs/appVersion`, { getversion: true }, CustomHttpHeaders(this.store));
+        const fparams = this.ApiParams();
+        return this.http.post(`${backenUrl()}/configs/appVersion`, fparams, CustomHttpHeaders(this.store));
     }
 
 } 

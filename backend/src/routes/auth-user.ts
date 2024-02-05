@@ -3,23 +3,24 @@ import { body } from "express-validator";
 import { AuthUserController } from "../controllers/auth-user";
 import { Router } from 'express';
 import { getUsersRepository } from "../entity/User";
+import { Middelware } from "../middleware/auth";
 
 const AuthUserRouter = Router();
 
-AuthUserRouter.post('/newToken', AuthUserController.newToken);
-AuthUserRouter.post('/check-reload-user', AuthUserController.CheckReloadUser);
+AuthUserRouter.post('/newToken', Middelware.authMiddleware, AuthUserController.newToken);
+AuthUserRouter.post('/check-reload-user', Middelware.authMiddleware, AuthUserController.CheckReloadUser);
 
-AuthUserRouter.post('/users-list', AuthUserController.allUsers);
-AuthUserRouter.post('/update-user', AuthUserController.updateUser);
-AuthUserRouter.post('/delete-user', AuthUserController.deleteUser);
+AuthUserRouter.post('/users-list', Middelware.authMiddleware, AuthUserController.allUsers);
+AuthUserRouter.post('/update-user', Middelware.authMiddleware, AuthUserController.updateUser);
+AuthUserRouter.post('/delete-user', Middelware.authMiddleware, AuthUserController.deleteUser);
 
-AuthUserRouter.post('/roles-list', AuthUserController.GetRolesList);
-AuthUserRouter.post('/create-role', AuthUserController.CreateRole);
-AuthUserRouter.post('/update-role', AuthUserController.UpdateRole);
-AuthUserRouter.post('/delete-role', AuthUserController.DeleteRole);
+AuthUserRouter.post('/roles-list', Middelware.authMiddleware, AuthUserController.GetRolesList);
+AuthUserRouter.post('/create-role', Middelware.authMiddleware, AuthUserController.CreateRole);
+AuthUserRouter.post('/update-role', Middelware.authMiddleware, AuthUserController.UpdateRole);
+AuthUserRouter.post('/delete-role', Middelware.authMiddleware, AuthUserController.DeleteRole);
 
-AuthUserRouter.post('/actions-list', AuthUserController.UserActionsList);
-AuthUserRouter.post('/pages-list', AuthUserController.UserPagesList);
+AuthUserRouter.post('/actions-list', Middelware.authMiddleware, AuthUserController.UserActionsList);
+AuthUserRouter.post('/pages-list', Middelware.authMiddleware, AuthUserController.UserPagesList);
 
 AuthUserRouter.post(
     '/login',
@@ -58,6 +59,7 @@ AuthUserRouter.post(
 
         body('password').trim().isLength({ min: 7 }),
     ],
+    Middelware.authMiddleware,
     AuthUserController.register
 );
 

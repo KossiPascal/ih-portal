@@ -32,6 +32,10 @@ export class AuthService {
     return this.currentUser()?.token;
   }
 
+  getAppLoadToken(): string | null | undefined {
+    return 'Kossi TSOLEGNAGBO';
+  }
+
   getExpiresIn(): number | null | undefined {
     return this.currentUser()?.expiresIn;
   }
@@ -49,37 +53,24 @@ export class AuthService {
     return;
   }
 
+  RolePagesActions(cible:'roles' | 'pages' | 'actions'):string[] | null | undefined{
+    const user = this.currentUser();
+    if (user) {
+      var data;
+      if(cible == 'roles') data = GetRolesIdsOrNames(user?.roles as UserRoles[], 'idsString');
+      if(cible == 'pages') data = GetRolesIdsOrNames(user?.roles as UserRoles[], 'pages');
+      if(cible == 'actions') data = GetRolesIdsOrNames(user?.roles as UserRoles[], 'actions');
+      if (data) {
+        return data as string[];
+      }
+    }
+    return;
+  }
+
+
   public isLoggedIn(): boolean {
     const expiresIn = this.currentUser()?.expiresIn;
     return expiresIn ? Date.now() < expiresIn : false;
-  }
-
-  getAllUsers(): any {
-    const userId = this.getUserId();
-    const sendParams = { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/auth-user/users-list`, sendParams, CustomHttpHeaders(this.store));
-  }
-
-  getUserBy(id: string): any {
-    const userId = this.getUserId();
-    const sendParams = { userId: userId, dhisusername: undefined, dhispassword: undefined };
-    return this.http.post(`${backenUrl()}/auth-user/${id}`, sendParams, CustomHttpHeaders(this.store));
-  }
-
-  updateUser(user: any): any {
-    const userId = this.getUserId();
-    user.dhisusername = undefined;
-    user.dhispassword = undefined;
-    const sendParams = { userId: userId, user: user };
-    return this.http.post(`${backenUrl()}/auth-user/update-user`, sendParams, CustomHttpHeaders(this.store));
-  }
-
-  deleteUser(user: User): any {
-    const userId = this.getUserId();
-    user.dhisusername = undefined;
-    user.dhispassword = undefined;
-    const sendParams = { userId: userId, user: user };
-    return this.http.post(`${backenUrl()}/auth-user/delete-user`, sendParams, CustomHttpHeaders(this.store));
   }
 
   public AlreadyLogin() {
@@ -99,46 +90,92 @@ export class AuthService {
     return;
   }
 
+  private ApiParams(params?:any, mustLoggedIn:boolean = true){
+    if (mustLoggedIn && !this.isLoggedIn()) {
+      return this.logout();
+    }
+    const fparams:any = notNull(params) ? params : {};
+    fparams['userId'] = this.getUserId();
+    fparams['appLoadToken'] = this.getAppLoadToken();
+    fparams['accessRoles'] = this.RolePagesActions('roles');
+    fparams['accessPages'] = this.RolePagesActions('pages');
+    fparams['accessActions'] = this.RolePagesActions('actions');
+    fparams['dhisusername'] = undefined;
+    fparams['dhispassword'] = undefined;
+    return fparams;
+  }
+
+  getAllUsers(): any {
+    const fparams = this.ApiParams();
+    return this.http.post(`${backenUrl()}/auth-user/users-list`, fparams, CustomHttpHeaders(this.store));
+  }
+
+  getUserBy(id: string): any {
+    const fparams = this.ApiParams();
+    return this.http.post(`${backenUrl()}/auth-user/${id}`, fparams, CustomHttpHeaders(this.store));
+  }
+
+  updateUser(user: any): any {
+    const fparams = this.ApiParams({ user: user });
+    return this.http.post(`${backenUrl()}/auth-user/update-user`, fparams, CustomHttpHeaders(this.store));
+  }
+
+  deleteUser(user: User): any {
+    const fparams = this.ApiParams({ user: user });
+    return this.http.post(`${backenUrl()}/auth-user/delete-user`, fparams, CustomHttpHeaders(this.store));
+  }
+
   register(user: User, forceRegister: boolean = false): any {
-    return this.http.post(`${backenUrl()}/auth-user/register`, user, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams({ user: user, forceRegister:forceRegister });
+    return this.http.post(`${backenUrl()}/auth-user/register`, fparams, CustomHttpHeaders(this.store));
   }
 
   login(params: { credential: string, password: string }): any {
-    return this.http.post(`${backenUrl()}/auth-user/login`, params, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params, false);
+    if (this.isLoggedIn()) {
+      return this.GoToDefaultPage();
+    }
+    return this.http.post(`${backenUrl()}/auth-user/login`, fparams, CustomHttpHeaders(this.store));
   }
 
   NewUserToken(updateReload:boolean = false): any {
-    const userId = this.getUserId();
-    return this.http.post(`${backenUrl()}/auth-user/newToken`, { userId: userId, updateReload:updateReload, dhisusername: undefined, dhispassword: undefined }, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams({ updateReload:updateReload });
+    return this.http.post(`${backenUrl()}/auth-user/newToken`, fparams, CustomHttpHeaders(this.store));
   }
 
   CheckReloadUser(): any {
-    const userId = this.getUserId();
-    return this.http.post(`${backenUrl()}/auth-user/check-reload-user`, { userId: userId, dhisusername: undefined, dhispassword: undefined }, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams();
+    return this.http.post(`${backenUrl()}/auth-user/check-reload-user`, fparams, CustomHttpHeaders(this.store));
   }
 
   GetAllRoles(): any {
-    return this.http.post(`${backenUrl()}/auth-user/roles-list`, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams();
+    return this.http.post(`${backenUrl()}/auth-user/roles-list`, fparams, CustomHttpHeaders(this.store));
   }
 
   CreateRole(params: UserRoles): any {
-    return this.http.post(`${backenUrl()}/auth-user/create-role`, params, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/auth-user/create-role`, fparams, CustomHttpHeaders(this.store));
   }
 
   UpdateRole(params: UserRoles): any {
-    return this.http.post(`${backenUrl()}/auth-user/update-role`, params, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/auth-user/update-role`, fparams, CustomHttpHeaders(this.store));
   }
 
   DeleteRole(params: UserRoles): any {
-    return this.http.post(`${backenUrl()}/auth-user/delete-role`, params, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/auth-user/delete-role`, fparams, CustomHttpHeaders(this.store));
   }
 
   UserActionsList(): any {
-    return this.http.post(`${backenUrl()}/auth-user/actions-list`, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams();
+    return this.http.post(`${backenUrl()}/auth-user/actions-list`, fparams, CustomHttpHeaders(this.store));
   }
 
   UserPagesList(): any {
-    return this.http.post(`${backenUrl()}/auth-user/pages-list`, CustomHttpHeaders(this.store));
+    const fparams = this.ApiParams();
+    return this.http.post(`${backenUrl()}/auth-user/pages-list`, fparams, CustomHttpHeaders(this.store));
   }
 
   logout() {

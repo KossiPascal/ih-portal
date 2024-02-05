@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { JsonDatabase } from '../json-data-source';
 import { appVersion } from '../utils/functions';
+import { Middelware } from '../middleware/auth';
 
 const configRouter = Router();
 
-configRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
+configRouter.post('/', Middelware.authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const _repoConfig = new JsonDatabase('configs');
     const found = (Object.values(_repoConfig.all()))[0];
@@ -19,7 +20,7 @@ configRouter.post('/', async (req: Request, res: Response, next: NextFunction) =
 
 });
 
-configRouter.post('/appVersion', async (req: Request, res: Response, next: NextFunction) => {
+configRouter.post('/appVersion', Middelware.authMiddleware,async (req: Request, res: Response, next: NextFunction) => {
   try {
     return res.status(200).json(appVersion());
   }

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { User, getUsersRepository, UpdateUserData } from '../entity/User';
 import { notEmpty } from '../utils/functions';
-import { Roles, GetRolesListOrNamesList, getRolesRepository } from '../entity/Roles';
+import { Roles, GetRolesAndNamesPagesActionsList, getRolesRepository } from '../entity/Roles';
 import crypto from 'crypto';
 // const { v4: uuidv4 } = require('uuid');
 // const { shortid } = require('shortid');
@@ -145,8 +145,8 @@ export class AuthUserController {
             await userRepo.save(finalUser);
 
             finalUser.password = '';
-            const formatedRoles = await GetRolesListOrNamesList(finalUser.roles);
-            finalUser.roles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles as Roles[] : [];
+            const formatedRoles = await GetRolesAndNamesPagesActionsList(finalUser.roles);
+            finalUser.roles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesObjects : [];
 
             return res.status(200).json({ status: 200, data: finalUser });
         } catch (err: any) {
@@ -201,8 +201,8 @@ export class AuthUserController {
                 const finalUser = await userRepo.save(userData);
                 finalUser.password = '';
 
-                const formatedRoles = await GetRolesListOrNamesList(finalUser.roles);
-                finalUser.roles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles as Roles[] : [];
+                const formatedRoles = await GetRolesAndNamesPagesActionsList(finalUser.roles);
+                finalUser.roles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesObjects : [];
 
                 return res.status(200).json({ status: 200, data: finalUser });
             }
@@ -221,8 +221,8 @@ export class AuthUserController {
                 if (!user || user && (!user.isActive || user.isDeleted || user.mustLogin)) return res.status(201).json({ status: 201, data: 'error' });
                 user.password = '';
 
-                const formatedRoles = await GetRolesListOrNamesList(user.roles);
-                user.roles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles as Roles[] : [];
+                const formatedRoles = await GetRolesAndNamesPagesActionsList(user.roles);
+                user.roles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesObjects : [];
 
                 return res.status(200).json({ status: 200, data: user });
             }
@@ -239,8 +239,8 @@ export class AuthUserController {
             const userRepo = await getUsersRepository();
             var users: User[] = await userRepo.find();
             const finalUsers = await Promise.all(users.map(async user => {
-                const formatedRoles = await GetRolesListOrNamesList(user.roles);
-                const finalRoles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles as Roles[] : [];
+                const formatedRoles = await GetRolesAndNamesPagesActionsList(user.roles);
+                const finalRoles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesObjects : [];
                 const newUser = { ...user, password: '', roles: finalRoles };
                 return newUser;
             }));
@@ -277,8 +277,8 @@ export class AuthUserController {
             await userRepo.update(userFound.id, userFound);
 
             userFound.password = '';
-            const formatedRoles = await GetRolesListOrNamesList(userFound.roles);
-            userFound.roles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles as Roles[] : [];
+            const formatedRoles = await GetRolesAndNamesPagesActionsList(userFound.roles);
+            userFound.roles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesObjects : [];
 
             return res.status(200).json({ status: 200, data: userFound });
         } catch (err: any) {
@@ -308,8 +308,8 @@ export class AuthUserController {
             await userRepo.save(userFound);
 
             userFound.password = '';
-            const formatedRoles = await GetRolesListOrNamesList(userFound.roles);
-            userFound.roles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles as Roles[] : [];
+            const formatedRoles = await GetRolesAndNamesPagesActionsList(userFound.roles);
+            userFound.roles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesObjects : [];
 
             return res.status(200).json({ status: 200, data: userFound });
         } catch (err: any) {

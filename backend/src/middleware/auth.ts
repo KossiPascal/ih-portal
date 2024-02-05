@@ -1,18 +1,37 @@
 import { Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
-import { jwSecretKey } from "../entity/User";
+import { generateSecret, getUsersRepository } from "../entity/User";
+import { GetRolesAndNamesPagesActionsList } from "../entity/Roles";
+import { notEmpty } from "../utils/functions";
 
 export class Middelware {
   static authMiddleware = async (req: Request, res: Response, next: any) => {
-
-    if (req.body.privileges == true) return next();
+    const { userId, privileges, appLoadToken, accessRoles, accessPages, accessActions } = req.body;
+    if (privileges == true) return next();
     const authHeader = req.get('Authorization');
     if (!authHeader) return res.status(res.statusCode).send('Not authenticated!');
     const token = authHeader.split(' ')[1];
-    const userId = req.body.userId;
-    const secret = await jwSecretKey({userId:userId});
-    jwt.verify(token, secret.secretOrPrivateKey, function (err, decoded) {
-      return err ? res.status(res.statusCode).send(err) : next();
-    });
+    if (userId && appLoadToken == 'Kossi TSOLEGNAGBO') {
+      const userRepo = await getUsersRepository();
+      const user = await userRepo.findOneBy({ id: userId });
+      if (user) {
+        const formatedRoles = (await GetRolesAndNamesPagesActionsList(user.roles));
+        const isSameRoles = accessRoles && notEmpty(accessRoles) ? (accessRoles as string[]).every(r => (user.roles as string[]).includes(r)) : false;
+        const isSamePages = accessPages && notEmpty(accessPages) && formatedRoles?.pages ? (accessPages as string[]).every(r => (formatedRoles.pages as string[]).includes(r)) : false;
+        const isSameActions = accessActions && notEmpty(accessActions) && formatedRoles?.actions ? (accessActions as string[]).every(r => (formatedRoles.actions as string[]).includes(r)) : false;
+        // const isChws = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesNames[0] == 'chws' : false;
+        if (isSameRoles && isSamePages && isSameActions) {
+          jwt.verify(token, generateSecret(false).secretOrPrivateKey, function (err, decoded) {
+            return err ? res.status(res.statusCode).send(err) : next();
+          });
+        } else {
+          return res.status(500).send('You do not have access');
+        }
+      } else {
+        return res.status(500).send('You do not have access');
+      }
+    } else {
+      return res.status(600).send('You do not have access');
+    }
   };
 }

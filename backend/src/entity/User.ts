@@ -1,7 +1,8 @@
 import * as jwt from 'jsonwebtoken';
 import { Entity, Column, Repository, DataSource, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm"
 import { AppDataSource } from '../data_source';
-import { Roles, GetRolesListOrNamesList } from './Roles';
+import { Roles, GetRolesAndNamesPagesActionsList } from './Roles';
+import { notEmpty } from '../utils/functions';
 
 let Connection: DataSource = AppDataSource.manager.connection;
 
@@ -70,23 +71,25 @@ export async function getUsersRepository(): Promise<Repository<User>> {
     return Connection.getRepository(User);
 }
 
-export async function jwSecretKey(data: { userId?: string, user?: User }): Promise<{ expiredIn: number; secretOrPrivateKey: string; }> {
+export async function jwSecretKey(data: { userId?: string, user?: User }): Promise<{ expiredIn: number, secretOrPrivateKey: string }> {
     var userIsChws: boolean = false;
     if (data.user) {
-        const roleNames = (await GetRolesListOrNamesList(data.user.roles, true));
-        userIsChws = roleNames ? (roleNames as string[])[0] == 'chws' : false;
+        const formatedRoles = (await GetRolesAndNamesPagesActionsList(data.user.roles));
+        userIsChws = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesNames[0] == 'chws' : false;
     } else if (data.userId) {
         const userRepo = await getUsersRepository();
         const user = await userRepo.findOneBy({ id: data.userId });
         if (user) {
-            const roleNames = (await GetRolesListOrNamesList(user.roles, true));
-            userIsChws = roleNames ? (roleNames as string[])[0] == 'chws' : false;
+            const formatedRoles = (await GetRolesAndNamesPagesActionsList(user.roles));
+            userIsChws = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesNames[0] == 'chws' : false;
         }
     }
+    return generateSecret(userIsChws);
+}
 
+export function generateSecret(userIsChws:boolean):{ expiredIn: number; secretOrPrivateKey: string; }{
     const second1 = 1000 * 60 * 60 * 24 * 366;
     const second2 = 1000 * 60 * 60 * 12;
-
     return {
         expiredIn: userIsChws ? second1 : second2,
         secretOrPrivateKey: 'kossi-secretfortoken',
@@ -104,7 +107,7 @@ export async function UpdateUserData(user: User): Promise<User> {
     const secret = await jwSecretKey({ user: user });
     const expireDate = Date.now() + secret.expiredIn;
     user.expiresIn = expireDate;
-    const roleNames = (await GetRolesListOrNamesList(user.roles, true));
-    user.useLocalStorage = roleNames ? (roleNames as string[])[0] == 'chws' : false;
+    const formatedRoles = (await GetRolesAndNamesPagesActionsList(user.roles));
+    user.useLocalStorage = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesNames[0] == 'chws' : false;
     return user;
 }
