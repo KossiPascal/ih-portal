@@ -51,6 +51,7 @@
     "@okta/jwt-verifier": "^2.3.0",
     "@sap/hana-client": "^2.13.22",
     "axios": "^1.6.5",
+    "bcrypt": "^5.1.1",
     "compression": "^1.7.4",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
