@@ -8,7 +8,14 @@ import { getIhDrugArrayData } from './controllers/dataFromDB';
 import { Chws } from './entity/Sync';
 import { ChwsDrugData, ChwsDrugDataWithChws, ChwsDrugQantityInfo } from './utils/appInterface';
 import { AppDataSource } from './data_source';
-import { appVersion, logNginx } from './utils/functions';
+import { ServerStart, appVersion, getIPAddress, logNginx, normalizePort, sslFolder } from './utils/functions';
+
+
+require('dotenv').config({ path: sslFolder('.ih-env') });
+const { ACCESS_ALL_AVAILABE_PORT, SERVER_2_API_PORT } = process.env
+
+const hostnames = getIPAddress(ACCESS_ALL_AVAILABE_PORT == 'true');
+const PORT_FOR_GET_API = normalizePort(SERVER_2_API_PORT || 9998);
 
 
 
@@ -23,7 +30,6 @@ AppDataSource
   .catch(error => { console.log(`${error}`); logNginx(`${error}`) });
 
 const app = express();
-const PORT_FOR_GET_API = process.env.PORT_FOR_GET_API || 9998;
 
 const validApiKeys = ['api_key'];
 const validPaths = ['/api/chws-meg/doc', '/api/chws-meg', '/api/chws-meg.json', '/api/chws-meg.csv', '/api/uids/doc', '/api/uids', '/api/uids.json', '/api/uids.csv'];
@@ -31,9 +37,11 @@ const validPaths = ['/api/chws-meg/doc', '/api/chws-meg', '/api/chws-meg.json', 
 app.use(helmet());
 
 app.use((req: Request, res: Response, next: NextFunction) => {
+  // if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method === 'GET') {
     if (validPaths.includes(req.path)) {
-      next();
+      if (req.secure) next();
+      if (!req.secure) res.redirect(`https://${req.headers.host}${req.url}`);
     } else {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -99,6 +107,7 @@ app.get('/api/chws-meg/doc', (req: Request, res: Response, next: NextFunction) =
     return res.status(401).json({ error: 'Unauthorized' });
   }
 });
+
 app.get('/api/chws-meg', async (req: Request, res: Response, next: NextFunction) => {
   const chwsMegJsonData: ChwsDrugDataWithChws[] | null = await chwsMegJson(req, res, next);
   if (chwsMegJsonData) {
@@ -107,6 +116,7 @@ app.get('/api/chws-meg', async (req: Request, res: Response, next: NextFunction)
     return res.status(401).json({ error: 'Unauthorized' });
   }
 });
+
 app.get('/api/chws-meg.json', async (req: Request, res: Response, next: NextFunction) => {
   const chwsMegJsonData: ChwsDrugDataWithChws[] | null = await chwsMegJson(req, res, next);
   if (chwsMegJsonData) {
@@ -115,10 +125,6 @@ app.get('/api/chws-meg.json', async (req: Request, res: Response, next: NextFunc
     return res.status(401).json({ error: chwsMegJsonData });
   }
 });
-
-
-
-
 
 app.get('/api/chws-meg.csv', async (req: Request, res: Response, next: NextFunction) => {
   const csvData: ChwsDrugDataWithChws[] | null = await chwsMegJson(req, res, next);
@@ -353,7 +359,12 @@ app.get('/api/uids.csv', async (req: Request, res: Response, next: NextFunction)
 
 // #####################################################################
 
-app.listen(PORT_FOR_GET_API, () => {
-  console.log(`Server is running on http://localhost:${PORT_FOR_GET_API}`);
-});
+const credentials = {
+  key: fs.readFileSync(`${sslFolder('server.key')}`, 'utf8'),
+  ca: fs.readFileSync(`${sslFolder('server-ca.crt')}`, 'utf8'),
+  cert: fs.readFileSync(`${sslFolder('server.crt')}`, 'utf8')
+};
+app.set('port', PORT_FOR_GET_API);
 
+
+ServerStart({ isSecure: true, credential: credentials, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: PORT_FOR_GET_API, hostnames: hostnames })
