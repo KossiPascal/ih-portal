@@ -1,6 +1,6 @@
 {
   "name": "ih-portal-backend",
-  "version": "1.0.169",
+  "version": "1.0.170",
   "main": "index.js",
   "author": "TSOLEGNAGBO Kossi <kossi.tsolegnagbo@gmail.com>",
   "private": true,
@@ -51,8 +51,6 @@
     "@okta/jwt-verifier": "^2.3.0",
     "@sap/hana-client": "^2.13.22",
     "axios": "^1.6.5",
-    "bcrypt": "^5.1.1",
-    "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
@@ -98,8 +96,6 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
-    "@types/bcryptjs": "^2.4.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/jsonwebtoken": "^8.5.8",
