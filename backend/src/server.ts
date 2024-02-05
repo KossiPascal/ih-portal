@@ -26,7 +26,7 @@ const compression = require("compression");
 const responseTime = require('response-time')
 
 require('dotenv').config({ path: sslFolder('.ih-env') });
-const { ACCESS_ALL_AVAILABE_PORT,CAN_ACCESS_INSECURE, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED } = process.env
+const { ACCESS_ALL_AVAILABE_PORT, CAN_ACCESS_INSECURE, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED } = process.env
 
 
 const hostnames = getIPAddress(ACCESS_ALL_AVAILABE_PORT == 'true');
@@ -44,17 +44,34 @@ AppDataSource
     console.log(`App Version: ${appVersion()}`);
     logNginx(`App Version: ${appVersion()}`);
   })
-  .catch(error => {console.log(`${error}`); logNginx(`${error}`)});
+  .catch(error => { console.log(`${error}`); logNginx(`${error}`) });
 
-  // const corsOptions = {
-  //   origin: '*',
-  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  //   allowedHeaders: 'Content-Type,Authorization',
-  //   optionsSuccessStatus: 200,
-  // };
+// const corsOptions = {
+//   origin: '*',
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//   allowedHeaders: 'Content-Type,Authorization',
+//   optionsSuccessStatus: 200,
+// };
 
 const app = express()
-.use(helmet())
+  .use(helmet({ contentSecurityPolicy: false }))
+  // .use(helmet({
+  //   contentSecurityPolicy: {
+  //     directives: {
+  //       defaultSrc: ["'self'"],
+  //       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", '*'],
+  //       // scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://localhost'],
+  //       styleSrc: ["'self'", "'unsafe-inline'", '*'],
+  //       // styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+  //       fontSrc: ["'self'", '*'],
+  //       // fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+  //       imgSrc: ["'self'", 'data:', '*'],
+  //       // imgSrc: ["'self'", 'data:'],
+  //       connectSrc: ["'self'", '*'],
+  //       // connectSrc: ["'self'", 'https://localhost'],
+  //     },
+  //   }
+  // }))
   //.options('*', cors(corsOptions))
   .use(cors()) //.use(cors(corsOptions))
   .use(json())
@@ -84,14 +101,14 @@ const app = express()
   .use('/api/database', databaseRouter)
   .use('/api/assets', express.static(__dirname + '/assets'))
   .use(express.static(path.join(projectFolder(), "views")))
-  .use("/", (req:Request, res:Response, next:NextFunction) => res.sendFile(path.join(projectFolder(), "views/index.html")))
-  .all('*', (req:Request, res:Response, next:NextFunction) => res.status(200).redirect("/"))
+  .use("/", (req: Request, res: Response, next: NextFunction) => res.sendFile(path.join(projectFolder(), "views/index.html")))
+  .all('*', (req: Request, res: Response, next: NextFunction) => res.status(200).redirect("/"))
   .use(Errors.get404)
   .use(Errors.get500);
 
-  // app.get('/api/assets/i18n/en-lang.json', (req:Request, res:Response, next:NextFunction) => {
-  //   res.json({ message: 'Hello, this is your JSON response!' });
-  // });
+// app.get('/api/assets/i18n/en-lang.json', (req:Request, res:Response, next:NextFunction) => {
+//   res.json({ message: 'Hello, this is your JSON response!' });
+// });
 
 const appSecured = app;
 const credentials = {
@@ -104,7 +121,7 @@ app.set('port', port);
 appSecured.set('port', portSecured);
 
 /* Redirect http to https */
-appSecured.use((req:Request, res:Response, next:NextFunction) => {
+appSecured.use((req: Request, res: Response, next: NextFunction) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.secure) next();
   if (!req.secure) res.redirect(`https://${req.headers.host}${req.url}`);
