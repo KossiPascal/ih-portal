@@ -12,6 +12,8 @@ import { getDateInFormat, isBetween } from "../utils/date-utils";
 const request = require('request');
 // const fetch = require('node-fetch');
 
+const MEG_FORMS: string[] = ["drug_movements", "drug_quantities", "pcime_c_asc", "pregnancy_family_planning", "fp_follow_up_renewal"];
+
 export async function GetPersonsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };
   const errors = validationResult(req);
@@ -292,11 +294,15 @@ export async function fetchIhChtDataPerChw(req: Request, res: Response, next: Ne
 }
 
 export async function fetchIhDrugDataPerChw(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined) {
+  req.body.forms = MEG_FORMS;
+  req.body.sources = ['Tonoudayo'];
+
   const outPut = await getIhDrugArrayData(req, res, next, Chw)
   return res.status(outPut.status).json(outPut);
 }
 
-async function getIhDrugArrayData(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined): Promise<{ status: number; data: { chwId: any, chw: Chws, data: ChwsDrugData }[] | string | undefined; }> {
+export async function getIhDrugArrayData(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined): Promise<{ status: number; data: { chwId: any, chw: Chws, data: ChwsDrugData }[] | string | undefined; }> {
+  
   const chwsDrug: { status: number, data: ChwsDrug[] } = await getChwsDrugWithParams(req, res, next, true);
 
   var chwsDrugFinalOut: { chwId: any, chw: Chws, data: ChwsDrugData }[] = [];
@@ -549,6 +555,8 @@ function generateDrugQty(data: ChwsDrug, fieldId: string): number {
 }
 
 export async function updateDrugPerChw(req: Request, res: Response, next: NextFunction) {
+  req.body.forms = MEG_FORMS;
+  req.body.sources = ['Tonoudayo'];
   const { district, site, chw, year, month, drug_index, drug_name, year_cmm, quantity_validated, delivered_quantity, observations, theoretical_quantity_to_order, forms, sources, userId } = req.body;
 
   const _repoChwsDrugUpdate = await getChwsDrugUpdateSyncRepository();

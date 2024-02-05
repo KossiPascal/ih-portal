@@ -1,5 +1,5 @@
 import "reflect-metadata"
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { json, urlencoded } from 'body-parser';
 import { ServerStart, appVersion, getIPAddress, logNginx, normalizePort, projectFolder, sslFolder } from './utils/functions';
 import { AppDataSource } from './data_source';
@@ -15,6 +15,11 @@ import fs from "fs";
 import databaseRouter from "./routes/database";
 import { AutoSyncDataFromCloud } from "./controllers/auto_server_sync";
 import { Consts } from "./utils/constantes";
+
+
+const helmet = require('helmet');
+const { v4: uuidv4 } = require('uuid');
+
 const path = require('path');
 const cron = require("node-cron");
 const compression = require("compression");
@@ -49,6 +54,7 @@ AppDataSource
   // };
 
 const app = express()
+.use(helmet())
   //.options('*', cors(corsOptions))
   .use(cors()) //.use(cors(corsOptions))
   .use(json())
@@ -78,12 +84,12 @@ const app = express()
   .use('/api/database', databaseRouter)
   .use('/api/assets', express.static(__dirname + '/assets'))
   .use(express.static(path.join(projectFolder(), "views")))
-  .use("/", (req, res) => res.sendFile(path.join(projectFolder(), "views/index.html")))
-  .all('*', (req, res) => res.status(200).redirect("/"))
+  .use("/", (req:Request, res:Response, next:NextFunction) => res.sendFile(path.join(projectFolder(), "views/index.html")))
+  .all('*', (req:Request, res:Response, next:NextFunction) => res.status(200).redirect("/"))
   .use(Errors.get404)
   .use(Errors.get500);
 
-  // app.get('/api/assets/i18n/en-lang.json', (req, res) => {
+  // app.get('/api/assets/i18n/en-lang.json', (req:Request, res:Response, next:NextFunction) => {
   //   res.json({ message: 'Hello, this is your JSON response!' });
   // });
 
@@ -98,7 +104,7 @@ app.set('port', port);
 appSecured.set('port', portSecured);
 
 /* Redirect http to https */
-appSecured.use((req, res, next) => {
+appSecured.use((req:Request, res:Response, next:NextFunction) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.secure) next();
   if (!req.secure) res.redirect(`https://${req.headers.host}${req.url}`);

@@ -1,0 +1,28 @@
+<!-- views/chws.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHWS Page</title>
+</head>
+<body>
+  <h1>CHWS Page</h1>
+  <p>Date: <%= date %></p>
+
+  <h2>CHWS Codes:</h2>
+  <ul>
+    <% chws.forEach(chw => { %>
+      <li><%= chw %></li>
+    <% }) %>
+  </ul>
+
+  <h2>Sites:</h2>
+  <ul>
+    <% site.forEach(site => { %>
+      <li><%= site %></li>
+    <% }) %>
+  </ul>
+</body>
+</html>

@@ -44,11 +44,11 @@ export class LoginComponent implements OnInit {
 
   createFormGroup(): FormGroup {
     return new FormGroup({
-      credential: new FormControl("ktsolegnagbo", [
+      credential: new FormControl("", [
         Validators.required,
         Validators.minLength(3),
       ]),
-      password: new FormControl("PaKo@263", [
+      password: new FormControl("", [
         Validators.required,
         Validators.minLength(7),
       ]),

@@ -205,8 +205,8 @@ export interface ChwsUpdateDrugInfo {
     userId?: string | null | undefined
     dhisusername?: string
     dhispassword?: string
-    forms: string[]
-    sources: string[]
+    forms?: string[]
+    sources?: string[]
 }
 
 export interface MeetingReport {

@@ -72,11 +72,6 @@ export class ChwsDrugManageComponent implements OnInit {
   month$!: { labelEN: string; labelFR: string; id: string; uid: number };
   year$!: number;
 
-
-  Sources$: string[] = ['Tonoudayo'];
-
-  Forms$: string[] = ["drug_movements", "drug_quantities", "pcime_c_asc", "pregnancy_family_planning", "fp_follow_up_renewal"];
-
   response$!: { status: number, data: { chwId: any, chw: Chws, data: ChwsDrugData }[] | any }
 
   drugUpdateResponse$!: { status: number, data: ChwsUpdateDrugInfo }
@@ -174,8 +169,6 @@ export class ChwsDrugManageComponent implements OnInit {
               delivered_quantity: dq?.value,
               theoretical_quantity_to_order: tq?.value,
               observations: os?.value,
-              forms: this.Forms$,
-              sources: this.Sources$
             };
 
             this.sync.ihDrugUpdateDataPerChw(dataUpdated).subscribe((_res$: {
@@ -393,11 +386,9 @@ export class ChwsDrugManageComponent implements OnInit {
     var params: FilterParams = {
       start_date: `${prevY}-${prevM}-21`,
       end_date: `${_year}-${_moth}-20`,
-      sources: this.Sources$,
       districts: districts,
       sites: sites,
       chws: chws,
-      forms: this.Forms$
     }
     return params;
   }
@@ -419,8 +410,8 @@ export class ChwsDrugManageComponent implements OnInit {
       this.defaultParams?.start_date != filters.start_date ||
       this.defaultParams?.end_date != filters.end_date ||
       this.defaultParams?.districts != filters.districts ||
-      this.defaultParams?.sites != filters.sites
-      // this.defaultParams?.chws != filters.chws
+      this.defaultParams?.sites != filters.sites ||
+      this.defaultParams?.chws != filters.chws
     ) {
       this.sync.ihDrugDataPerChw(filters).subscribe((_res$: { status: number, data: { chwId: any, chw: Chws, data: ChwsDrugData }[] | any }) => {
         this.response$ = _res$;
