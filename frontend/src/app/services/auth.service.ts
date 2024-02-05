@@ -66,7 +66,7 @@ export class AuthService {
     return this.http.post(`${backenUrl()}/auth-user/${id}`, sendParams, CustomHttpHeaders(this.store));
   }
 
-  updateUser(user: User): any {
+  updateUser(user: any): any {
     const userId = this.getUserId();
     user.dhisusername = undefined;
     user.dhispassword = undefined;

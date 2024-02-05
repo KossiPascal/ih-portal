@@ -6,7 +6,7 @@ export interface User {
   username: string
   fullname: string
   email?: string
-  password?: string
+  // password?: string
   roles: UserRoles[]|string[]
   meeting_report: string[]
   isActive: boolean

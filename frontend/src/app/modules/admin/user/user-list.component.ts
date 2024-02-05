@@ -200,10 +200,12 @@ export class UserComponent implements OnInit {
         this.selectedUser.roles = this.selectedRole;
         this.selectedUser.meeting_report = this.selectedMR;
         this.selectedUser.isActive = this.userForm.value.isActive;
+
+        const finalSelectedUser:any = this.selectedUser;
         if (notNull(this.userForm.value.password) && notNull(this.userForm.value.passwordConfirm)) {
-          this.selectedUser.password = this.userForm.value.password;
+          finalSelectedUser['password'] = this.userForm.value.password;
         }
-        request = this.auth.updateUser(this.selectedUser);
+        request = this.auth.updateUser(finalSelectedUser);
       }
     } else {
 
