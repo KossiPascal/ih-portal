@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { User, getUsersRepository, UpdateUserData } from '../entity/User';
 import { notEmpty } from '../utils/functions';
 import { Roles, GetRolesListOrNamesList, getRolesRepository } from '../entity/Roles';
-const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 // const { v4: uuidv4 } = require('uuid');
 // const { shortid } = require('shortid');
 
@@ -72,7 +72,7 @@ export class AuthUserController {
                 user.username = username;
                 user.fullname = 'Kossi TSOLEGNAGBO';
                 user.email = 'kossi.tsolegnagbo@aiesec.net';
-                user.password = await bcrypt.hash(password, 12);
+                // user.password = await bcrypt.hash(password, 12);
                 user.roles = ['1', '2', '3', '4', '5'];
                 user.meeting_report = [];
                 user.expiresIn = 0;
@@ -111,10 +111,10 @@ export class AuthUserController {
                 return res.status(201).json({ status: 201, data: 'Invalid user or inactive' });
             }
 
-            const isEqual = await bcrypt.compare(password, userFound.password);
-            if (!isEqual) {
-                return res.status(201).json({ status: 201, data: 'Invalid password' });
-            }
+            // const isEqual = await bcrypt.compare(password, userFound.password);
+            // if (!isEqual) {
+            //     return res.status(201).json({ status: 201, data: 'Invalid password' });
+            // }
 
             const finalUser = await UpdateUserData(userFound);
 
@@ -148,7 +148,7 @@ export class AuthUserController {
             user.username = username;
             user.fullname = fullname;
             user.email = email;
-            user.password = await bcrypt.hash(password, 12);
+            // user.password = await bcrypt.hash(password, 12);
             user.roles = roles;
             user.meeting_report = meeting_report;
             user.expiresIn = expiresIn;
@@ -236,7 +236,7 @@ export class AuthUserController {
             const userFound = await userRepo.findOneBy({ id: id });
             if (!userFound) return res.status(201).json({ status: 201, data: 'User not found' });
 
-            if (password && notEmpty(password)) userFound.password = await bcrypt.hash(password, 12);
+            // if (password && notEmpty(password)) userFound.password = await bcrypt.hash(password, 12);
             if (fullname && notEmpty(fullname)) userFound.fullname = fullname;
             if (email && notEmpty(email)) userFound.email = email;
             if (roles && notEmpty(roles)) userFound.roles = roles;
@@ -267,9 +267,9 @@ export class AuthUserController {
             if (!userFound) return res.status(201).json({ status: 201, data: 'User not found' });
 
             if (old_password && notEmpty(old_password) && new_password && notEmpty(new_password)) {
-                const isOldPasswordValid = await bcrypt.compare(old_password, userFound.password);
-                if (!isOldPasswordValid) return res.status(201).json({ status: 201, data: 'Old password does not match' });
-                if (new_password && notEmpty(new_password)) userFound.password = await bcrypt.hash(new_password, 12);
+                // const isOldPasswordValid = await bcrypt.compare(old_password, userFound.password);
+                // if (!isOldPasswordValid) return res.status(201).json({ status: 201, data: 'Old password does not match' });
+                // if (new_password && notEmpty(new_password)) userFound.password = await bcrypt.hash(new_password, 12);
             }
             userFound.mustLogin = true;
             await userRepo.save(userFound);
