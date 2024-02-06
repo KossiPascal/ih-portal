@@ -61,7 +61,7 @@
                         <th colspan="3">
                           <b style="font-size: 25px; color:rgb(206, 32, 32); margin:10px">
                             {{ team.name | uppercase }}
-                            <ul class="download noExl" *ngIf="AllFieldAreNotEmpty(t, false) && roles.isSuperAdmin()">
+                            <ul class="download noExl" *ngIf="roles.canDownloadReports() && AllFieldAreNotEmpty(t, false)">
                               <li><span (click)="excel('meeting-report-'+t)">Excel</span></li>
                               <li><span (click)="csv('meeting-report-'+t)">CSV</span></li>
                               <li><span (click)="json('meeting-report-'+t)">JSON</span></li>

@@ -6,6 +6,7 @@ import { DataIndicators } from '@ih-app/models/DataAggragate';
 import { capitaliseDataGiven, notNull, range, returnDataAsArray, returnEmptyArrayIfNul } from '@ih-app/shared/functions';
 import { AuthService } from '@ih-app/services/auth.service';
 import { startEnd21and20Date } from '@ih-src/app/shared/dates-utils';
+import { Roles } from '@ih-src/app/models/Roles';
 declare var sortTable: any;
 
 @Component({
@@ -19,6 +20,7 @@ export class Dashboard2Component implements OnInit {
 
   constructor(private auth: AuthService, private sync: SyncService) {
   }
+  public roles = new Roles(this.auth);
 
   aggradateDataForm!: FormGroup;
   initDate!: { start_date: string, end_date: string };

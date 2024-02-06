@@ -137,7 +137,7 @@
                                 <div class="card">
                                     <div class="card-header">
                                         <div class="card-title">
-                                          <table-export></table-export>
+                                          <table-export *ngIf="roles.canDownloadReports()"></table-export>
                                         </div>
                                       </div>
                                     <div class="card-body" style="overflow-y:scroll!important;">
@@ -293,7 +293,7 @@
                                 <div class="card" *ngIf="tab3_error_messages==''  && tab3_messages.length > 0">
                                     <div class="card-header">
                                         <div class="card-title">
-                                          <table-export></table-export>
+                                          <table-export *ngIf="roles.canDownloadReports()"></table-export>
                                         </div>
                                       </div>
                                     <div class="card-body" style="overflow-y:scroll!important;">

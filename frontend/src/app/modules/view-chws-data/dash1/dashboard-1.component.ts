@@ -5,6 +5,7 @@ import { Chws, CompareData, Dhis2Sync, Districts, FilterParams, Sites } from '@i
 import { AuthService } from '@ih-app/services/auth.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import { notNull, returnDataAsArray } from '@ih-app/shared/functions';
+import { Roles } from '@ih-src/app/models/Roles';
 import { startEnd21and20Date } from '@ih-src/app/shared/dates-utils';
 
 
@@ -22,6 +23,7 @@ export class Dashboard1Component implements OnInit {
   }
   constructor(private auth: AuthService, private sync: SyncService) {
   }
+  public roles = new Roles(this.auth);
 
   aggradateDataForm!: FormGroup;
   initDate!: { start_date: string, end_date: string };

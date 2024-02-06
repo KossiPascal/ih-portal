@@ -9,6 +9,7 @@ import { capitaliseDataGiven, notNull, returnEmptyArrayIfNul } from '@ih-app/sha
 import { ActivatedRoute } from '@angular/router'
 import { DataIndicators } from '@ih-app/models/DataAggragate';
 import { startEnd21and20Date, isDayInDate, daysDiff } from '@ih-src/app/shared/dates-utils';
+import { Roles } from '@ih-src/app/models/Roles';
 
 @Component({
   selector: 'sync-to-dhis2',
@@ -64,6 +65,8 @@ export class SyncToDhis2Component implements OnInit {
 
   constructor(private auth: AuthService, private route: ActivatedRoute, private sync: SyncService) {
   }
+
+  public roles = new Roles(this.auth);
 
 
   ngOnInit(): void {
