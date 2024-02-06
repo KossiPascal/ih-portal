@@ -17,6 +17,7 @@ export interface User {
   userLogo: string
   mustLogin: boolean
   useLocalStorage: boolean
+  isDeleted: boolean
   // pages:string[]
   // actions:string[]
   // default_page:string

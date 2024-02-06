@@ -146,7 +146,8 @@ export class AuthUserController {
 
     static register = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { userId, username, email, password, fullname, roles, meeting_report, expiresIn, token, isActive } = req.body;
+            const { userId } = req.body;
+            const { username, email, password, fullname, roles, meeting_report, expiresIn, token, isActive } = req.body.user;
             if (!username || !password) return res.status(201).json({ status: 201, data: 'Invalid credentials' });
 
             const userRepo = await getUsersRepository();
@@ -243,7 +244,8 @@ export class AuthUserController {
 
     static updateUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const userId = req.body.userId;
+            console.log(req.body)
+            const { userId } = req.body;
             const { id, email, password, fullname, roles, meeting_report, isActive } = req.body.user;
             if (!id) return res.status(201).json({ status: 201, data: 'Invalid user ID' });
 
@@ -309,10 +311,12 @@ export class AuthUserController {
 
     static deleteUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { userId, permanentDelete, isSuperAdmin } = req.body;
-            const id = req.body.user.id;
+            const { userId, permanentDelete } = req.body;
+            const { id } = req.body.user;
 
             const userRepo = await getUsersRepository();
+
+            const isSuperAdmin = true;
 
             if (isSuperAdmin == true && id) {
                 const user = await userRepo.findOneBy({ id: id });
@@ -327,7 +331,7 @@ export class AuthUserController {
                         user.mustLogin = true;
                         await userRepo.update(id, user);
                     } else {
-                        // await userRepo.delete({ id: id });
+                        await userRepo.delete({ id: id });
                     }
                     return res.status(200).json({ status: 200, data: 'success' });
                 }
@@ -450,20 +454,22 @@ export class AuthUserController {
         'can_create_person',
         'can_create_report',
         'can_create_role',
+        'can_create_user',
 
         'can_update_team',
         'can_update_person',
         'can_update_report',
         'can_update_role',
-        
+        'can_update_user',
+
         'can_update_chws_drug',
 
         'can_delete_team',
         'can_delete_person',
         'can_delete_report',
         'can_delete_role',
+        'can_delete_user',
 
-        'can_register_user',
         'can_logout',
         'can_view_left_navigation',
         'can_view_top_navigation',

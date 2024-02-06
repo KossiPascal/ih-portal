@@ -24,41 +24,41 @@ AuthUserRouter.post('/pages-list', Middelware.authMiddleware, AuthUserController
 
 AuthUserRouter.post(
     '/login',
-    [
-        body('credential')
-            .trim().not().isEmpty().isString()
-            .withMessage('Please provide credential'),
+    // [
+    //     body('credential')
+    //         .trim().not().isEmpty().isString()
+    //         .withMessage('Please provide credential'),
 
-        body('password')
-            .trim().isLength({ min: 7 })
-            .withMessage('Mot de passe trop cours (min:7)'),
-    ],
+    //     body('password')
+    //         .trim().isLength({ min: 7 })
+    //         .withMessage('Mot de passe trop cours (min:7)'),
+    // ],
     AuthUserController.login
 );
 
 AuthUserRouter.post(
     '/register',
-    [
-        body('username')
-            .trim().not().isEmpty().isString()
-            .withMessage('Please enter username.')
-            .custom(async (username) => {
-                const userRepo = await getUsersRepository();
-                const user = await userRepo.findOneBy({ username: username });
-                if (user) return Promise.reject('username already exist!');
-            }),
+    // [
+    //     body('username')
+    //         .trim().not().isEmpty().isString()
+    //         .withMessage('Please enter username.')
+    //         .custom(async (username) => {
+    //             const userRepo = await getUsersRepository();
+    //             const user = await userRepo.findOneBy({ username: username });
+    //             if (user) return Promise.reject('username already exist!');
+    //         }),
 
-        body('email').isEmail()
-            .trim().isString()
-            .withMessage('Please enter a valid email.')
-            .custom(async (email) => {
-                const userRepo = await getUsersRepository();
-                const user = await userRepo.findOneBy({ email: email });
-                if (user) return Promise.reject('Email address already exist!');
-            }), // .normalizeEmail(),
+    //     body('email').isEmail()
+    //         .trim().isString()
+    //         .withMessage('Please enter a valid email.')
+    //         .custom(async (email) => {
+    //             const userRepo = await getUsersRepository();
+    //             const user = await userRepo.findOneBy({ email: email });
+    //             if (user) return Promise.reject('Email address already exist!');
+    //         }), // .normalizeEmail(),
 
-        body('password').trim().isLength({ min: 7 }),
-    ],
+    //     body('password').trim().isLength({ min: 7 }),
+    // ],
     Middelware.authMiddleware,
     AuthUserController.register
 );

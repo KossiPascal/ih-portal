@@ -19,7 +19,7 @@
                 <div class="panel-body">
                     <table class="table datatable">
                         <thead>
-                            <tr>
+                            <tr style="background-color: blue;color:white;">
                                 <th>N°</th>
                                 <th>Username</th>
                                 <th>Full name</th>
@@ -33,7 +33,7 @@
                         </thead>
 
                         <tbody *ngFor="let user of users$; let index = index; let isFirst = first; let isOdd = odd;">
-                            <tr>
+                            <tr [class]="user.isDeleted == true ? 'deleted-user' : 'undeleted-user'">
                                 <td>{{ index+1 }}</td>
                                 <td>{{ user.username }}</td>
                                 <td>{{ user.fullname }}</td>
@@ -59,13 +59,15 @@
                                             <br>
                                             <h3>ID: {{ user.id }}</h3>
 
-                                            <h3 *ngIf="1==1" style="cursor: pointer;" (click)="EditUser(user)"
-                                                role="button" data-toggle="modal" data-target="#modal-default">
+                                            <h3 *ngIf="roles.canUpdateUser()" style="cursor: pointer;"
+                                                (click)="EditUser(user)" role="button" data-toggle="modal"
+                                                data-target="#modal-default">
                                                 <i class="fas fa-edit"></i> Modifier
                                             </h3>
 
-                                            <h3 *ngIf="1==1" style="cursor: pointer;" (click)="UserSelected(user)"
-                                                role="button" data-toggle="modal" data-target="#modal-danger">
+                                            <h3 *ngIf="roles.canDeleteUser()" style="cursor: pointer;"
+                                                (click)="UserSelected(user)" role="button" data-toggle="modal"
+                                                data-target="#modal-danger">
                                                 <i class="fas fa-trash-alt"></i> Supprimer
                                             </h3>
 
@@ -219,47 +221,45 @@
 
 <div class="modal fade" id="modal-primary">
     <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <img height="30" class="modal-title" src="{{ APP_LOGO}}" alt="" srcset="">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img height="30" class="modal-title" src="{{ APP_LOGO}}" alt="" srcset="">
 
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
 
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h1> <input style="zoom: 1.5;" type="checkbox"
-                                    [checked]="selectedRole.length == roles$.length" (click)="SelectAllRoles()"> <span
-                                    style="margin-left: 5px;">Rôles</span></h1>
-                            <p *ngFor="let role of roles$">
-                                <input type="checkbox" [checked]="containsRole(role.id)"
-                                    (click)="AddOrRemoveRole(role.id)">
-                                <span style="margin-left: 5px; cursor:pointer;" (click)="AddOrRemoveRole(role.id)">
-                                    {{ role.name }}</span>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <h1> <input style="zoom: 1.5;" type="checkbox"
-                                    [checked]="selectedMR.length == MeetingReport$.length" (click)="SelectAllMRs()">
-                                <span style="margin-left: 5px;">Metting Team</span>
-                            </h1>
-                            <p *ngFor="let mr of MeetingReport$">
-                                <input type="checkbox" [checked]="containsMR(mr.id)" (click)="AddOrRemoveMR(mr.id)">
-                                <span style="margin-left: 5px; cursor:pointer;" (click)="AddOrRemoveMR(mr.id)">
-                                    {{ mr.name }}
-                                </span>
-                            </p>
-                        </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1> <input style="zoom: 1.5;" type="checkbox" [checked]="selectedRole.length == roles$.length"
+                                (click)="SelectAllRoles()"> <span style="margin-left: 5px;">Rôles</span></h1>
+                        <p *ngFor="let role of roles$">
+                            <input type="checkbox" [checked]="containsRole(role.id)" (click)="AddOrRemoveRole(role.id)">
+                            <span style="margin-left: 5px; cursor:pointer;" (click)="AddOrRemoveRole(role.id)">
+                                {{ role.name }}</span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h1> <input style="zoom: 1.5;" type="checkbox"
+                                [checked]="selectedMR.length == MeetingReport$.length" (click)="SelectAllMRs()">
+                            <span style="margin-left: 5px;">Metting Team</span>
+                        </h1>
+                        <p *ngFor="let mr of MeetingReport$">
+                            <input type="checkbox" [checked]="containsMR(mr.id)" (click)="AddOrRemoveMR(mr.id)">
+                            <span style="margin-left: 5px; cursor:pointer;" (click)="AddOrRemoveMR(mr.id)">
+                                {{ mr.name }}
+                            </span>
+                        </p>
                     </div>
                 </div>
-
-                <div class="modal-footer">
-                    <button id="close-modal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
             </div>
+
+            <div class="modal-footer">
+                <button id="close-modal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 

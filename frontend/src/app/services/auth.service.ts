@@ -37,8 +37,8 @@ export class AuthService {
     }
   }
 
-  setChwLogged(chws:Chws): void {
-      this.store.set('chw_found', JSON.stringify(chws), true);
+  setChwLogged(chws: Chws): void {
+    this.store.set('chw_found', JSON.stringify(chws), true);
   }
 
   getToken(): string | null | undefined {
@@ -66,13 +66,13 @@ export class AuthService {
     return;
   }
 
-  RolePagesActions(cible:'roles' | 'pages' | 'actions'):string[] | null | undefined{
+  RolePagesActions(cible: 'roles' | 'pages' | 'actions'): string[] | null | undefined {
     const user = this.currentUser();
     if (user) {
       var data;
-      if(cible == 'roles') data = GetRolesIdsOrNames(user?.roles as UserRoles[], 'idsString');
-      if(cible == 'pages') data = GetRolesIdsOrNames(user?.roles as UserRoles[], 'pages');
-      if(cible == 'actions') data = GetRolesIdsOrNames(user?.roles as UserRoles[], 'actions');
+      if (cible == 'roles') data = GetRolesIdsOrNames(user?.roles as UserRoles[], 'idsString');
+      if (cible == 'pages') data = GetRolesIdsOrNames(user?.roles as UserRoles[], 'pages');
+      if (cible == 'actions') data = GetRolesIdsOrNames(user?.roles as UserRoles[], 'actions');
       if (data) {
         return data as string[];
       }
@@ -92,19 +92,19 @@ export class AuthService {
     }
   }
 
-  public GoToDefaultPage(forcelogout:boolean = false) {
-    if(forcelogout){
+  public GoToDefaultPage(forcelogout: boolean = false) {
+    if (forcelogout) {
       this.logout();
       return;
     }
     const default_page = this.getDefaultPage();
-    if (default_page && default_page!='') {
+    if (default_page && default_page != '') {
       // location.href = dpUrl;
       this.router.navigate([default_page]);
       return;
     }
     const roles = this.RolePagesActions('roles');
-    if (roles && roles.length<=0) {
+    if (roles && roles.length <= 0) {
       const msg = "Vous n'avez aucun role attribué, Contacter votre administrateur!";
       this.router.navigate([`auths/error/500/${msg}`]);
       return;
@@ -113,11 +113,11 @@ export class AuthService {
     return;
   }
 
-  private ApiParams(params?:any, mustLoggedIn:boolean = true){
+  private ApiParams(params?: any, mustLoggedIn: boolean = true) {
     if (mustLoggedIn && !this.isLoggedIn()) {
       return this.logout();
     }
-    const fparams:any = notNull(params) ? params : {};
+    const fparams: any = notNull(params) ? params : {};
     fparams['userId'] = this.getUserId();
     fparams['appLoadToken'] = this.getAppLoadToken();
     fparams['accessRoles'] = this.RolePagesActions('roles');
@@ -143,13 +143,13 @@ export class AuthService {
     return this.http.post(`${backenUrl()}/auth-user/update-user`, fparams, CustomHttpHeaders(this.store));
   }
 
-  deleteUser(user: User): any {
-    const fparams = this.ApiParams({ user: user });
+  deleteUser(user: User, permanentDelete: boolean = false): any {
+    const fparams = this.ApiParams({ user: user, permanentDelete: permanentDelete });
     return this.http.post(`${backenUrl()}/auth-user/delete-user`, fparams, CustomHttpHeaders(this.store));
   }
 
-  register(user: User, forceRegister: boolean = false): any {
-    const fparams = this.ApiParams({ user: user, forceRegister:forceRegister });
+  register(user: User): any {
+    const fparams = this.ApiParams({ user: user });
     return this.http.post(`${backenUrl()}/auth-user/register`, fparams, CustomHttpHeaders(this.store));
   }
 
@@ -161,8 +161,8 @@ export class AuthService {
     return this.http.post(`${backenUrl()}/auth-user/login`, fparams, CustomHttpHeaders(this.store));
   }
 
-  NewUserToken(updateReload:boolean = false): any {
-    const fparams = this.ApiParams({ updateReload:updateReload });
+  NewUserToken(updateReload: boolean = false): any {
+    const fparams = this.ApiParams({ updateReload: updateReload });
     return this.http.post(`${backenUrl()}/auth-user/newToken`, fparams, CustomHttpHeaders(this.store));
   }
 
@@ -205,7 +205,7 @@ export class AuthService {
     saveCurrentUrl(this.router);
     this.store.delete(this.objectStoreName);
     this.store.delete('chw_found');
-    
+
     localStorage.removeItem("IFrame");
     // location.href = 'auths/login';
     this.router.navigate(["auths/login"]);

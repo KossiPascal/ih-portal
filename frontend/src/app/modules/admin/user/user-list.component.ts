@@ -15,6 +15,9 @@ declare var showToast: any;
 @Component({
   selector: 'app-user',
   templateUrl: `./user-list.component.html`,
+  styleUrls: [
+    './user-list.component.css'
+  ],
 
 })
 export class UserComponent implements OnInit {
@@ -40,6 +43,8 @@ export class UserComponent implements OnInit {
 
   constructor(private auth: AuthService, private sync: SyncService, private router: Router) {
   }
+
+  public roles = new Roles(this.auth);
 
 
   ngOnInit(): void {
@@ -94,23 +99,25 @@ export class UserComponent implements OnInit {
   }
 
   DeleteUser() {
-    this.isEditMode = false;
-    if (this.selectedUser) this.auth.deleteUser(this.selectedUser).subscribe((res: { status: number, data: any }) => {
-      if (res.status === 200) {
-        this.showModalToast('success', 'Supprimé avec success');
-        this.getUsers();
-        this.selectedUser = null;
-        this.selectedRole = [];
-        this.selectedMR = [];
+    if (this.roles.canDeleteUser()) {
+      this.isEditMode = false;
+      if (this.selectedUser) this.auth.deleteUser(this.selectedUser).subscribe((res: { status: number, data: any }) => {
+        if (res.status === 200) {
+          this.showModalToast('success', 'Supprimé avec success');
+          this.getUsers();
+          this.selectedUser = null;
+          this.selectedRole = [];
+          this.selectedMR = [];
+          this.isLoading = false;
+          this.message = '';
+        } else {
+          this.message = res.data;
+        }
+      }, (err: any) => {
+        this.message = err;
         this.isLoading = false;
-        this.message = '';
-      } else {
-        this.message = res.data;
-      }
-    }, (err: any) => {
-      this.message = err;
-      this.isLoading = false;
-    });
+      });
+    }
   }
 
   CreateUser() {
@@ -194,7 +201,7 @@ export class UserComponent implements OnInit {
     var request: any;
 
     if (this.isEditMode) {
-      if (this.selectedUser) {
+      if (this.selectedUser && this.roles.canUpdateUser()) {
         this.selectedUser.fullname = this.userForm.value.fullname;
         this.selectedUser.email = this.userForm.value.email;
         this.selectedUser.roles = this.selectedRole;
@@ -208,13 +215,15 @@ export class UserComponent implements OnInit {
         request = this.auth.updateUser(finalSelectedUser);
       }
     } else {
-      delete this.userForm.value.passwordConfirm;
-      this.userForm.value["roles"] = this.selectedRole;
-      this.userForm.value["meeting_report"] = this.selectedMR;
-      request = this.auth.register(this.userForm.value, true);
+      if (this.roles.canCreateUser()) {
+        delete this.userForm.value.passwordConfirm;
+        this.userForm.value["roles"] = this.selectedRole;
+        this.userForm.value["meeting_report"] = this.selectedMR;
+        request = this.auth.register(this.userForm.value);
+      }
     }
 
-    if (request) {
+    if (request && this.roles.canCreateUser() || this.roles.canUpdateUser()) {
       return request.subscribe((res: { status: number, data: any }) => {
         if (res.status === 200) {
           this.message = 'Registed successfully !'
