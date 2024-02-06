@@ -135,6 +135,8 @@ export class Roles {
     canCreateRole = (): boolean => {
         return this.actions().includes('can_create_role') || this.isSuperAdmin();
     }
+
+
     canUpdateTeam = (): boolean => {
         return this.actions().includes('can_update_team') || this.isSuperAdmin();
     }
@@ -147,6 +149,14 @@ export class Roles {
     canUpdateRole = (): boolean => {
         return this.actions().includes('can_update_role') || this.isSuperAdmin();
     }
+
+    canUpdateChwsDrug = (): boolean => {
+        return this.actions().includes('can_update_chws_drug') || this.isSuperAdmin();
+    }
+
+    
+
+
     canDeleteTeam = (): boolean => {
         return this.actions().includes('can_delete_team') || this.isSuperAdmin();
     }
@@ -162,8 +172,14 @@ export class Roles {
     canRegisterUser = (): boolean => {
         return this.actions().includes('can_register_user') || this.isSuperAdmin();
     }
+
     canLogOut = (): boolean => {
         return this.actions().includes('can_logout') || this.isSuperAdmin();
+    }
+
+
+    canDownloadReports = (): boolean => {
+        return this.actions().includes('can_download_reports') || this.isSuperAdmin();
     }
 
 } 

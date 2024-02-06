@@ -145,7 +145,7 @@
                         </p>
 
                         <ul
-                          *ngIf="editCmm[i]!='edit' && editQtyValidated[i]!='edit' && editQtyDelivered[i]!='edit' && editObservations[i]!='edit' && editTheoreticalQtyOrder[i]!='edit'">
+                          *ngIf="roles.canDownloadReports() && editCmm[i]!='edit' && editQtyValidated[i]!='edit' && editQtyDelivered[i]!='edit' && editObservations[i]!='edit' && editTheoreticalQtyOrder[i]!='edit'">
                           <li><span (click)="excel('export_table'+i)">Excel</span></li>
                           <li><span (click)="csv('export_table'+i)">CSV</span></li>
                           <li><span (click)="json('export_table'+i)">JSON</span></li>
@@ -154,7 +154,7 @@
                         </ul>
 
                         <button
-                          *ngIf="editCmm[i]=='edit' || editQtyValidated[i]=='edit' || editQtyDelivered[i]=='edit' || editObservations[i]=='edit' || editTheoreticalQtyOrder[i]=='edit' || isUpdateLoading[i] == 'true'"
+                          *ngIf="roles.canUpdateChwsDrug() && editCmm[i]=='edit' || editQtyValidated[i]=='edit' || editQtyDelivered[i]=='edit' || editObservations[i]=='edit' || editTheoreticalQtyOrder[i]=='edit' || isUpdateLoading[i] == 'true'"
                           class="submit" [disabled]="isUpdateLoading[i] == 'true'" type="submit" class="submit-btn btn btn-warning">
                           <i *ngIf="isUpdateLoading[i] == 'true'" style="margin-right: 20px!important;" class="fas fa-1x fa-sync-alt fa-spin"></i>
                           {{ isUpdateLoading[i] == 'true' ? 'Sauvegarde en cours ...' : 'Mettre à jour'}} 
@@ -177,23 +177,23 @@
                         <th rowspan="2">Quantité comptée à l'inventaire</th>
                         <th rowspan="2">Ecart d'inventaire</th>
                         <th rowspan="2">CMM de l'année N-1  
-                          <i (click)="editCmmClick(i)"  class="fas {{this.editCmm[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                          <i *ngIf="roles.canUpdateChwsDrug()" (click)="editCmmClick(i)"  class="fas {{this.editCmm[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
                         </th>
                         <th rowspan="2">Quantité théorique à commander 
-                          <i (click)="editTheoreticalQtyOrderClick(i)"  class="fas {{this.editTheoreticalQtyOrder[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                          <i *ngIf="roles.canUpdateChwsDrug()" (click)="editTheoreticalQtyOrderClick(i)"  class="fas {{this.editTheoreticalQtyOrder[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
                         </th>
                         <th rowspan="2">Quantités à commander</th>
                         <th rowspan="2">Quantité validée 
-                          <i (click)="editQtyValidatedClick(i)"  class="fas {{editQtyValidated[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                          <i *ngIf="roles.canUpdateChwsDrug()" (click)="editQtyValidatedClick(i)"  class="fas {{editQtyValidated[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
                         </th>
                         <th rowspan="2">Quantité livrée 
-                          <i (click)="editQtyDeliveredClick(i)"  class="fas {{editQtyDelivered[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                          <i *ngIf="roles.canUpdateChwsDrug()" (click)="editQtyDeliveredClick(i)"  class="fas {{editQtyDelivered[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
                         </th>
                         <th rowspan="2">Taux de satisfaction</th>
                         
                         <th colspan="9">Observation ASC</th>
                         <th rowspan="2">Observations (Pharmacie) 
-                          <i (click)="editObservationsClick(i)"  class="fas {{editObservations[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                          <i *ngIf="roles.canUpdateChwsDrug()" (click)="editObservationsClick(i)"  class="fas {{editObservations[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
                         </th>
                       </tr> -->
 
@@ -211,28 +211,28 @@
                             <th rowspan="2">Quantité comptée à l'inventaire <small>(F)</small></th>
                             <th rowspan="2">Ecart d'inventaire <small>J = F-E</small></th>
                             <th rowspan="2">CMM de l'année N-1 <small>(G)</small>
-                              <i (click)="editCmmClick(i)"
+                              <i *ngIf="roles.canUpdateChwsDrug()" (click)="editCmmClick(i)"
                                 class="fas {{this.editCmm[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
                             </th>
                             <th rowspan="2">Quantité théorique à commander <small>(H)</small>
-                              <i (click)="editTheoreticalQtyOrderClick(i)"
+                              <i *ngIf="roles.canUpdateChwsDrug()" (click)="editTheoreticalQtyOrderClick(i)"
                                 class="fas {{this.editTheoreticalQtyOrder[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
                             </th>
                             <th rowspan="2">Quantités à commander <br> <small><small>(Expression besoins ASC)</small>(I)</small>
                             </th>
                             <th rowspan="2">Quantité validée
-                              <i (click)="editQtyValidatedClick(i)"
+                              <i *ngIf="roles.canUpdateChwsDrug()" (click)="editQtyValidatedClick(i)"
                                 class="fas {{editQtyValidated[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
                             </th>
                             <th rowspan="2">Quantité livrée
-                              <i (click)="editQtyDeliveredClick(i)"
+                              <i *ngIf="roles.canUpdateChwsDrug()" (click)="editQtyDeliveredClick(i)"
                                 class="fas {{editQtyDelivered[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
                             </th>
                             <th rowspan="2">Taux de satisfaction</th>
                             <th colspan="9">Observation ASC</th>
                             
                             <th rowspan="2">Observations (Pharmacie)
-                              <i (click)="editObservationsClick(i)"
+                              <i *ngIf="roles.canUpdateChwsDrug()" (click)="editObservationsClick(i)"
                                 class="fas {{editObservations[i]=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
                             </th>
                           </tr>
@@ -301,7 +301,7 @@
                                   <span *ngIf="editCmm[i]!='edit'">
                                     {{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.year_cmm) }}
                                   </span>
-                                  <input *ngIf="editCmm[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
+                                  <input *ngIf="roles.canUpdateChwsDrug() && editCmm[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
                                     id="year_cmm_{{i}}_{{key}}" [attr.data-drug-index]="key" type="number"
                                     value="{{ toChwsDrugData(sortedArray(datas.data), k).val.year_cmm }}" />
                                 </p>
@@ -313,7 +313,7 @@
                                     {{ convertQty(toChwsDrugData(sortedArray(datas.data),
                                     k).val.theoretical_quantity_to_order) }}
                                   </span>
-                                  <input *ngIf="editTheoreticalQtyOrder[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
+                                  <input *ngIf="roles.canUpdateChwsDrug() && editTheoreticalQtyOrder[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
                                     id="theoretical_quantity_to_order_{{i}}_{{key}}" [attr.data-drug-index]="key"
                                     type="number"
                                     value="{{ toChwsDrugData(sortedArray(datas.data), k).val.theoretical_quantity_to_order }}" />
@@ -328,7 +328,7 @@
                                   <span *ngIf="editQtyValidated[i]!='edit'">
                                     {{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.quantity_validated) }}
                                   </span>
-                                  <input *ngIf="editQtyValidated[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
+                                  <input *ngIf="roles.canUpdateChwsDrug() && editQtyValidated[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
                                     id="quantity_validated_{{i}}_{{key}}" [attr.data-drug-index]="key" type="number"
                                     value="{{ toChwsDrugData(sortedArray(datas.data), k).val.quantity_validated }}" />
                                 </p>
@@ -338,7 +338,7 @@
                                   <span *ngIf="editQtyDelivered[i]!='edit'">
                                     {{ convertQty(toChwsDrugData(sortedArray(datas.data), k).val.delivered_quantity) }}
                                   </span>
-                                  <input *ngIf="editQtyDelivered[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
+                                  <input *ngIf="roles.canUpdateChwsDrug() && editQtyDelivered[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-input form-control"
                                     id="delivered_quantity_{{i}}_{{key}}" [attr.data-drug-index]="key" type="number"
                                     value="{{ toChwsDrugData(sortedArray(datas.data), k).val.delivered_quantity }}" />
                                 </p>
@@ -384,7 +384,7 @@
                                 <span *ngIf="editObservations[i]!='edit'">
                                   {{ toChwsDrugData(sortedArray(datas.data), k).val.observations }}
                                 </span>
-                                <input *ngIf="editObservations[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-textarea form-control"
+                                <input *ngIf="roles.canUpdateChwsDrug() && editObservations[i]=='edit'" [disabled]="isUpdateLoading[i] == 'true'" class="custom-textarea form-control"
                                   id="observations_{{i}}_{{key}}" [attr.data-drug-index]="key"
                                   value="{{ toChwsDrugData(sortedArray(datas.data), k).val.observations }}" />
                                 <i *ngIf="toChwsDrugData(sortedArray(datas.data), k).val.observations!=''"

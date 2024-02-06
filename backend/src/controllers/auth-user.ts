@@ -455,6 +455,8 @@ export class AuthUserController {
         'can_update_person',
         'can_update_report',
         'can_update_role',
+        
+        'can_update_chws_drug',
 
         'can_delete_team',
         'can_delete_person',
@@ -464,7 +466,9 @@ export class AuthUserController {
         'can_register_user',
         'can_logout',
         'can_view_left_navigation',
-        'can_view_top_navigation'
+        'can_view_top_navigation',
+
+        'can_download_reports'
     ];
 
 
