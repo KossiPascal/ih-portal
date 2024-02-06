@@ -5,7 +5,7 @@ export class Consts {
   static APP_LOGO_1 = this.portInfo.port == 9999 || this.portInfo.port == 9990 ? 'assets/logo/logo1.png' : 'assets/logo/dev_logo1.png';
 
   static isProdEnv() {
-    return true;//false;//
+    return false;//true;//
   }
 
   public static getPort(): { port: number, isLocal: boolean } {

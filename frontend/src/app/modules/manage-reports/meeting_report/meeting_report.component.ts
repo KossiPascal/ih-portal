@@ -38,7 +38,6 @@ export class MeetingReportComponent implements OnInit {
     return this.roles.getMeetingReport().includes(`${teamId}`);
   }
 
-  ChwOU: Chws | null | undefined;
   visibleItems: { [key: string]: boolean } = {};
 
   currentUser:User | null | undefined;
@@ -63,16 +62,19 @@ export class MeetingReportComponent implements OnInit {
   ViewedReport: { [team: number]: MeetingReport | undefined } = {};
   EditReportView:{[team: number]: boolean | undefined} = {};
 
+  selected_report_url!:string;
+
   ngOnInit(): void {
     this.currentUser = this.auth.currentUser();
-    this.ChwOU = this.auth.ChwLogged();
-    if (this.roles.isChws() && (this.ChwOU == null || !notNull(this.ChwOU))){
-      // location.href = 'chws/select_orgunit';
-      this.router.navigate(['chws/select_orgunit']);
-    }
     this.GetPerson();
     this.GetTeams();
     this.GetReports();
+    this.selected_report_url = 'https://portal-integratehealth.org:9999/manage-reports/meeting-report';
+  }
+
+  openNewWindow(event:Event) {
+    event.preventDefault();
+    window.open(this.selected_report_url, "_blank");
   }
 
   showEdit(teamId: number, field:'Input'|'span' = 'Input'):boolean{
@@ -382,8 +384,9 @@ export class MeetingReportComponent implements OnInit {
 
     this.sync.SaveOrUpdatePerson(newPerson).subscribe((_res$: { status: number, data: Person | string }) => {
       if (_res$.status == 200) {
-        this.Person$.push((_res$.data as Person));
-        this.Person$ = this.Person$.sort((a, b) => a.name.localeCompare(b.name));
+        this.GetPerson();
+        // this.Person$.push((_res$.data as Person));
+        // this.Person$ = this.Person$.sort((a, b) => a.name.localeCompare(b.name));
         this.cancelPersonAction(event, teamId);
       }
     }, (err: any) => { });
@@ -409,7 +412,8 @@ export class MeetingReportComponent implements OnInit {
           this.Team$.push(data);
           this.Team$ = this.Team$.sort((a, b) => a.name.localeCompare(b.name));
         }
-        this.SelectedTeam!.show = true;
+        console.log(_res$.data)
+        // this.SelectedTeam!.show = true;
         this.cancelTeamAction(event);
       }
     }, (err: any) => { });

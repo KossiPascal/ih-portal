@@ -52,9 +52,9 @@
 
 .meeting_report tbody tr td,
 .meeting_report tbody tr th {
-  width: 200px !important;
+  width: 170px !important;
   border: 1px solid #ddd;
-  padding: 8px;
+  /* padding: 8px; */
   text-align: left;
 }
 
@@ -226,8 +226,7 @@
   border-radius: 15px;
   padding: 15px;
   width: 300px;
-  margin: auto;
-  margin-bottom: 10px;
+  margin: 0px auto;
   align-items: center;
   text-align: center;
   font-size: x-large;
@@ -321,22 +320,23 @@
 .custom-tabs-body-chid {
   display: flex;
   flex-wrap: wrap;
-  /* height: 100vh; */
 }
 
 .custom-tab-body-left {
-  margin-right: 30px;
+  margin-right: 20px;
 }
 
-.custom-tab-body-right {
-  margin-top: 40px;
-  display: flex;
-  flex-wrap: wrap;
+.custom-tab-body-1 {
+  margin-right: 20px;
 }
 
+.custom-tab-body-2 {
+  margin-top: 80px;
+  margin-right: 20px;
+}
 
-#person-list {
-  margin-right: 30px;
+.custom-tab-body-3 {
+  margin-top: 80px;
 }
 
 #report-list {
@@ -344,7 +344,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   /* justify-content: space-between; */
   /* align-items: center; */
-  min-width: 300px;
+  /* min-width: 300px; */
   /* background-color: #087d0c; */
 }
 
@@ -407,7 +407,7 @@
 
 
 
-.custom-tab-body-right input[type="checkbox"] {
+.custom-tab-body-1 input[type="checkbox"] {
   zoom: 1.5;
   margin-top: 2.5px;
   /* transform: scale(1.5); */
@@ -419,7 +419,7 @@
     color: #ff6a00;
   }
 
-  .custom-tab-body-right {
+  .custom-tab-body-1 {
     width: 100%;
   }
 }
@@ -430,7 +430,7 @@
     color: brown;
   }
 
-  .custom-tab-body-right {
+  .custom-tab-body-1 {
     width: 42%;
     padding-left: 3%;
   }
@@ -442,7 +442,7 @@
     color: #087d0c;
   }
 
-  .custom-tab-body-right {
+  .custom-tab-body-1 {
     width: 42%;
     padding-left: 3%;
   }
