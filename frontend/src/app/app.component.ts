@@ -328,27 +328,33 @@ export class AppComponent implements OnInit {
   ];
   CHWS_PAGES: AppLink[] = [
     {
-      icon: 'fas far fa-info',
+      icon: 'far fa-circle nav-icon',
       link: 'chws/dashboard1',
       label: 'Activité Des ASC',
       show: true
     },
     {
-      icon: 'fas far fa-info',
+      icon: 'far fa-circle nav-icon',
       link: 'chws/dashboard2',
       label: 'Détails Par ASC',
       show: true
     },
     {
-      icon: 'fas far fa-info',
+      icon: 'far fa-circle nav-icon',
       link: 'chws/dashboard3',
       label: ' Effectifs Des Patients',
       show: true
     },
     {
-      icon: 'fas far fa-info',
+      icon: 'far fa-circle nav-icon',
       link: 'chws/dashboard4',
       label: 'Visite de Ménages',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'manage-chws/chws-drug',
+      label: 'Situation Médicament ASC',
       show: true
     },
     {
@@ -362,7 +368,7 @@ export class AppComponent implements OnInit {
       link: 'auths/cache-list',
       label: 'Effacer Le Cache',
       show: true
-    },
+    }
   ];
 
   //   auths/login
