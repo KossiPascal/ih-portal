@@ -549,6 +549,7 @@ export class MeetingReportComponent implements OnInit {
     return '';
   }
 
+
   GetSeletedPersonName(p: Person, teamId: number, i: number, l: number) {
     return p ? `${p.name}${i != l - 1 ? '&nbsp;&nbsp;|&nbsp;&nbsp;' : ''}` : '';
   }

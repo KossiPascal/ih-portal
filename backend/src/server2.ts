@@ -52,80 +52,6 @@ AppDataSource
   })
   .catch(error => { console.log(`${error}`); logNginx(`${error}`) });
 
-const app = express();
-
-const validPaths = [
-  '/api/chws-meg/doc',
-  '/api/chws-meg',
-  '/api/chws-meg.json',
-  // '/api/chws-meg.csv',
-  '/api/uids/doc',
-  '/api/uids',
-  '/api/uids.json',
-  '/api/uids.csv',
-  '/api/districts',
-  '/api/districts.json',
-  '/api/sites',
-  '/api/sites.json',
-  '/api/zones',
-  '/api/zones.json',
-  '/api/chws',
-  '/api/chws.json'
-];
-
-app.use(helmet());
-
-// const apiTarget = 'https://localhost:9998/api';
-// app.use(
-//   createProxyMiddleware({
-//     target: apiTarget,
-//     changeOrigin: false,
-//     secure: false,
-//     // pathRewrite: {
-//     //   '^/api': '',
-//     // },
-//     onProxyRes: (proxyRes:IncomingMessage, req:Request, res:Response, ) => {
-//       res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
-//     },
-//   })
-// );
-app.enable('trust proxy')
-app.set('trust proxy', 1)
-app.set('content-type', 'application/json; charset=utf-8')
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(cors({
-  origin: true,//['http://127.0.0.1:5501', 'http://127.0.0.1:5502'],
-  credentials: true
-}));
-app.use(responseTime())
-app.use(compression())
-app.set('json spaces', 0);
-app.use(session({
-  secret: 'session',
-  cookie: {
-    secure: true,
-    maxAge: 60000
-  },
-  saveUninitialized: true,
-  resave: true
-}));
-app.use(bearerToken())
-app.get('/favicon.ico', (req, res) => {
-  res.status(204).end(); // No content response
-});
-
-app.use(async (req: Request, res: Response, next: NextFunction) => {
-  const { api_access_key } = req.body ?? req.query ?? req.params;
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed', allowedMethods: ['GET'] });
-  if (!req.secure) return res.redirect(`https://${req.headers.host}${req.url}`);
-  const apiRepo = await getApiTokenAccessRepository();
-  if (!api_access_key || api_access_key == '') return res.status(405).json({ error: 'You must provide a valid `api_access_key`' });
-  const validApiKeysElement: ApiTokenAccess[] = await apiRepo.findBy({ isActive: true });
-  const validApiKeys = validApiKeysElement.map(api => api.token);
-  if (!validApiKeys.includes(api_access_key) || !validPaths.includes(req.path)) return res.status(401).json({ error: 'Unauthorized' });
-  if (req.secure) next();
-});
 
 async function getDistrictsSitesZonesChws(req: Request, res: Response, dataType: 'districts' | 'sites' | 'zones' | 'chws') {
   try {
@@ -224,6 +150,98 @@ async function uidsJson(req: Request, res: Response, next: NextFunction): Promis
   }
 }
 
+
+const app = express();
+
+const validPaths = [
+  '/api/documenations',
+  '/api/chws-meg',
+  '/api/chws-meg.json',
+  // '/api/chws-meg.csv',
+  // '/api/uids',
+  // '/api/uids.json',
+  // '/api/uids.csv',
+  '/api/districts',
+  '/api/districts.json',
+  '/api/sites',
+  '/api/sites.json',
+  '/api/zones',
+  '/api/zones.json',
+  '/api/chws',
+  '/api/chws.json'
+];
+
+app.use(helmet());
+
+// const apiTarget = 'https://localhost:9998/api';
+// app.use(
+//   createProxyMiddleware({
+//     target: apiTarget,
+//     changeOrigin: false,
+//     secure: false,
+//     // pathRewrite: {
+//     //   '^/api': '',
+//     // },
+//     onProxyRes: (proxyRes:IncomingMessage, req:Request, res:Response, ) => {
+//       res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
+//     },
+//   })
+// );
+
+app.enable('trust proxy')
+app.set('trust proxy', 1)
+app.set('content-type', 'application/json; charset=utf-8')
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(cors({
+  origin: true,//['http://127.0.0.1:5501', 'http://127.0.0.1:5502'],
+  credentials: true
+}));
+app.use(responseTime())
+app.use(compression())
+app.set('json spaces', 0);
+app.use(session({
+  secret: 'session',
+  cookie: {
+    secure: true,
+    maxAge: 60000
+  },
+  saveUninitialized: true,
+  resave: true
+}));
+app.use(bearerToken())
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end(); // No content response
+});
+
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  const { api_access_key } = req.body ?? req.query ?? req.params;
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed', allowedMethods: ['GET'] });
+  if (!req.secure) return res.redirect(`https://${req.headers.host}${req.url}`);
+  const apiRepo = await getApiTokenAccessRepository();
+  if (!api_access_key || api_access_key == '') return res.status(405).json({ error: 'You must provide a valid `api_access_key`' });
+  const validApiKeysElement: ApiTokenAccess[] = await apiRepo.findBy({ isActive: true });
+  const validApiKeys = validApiKeysElement.map(api => api.token);
+  if (!validApiKeys.includes(api_access_key) || !validPaths.includes(req.path)) return res.status(401).json({ error: 'Unauthorized' });
+  if (req.secure) next();
+});
+
+app.get('/api/documenations', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 0);
+  const { date } = req.body ?? req.query ?? req.params;
+  const params = {
+    host: 'https://portal-integratehealth.org:9998/api/chws-meg?',
+    api_access_key: 'api_access_key = your_valid_api_access_key',
+    start_date: '& start_date = 2023-10-26',
+    end_date: '& end_date = 2023-12-25',
+    districts: '& districts = x8f4IKAC7TO',
+    sites: '& sites = [552aafc3-11a9-4209-8f17-d1ea13bab8d5]',
+    chws: '& chws = [eafabdf9-c16a-44d5-83e4-a619d5478919]',
+    full_url: 'https://portal-integratehealth.org:9998/api/chws-meg?api_access_key=your_valid_api_access_key&start_date=2023-10-26&end_date=2023-12-25&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]',
+  };
+  return res.render('documenations', params);
+});
+
 app.get('/api/districts', async (req: Request, res: Response, next: NextFunction) => {
   app.set('json spaces', 0);
   return await getDistrictsSitesZonesChws(req, res, 'districts');
@@ -256,21 +274,6 @@ app.get('/api/chws', async (req: Request, res: Response, next: NextFunction) => 
 //     res.status(500).json({ error: 'Internal Server Error' });
 //   }
 // });
-app.get('/api/chws-meg/doc', async (req: Request, res: Response, next: NextFunction) => {
-  app.set('json spaces', 0);
-  const { date } = req.body ?? req.query ?? req.params;
-  const params = {
-    host: 'https://portal-integratehealth.org:9998/api/chws-meg?',
-    api_access_key: 'api_access_key=api_access_key',
-    start_date: '&start_date=2023-10-26',
-    end_date: '&end_date=2023-12-25',
-    districts: '&districts=x8f4IKAC7TO',
-    sites: '&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]',
-    chws: '&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]',
-    full_url: 'https://portal-integratehealth.org:9998/api/chws-meg?api_access_key=api_access_key&start_date=2023-10-26&end_date=2023-12-25&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]',
-  };
-  return res.render('chws-meg', params);
-});
 app.get('/api/chws-meg', async (req: Request, res: Response, next: NextFunction) => {
   app.set('json spaces', 0);
   const chwsMegJsonData: ChwsDrugDataWithChws[] = await chwsMegJson(req, res, next);
@@ -316,11 +319,6 @@ app.get('/api/chws-meg.csv', async (req: Request, res: Response, next: NextFunct
   }
 });
 
-app.get('/api/uids/doc', async (req: Request, res: Response, next: NextFunction) => {
-  app.set('json spaces', 0);
-  const { date } = req.body ?? req.query ?? req.params;
-  return res.render('uids', { uids: 'uids' });
-});
 app.get('/api/uids', async (req: Request, res: Response, next: NextFunction) => {
   app.set('json spaces', 0);
   const uidsJsonData = await uidsJson(req, res, next);
@@ -410,14 +408,12 @@ app.get('/api/uids.json', async (req: Request, res: Response, next: NextFunction
   }
 });
 
-
 const credentials = {
   key: fs.readFileSync(`${sslFolder('server.key')}`, 'utf8'),
   ca: fs.readFileSync(`${sslFolder('server-ca.crt')}`, 'utf8'),
   cert: fs.readFileSync(`${sslFolder('server.crt')}`, 'utf8')
 };
 app.set('port', PORT_FOR_GET_API);
-
 
 const server = ServerStart({ isSecure: true, credential: credentials, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: PORT_FOR_GET_API, hostnames: hostnames })
 

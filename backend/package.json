@@ -1,6 +1,6 @@
 {
   "name": "ih-portal-backend",
-  "version": "1.0.177",
+  "version": "1.0.178",
   "main": "index.js",
   "author": "TSOLEGNAGBO Kossi <kossi.tsolegnagbo@gmail.com>",
   "private": true,
@@ -66,6 +66,7 @@
     "express-validator": "^6.14.2",
     "hdb-pool": "^0.1.6",
     "helmet": "^7.1.0",
+    "http-proxy-middleware": "^2.0.6",
     "ip": "^1.1.8",
     "jfile": "^1.1.12",
     "moment": "^2.29.4",
