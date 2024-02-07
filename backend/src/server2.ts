@@ -2,22 +2,45 @@ import express, { Request, Response, NextFunction } from 'express';
 const helmet = require('helmet');
 const { v4: uuidv4 } = require('uuid');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-import * as path from 'path';
+import path from 'path';
 import fs from 'fs';
 import { getIhDrugArrayData } from './controllers/dataFromDB';
-import { Chws } from './entity/Sync';
+import { ApiTokenAccess, Chws, Districts, Sites, Zones, getApiTokenAccessRepository, getChwsSyncRepository, getDistrictSyncRepository, getSiteSyncRepository, getZoneSyncRepository } from './entity/Sync';
 import { ChwsDrugData, ChwsDrugDataWithChws, ChwsDrugQantityInfo } from './utils/appInterface';
 import { AppDataSource } from './data_source';
-import { ServerStart, appVersion, getIPAddress, logNginx, normalizePort, sslFolder } from './utils/functions';
+import { ServerStart, appVersion, getIPAddress, logNginx, normalizePort, notEmpty, sslFolder } from './utils/functions';
+import cors from 'cors';
+import bearerToken from 'express-bearer-token';
+import { IncomingMessage } from 'http';
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
+const session = require('express-session');
+const compression = require("compression");
+const responseTime = require('response-time')
+const fetch = require('node-fetch');
 
 require('dotenv').config({ path: sslFolder('.ih-env') });
-const { ACCESS_ALL_AVAILABE_PORT, SERVER_2_API_PORT } = process.env
+const { ACCESS_ALL_AVAILABE_PORT, SERVER_2_API_PORT } = process.env;
 
 const hostnames = getIPAddress(ACCESS_ALL_AVAILABE_PORT == 'true');
 const PORT_FOR_GET_API = normalizePort(SERVER_2_API_PORT || 9998);
 
-
+const parseInQuery = (input: string): string[] => {
+  const data = [];
+  try {
+    const regex1 = /['\[\]\s"]/g;
+    const regex2 = /%27/g;
+    if (input && notEmpty(input)) {
+      const dts = input.split(',');
+      for (let i = 0; i < dts.length; i++) {
+        var res = dts[i].replace(regex1, '');
+        res = res.replace(regex2, '');
+        data.push(res);
+      }
+    }
+  } catch (error) { }
+  return data;
+};
 
 AppDataSource
   .initialize()
@@ -31,290 +54,275 @@ AppDataSource
 
 const app = express();
 
-const validApiKeys = ['api_key'];
-const validPaths = ['/api/chws-meg/doc', '/api/chws-meg', '/api/chws-meg.json', '/api/chws-meg.csv', '/api/uids/doc', '/api/uids', '/api/uids.json', '/api/uids.csv'];
+const validPaths = [
+  '/api/chws-meg/doc',
+  '/api/chws-meg',
+  '/api/chws-meg.json',
+  // '/api/chws-meg.csv',
+  '/api/uids/doc',
+  '/api/uids',
+  '/api/uids.json',
+  '/api/uids.csv',
+  '/api/districts',
+  '/api/districts.json',
+  '/api/sites',
+  '/api/sites.json',
+  '/api/zones',
+  '/api/zones.json',
+  '/api/chws',
+  '/api/chws.json'
+];
 
 app.use(helmet());
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  // if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method === 'GET') {
-    if (validPaths.includes(req.path)) {
-      if (req.secure) next();
-      if (!req.secure) res.redirect(`https://${req.headers.host}${req.url}`);
-    } else {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-  } else {
-    return res.status(405).json({ error: 'Method Not Allowed', allowedMethods: ['GET'] });
-  }
-});
-
+// const apiTarget = 'https://localhost:9998/api';
+// app.use(
+//   createProxyMiddleware({
+//     target: apiTarget,
+//     changeOrigin: false,
+//     secure: false,
+//     // pathRewrite: {
+//     //   '^/api': '',
+//     // },
+//     onProxyRes: (proxyRes:IncomingMessage, req:Request, res:Response, ) => {
+//       res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
+//     },
+//   })
+// );
+app.enable('trust proxy')
+app.set('trust proxy', 1)
+app.set('content-type', 'application/json; charset=utf-8')
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(cors({
+  origin: true,//['http://127.0.0.1:5501', 'http://127.0.0.1:5502'],
+  credentials: true
+}));
+app.use(responseTime())
+app.use(compression())
+app.set('json spaces', 0);
+app.use(session({
+  secret: 'session',
+  cookie: {
+    secure: true,
+    maxAge: 60000
+  },
+  saveUninitialized: true,
+  resave: true
+}));
+app.use(bearerToken())
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end(); // No content response
+});
 
-// #####################################################################
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  const { api_access_key } = req.body ?? req.query ?? req.params;
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed', allowedMethods: ['GET'] });
+  if (!req.secure) return res.redirect(`https://${req.headers.host}${req.url}`);
+  const apiRepo = await getApiTokenAccessRepository();
+  if (!api_access_key || api_access_key == '') return res.status(405).json({ error: 'You must provide a valid `api_access_key`' });
+  const validApiKeysElement: ApiTokenAccess[] = await apiRepo.findBy({ isActive: true });
+  const validApiKeys = validApiKeysElement.map(api => api.token);
+  if (!validApiKeys.includes(api_access_key) || !validPaths.includes(req.path)) return res.status(401).json({ error: 'Unauthorized' });
+  if (req.secure) next();
+});
 
-async function chwsMegJson(req: Request, res: Response, next: NextFunction): Promise<ChwsDrugDataWithChws[] | null> {
-  const { api_key, date } = req.body ?? req.query ?? req.params;
-  if (validApiKeys.includes(api_key)) {
-    req.body = {
-      start_date: `2023-11-21`,
-      end_date: `2023-12-20`,
-      districts: ['x8f4IKAC7TO'],
-      sites: ['552aafc3-11a9-4209-8f17-d1ea13bab8d5'],
-      // zones: ['8e18af53-1021-4486-8945-522f6e54f959'],
-      chws: ['eafabdf9-c16a-44d5-83e4-a619d5478919']
-    };
-
-    const outPut = await getIhDrugArrayData(req, res, next);
-
-    // const jsonData = [
-    //   { id: 1, name: 'John Doe', age: 30, city: 'New York' },
-    //   { id: 2, name: 'Jane Smith', age: 25, city: 'San Francisco' },
-    //   { id: 3, name: 'John Doe', age: 30, city: 'New York' },
-    //   { id: 4, name: 'Jane Smith', age: 25, city: 'San Francisco' },
-    // ];
-    if (outPut && outPut.status == 200) {
-      const jsonData = outPut.data;
-      if (jsonData && typeof jsonData != 'string') {
-        if (jsonData.length <= 0) {
-          return null;
-        } else {
-          const formatedJsonData = jsonData.map(meg => {
-            const data = meg.data as ChwsDrugDataWithChws;
-            data.chwId = meg.chw.id;
-            data.chwName = meg.chw.name;
-            return data;
-          });
-          return formatedJsonData;
-        }
+async function getDistrictsSitesZonesChws(req: Request, res: Response, dataType: 'districts' | 'sites' | 'zones' | 'chws') {
+  try {
+    if (dataType == 'districts') {
+      const repoDistrict = await getDistrictSyncRepository();
+      const districts: Districts[] = await repoDistrict.find();
+      if (districts) {
+        return res.status(200).json({ length: districts.length, districts: districts });
       }
     }
-  }
-  return null;
+    if (dataType == 'sites') {
+      const repoSite = await getSiteSyncRepository();
+      const sites: Sites[] = await repoSite.find();
+      if (sites) {
+        return res.status(200).json({ length: sites.length, sites: sites });
+      }
+    }
+    if (dataType == 'zones') {
+      const repoZone = await getZoneSyncRepository();
+      const zones: Zones[] = await repoZone.find();
+      if (zones) {
+        return res.status(200).json({ length: zones.length, zones: zones });
+      }
+    }
+    if (dataType == 'chws') {
+      const repoChw = await getChwsSyncRepository();
+      const chws: Chws[] = await repoChw.find();
+      if (chws) {
+        return res.status(200).json({ length: chws.length, chws: chws });
+      }
+    }
+  } catch (e: any) { }
+  return res.status(500).json({ error: 'Internal Server Error' });
+
 }
-app.get('/api/chws-meg/doc', (req: Request, res: Response, next: NextFunction) => {
-  const { api_key, date } = req.body ?? req.query ?? req.params;
-  if (validApiKeys.includes(api_key)) {
-    const params = {
-      date: 'your-date',
-      chwsMeg: ['chws-meg-code-1', 'chws-meg-code-2', 'chws-meg-code-2'],
-      site: ['Adabawere', 'Djamdè', 'Kpindi', 'Sarakawa']
-    };
-    return res.render('chws-meg', params);
-  } else {
-    return res.status(401).json({ error: 'Unauthorized' });
+async function chwsMegJson(req: Request, res: Response, next: NextFunction): Promise<ChwsDrugDataWithChws[]> {
+  const { start_date, end_date, districts, sites, zones, chws } = req.body ?? req.query ?? req.params;
+
+  const districtsArray = parseInQuery(districts);
+  const sitesArray = parseInQuery(sites);
+  const zonesArray = parseInQuery(zones);
+  const chwsArray = parseInQuery(chws);
+
+  if (!notEmpty(start_date)) {
+    res.status(401).json({ error: 'Le paramettre `start_date` est obligatoire.' });
+    return [];
   }
+
+  if (!notEmpty(end_date)) {
+    res.status(401).json({ error: 'Le paramettre `end_date` est obligatoire.' });
+    return [];
+  }
+
+  if (!notEmpty(districtsArray) && !notEmpty(sitesArray) && !notEmpty(chwsArray)) {
+    res.status(401).json({ error: "[districts, sites, zones, chws] L'un des paramettre dans ce tableau est obligatoire" });
+    return [];
+  }
+
+  req.body = {
+    start_date: start_date,
+    end_date: end_date,
+    districts: districtsArray,
+    sites: sitesArray,
+    zones: zonesArray,
+    chws: chwsArray
+  };
+
+  const outPut = await getIhDrugArrayData(req, res, next);
+
+  if (outPut && outPut.status == 200) {
+    const jsonData = outPut.data;
+    if (jsonData && typeof jsonData != 'string') {
+      const formatedJsonData = jsonData.map(meg => {
+        const data = meg.data as ChwsDrugDataWithChws;
+        data.chw = meg.chw;
+        return data;
+      });
+      return formatedJsonData;
+    }
+  }
+  return [];
+}
+async function uidsJson(req: Request, res: Response, next: NextFunction): Promise<any> {
+  const { number } = req.body ?? req.query ?? req.params;
+  if (number && number != '') {
+    const numIds = parseInt(number, 10);
+    if (isNaN(numIds) || numIds <= 0) {
+      return 'A';
+    }
+    const csvData = Array.from({ length: numIds }, () => ({
+      id: uuidv4(),
+    }));
+    return csvData.length <= 0 ? 'D' : csvData;
+  } else {
+    return 'B';
+  }
+}
+
+app.get('/api/districts', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 0);
+  return await getDistrictsSitesZonesChws(req, res, 'districts');
+});
+app.get('/api/sites', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 0);
+  return await getDistrictsSitesZonesChws(req, res, 'sites');
+});
+app.get('/api/zones', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 0);
+  return await getDistrictsSitesZonesChws(req, res, 'zones');
+});
+app.get('/api/chws', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 0);
+  return await getDistrictsSitesZonesChws(req, res, 'chws');
 });
 
+// app.get('/api/chws-meg', async (req, res) => {
+//   try {
+//     const response = await fetch('https://localhost:9998/api/chws-meg?api_access_key=afrikDigitalAZ-FGHJ@04jdkj2024&start_date=2023-10-26&end_date=2023-12-25&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]', {
+//       method: 'GET',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       credentials: 'include'
+//     });
+//     const data = await response.json();
+//     res.json(data);
+//   } catch (error) {
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// });
+app.get('/api/chws-meg/doc', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 0);
+  const { date } = req.body ?? req.query ?? req.params;
+  const params = {
+    host: 'https://portal-integratehealth.org:9998/api/chws-meg?',
+    api_access_key: 'api_access_key=api_access_key',
+    start_date: '&start_date=2023-10-26',
+    end_date: '&end_date=2023-12-25',
+    districts: '&districts=x8f4IKAC7TO',
+    sites: '&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]',
+    chws: '&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]',
+    full_url: 'https://portal-integratehealth.org:9998/api/chws-meg?api_access_key=api_access_key&start_date=2023-10-26&end_date=2023-12-25&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]',
+  };
+  return res.render('chws-meg', params);
+});
 app.get('/api/chws-meg', async (req: Request, res: Response, next: NextFunction) => {
-  const chwsMegJsonData: ChwsDrugDataWithChws[] | null = await chwsMegJson(req, res, next);
-  if (chwsMegJsonData) {
-    return res.json({ CHWS_MEG: chwsMegJsonData });
-  } else {
-    return res.status(401).json({ error: 'Unauthorized' });
+  app.set('json spaces', 0);
+  const chwsMegJsonData: ChwsDrugDataWithChws[] = await chwsMegJson(req, res, next);
+  if (chwsMegJsonData.length > 0) {
+    const objectLength = Object.keys(chwsMegJsonData[0]).length;
+    return res.status(200).json({ length: objectLength, CHWS_MEG: chwsMegJsonData });
   }
 });
-
-app.get('/api/chws-meg.json', async (req: Request, res: Response, next: NextFunction) => {
-  const chwsMegJsonData: ChwsDrugDataWithChws[] | null = await chwsMegJson(req, res, next);
-  if (chwsMegJsonData) {
-    return res.json({ CHWS_MEG: chwsMegJsonData });
-  } else {
-    return res.status(401).json({ error: chwsMegJsonData });
-  }
-});
-
 app.get('/api/chws-meg.csv', async (req: Request, res: Response, next: NextFunction) => {
-  const csvData: ChwsDrugDataWithChws[] | null = await chwsMegJson(req, res, next);
-  if (csvData) {
+  app.set('json spaces', 0);
+  const csvData: ChwsDrugDataWithChws[] = await chwsMegJson(req, res, next);
+  if (csvData.length > 0) {
     const fileName = `chws-meg-${Date.now()}.csv`;
     const downloadPath = path.resolve(`${__dirname}/downloads`, fileName);
-
-     // Extract unique keys from data
-  const allKeys = new Set(csvData.flatMap(item => Object.keys(item)));
-
-  // Filter out common keys like 'id' and 'name'
-  const header = Array.from(allKeys).filter(key => key !== 'id' && key !== 'name');
-
-  // Define CSV writer
-  const csvWriter = createCsvWriter({
-    path: 'output.csv',
-    header: [
-      { id: 'id', title: 'id' },
-      { id: 'name', title: 'name' },
-      ...header.map(key => ({ id: key, title: key })),
-    ],
-  });
-
-  // Flatten the data for CSV records
-  const records = csvData.map(item0 => {
-    const item = item0 as any;
-    const record = { id: 'item.id', name: 'item.name' } as any;
-    header.forEach(key => {
-      record[key] = item[key] ? item[key].momo : '';
-      record[key + '_value'] = item[key] ? item[key].value : '';
+    const allKeys = new Set(csvData.flatMap(item => Object.keys(item)));
+    const header = Array.from(allKeys).filter(key => key !== 'id' && key !== 'name');
+    const csvWriter = createCsvWriter({
+      path: 'output.csv',
+      header: [
+        { id: 'id', title: 'id' },
+        { id: 'name', title: 'name' },
+        ...header.map(key => ({ id: key, title: key })),
+      ],
     });
-    return record;
-  });
-
-  // Write CSV to response
-  csvWriter.writeRecords(records)
-    .then(() => {
-      res.attachment('output.csv');
-      res.status(200).sendFile('output.csv');
-    })
-    .catch((err:any) => {
-      console.error(err);
-      res.status(500).json({ error: 'Internal Server Error' });
+    const records = csvData.map(item0 => {
+      const item = item0 as any;
+      const record = { id: 'item.id', name: 'item.name' } as any;
+      header.forEach(key => {
+        record[key] = item[key] ? item[key].momo : '';
+        record[key + '_value'] = item[key] ? item[key].value : '';
+      });
+      return record;
     });
-
-
-
-  //   // const csvDataHeader = Object.keys(csvData[0]).map((key) => ({
-  //   //   id: key,
-  //   //   title: key.charAt(0).toUpperCase() + key.slice(1),
-  //   // }));
-
-  //   // const csvDataHeader:{ id: string, title: string }[] = [];
-
-  //   // const flattenObject = (obj:any, parentKey = '') => {
-  //   //   for (const key in obj) {
-  //   //     const currentKey = parentKey ? `${parentKey}_${key}` : key;
-  //   //     if (typeof obj[key] === 'object') {
-  //   //       flattenObject(obj[key], currentKey);
-  //   //     } else {
-  //   //       csvDataHeader.push({ id: currentKey, title: currentKey });
-  //   //     }
-  //   //   }
-  //   // };
-  //   // flattenObject(csvData[0]);
-
-  //   // const flattenedData = csvData.reduce((result:any[], item:any) => {
-  //   //   for (const key in item) {
-  //   //     if (typeof item[key] === 'object') {
-  //   //       const rowData = Object.values(item[key]);
-  //   //       result.push(rowData);
-  //   //     }
-  //   //   }
-  //   //   return result;
-  //   // }, []);
-
-  //   const megList = Object.keys(csvData[0]).map((key) => key);
-  //   const columnList = Object.keys(csvData[0].SRO_10).map((key) => key);
-
-  //   for (let i = 0; i < megList.length; i++) {
-  //     const m = megList[i];
-  //     for (let j = 0; j < csvData.length; j++) {
-  //       const c = csvData[j] as any;
-  //       const d = c[m] as any;
-        
-  //       for (let k = 0; k < columnList.length; k++) {
-  //         const e = columnList[k] as any;
-  //         const f = d[e]
-          
-          
-  //       }
-  //     }
-
-      
-  //   }
-
-  //   const csvWriter = createCsvWriter({
-  //     path: downloadPath,
-  //     header: csvDataHeader,
-  //   });
-
-  //   const finalRowData:any[] = [];
-
-  //   csvData.forEach((item1:any )=> {
-  //   });
-
-  //   for (let i = 0; i < csvData.length; i++) {
-  //     const item1 = csvData[i] as any;
-  //     const rowData = [];
-  //     for (const k1 in item1) {
-  //       if (typeof item1[k1] === 'object') {
-  //         rowData.push(k1);
-  //         const item2 = item1[k1];
-  //         for (const k2 in item2) {
-  //           if (typeof item2[k2] !== 'object') {
-  //             rowData.push(item2[k2]);
-  //           }
-  //         }
-  //       }
-  //     }
-  //     finalRowData.push(rowData)
-      
-  //   }
-
-  //   csvWriter.writeRecords(finalRowData).then(() => {
-  //     res.attachment(fileName);
-  //     return res.status(200).sendFile(downloadPath, () => {
-  //       // After sending the file, delete it
-  //       fs.unlink(downloadPath, (err) => {
-  //         if (err) {
-  //           console.error('Error deleting file:', err);
-  //         } else {
-  //           console.log('File deleted successfully:', downloadPath);
-  //         }
-  //       });
-  //     });
-  //   }).catch((err: any) => {
-  //     console.error(err);
-  //     return res.status(500).json({ error: 'Internal Server Error' });
-  //   });
-  } else {
-    return res.status(404).json({ error: 'No data found in db' });
+    csvWriter.writeRecords(records)
+      .then(() => {
+        res.attachment('output.csv');
+        res.status(200).sendFile('output.csv');
+      })
+      .catch((err: any) => {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
   }
 });
 
-// #####################################################################
-
-async function uidsJson(req: Request, res: Response, next: NextFunction): Promise<any> {
-  const { api_key, number } = req.body ?? req.query ?? req.params;
-  if (validApiKeys.includes(api_key)) {
-    if (number && number != '') {
-      const numIds = parseInt(number, 10);
-      if (isNaN(numIds) || numIds <= 0) {
-        return 'A';
-      }
-      // const csvData = Array.from({ length: numIds }, () => uuidv4());
-      const csvData = Array.from({ length: numIds }, () => ({
-        id: uuidv4(),
-      }));
-      return csvData.length <= 0 ? 'D' : csvData;
-    } else {
-      return 'B';
-    }
-  } else {
-    return 'C';
-  }
-}
-app.get('/api/uids/doc', (req: Request, res: Response, next: NextFunction) => {
-  const { api_key, date } = req.body ?? req.query ?? req.params;
-  if (validApiKeys.includes(api_key)) {
-    return res.render('uids', { uids: 'uids' });
-  } else {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+app.get('/api/uids/doc', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 0);
+  const { date } = req.body ?? req.query ?? req.params;
+  return res.render('uids', { uids: 'uids' });
 });
 app.get('/api/uids', async (req: Request, res: Response, next: NextFunction) => {
-  const uidsJsonData = await uidsJson(req, res, next);
-  if (uidsJsonData === 'A') {
-    return res.json({ error: 'Provide valid number' });
-  } else if (uidsJsonData === 'B') {
-    return res.status(401).json({ error: 'Provide number of IDs' });
-  } else if (uidsJsonData === 'C') {
-    return res.status(401).json({ error: 'Unauthorized' });
-  } else if (uidsJsonData == 'D') {
-    return res.status(404).json({ error: 'No data found in db' });
-  } else {
-    return res.json(uidsJsonData);
-  }
-});
-app.get('/api/uids.json', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 0);
   const uidsJsonData = await uidsJson(req, res, next);
   if (uidsJsonData === 'A') {
     return res.json({ error: 'Provide valid number' });
@@ -329,7 +337,66 @@ app.get('/api/uids.json', async (req: Request, res: Response, next: NextFunction
   }
 });
 app.get('/api/uids.csv', async (req: Request, res: Response, next: NextFunction) => {
-  const uidsJsonData: any[] | string = await uidsJson(req, res, next);
+  app.set('json spaces', 0);
+  const csvData: any = await uidsJson(req, res, next);
+  if (csvData === 'A') {
+    return res.json({ error: 'Provide valid number' });
+  } else if (csvData === 'B') {
+    return res.status(401).json({ error: 'Provide number of IDs' });
+  } else if (csvData === 'C') {
+    return res.status(401).json({ error: 'Unauthorized' });
+  } else if (csvData == 'D') {
+    return res.status(404).json({ error: 'No data found in db' });
+  } else {
+    const fileName = `uids-${Date.now()}.csv`;
+    const downloadPath = path.resolve(`${__dirname}/downloads`, fileName);
+    const csvWriter = createCsvWriter({
+      path: 'output.csv',
+      header: [
+        { id: 'id', title: 'id' },
+      ],
+    });
+    csvWriter.writeRecords(csvData)
+      .then(() => {
+        res.attachment('output.csv');
+        res.status(200).sendFile('output.csv');
+      })
+      .catch((err: any) => {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+      });
+  }
+});
+
+app.get('/api/districts.json', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 2);
+  return await getDistrictsSitesZonesChws(req, res, 'districts');
+});
+app.get('/api/sites.json', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 2);
+  return await getDistrictsSitesZonesChws(req, res, 'sites');
+});
+app.get('/api/zones.json', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 2);
+  return await getDistrictsSitesZonesChws(req, res, 'zones');
+});
+app.get('/api/chws.json', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 2);
+  return await getDistrictsSitesZonesChws(req, res, 'chws');
+});
+
+app.get('/api/chws-meg.json', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 2);
+  const chwsMegJsonData: ChwsDrugDataWithChws[] = await chwsMegJson(req, res, next);
+  if (chwsMegJsonData.length > 0) {
+    const objectLength = Object.keys(chwsMegJsonData[0]).length;
+    return res.status(200).json({ length: objectLength, CHWS_MEG: chwsMegJsonData });
+  }
+});
+
+app.get('/api/uids.json', async (req: Request, res: Response, next: NextFunction) => {
+  app.set('json spaces', 2);
+  const uidsJsonData = await uidsJson(req, res, next);
   if (uidsJsonData === 'A') {
     return res.json({ error: 'Provide valid number' });
   } else if (uidsJsonData === 'B') {
@@ -339,25 +406,10 @@ app.get('/api/uids.csv', async (req: Request, res: Response, next: NextFunction)
   } else if (uidsJsonData == 'D') {
     return res.status(404).json({ error: 'No data found in db' });
   } else {
-    const fileName = `uuids-${Date.now()}.csv`;
-    const downloadPath = path.resolve(`${__dirname}/downloads`, fileName);
-    const csvWriter = createCsvWriter({
-      path: downloadPath,
-      header: [{ id: 'id', title: 'IDs' }],
-    });
-    csvWriter.writeRecords(uidsJsonData as any[])
-      .then(() => {
-        res.attachment(fileName);
-        return res.status(200).sendFile(downloadPath);
-      })
-      .catch((err: any) => {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error' });
-      });
+    return res.json(uidsJsonData);
   }
 });
 
-// #####################################################################
 
 const credentials = {
   key: fs.readFileSync(`${sslFolder('server.key')}`, 'utf8'),
@@ -367,4 +419,15 @@ const credentials = {
 app.set('port', PORT_FOR_GET_API);
 
 
-ServerStart({ isSecure: true, credential: credentials, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: PORT_FOR_GET_API, hostnames: hostnames })
+const server = ServerStart({ isSecure: true, credential: credentials, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: PORT_FOR_GET_API, hostnames: hostnames })
+
+
+// process.on('SIGTERM', () => {
+//   console.info('SIGTERM signal received.');
+//   console.log('Closing http server.');
+//   server.close(async () => {
+//     console.log('Http server closed.');
+//     // await AppDataSource.closeConnection();
+//   });
+// });
+

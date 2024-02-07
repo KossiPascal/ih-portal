@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { SwUpdate } from '@angular/service-worker';
-import { interval } from 'rxjs';
 import { ConfigService } from './config.service';
 import { AppStorageService } from './local-storage.service';
 import { AuthService } from './auth.service';
-
+declare var $: any;
 @Injectable({
   providedIn: 'root'
 })
@@ -16,19 +15,19 @@ export class ServiceWorkerService {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/ngsw-worker.js')
         .then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
+          // console.log('Service Worker registered with scope:', registration.scope);
         })
         .catch(error => {
-          console.error('Service Worker registration failed:', error);
+          // console.error('Service Worker registration failed:', error);
         });
     }
   }
 
-  checkForUpdates(): void {
+  checkForUpdates(modalId: string): void {
     if (this.swUpdate.isEnabled) {
       // interval(60000).subscribe(() => { this.swUpdate.checkForUpdate().then(() => {}); });
       this.swUpdate.available.subscribe(event => {
-        this.activateUpdate();
+        this.activateUpdate(modalId);
       });
     }
   }
@@ -42,13 +41,10 @@ export class ServiceWorkerService {
     }, (err: any) => { console.log(err.toString()) });
   }
 
-  activateUpdate(): void {
+  activateUpdate(modalId: string): void {
     if (this.swUpdate.isEnabled) {
       this.swUpdate.activateUpdate().then(() => {
-        if (confirm("Une nouvelle version de l'application est disponible.\nVoulez-vous procéder à la mise à jour ?")) {
-          // document.location.reload();
-          window.location.reload();
-        }
+        $('#' + modalId).trigger('click');
       });
     }
   }

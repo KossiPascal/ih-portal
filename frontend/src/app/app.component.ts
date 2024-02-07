@@ -1,18 +1,17 @@
-import { Component, HostBinding, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '@ih-services/auth.service';
 import { TranslateService } from '@ngx-translate/core';
 import { User } from './models/User';
-
 import { Chws } from './models/Sync';
 import { Consts } from './shared/constantes';
 import { GetRolesIdsOrNames, Roles, UserRoles } from './models/Roles';
 import { AppLink } from './models/Interfaces';
 import { Router } from '@angular/router';
 import { ServiceWorkerService } from './services/service-worker.service';
-import { notNull } from './shared/functions';
 import { interval, Subject } from 'rxjs';
-import { takeWhile, takeUntil } from 'rxjs/operators';
+import { takeWhile, takeUntil, switchMap, catchError } from 'rxjs/operators';
 import { AppStorageService } from './services/local-storage.service';
+import { ConfigService } from './services/config.service';
 
 declare var $: any;
 @Component({
@@ -32,7 +31,9 @@ export class AppComponent implements OnInit {
 
   checkChangeForUser!: boolean;
 
-  constructor(public translate: TranslateService, private auth: AuthService, private store: AppStorageService, private swService: ServiceWorkerService, private router: Router) {
+  updateModalId: string = 'active-update-modal';
+
+  constructor(public translate: TranslateService, private conf: ConfigService, private auth: AuthService, private store: AppStorageService, private swService: ServiceWorkerService, private router: Router) {
     this.CheckReloadUser();
   }
 
@@ -43,8 +44,9 @@ export class AppComponent implements OnInit {
     this.translate.use(browserLang?.match(/en|fr/) ? browserLang : 'en');
 
     this.swService.registerServiceWorker();
-    this.swService.checkForUpdates();
+    this.swService.checkForUpdates(this.updateModalId);
     this.checkChangeForUser = this.isAuthenticated();
+    this.UpdateVersion(false)
   }
 
   roles(): Roles {
@@ -58,18 +60,41 @@ export class AppComponent implements OnInit {
     return this.auth.currentUser();
   }
 
-  ChwLogged(): Chws | null |undefined {
+  ChwLogged(): Chws | null | undefined {
     return this.auth.ChwLogged();
   }
-  
+
+
+
+  UpdateVersion(reload: boolean = true) {
+    this.conf.appVersion().subscribe((newVersion: any) => {
+      this.store.set('appVersion', newVersion, false);
+      this.UpdateUserToken(reload);
+    }, (err: any) => { console.log(err.toString()) });
+  }
+
+  UpdateUserToken(updateReload?: boolean) {
+    this.auth.NewUserToken(updateReload).subscribe((res: { status: number, data: User | string }) => {
+      if (res.status == 200) {
+        this.auth.setUser(res.data as User);
+      }
+      this.checkChangeForUser = true;
+      if (updateReload) {
+        // document.location.reload();
+        window.location.reload();
+      }
+    }, (err: any) => {
+      console.log(err.error);
+      this.checkChangeForUser = true;
+    });
+  }
 
   userPages(): string[] {
     return (GetRolesIdsOrNames(this.currentUser()?.roles as UserRoles[], 'pages') ?? []) as string[];
   };
 
-  @HostBinding('attr.app-version')
   appVersion(): string | null {
-    return localStorage.getItem('appVersion');
+    return this.store.get('appVersion');
   }
 
   errorFound(): boolean {
@@ -86,58 +111,36 @@ export class AppComponent implements OnInit {
   }
 
   CheckReloadUser() {
-    interval(5000)
+    interval(10000)
       .pipe(
         takeWhile(() => this.checkChangeForUser),
-        takeUntil(this.onDestroy$)
+        takeUntil(this.onDestroy$),
+        switchMap(() => this.auth.CheckReloadUser()),
+        catchError((error: any) => {
+          console.error('Error occurred while checking/reloading user:', error);
+          return [];
+        })
       )
-      .subscribe(() => {
-        console.log('Code executed every 5 seconds');
-        this.auth.CheckReloadUser().subscribe((res: { status: number, data: User | string }) => {
-          if (res.status != 200) {
+      .subscribe((r) => {
+        if (r) {
+          const res = r as { status: number, data: User | string };
+          if (res.status == 200) {
+            this.auth.setUser(res.data as User);
+          } else if (res.status == 201) {
+            this.auth.logout();
+          }  else if (res.status == 202) {
             this.checkChangeForUser = false;
-            this.infosModalMessage = 'Actualisation de la page imminente dans';
-            $('#logout-reload').trigger('click');
-            this.startCountdown(10, 'reload');
-          } else {
-            this.auth.setUser(res.data as User)
+            $('#'+this.updateModalId).trigger('click');
           }
-        }, (err: any) => { });
+        }
       });
   }
 
-  startCountdown(count: number, action: 'reload' | 'inactivity'): void {
-    this.countdown = count;
-    const countdownInterval = setInterval(() => {
-      this.countdown--;
-      if (this.countdown <= 0) {
-        clearInterval(countdownInterval);
-        if (action == 'reload') {
-          // this.logAllOut();
-          this.UpdateUserToken(true);
-        }
-        else if (action == 'inactivity') {
-
-        }
-      }
-    }, 1000);
-  }
-
-  appVersionExist(): boolean {
-    return notNull(this.appVersion());
-  }
 
   logout(event: Event) {
     event.preventDefault();
-    if (confirm("DECONNEXION\nSouhaitez-vous vraiment vous déconnecter?")) {
-      this.logAllOut();
-    }
-  }
-
-  LongInactivityAction(count: number) {
-    this.infosModalMessage = "Long moment d'inactivité, veuillez bouger la souris pour ne pas être déconnecté. Temps restant";
-    $('#logout-reload').trigger('click');
-    this.startCountdown(count, 'inactivity');
+    $('#modal-logout-close').trigger('click');
+    this.logAllOut();
   }
 
   logAllOut() {
@@ -150,27 +153,20 @@ export class AppComponent implements OnInit {
     if (expiresIn) {
       // const restOfTime = Math.floor((Date.now() - expiresIn) / 1000);
       if ((Number(expiresIn) - (1000 * 60 * 5)) < Date.now()) { // avant 5 min d'action
-        this.UpdateUserToken();
+        this.auth.NewUserToken(true).subscribe((res: { status: number, data: User | string }) => {
+          if (res.status == 200) {
+            this.auth.setUser(res.data as User);
+          }
+          this.checkChangeForUser = true;
+        }, (err: any) => {
+          console.log(err.error);
+          this.checkChangeForUser = true;
+        });
       }
     }
   }
 
-  UpdateUserToken(reloadApp: boolean = false) {
-    this.auth.NewUserToken(reloadApp).subscribe((res: { status: number, data: User | string }) => {
-      if (res.status == 200) {
-        if (reloadApp) {
-          if (confirm("Mise à jour disponible!\nAppliquer les modifications.\nLa page va se recharger, veuillez sauvegarder vos données")) {
-            this.auth.setUser(res.data as User);
-            // window.location.reload();
-          }
-        } else {
-          this.auth.setUser(res.data as User);
-        }
-      }
-      $('#logout-reload-dismiss').trigger('click');
-      this.checkChangeForUser = true;
-    }, (err: any) => { console.log(err.error) });
-  }
+
 
   NavigateTo(event: Event, link: string) {
     event.preventDefault();
@@ -213,6 +209,12 @@ export class AppComponent implements OnInit {
       icon: 'far fa-circle nav-icon',
       link: 'admin/roles-list',
       label: 'Admin Roles',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'admin/api-access-list',
+      label: 'Admin API Access',
       show: true
     },
     {

@@ -203,7 +203,7 @@ export function saveCurrentUrl(router: Router): void {
   // const link = location.href;
   // const link = window.location.href;
 
-  if (!link.includes('/error') && !link.includes('/login')) {
+  if (!link.includes('/error') && !link.includes('/login') && !link.includes('/auths/change-password')) {
     sessionStorage.setItem("redirect_url", link);
     return;
   }

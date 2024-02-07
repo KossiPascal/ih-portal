@@ -1,0 +1,20 @@
+/* .user-list-row {
+
+} */
+
+.undeleted-user{
+    background-color: white;
+}
+
+/* .deleted-user{
+    background-color: rgb(241, 241, 241);
+} */
+
+.action-checked {
+    color:black;
+    /* font-weight: bold; */
+}
+
+.action-unchecked {
+    color:rgb(214, 213, 213);
+}

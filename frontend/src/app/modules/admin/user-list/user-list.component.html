@@ -1,0 +1,290 @@
+<div class="page-title card card-primary card-outline">
+    <!-- <button (click)="CreateUser()"></button> -->
+    <div class="card-body">
+        <span style="float: left;" class="fas fa-user"> Users List</span>
+        <button (click)="CreateUser()" style="float: right;" type="button" class="btn btn-default" data-toggle="modal"
+            data-target="#modal-default">
+            Add User
+        </button>
+    </div>
+</div>
+
+<div class="page-content-wrap">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+
+                </div>
+                <div class="panel-body">
+                    <table class="table datatable">
+                        <thead>
+                            <tr style="background-color: blue;color:white;">
+                                <th>N°</th>
+                                <th>Username</th>
+                                <th>Full name</th>
+                                <th>Email</th>
+                                <th>Rôles</th>
+                                <th>Default Page</th>
+                                <th>InActifs</th>
+                                <th>IsSuperAdmin</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody *ngFor="let user of users$; let index = index; let isFirst = first; let isOdd = odd;">
+                            <tr [class]="user.isDeleted == true ? 'deleted-user' : 'undeleted-user'">
+                                <td>{{ index+1 }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.fullname }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <i style="cursor: pointer;" (click)="ShowRoles(user)" role="button"
+                                        data-toggle="modal" data-target="#modal-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </i>
+                                </td>
+                                <td></td>
+                                <!-- <td [innerHTML]="ToStringNewLine(user?.roles, 'roles') | safeHtml"></td> -->
+                                <td><span style='font-size:20px;'>{{user.isActive ? '' : '&#10003;'}}</span></td>
+                                <td><span style='font-size:20px;'>{{isSuperUser(user.roles) ? '&#10003;' : ''}}</span>
+                                </td>
+                                <td>
+                                    <span class="nav-item dropdown">
+                                        <a style="text-decoration: none;color:black;" data-toggle="dropdown" href="#">
+                                            <i class="fa fa-ellipsis-v" style="font-size:18px"></i>
+                                        </a>
+                                        <div style="padding-left:10px;"
+                                            class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                                            <br>
+                                            <h3>ID: {{ user.id }}</h3>
+
+                                            <h3 *ngIf="roles.canUpdateUser()" style="cursor: pointer;"
+                                                (click)="EditUser(user)" role="button" data-toggle="modal"
+                                                data-target="#modal-default">
+                                                <i class="fas fa-edit"></i> Modifier
+                                            </h3>
+
+                                            <h3 *ngIf="roles.canDeleteUser()" style="cursor: pointer;"
+                                                (click)="UserSelected(user)" role="button" data-toggle="modal"
+                                                data-target="#modal-danger">
+                                                <i class="fas fa-trash-alt"></i> Supprimer
+                                            </h3>
+
+                                        </div>
+                                    </span>
+                                </td>
+
+                                <!-- <td>{{ isFirst }}</td>
+                                        <td>{{ isOdd }}</td> -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <form [formGroup]="userForm" (ngSubmit)="registerOrUpdate()" novalidate class="form-horizontal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <img height="30" class="modal-title" src="{{ APP_LOGO}}" alt="" srcset="">
+
+                    <strong style="text-align: center;" class="login-box-msg"><span
+                            class=" btn-{{ isEditMode?'warning':'success' }}">{{ isEditMode ? 'Modifier un utilisateur'
+                            :'Ajouter un utilisateur' }}</span></strong>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p *ngIf="message!=''" class="login-box-msg"><strong>{{ message }}</strong></p>
+
+                    <label *ngIf="isEditMode" for="username">Username</label>
+                    <div class="input-group mb-3">
+                        <input id="username" type="text" class="form-control" placeholder="Username"
+                            formControlName="username" />
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-user"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label *ngIf="isEditMode" for="fullname">Full Name</label>
+                    <div class="input-group mb-3">
+                        <input id="fullname" type="text" class="form-control" placeholder="Full Name"
+                            formControlName="fullname" />
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-user"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label *ngIf="isEditMode" for="email">Email</label>
+                    <div class="input-group mb-3">
+                        <input id="email" type="email" class="form-control" placeholder="Email"
+                            formControlName="email" />
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label *ngIf="isEditMode" for="password">Password</label>
+                    <div class="input-group mb-3">
+                        <input id="password" type="password" class="form-control" placeholder="Password"
+                            formControlName="password" />
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label *ngIf="isEditMode" for="passwordConfirm">Password Confirm</label>
+                    <div class="input-group mb-3">
+                        <input id="passwordConfirm" type="password" class="form-control" placeholder="Retype password"
+                            formControlName="passwordConfirm" />
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div *ngIf="passwordMatchError()" class="btn btn-danger">
+                        Password does not match
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h1> <input style="zoom: 1.5;" type="checkbox"
+                                    [checked]="selectedRole.length == roles$.length" (click)="SelectAllRoles()"> <span
+                                    style="margin-left: 5px;">Rôles</span></h1>
+                            <p *ngFor="let role of roles$">
+                                <input type="checkbox" [checked]="containsRole(role.id)"
+                                    (click)="AddOrRemoveRole(role.id)">
+                                <span style="margin-left: 5px; cursor:pointer;" (click)="AddOrRemoveRole(role.id)">
+                                    {{ role.name }}</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h1> <input style="zoom: 1.5;" type="checkbox"
+                                    [checked]="selectedMR.length == MeetingReport$.length" (click)="SelectAllMRs()">
+                                <span style="margin-left: 5px;">Metting Team</span>
+                            </h1>
+                            <p *ngFor="let mr of MeetingReport$">
+                                <input type="checkbox" [checked]="containsMR(mr.id)" (click)="AddOrRemoveMR(mr.id)">
+                                <span style="margin-left: 5px; cursor:pointer;" (click)="AddOrRemoveMR(mr.id)">
+                                    {{ mr.name }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="input-group mb-3">
+                                <div class="icheck-primary">
+                                    <input type="checkbox" id="isActive" formControlName="isActive">
+                                    <label for="isActive">Activer</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button id="close-modal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button [disabled]="!userForm.valid" type="submit"
+                        class="btn btn-{{isEditMode ? 'warning': 'success'}}">{{isEditMode ? 'Modifier':
+                        'Sauvegarder'}}</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="modal-primary">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img height="30" class="modal-title" src="{{ APP_LOGO}}" alt="" srcset="">
+
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1><span style="margin-left: 5px;">Rôles</span></h1>
+                        <p *ngFor="let role of roles$">
+                            <input type="checkbox" [checked]="containsRole(role.id)" [disabled]="true">
+                            <span [class]="containsRole(role.id) ? 'action-checked' : 'action-unchecked'" style="margin-left: 5px;">
+                                {{ role.name }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h1><span style="margin-left: 5px;">Metting Team</span></h1>
+                        <p *ngFor="let mr of MeetingReport$">
+                            <input type="checkbox" [checked]="containsMR(mr.id)" [disabled]="true">
+                            <span [class]="containsMR(mr.id) ? 'action-checked' : 'action-unchecked'" style="margin-left: 5px;">
+                                {{ mr.name }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="close-modal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="modal-danger">
+    <div class="modal-dialog">
+        <div class="modal-content bg-danger">
+            <div class="modal-header">
+
+                <h4 class="modal-title">Suppression d'utilisateur</h4>
+                <button id="close-delete-modal" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Cette action est iréversible! Êtes vous sûr de procéder à la suppression ?
+
+                <p class="login-box-msg"><strong>{{ message }}</strong></p>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                <button (click)="DeleteUser()" type="button" class="btn btn-danger swalDefaultSuccess">Oui Supprimer
+                    !</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

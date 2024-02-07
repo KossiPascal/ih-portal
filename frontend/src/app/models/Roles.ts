@@ -158,7 +158,9 @@ export class Roles {
     canUpdateUser = (): boolean => {
         return this.actions().includes('can_update_user') || this.isSuperAdmin();
     }
-    
+    canUpdatePassword = (): boolean => {
+        return this.actions().includes('can_update_password') || this.isSuperAdmin();
+    }    
 
 
     canDeleteTeam = (): boolean => {

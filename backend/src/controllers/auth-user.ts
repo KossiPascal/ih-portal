@@ -3,6 +3,7 @@ import { User, getUsersRepository, UpdateUserData } from '../entity/User';
 import { notEmpty } from '../utils/functions';
 import { Roles, GetRolesAndNamesPagesActionsList, getRolesRepository } from '../entity/Roles';
 import crypto from 'crypto';
+import { getApiTokenAccessRepository, ApiTokenAccess } from '../entity/Sync';
 // const { v4: uuidv4 } = require('uuid');
 // const { shortid } = require('shortid');
 
@@ -201,7 +202,7 @@ export class AuthUserController {
         } catch (err) {
             return res.status(500).json({ status: 500, data: `${err}` });
         }
-    };
+    }
 
     static CheckReloadUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -209,12 +210,11 @@ export class AuthUserController {
             if (userId) {
                 const userRepo = await getUsersRepository();
                 const user = await userRepo.findOneBy({ id: userId });
-                if (!user || user && (!user.isActive || user.isDeleted || user.mustLogin)) return res.status(201).json({ status: 201, data: 'error' });
+                if (!user || user && (!user.isActive || user.isDeleted)) return res.status(201).json({ status: 201, data: 'error' });
+                if (user.mustLogin) return res.status(202).json({ status: 202, data: 'error' });
                 user.password = '';
-
                 const formatedRoles = await GetRolesAndNamesPagesActionsList(user.roles);
                 user.roles = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesObjects : [];
-
                 return res.status(200).json({ status: 200, data: user });
             }
             return res.status(201).json({ status: 201, data: 'no user ID provided' });
@@ -280,11 +280,12 @@ export class AuthUserController {
 
     static updateUserPassWord = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id, old_password, new_password, userId } = req.body.user;
-            if (!id) return res.status(201).json({ status: 201, data: 'Invalid user ID' });
+            const { userId } = req.body;
+            const { old_password, new_password } = req.body.user;
+            if (!userId) return res.status(201).json({ status: 201, data: 'Invalid user ID' });
 
             const userRepo = await getUsersRepository();
-            const userFound = await userRepo.findOneBy({ id });
+            const userFound = await userRepo.findOneBy({ id: userId });
             if (!userFound) return res.status(201).json({ status: 201, data: 'User not found' });
 
             if (old_password && notEmpty(old_password) && new_password && notEmpty(new_password)) {
@@ -440,6 +441,49 @@ export class AuthUserController {
         }
     }
 
+    static ApiAccessKeyList = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+
+            console.log(req.body)
+            const { userId, id, token, isActive, action  } = req.body;
+            if (userId) {
+                const apiRepo = await getApiTokenAccessRepository();
+
+                if (action == 'list') {
+                    const apis = await apiRepo.find();
+                    return res.status(200).json({ status: 200, data: apis });
+                } else if(action == 'create' && !id && token){
+                    const api = new ApiTokenAccess();
+                    api.token = token;
+                    api.isActive = isActive;
+                    await apiRepo.save(api);
+                    const apis = await apiRepo.find();
+                    return res.status(200).json({ status: 200, data: apis });
+                } else if(action == 'update' && id && token){
+                    const api = await apiRepo.findOneBy({ id: id });
+                    if (api) {
+                        api.token = token;
+                        api.isActive = isActive;
+                        await apiRepo.update(id, api);
+                        const apis = await apiRepo.find();
+                        return res.status(200).json({ status: 200, data: apis });
+                    }
+                } else if(action == 'delete' && id){
+                    const api = await apiRepo.findOneBy({ id: id });
+                    if (api) {
+                        await apiRepo.delete(api);
+                        const apis = await apiRepo.find();
+                        return res.status(200).json({ status: 200, data: apis });
+                    }
+                }
+                return res.status(201).json({ status: 201, data: 'error' });
+            }
+            return res.status(201).json({ status: 201, data: 'no user ID provided' });
+        } catch (err) {
+            return res.status(500).json({ status: 500, data: `${err}` });
+        }
+    }
+
     static UserActionsList = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(200).json({ status: 200, data: this.actionsList });
     }
@@ -447,6 +491,8 @@ export class AuthUserController {
     static UserPagesList = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(200).json({ status: 200, data: this.pagesList });
     }
+
+
 
 
     static actionsList = [
@@ -461,6 +507,7 @@ export class AuthUserController {
         'can_update_report',
         'can_update_role',
         'can_update_user',
+        'can_update_password',
 
         'can_update_chws_drug',
 
@@ -481,6 +528,7 @@ export class AuthUserController {
     static pagesList = [
         "admin/users-list",
         "admin/roles-list",
+        "admin/api-access-list",
         "admin/database-utils",
         "admin/documentations",
 

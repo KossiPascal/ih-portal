@@ -204,6 +204,7 @@ export function ServerStart(data: {
     server.on('error', (err) => onError(err, data.port));
     server.on('listening', () => onListening(server, data.hostnames, 'https'));
     server.on('connection', (stream) => console.log('someone connected!'));
+    return server;
 }
 
 export function getIPAddress(accessAllAvailablePort: boolean = true): string[] {

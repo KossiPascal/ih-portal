@@ -1,3 +1,5 @@
+import { Chws } from "../entity/Sync"
+
 export interface DataFromPython {
   errorToSend: {
     ErrorCount: number
@@ -138,8 +140,7 @@ export interface ChwsDrugData {
 }
 
 export interface ChwsDrugDataWithChws {
-  chwId?:string,
-  chwName?:string,
+  chw:Chws,
   Albendazole_400_mg_cp_1: ChwsDrugQantityInfo
   Amoxiciline_250_mg_2: ChwsDrugQantityInfo
   Amoxiciline_500_mg_3: ChwsDrugQantityInfo

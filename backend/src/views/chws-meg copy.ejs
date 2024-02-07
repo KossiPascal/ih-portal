@@ -1,0 +1,29 @@
+views/chws.ejs
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHWS Page</title>
+</head>
+<body>
+  <h1>CHWS Page</h1>
+  <p>Date: <%= date %></p>
+
+  <h2>CHWS Codes:</h2>
+  <ul>
+    <% chws.forEach(chw => { %>
+      <li><%= chw %></li>
+    <% }) %>
+  </ul>
+
+  <h2>Sites:</h2>
+  <ul>
+    <% site.forEach(site => { %>
+      <li><%= site %></li>
+    <% }) %>
+  </ul>
+</body>
+</html>
+https://localhost:9998/api/chws-meg?api_access_key=api_access_key&start_date=2023-10-26&end_date=2023-12-25&districts=x8f4IKAC7TO&sites=[%27552aafc3-11a9-4209-8f17-d1ea13bab8d5%27]&chws=[%27eafabdf9-c16a-44d5-83e4-a619d5478919%27]

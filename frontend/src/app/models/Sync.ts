@@ -1,5 +1,11 @@
 import { DataIndicators } from "./DataAggragate"
 
+export interface ApiTokenAccess {
+  id?: number
+  token: string
+  isActive: boolean
+}
+
 export interface HighChart {
   cibleId: string;
   chartOptions: any;
@@ -51,7 +57,7 @@ export interface Sync {
 }
 
 export interface DataFromPython {
-  DataFordhis2:DataIndicators[]
+  DataFordhis2: DataIndicators[]
   errorToSend: {
     ErrorCount: number
     ErrorData: any[]
@@ -123,8 +129,8 @@ export interface FilterParams {
   userId?: string | null | undefined
   dhisusername?: string
   dhispassword?: string
-  params?:any
-  withDhis2Data?:boolean
+  params?: any
+  withDhis2Data?: boolean
 }
 
 export interface ChwsDataFormDb {
@@ -254,7 +260,7 @@ export interface Dhis2Sync {
 }
 
 
-export interface SyncOrgUnit { 
+export interface SyncOrgUnit {
   start_date: string
   end_date: string
   site: boolean

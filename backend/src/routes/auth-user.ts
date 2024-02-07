@@ -13,6 +13,7 @@ AuthUserRouter.post('/check-reload-user', Middelware.authMiddleware, AuthUserCon
 AuthUserRouter.post('/users-list', Middelware.authMiddleware, AuthUserController.allUsers);
 AuthUserRouter.post('/update-user', Middelware.authMiddleware, AuthUserController.updateUser);
 AuthUserRouter.post('/delete-user', Middelware.authMiddleware, AuthUserController.deleteUser);
+AuthUserRouter.post('/update-user-password', Middelware.authMiddleware, AuthUserController.updateUserPassWord);
 
 AuthUserRouter.post('/roles-list', Middelware.authMiddleware, AuthUserController.GetRolesList);
 AuthUserRouter.post('/create-role', Middelware.authMiddleware, AuthUserController.CreateRole);
@@ -21,6 +22,8 @@ AuthUserRouter.post('/delete-role', Middelware.authMiddleware, AuthUserControlle
 
 AuthUserRouter.post('/actions-list', Middelware.authMiddleware, AuthUserController.UserActionsList);
 AuthUserRouter.post('/pages-list', Middelware.authMiddleware, AuthUserController.UserPagesList);
+
+AuthUserRouter.post('/api-access-key', Middelware.authMiddleware, AuthUserController.ApiAccessKeyList);
 
 AuthUserRouter.post(
     '/login',

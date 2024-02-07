@@ -20,7 +20,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 
 import { DateAdapter, MatDateFormats, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MAT_MOMENT_DATE_FORMATS, MomentDateAdapter } from '@angular/material-moment-adapter';
-import { NgMultiSelectDropDownModule } from "ng-multiselect-dropdown";
+// import { NgMultiSelectDropDownModule } from "ng-multiselect-dropdown";
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -28,7 +28,6 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { backenUrl } from './shared/functions';
 import { JwtInterceptor } from './_helpers/jwt.interceptor';
 import { ErrorInterceptor } from './_helpers/error.interceptor';
-
 
 MAT_MOMENT_DATE_FORMATS.parse = {
   dateInput: { month: 'short', year: 'numeric', day: 'numeric', date: 'long' },
@@ -82,7 +81,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     MatIconModule,
     MatButtonModule,
     MatButtonToggleModule,
-    NgMultiSelectDropDownModule.forRoot(), 
+    // NgMultiSelectDropDownModule.forRoot(), 
     
     TranslateModule.forRoot({
       loader: {

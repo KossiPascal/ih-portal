@@ -1,6 +1,6 @@
 {
   "name": "ih-portal",
-  "version": "1.2.78",
+  "version": "1.2.81",
   "author": "TSOLEGNAGBO Kossi <kossi.tsolegnagbo@gmail.com>",
   "private": true,
   "description": "Integratehealth analytics app for chws followup",
@@ -74,7 +74,6 @@
     "lite-server": "^2.6.1",
     "moment": "^2.29.4",
     "morris": "^0.1.4",
-    "ng-multiselect-dropdown": "^1.0.0-beta.19",
     "ng-pwa-tools": "0.0.15",
     "ngx-loadable": "^2.1.1",
     "ngx-multiple-dates": "^14.3.1",
@@ -95,6 +94,6 @@
     "@angular/cli": "^14.0.7",
     "@angular/compiler-cli": "^14.0.0",
     "@types/proj4": "^2.5.2",
-    "browser-sync": "^2.29.0"
+    "browser-sync": "^3.0.2"
   }
 }

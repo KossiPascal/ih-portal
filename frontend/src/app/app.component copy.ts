@@ -129,7 +129,6 @@
 //   updateChecker() {
 //     if (this.sw.isEnabled) {
 //       this.sw.available.subscribe(() => {
-//         // if (confirm("New version available. Load New Version?")) window.location.reload();
 //         this.ShowUpdateVersionModal();
 //       });
 //     }

@@ -143,6 +143,11 @@ export class AuthService {
     return this.http.post(`${backenUrl()}/auth-user/update-user`, fparams, CustomHttpHeaders(this.store));
   }
 
+  updateMyPassword(user: { old_password: string, new_password: string }): any {
+    const fparams = this.ApiParams({ user: user });
+    return this.http.post(`${backenUrl()}/auth-user/update-user-password`, fparams, CustomHttpHeaders(this.store));
+  }
+
   deleteUser(user: User, permanentDelete: boolean = false): any {
     const fparams = this.ApiParams({ user: user, permanentDelete: permanentDelete });
     return this.http.post(`${backenUrl()}/auth-user/delete-user`, fparams, CustomHttpHeaders(this.store));
@@ -201,12 +206,19 @@ export class AuthService {
     return this.http.post(`${backenUrl()}/auth-user/pages-list`, fparams, CustomHttpHeaders(this.store));
   }
 
+  ApiTokenAccessAction(params:{ action: string, id?: number, token?: string, isActive?: boolean }): any {
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/auth-user/api-access-key`, fparams, CustomHttpHeaders(this.store));
+  }
+
+  
+
   logout() {
     saveCurrentUrl(this.router);
     this.store.delete(this.objectStoreName);
     this.store.delete('chw_found');
-
-    localStorage.removeItem("IFrame");
+    this.store.delete('appVersion');
+    this.store.delete('IFrame');
     // location.href = 'auths/login';
     this.router.navigate(["auths/login"]);
   }

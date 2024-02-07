@@ -9,6 +9,22 @@ let Connection: DataSource = AppDataSource.manager.connection;
 
 
 @Entity()
+export class ApiTokenAccess {
+  constructor() { };
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column({ unique: true, type: 'varchar', nullable: false })
+  token!: string
+
+  @Column({ nullable: false, default: false })
+  isActive!: boolean
+}
+export async function getApiTokenAccessRepository(): Promise<Repository<ApiTokenAccess>> {
+  return Connection.getRepository(ApiTokenAccess);
+}
+
+@Entity()
 export class Districts {
   constructor() { };
   @PrimaryColumn({ type: 'varchar' })

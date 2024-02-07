@@ -3,9 +3,10 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DatabaseUtilsComponent } from './database/database_utils.component';
 import { DocumentationComponent } from './documentation/documentation.component';
-import { UserComponent } from './user/user-list.component';
+import { UserComponent } from './user-list/user-list.component';
 import { RoleComponent } from './role/role-list.component';
 import { LoginAccessGuard } from '@ih-src/app/guards/login-access-guard';
+import { ApiComponent } from './api-list/api-list.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'documentations', pathMatch: 'full' },
@@ -25,6 +26,10 @@ const routes: Routes = [
   {
     path: 'roles-list', component: RoleComponent, canActivate: [LoginAccessGuard],
     data: {href: "user",icon: "fa fa-user",label: "Roles", title: 'Roles'},
+  },
+  {
+    path: 'api-access-list', component: ApiComponent, canActivate: [LoginAccessGuard],
+    data: {href: "user",icon: "fa fa-user",label: "Apis", title: 'Apis'},
   }
 ];
 

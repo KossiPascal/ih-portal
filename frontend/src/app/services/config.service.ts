@@ -9,8 +9,8 @@ export class ConfigService {
 
     constructor(private auth: AuthService, private http: HttpClient, private store: AppStorageService) { }
 
-    private ApiParams(params?:any, mustLoggedIn:boolean = true){
-        if (mustLoggedIn && !this.auth.isLoggedIn()) {
+    private ApiParams(params?:any){
+        if (!this.auth.isLoggedIn()) {
           return this.auth.logout();
         }
         const fparams:any = notNull(params) ? params : {};
