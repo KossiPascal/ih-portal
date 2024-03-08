@@ -46,29 +46,6 @@ export function httpHeaders(Username?: string, Password?: string, WithParams: bo
     return p;
 }
 
-
-export function previousMonth(monthId: string): string {
-    let cMonth: number = parseInt(monthId, 10);
-    if (cMonth === 1) return '12';
-    cMonth--;
-    return cMonth < 10 ? `0${cMonth}` : cMonth.toString();
-}
-
-export function date_to_milisecond(stringDate: string, start: boolean = true): string {
-    if (stringDate != "") {
-        let dt = start ? " 00:00:00.000001" : " 23:59:59.999999";
-        let date = new Date(`${stringDate}` + dt);
-        return `${date.getTime()}`;
-    }
-    return stringDate;
-}
-
-export function milisecond_to_date(timestamp: string | number, type = 'fulldate'): string {
-    const date = new Date(timestamp);
-    if (type === 'dateOnly') return date.toLocaleString('sv').split(' ')[0].trim();
-    return date.toLocaleString('sv');
-}
-
 export function renameKeyIfFoundInObject(obj: any, oldKey: string, newKey: string) {
     try {
         let allKeys = Object.keys(obj).includes(oldKey);
@@ -472,6 +449,18 @@ export function getValue(dataValues: { dataElement: string, value: any }[], elem
         }
     }
     return '';
+}
+
+export function getDhis2DrugValue(dataValues: { dataElement: string, value: any }[], elementId: string): number | undefined {
+    try {
+        for (let i = 0; i < dataValues.length; i++) {
+            const data = dataValues[i];
+            if (data.dataElement == elementId) {
+                return parseInt(data.value);
+            }
+        }
+    } catch (error) {}
+    return undefined;
 }
 
 

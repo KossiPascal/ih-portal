@@ -2,17 +2,86 @@ import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import { Between, In } from "typeorm";
 import { ChtOutPutData, DataIndicators } from "../entity/DataAggragate";
-import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository, ChwsDrug, getChwsDrugSyncRepository, getChwsDrugUpdateSyncRepository, ChwsDrugUpdate, GetPersonsRepository, Persons, Teams, GetTeamsRepository, MeetingReportData, GetMeetingReportDataRepository } from "../entity/Sync";
+import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository, ChwsDrug, getChwsDrugSyncRepository, getChwsDrugUpdateSyncRepository, ChwsDrugUpdate, GetPersonsRepository, Persons, Teams, GetTeamsRepository, MeetingReportData, GetMeetingReportDataRepository, Districts, Sites, getSiteSyncRepository, getDistrictSyncRepository, getDrugChwYearCmmSyncRepository, DrugChwYearCmm } from "../entity/Sync";
 import { Consts } from "../utils/constantes";
-import { notEmpty, previousMonth } from "../utils/functions";
+import { notEmpty } from "../utils/functions";
 import { getChws } from "./orgUnitsFromDB ";
-import { ChwsDrugData, ChwsDrugQantityInfo } from "../utils/appInterface";
-import { getDateInFormat, isBetween } from "../utils/date-utils";
+import { ChwsDrugData, ChwsDrugQuantityInfo, PatologieData } from "../utils/appInterface";
+import { GetPreviousDate, GetPreviousYearMonth, YearMonthBetween21And20, getDateInFormat, isBetween } from "../utils/date-utils";
 
 const request = require('request');
 // const fetch = require('node-fetch');
 
 const MEG_FORMS: string[] = ["drug_movements", "drug_quantities", "pcime_c_asc", "pregnancy_family_planning", "fp_follow_up_renewal"];
+const quantities: ChwsDrugQuantityInfo = {
+  month_quantity_beginning: 0,
+  month_quantity_received: 0,
+  month_total_quantity: 0,
+  month_consumption: 0,
+  theoretical_quantity: 0,
+  inventory_quantity: 0,
+  inventory_variance: 0,
+  year_chw_cmm: 0,
+  theoretical_quantity_to_order: 0,
+  quantity_to_order: 0,
+  quantity_validated: 0,
+  delivered_quantity: 0,
+  satisfaction_rate: '',
+  lending: '',
+  lending_quantity: 0,
+  lending_chws_code: '',
+  borrowing: '',
+  borrowing_quantity: 0,
+  borrowing_chws_code: '',
+  quantity_loss: 0,
+  quantity_damaged: 0,
+  quantity_broken: 0,
+  quantity_expired: 0,
+  other_quantity: 0,
+  comments: "",
+  observations: ""
+};
+
+const dataFields: { id: string, name: string, index: number }[] = [
+  { id: "alben_400", name: "Albendazole_400_mg_cp_1", index: 1 },
+  { id: "amox_250", name: "Amoxiciline_250_mg_2", index: 2 },
+  { id: "amox_500", name: "Amoxiciline_500_mg_3", index: 3 },
+  { id: "lumartem", name: "Artemether_Lumefantrine_20_120mg_cp_4", index: 4 },
+  { id: "pills", name: "Oral_Combination_Pills_5", index: 5 },
+  { id: "para_250", name: "Paracetamol_250_mg_6", index: 6 },
+  { id: "para_500", name: "Paracetamol_500_mg_7", index: 7 },
+  { id: "pregnancy_test", name: "Pregnancy_Test_8", index: 8 },
+  { id: "sayana", name: "Sayana_Press_9", index: 9 },
+  { id: "sro", name: "SRO_10", index: 10 },
+  { id: "tdr", name: "TDR_11", index: 11 },
+  { id: "vit_A1", name: "Vitamine_A_100000UI_12", index: 12 },
+  { id: "vit_A2", name: "Vitamine_A_200000UI_13", index: 13 },
+  { id: "zinc", name: "Zinc_14", index: 14 }
+];
+
+function YearCmmMonthStart(year: number, startMonth: string): { name: string, interval: string[] } {
+  const y = parseInt(`${year}`);
+  const lY = parseInt(`${year}`) - 1;
+  const nY = parseInt(`${year}`) + 1;
+  const months: any = {};
+
+  months[`janvier_decembre_${y}`] = {
+    name: `Janvier - Décembre ${y}`,
+    interval: [`01-${y}`, `02-${y}`, `03-${y}`, `04-${y}`, `05-${y}`, `06-${y}`, `07-${y}`, `08-${y}`, `09-${y}`, `10-${y}`, `11-${y}`, `12-${y}`]
+  };
+
+  months[`juillet_${y}_juin_${nY}`] = {
+    name: `Juillet ${y} - Juin ${nY}`,
+    interval: [`07-${y}`, `08-${y}`, `09-${y}`, `10-${y}`, `11-${y}`, `12-${y}`, `01-${nY}`, `02-${nY}`, `03-${nY}`, `04-${nY}`, `05-${nY}`, `06-${nY}`]
+  };
+
+  months[`juillet_${lY}_juin_${y}`] = {
+    name: `Juillet ${lY} - Juin ${y}`,
+    interval: [`07-${lY}`, `08-${lY}`, `09-${lY}`, `10-${lY}`, `11-${lY}`, `12-${lY}`, `01-${y}`, `02-${y}`, `03-${y}`, `04-${y}`, `05-${y}`, `06-${y}`]
+  };
+
+  return months[startMonth];
+}
 
 export async function GetPersonsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };
@@ -60,7 +129,7 @@ export async function GetTeamsDataWithParams(req: Request, res: Response, next: 
   return onlyData ? respData : res.status(respData.status).json(respData);
 }
 
-export async function getChwsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
+export async function getChwsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false, filter?: { start_date?: string, end_date?: string, forms?: string[], sources?: string[] }): Promise<any> {
   var respData: { status: number, data: any };
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -71,12 +140,17 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
   try {
     const repository = await getChwsDataSyncRepository();
 
+    const start_date = (filter?.start_date ?? '') != '' ? filter?.start_date : req.body.start_date;
+    const end_date = (filter?.end_date ?? '') != '' ? filter?.end_date : req.body.end_date;
+    const sources = (filter?.sources ?? '') != '' ? filter?.sources : req.body.sources;
+    const forms = (filter?.forms ?? '') != '' ? filter?.forms : req.body.forms;
+
     var allSync: ChwsData[] = await repository.find({
       where: {
         id: notEmpty(req.body.id) ? req.body.id : notEmpty(req.params.id) ? req.params.id : undefined,
-        reported_date: notEmpty(req.body.start_date) && notEmpty(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
-        form: notEmpty(req.body.forms) ? In(req.body.forms) : undefined,
-        source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
+        reported_date: notEmpty(start_date) && notEmpty(end_date) ? Between(start_date, end_date) : undefined,
+        form: notEmpty(forms) ? In(forms) : undefined,
+        source: notEmpty(sources) ? In(sources) : undefined,
         district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
         site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
         zone: notEmpty(req.body.zones) ? { id: In(req.body.zones) } : undefined,
@@ -92,34 +166,62 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
   return onlyData ? respData : res.status(respData.status).json(respData);
 }
 
-export async function getChwsDrugWithParams(req: any, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
-  var respData: { status: number, data: any };
+export async function getChwsDrugWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
+  var msg = 'Not data found with parametter!';
+  var respData: { previous: { status: number, data: any }, current: { status: number, data: any } } = { previous: { status: 201, data: msg }, current: { status: 201, data: msg } };
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    respData = { status: 201, data: 'Informations you provided are not valid' }
+    msg = 'Informations you provided are not valid';
+    respData = { previous: { status: 201, data: msg }, current: { status: 201, data: msg } };
     return onlyData ? respData : res.status(201).json(respData);
   }
   const errorMsg: string = "Your request provides was rejected !";
   try {
     const repository = await getChwsDrugSyncRepository();
-    var allSync: ChwsDrug[] = await repository.find({
+    const CurrentSyncs: ChwsDrug[] = await repository.find({
       where: {
         id: notEmpty(req.body.id) ? req.body.id : notEmpty(req.params.id) ? req.params.id : undefined,
-        activity_date: notEmpty(req.body.start_date) && notEmpty(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
+        year: notEmpty(req.body.year) ? req.body.year : undefined,
+        month: notEmpty(req.body.month) ? req.body.month : undefined,
         form: notEmpty(req.body.forms) ? In(req.body.forms) : undefined,
         source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
         district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
         site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+        zone: notEmpty(req.body.zones) ? { id: In(req.body.zones) } : undefined,
         chw: notEmpty(req.body.chws) ? { id: In(req.body.chws) } : undefined
       }
     });
-    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
+
+
+    // const prev_start_date = GetPreviousDate(req.body.start_date);
+    // const prev_end_date = GetPreviousDate(req.body.end_date);
+
+    const ym = GetPreviousYearMonth(req.body.year, req.body.month);
+
+    const PreviousSyncs: ChwsDrug[] = await repository.find({
+      where: {
+        id: notEmpty(req.body.id) ? req.body.id : notEmpty(req.params.id) ? req.params.id : undefined,
+        year: notEmpty(ym.year) ? ym.year : undefined,
+        month: notEmpty(ym.month) ? ym.month : undefined,
+        form: notEmpty(req.body.forms) ? In(req.body.forms) : undefined,
+        source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
+        district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+        site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+        zone: notEmpty(req.body.zones) ? { id: In(req.body.zones) } : undefined,
+        chw: notEmpty(req.body.chws) ? { id: In(req.body.chws) } : undefined
+      }
+    });
+
+    if (CurrentSyncs) respData.current = { status: 200, data: CurrentSyncs };
+    if (PreviousSyncs) respData.previous = { status: 200, data: PreviousSyncs };
+
   }
   catch (err) {
     // return next(err);
-    respData = { status: 201, data: errorMsg };
+    respData.current = { status: 201, data: errorMsg };
+    respData.previous = { status: 201, data: errorMsg };
   }
-  return onlyData ? respData : res.status(respData.status).json(respData);
+  return onlyData ? respData : res.status(respData.current.status).json(respData);
 }
 
 export async function getChwsDrugUpdatedWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
@@ -137,11 +239,12 @@ export async function getChwsDrugUpdatedWithParams(req: Request, res: Response, 
       where: {
         id: notEmpty(req.body.id) ? req.body.id : notEmpty(req.params.id) ? req.params.id : undefined,
         district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
-        site: notEmpty(req.body.site) ? { id: In(req.body.sites) } : undefined,
-        chw: notEmpty(req.body.chw) ? { id: In(req.body.chws) } : undefined,
-        year: notEmpty(req.body.year) ? In(req.body.years) : undefined,
-        month: notEmpty(req.body.month) ? In(req.body.month) : undefined,
-        drug_index: notEmpty(req.body.chw) ? In(req.body.drugs_index) : undefined
+        site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+        zone: notEmpty(req.body.zones) ? { id: In(req.body.zones) } : undefined,
+        chw: notEmpty(req.body.chws) ? { id: In(req.body.chws) } : undefined,
+        year: notEmpty(req.body.year) ? req.body.year : undefined,
+        month: notEmpty(req.body.month) ? req.body.month : undefined,
+        drug_index: notEmpty(req.body.drugs_index) ? In(req.body.drugs_index) : undefined
       }
     });
     respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
@@ -153,25 +256,57 @@ export async function getChwsDrugUpdatedWithParams(req: Request, res: Response, 
   return onlyData ? respData : res.status(respData.status).json(respData);
 }
 
-export async function getChwsDrugUpdatedWithCoustomParams(req: { district: string, site: string, chw: string, year: number, month: string, drug_index: number }): Promise<ChwsDrugUpdate[] | undefined> {
-  var allSync: ChwsDrugUpdate[] | undefined;
+export async function getChwsDrugYearCmmWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
+  var respData: { status: number, data: any };
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    respData = { status: 201, data: 'Informations you provided are not valid' }
+    return onlyData ? respData : res.status(201).json(respData);
+  }
   const errorMsg: string = "Your request provides was rejected !";
   try {
-    const repository = await getChwsDrugUpdateSyncRepository();
-    allSync = await repository.find({
+    const repository = await getDrugChwYearCmmSyncRepository();
+    var allSync: DrugChwYearCmm[] = await repository.find({
       where: {
-        district: notEmpty(req.district) ? { id: req.district } : undefined,
-        site: notEmpty(req.site) ? { id: req.site } : undefined,
-        chw: notEmpty(req.chw) ? { id: req.chw } : undefined,
-        year: notEmpty(req.year) ? req.year : undefined,
-        month: notEmpty(req.month) ? req.month : undefined,
-        drug_index: notEmpty(req.chw) ? req.drug_index : undefined
+        id: notEmpty(req.body.id) ? req.body.id : notEmpty(req.params.id) ? req.params.id : undefined,
+        district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+        site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+        zone: notEmpty(req.body.zones) ? { id: In(req.body.zones) } : undefined,
+        chw: notEmpty(req.body.chws) ? { id: In(req.body.chws) } : undefined,
+        // year: notEmpty(req.body.year) ? req.body.year : undefined,
+        cmm_start_year_month: notEmpty(req.body.cmm_start_year_month) ? req.body.cmm_start_year_month : undefined,
+        drug_index: notEmpty(req.body.drugs_index) ? In(req.body.drugs_index) : undefined
       }
     });
-  } catch (err) {
+    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
   }
-  return !allSync ? undefined : allSync;
+  catch (err) {
+    // return next(err);
+    respData = { status: 201, data: errorMsg };
+  }
+  return onlyData ? respData : res.status(respData.status).json(respData);
 }
+
+// export async function getChwsDrugUpdatedWithCoustomParams(req: { districts?: string[], sites?: string[], zones?: string[], chws?: string[], years?: number[], months?: string[], drug_index?: number[] }): Promise<ChwsDrugUpdate[] | undefined> {
+//   try {
+//     const repository = await getChwsDrugUpdateSyncRepository();
+//     const allSync = await repository.find({
+//       where: {
+//         district: notEmpty(req.districts) ? { id: In(req.districts!) } : undefined,
+//         site: notEmpty(req.sites) ? { id: In(req.sites!) } : undefined,
+//         zone: notEmpty(req.zones) ? { id: In(req.zones!) } : undefined,
+//         chw: notEmpty(req.chws) ? { id: In(req.chws!) } : undefined,
+//         year: notEmpty(req.years) ? In(req.years!) : undefined,
+//         month: notEmpty(req.months) ? In(req.months!) : undefined,
+//         drug_index: notEmpty(req.drug_index) ? In(req.drug_index!) : undefined
+//       }
+//     });
+//     return allSync;
+//   } catch (err) {
+//     return undefined;
+//   }
+
+// }
 
 function getChwInfos(chw: Chws[], chwId: string): Chws | null {
   if (notEmpty(chwId)) {
@@ -292,47 +427,726 @@ export async function fetchIhChtDataPerChw(req: Request, res: Response, next: Ne
     return res.status(chwsData.status).json({ status: 201, data: 'No data found !' });
   }
 }
-
-export async function fetchIhDrugDataPerChw(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined) {
-  req.body.forms = MEG_FORMS;
-  req.body.sources = ['Tonoudayo'];
-
-  const outPut = await getIhDrugArrayData(req, res, next, Chw)
+// ###################################### PER CHW ######################################
+export async function fetchIhDrugDataPerChw(req: Request, res: Response, next: NextFunction) {
+  const outPut = await getIhDrugArrayDataPerChw(req, res, next)
   return res.status(outPut.status).json(outPut);
 }
+export async function getIhDrugArrayDataPerChw(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined): Promise<{ status: number, data: { chwId: any, chw: Chws, drugData: ChwsDrugData, patologieData: PatologieData }[] | string | undefined; }> {
+  // const dateArray = req.body.end_date.split('-');
+  req.body.forms = MEG_FORMS;
+  req.body.sources = ['Tonoudayo'];
+  // req.body.year = parseInt(dateArray[0]);
+  // req.body.month = dateArray[1];
+  const year = req.body.year;
+  const month = req.body.month;
 
-export async function getIhDrugArrayData(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined): Promise<{ status: number; data: { chwId: any, chw: Chws, data: ChwsDrugData }[] | string | undefined; }> {
-  
-  const chwsDrug: { status: number, data: ChwsDrug[] } = await getChwsDrugWithParams(req, res, next, true);
+  const chwsChtDataFilter = {
+    start_date: GetPreviousDate(`${year}-${month}-21`),
+    end_date: `${year}-${month}-20`,
+    sources: ["Tonoudayo", "dhis2"],
+    forms: ["pcime_c_asc", "PCIME"],
+  };
 
-  var chwsDrugFinalOut: { chwId: any, chw: Chws, data: ChwsDrugData }[] = [];
+  const chwsDrug = await getChwsDrugWithParams(req, res, next, true);
+  const drugUpdated = await getChwsDrugUpdatedWithParams(req, res, next, true);
+  const drugYearCmm = await getChwsDrugYearCmmWithParams(req, res, next, true);
+  const chwsChtData = await getChwsDataWithParams(req, res, next, true, chwsChtDataFilter);
+
+  var chwsDrugFinalOut: { chwId: any, chw: Chws, drugData: ChwsDrugData, patologieData: PatologieData }[] = [];
 
   if (Chw) {
-    if (Chw.id && Chw.id != '') {
-      const chwsDrugOutPut = await genarateIhDrugArray(chwsDrug.data, Chw, req, res, next);
-      chwsDrugFinalOut.push({ chwId: Chw.id, chw: Chw, data: chwsDrugOutPut });
+    if (chwsDrug.current.status == 200 && chwsDrug.previous.status == 200 && drugUpdated.status == 200 && drugYearCmm.status == 200 && chwsChtData.status == 200) {
+      const outPut = await getChwsDrugQantityPerChw(chwsDrug.current.data, chwsDrug.previous.data, drugUpdated.data, drugYearCmm.data, chwsChtData.data, Chw, req);
+      chwsDrugFinalOut.push({ chwId: Chw.id, chw: Chw, drugData: outPut.drugData, patologieData: outPut.patologieData });
     }
   } else {
-    const chws: { status: number, data: Chws[] } = await getChws(req, res, next, true);
-    if (chwsDrug.status == 200 && chws.status == 200) {
+    const chws = await getChws(req, res, next, true);
+    if (chwsDrug.current.status == 200 && chwsDrug.previous.status == 200 && chws.status == 200 && drugUpdated.status == 200 && drugYearCmm.status == 200 && chwsChtData.status == 200 && chws.status == 200) {
       var confirm: string[] = []
       for (let i = 0; i < chws.data.length; i++) {
         const asc = chws.data[i];
         if (asc.id && asc.id != '' && !confirm.includes(asc.id!)) {
-          const chwsDrugOutPut = await genarateIhDrugArray(chwsDrug.data, asc, req, res, next);
-          chwsDrugFinalOut.push({ chwId: asc.id, chw: asc, data: chwsDrugOutPut });
+          const outPut = await getChwsDrugQantityPerChw(chwsDrug.current.data, chwsDrug.previous.data, drugUpdated.data, drugYearCmm.data, chwsChtData.data, asc, req);
+          chwsDrugFinalOut.push({ chwId: asc.id, chw: asc, drugData: outPut.drugData, patologieData: outPut.patologieData });
           confirm.push(asc.id!);
         }
       }
-    } else {
-      return { status: 201, data: 'No data found !' };
     }
   }
 
   if (!chwsDrugFinalOut) return { status: 201, data: 'No data found !' };
   return { status: 200, data: chwsDrugFinalOut };
 }
+export async function updateDrugPerChw(req: Request, res: Response, next: NextFunction) {
 
+  const { district, site, chw, year, month, drug_index, drug_name, quantity_validated, delivered_quantity, observations, userId } = req.body;
+
+  const _repoChwsDrugUpdate = await getChwsDrugUpdateSyncRepository();
+  const _chwRepo = await getChwsSyncRepository();
+  try {
+    if (district && site && chw && year && month && drug_index) {
+
+      const _sync = new ChwsDrugUpdate();
+      const id = `${chw}-${year}-${month}-${drug_index}`;
+      const dataFound = await _repoChwsDrugUpdate.findOneBy({ id: id });
+      if (dataFound) {
+        _sync.updatedBy = userId;
+        _sync.updatedAt = new Date();
+      } else {
+        _sync.createdBy = userId;
+        _sync.createdAt = new Date();
+      }
+      _sync.id = id;
+      _sync.district = district;
+      _sync.site = site;
+      _sync.chw = chw;
+      _sync.year = year;
+      _sync.month = month;
+      _sync.drug_index = drug_index;
+      _sync.drug_name = drug_name;
+      _sync.quantity_validated = quantity_validated;
+      _sync.delivered_quantity = delivered_quantity;
+      _sync.observations = observations;
+      await _repoChwsDrugUpdate.save(_sync);
+
+      // req.body.start_date = GetPreviousDate(`${year}-${month}-21`);
+      // req.body.end_date = `${year}-${month}-20`;
+      req.body.year = year;
+      req.body.month = month;
+      req.body.districts = [district];
+      req.body.sites = [site];
+      req.body.chws = [chw];
+
+      var Chw = await _chwRepo.findOneBy({ id: chw });
+      if (Chw) {
+        const updateOutPut = await getIhDrugArrayDataPerChw(req, res, next, Chw);
+        if (updateOutPut) return res.status(updateOutPut.status).json(updateOutPut);
+      }
+    }
+    return res.status(201).json({ status: 201, data: 'No data found !' });
+
+  } catch (err: any) {
+    if (!err.statusCode) err.statusCode = 500;
+    return res.status(err.statusCode).json({ status: 201, data: 'No data found !' });
+  }
+}
+export async function updateDrugYearCmmPerChw(req: Request, res: Response, next: NextFunction) {
+
+  const { district, site, chw, year, drug_index, drug_name, year_chw_cmm, cmm_start_year_month, userId } = req.body;
+  try {
+    if (district && site && chw && drug_index && cmm_start_year_month) {
+      const _repoDrugChwYearCmm = await getDrugChwYearCmmSyncRepository();
+      const _sync = new DrugChwYearCmm();
+      const id = `${chw}-${drug_index}-${cmm_start_year_month}`;
+      const dataFound = await _repoDrugChwYearCmm.findOneBy({ id: id });
+      if (dataFound) {
+        _sync.updatedBy = userId;
+        _sync.updatedAt = new Date();
+      } else {
+        _sync.createdBy = userId;
+        _sync.createdAt = new Date();
+      }
+      _sync.id = id;
+      _sync.district = district;
+      _sync.site = site;
+      _sync.chw = chw;
+      _sync.cmm_start_year_month = cmm_start_year_month;
+
+      _sync.cmm_year_month_list = YearCmmMonthStart(year, cmm_start_year_month)?.interval;
+      _sync.drug_index = drug_index;
+      _sync.drug_name = drug_name;
+      _sync.year_chw_cmm = year_chw_cmm;
+      await _repoDrugChwYearCmm.save(_sync);
+
+    }
+    // return res.status(201).json({ status: 201, data: 'No data found !' });
+    return res.status(200).json({ status: 200, data: 'success' });
+  } catch (err: any) {
+    if (!err.statusCode) err.statusCode = 500;
+    return res.status(err.statusCode).json({ status: 201, data: 'No data found !' });
+  }
+}
+async function getChwsDrugQantityPerChw(currentData: ChwsDrug[], previousData: ChwsDrug[], drugUpdated: ChwsDrugUpdate[], drugCmm: DrugChwYearCmm[], chwsChtData: ChwsData[], Chw: Chws, req: Request): Promise<{ drugData: ChwsDrugData, patologieData: PatologieData }> {
+  // const { start_date, end_date, sources, districts, sites, chws } = req.body;
+
+  const outData: any = {
+    Albendazole_400_mg_cp_1: { ...quantities },
+    Amoxiciline_250_mg_2: { ...quantities },
+    Amoxiciline_500_mg_3: { ...quantities },
+    Artemether_Lumefantrine_20_120mg_cp_4: { ...quantities },
+    Oral_Combination_Pills_5: { ...quantities },
+    Paracetamol_250_mg_6: { ...quantities },
+    Paracetamol_500_mg_7: { ...quantities },
+    Pregnancy_Test_8: { ...quantities },
+    Sayana_Press_9: { ...quantities },
+    SRO_10: { ...quantities },
+    TDR_11: { ...quantities },
+    Vitamine_A_100000UI_12: { ...quantities },
+    Vitamine_A_200000UI_13: { ...quantities },
+    Zinc_14: { ...quantities },
+  };
+
+  var patologieData: PatologieData = {
+    diarrhee_pcime: {},
+    paludisme_pcime: {},
+    pneumonie_pcime: {},
+    malnutrition_pcime: {}
+  }
+
+  for (let i = 0; i < currentData.length; i++) {
+    const data: any = currentData[i];
+    if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+
+      const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+      const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+      const idChwValid: boolean = data?.chw?.id == Chw.id;
+
+      if (idDistrictValid && idSiteValid && idChwValid) {
+
+        if (data.form == "drug_quantities") {
+          for (const field of dataFields) {
+            if (data.activity_type == "c_qty_received" && data[field.id]) {
+              outData[field.name].month_quantity_received += data[field.id];
+            }
+            if (data.activity_type == "c_qty_counted" && data[field.id]) {
+              outData[field.name].inventory_quantity += data[field.id];
+            }
+            if (data.activity_type == "c_qty_order" && data[field.id]) {
+              outData[field.name].quantity_to_order += data[field.id];
+            }
+          }
+        }
+
+        if (data.form == "drug_movements") {
+          for (const field of dataFields) {
+            if (data.activity_type == "c_med_loss" && data[field.id]) {
+              outData[field.name].quantity_loss += data[field.id];
+            }
+            if (data.activity_type == "c_med_expired" && data[field.id]) {
+              outData[field.name].quantity_expired += data[field.id];
+            }
+
+            if (data.activity_type == "c_med_borrowing" && data[field.id]) {
+              outData[field.name].borrowing_quantity += data[field.id];
+              if (outData[field.name].borrowing_quantity && outData[field.name].borrowing_quantity != 0) {
+                if ((data.borrowing_chws_info ?? '') != '') {
+                  const bcc = outData[field.name].borrowing_chws_code != '' ? '|||' : '';
+                  outData[field.name].borrowing_chws_code! += `${bcc}${data.borrowing_chws_info}@@@${data[field.id]}@@@${data.reported_date}`;
+                  outData[field.name].borrowing = 'Emprunt';
+                }
+              }
+            }
+            if (data.activity_type == "c_med_loan" && data[field.id]) {
+              outData[field.name].lending_quantity += data[field.id];
+              if (outData[field.name].lending_quantity && outData[field.name].lending_quantity != 0) {
+                if ((data.lending_chws_info ?? '') != '') {
+                  const lcc = outData[field.name].lending_chws_code != '' ? '|||' : '';
+                  outData[field.name].lending_chws_code! += `${lcc}${data.lending_chws_info}@@@${data[field.id]}@@@${data.reported_date}`;
+                  outData[field.name].lending = 'Prêt';
+                }
+              }
+            }
+            if (data.activity_type == "c_med_damaged" && data[field.id]) {
+              outData[field.name].quantity_damaged += data[field.id];
+            }
+            if (data.activity_type == "c_med_broken" && data[field.id]) {
+              outData[field.name].quantity_broken += data[field.id];
+            }
+            if (data.activity_type == "c_others" && data[field.id]) {
+              outData[field.name].other_quantity += data[field.id];
+            }
+            outData[field.name].comments = data.comments ?? '';
+          }
+        }
+
+        if (["pcime_c_asc", "pregnancy_family_planning", "fp_follow_up_renewal"].includes(data.form!)) {
+          for (const field of dataFields) {
+            if (data[field.id]) {
+              outData[field.name].month_consumption += data[field.id];
+            }
+          }
+        }
+
+      }
+    }
+  }
+
+  // ################################################
+  for (let i = 0; i < previousData.length; i++) {
+    const data: any = previousData[i];
+    if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+      const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+      const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+      const idChwValid: boolean = data?.chw?.id == Chw.id;
+
+      if (idDistrictValid && idSiteValid && idChwValid && data.form == "drug_quantities" && data.activity_type == "c_qty_counted") {
+        for (const field of dataFields) {
+          if (data[field.id]) {
+            outData[field.name].month_quantity_beginning += data[field.id];
+          }
+        }
+      }
+    }
+  }
+
+  // ################################################
+  for (let i = 0; i < drugUpdated.length; i++) {
+    const data = drugUpdated[i];
+    if (notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+      const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+      const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+      const idChwValid: boolean = data?.chw?.id == Chw.id;
+
+      if (idDistrictValid && idSiteValid && idChwValid) {
+        for (const field of dataFields) {
+          if (data.drug_index == field.index) {
+            outData[field.name].quantity_validated! += data.quantity_validated ?? 0;
+            outData[field.name].delivered_quantity! += data.delivered_quantity ?? 0;
+            outData[field.name].observations += data.observations ?? '';
+          }
+        }
+      }
+    }
+  }
+
+  // ################################################
+  for (let i = 0; i < drugCmm.length; i++) {
+    const data = drugCmm[i];
+    if (notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+      const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+      const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+      const idChwValid: boolean = data?.chw?.id == Chw.id;
+
+      if (idDistrictValid && idSiteValid && idChwValid) {
+        for (const field of dataFields) {
+          if (data.drug_index == field.index) {
+            outData[field.name].year_chw_cmm! += data.year_chw_cmm ?? 0;
+          }
+        }
+      }
+    }
+  }
+
+  // ################################################
+  for (let i = 0; i < chwsChtData.length; i++) {
+    const data: ChwsData = chwsChtData[i];
+    if (data) {
+      const form = data.form;
+      const field = data.fields;
+      const chw: string = data.chw?.id ?? '';
+
+      if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+
+        const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+        const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+        const idChwValid: boolean = data?.chw?.id == Chw.id;
+
+        if (idDistrictValid && idSiteValid && idChwValid) {
+
+          if (data.source == 'Tonoudayo' && form === "pcime_c_asc") {
+            if (field["has_diarrhea"] == "true") {
+              if (!(data.reported_date in patologieData.diarrhee_pcime)) {
+                patologieData.diarrhee_pcime[data.reported_date] = 0;
+              }
+              patologieData.diarrhee_pcime[data.reported_date] += 1;
+            }
+            if (field["fever_with_malaria"] == "true") {
+              if (!(data.reported_date in patologieData.paludisme_pcime)) {
+                patologieData.paludisme_pcime[data.reported_date] = 0;
+              }
+              patologieData.paludisme_pcime[data.reported_date] += 1;
+            }
+            if (field["has_pneumonia"] == "true") {
+              if (!(data.reported_date in patologieData.pneumonie_pcime)) {
+                patologieData.pneumonie_pcime[data.reported_date] = 0;
+              }
+              patologieData.pneumonie_pcime[data.reported_date] += 1;
+            }
+            if (field["has_malnutrition"] == "true") {
+              if (!(data.reported_date in patologieData.malnutrition_pcime)) {
+                patologieData.malnutrition_pcime[data.reported_date] = 0;
+              }
+              patologieData.malnutrition_pcime[data.reported_date] += 1;
+            }
+          }
+
+          if (data.source == 'dhis2' && form === "PCIME" && data.fields['zNldrz5EUPR'] == 'Soins') {
+            if (data.fields['NPHYf8WAR9l'] == 'true') {
+              if (!(data.reported_date in patologieData.diarrhee_pcime)) {
+                patologieData.diarrhee_pcime[data.reported_date] = 0;
+              }
+              patologieData.diarrhee_pcime[data.reported_date] += 1;
+            }
+            if (data.fields['Gl7HGePuIi3'] == 'true') {
+              if (!(data.reported_date in patologieData.paludisme_pcime)) {
+                patologieData.paludisme_pcime[data.reported_date] = 0;
+              }
+              patologieData.paludisme_pcime[data.reported_date] += 1;
+            }
+            if (data.fields['LP33fMJRWrT'] == 'true') {
+              if (!(data.reported_date in patologieData.pneumonie_pcime)) {
+                patologieData.pneumonie_pcime[data.reported_date] = 0;
+              }
+              patologieData.pneumonie_pcime[data.reported_date] += 1;
+            }
+            if (data.fields['y84NNODZ705'] == 'true') {
+              if (!(data.reported_date in patologieData.malnutrition_pcime)) {
+                patologieData.malnutrition_pcime[data.reported_date] = 0;
+              }
+              patologieData.malnutrition_pcime[data.reported_date] += 1;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (const field of dataFields) {
+    outData[field.name].month_total_quantity = outData[field.name].month_quantity_beginning + outData[field.name].month_quantity_received;
+    outData[field.name].theoretical_quantity = outData[field.name].month_total_quantity - outData[field.name].month_consumption;
+    outData[field.name].inventory_variance = outData[field.name].inventory_quantity - outData[field.name].theoretical_quantity;
+
+    if (outData[field.name].delivered_quantity != 0 && outData[field.name].quantity_validated != 0) {
+      const rate = outData[field.name].delivered_quantity! / outData[field.name].quantity_validated!;
+      outData[field.name].satisfaction_rate = !Number.isNaN(rate) ? `${(rate * 100).toFixed(2)} %` : 'NA';
+    } else {
+      outData[field.name].satisfaction_rate = undefined;
+    }
+
+    outData[field.name].theoretical_quantity_to_order = outData[field.name].year_chw_cmm - outData[field.name].inventory_quantity
+  }
+
+  return { drugData: outData as ChwsDrugData, patologieData: patologieData };
+}
+
+
+// ###################################### PER SELECTED ######################################
+export async function fetchIhDrugDataPerSelected(req: Request, res: Response, next: NextFunction) {
+  const outPut = await getIhDrugArrayDataPerSelected(req, res, next)
+  return res.status(outPut.status).json(outPut);
+}
+
+export async function getIhDrugArrayDataPerSelected(req: Request, res: Response, next: NextFunction): Promise<{ status: number, data: { cibleId: any, cible: Districts | Sites | Chws, drugData: ChwsDrugData, patologieData: PatologieData } | string | undefined; }> {
+  // const dateArray = req.body.end_date.split('-');
+  req.body.forms = MEG_FORMS;
+  req.body.sources = ['Tonoudayo'];
+  const year = req.body.year;
+  const month = req.body.month;
+  // req.body.year = parseInt(dateArray[0]);
+  // req.body.month = dateArray[1];
+
+  const chwsChtDataFilter = {
+    start_date: GetPreviousDate(`${year}-${month}-21`),
+    end_date: `${year}-${month}-20`,
+    sources: ["Tonoudayo", "dhis2"],
+    forms: ["pcime_c_asc", "PCIME"],
+  };
+
+  const chwsDrug = await getChwsDrugWithParams(req, res, next, true);
+  const drugUpdated = await getChwsDrugUpdatedWithParams(req, res, next, true);
+  const drugYearCmm = await getChwsDrugYearCmmWithParams(req, res, next, true);
+  const chwsChtData = await getChwsDataWithParams(req, res, next, true, chwsChtDataFilter);
+  const chws = await getChws(req, res, next, true);
+
+  var cible: Districts | Sites | Chws | undefined | undefined = undefined;
+
+  if (notEmpty(req.body.districts) && notEmpty(req.body.sites) && notEmpty(req.body.chws)) {
+    const _repo = await getChwsSyncRepository();
+    cible = (await _repo.findOneBy({ id: req.body.chws[0] })) as Chws;
+  } else if (notEmpty(req.body.districts) && notEmpty(req.body.sites) && !notEmpty(req.body.chws)) {
+    const _repo = await getSiteSyncRepository();
+    cible = await _repo.findOneBy({ id: req.body.sites[0] }) as Sites;
+  } else if (notEmpty(req.body.districts) && !notEmpty(req.body.sites) && !notEmpty(req.body.chws)) {
+    const _repo = await getDistrictSyncRepository();
+    cible = await _repo.findOneBy({ id: req.body.districts[0] }) as Districts;
+  }
+
+  if (chwsDrug.current.status == 200 && chwsDrug.previous.status == 200 && chws.status == 200 && drugUpdated.status == 200 && drugYearCmm.status == 200 && chws.status == 200 && chwsChtData.status == 200 && cible) {
+    const outPut = await getChwsDrugQantityPerSelected(chwsDrug.current.data, chwsDrug.previous.data, drugUpdated.data, drugYearCmm.data, chwsChtData.data, chws.data, req);
+    return { status: 200, data: { cibleId: cible.id, cible: cible, drugData: outPut.drugData, patologieData: outPut.patologieData } };
+  } else {
+    return { status: 201, data: 'No data found !' };
+  }
+}
+
+async function getChwsDrugQantityPerSelected(currentData: ChwsDrug[], previousData: ChwsDrug[], drugUpdated: ChwsDrugUpdate[], drugCmm: DrugChwYearCmm[], chwsChtData: ChwsData[], Chws: Chws[], req: Request): Promise<{ drugData: ChwsDrugData, patologieData: PatologieData }> {
+  const { year, month } = req.body;
+  const outData: any = {
+    Albendazole_400_mg_cp_1: { ...quantities },
+    Amoxiciline_250_mg_2: { ...quantities },
+    Amoxiciline_500_mg_3: { ...quantities },
+    Artemether_Lumefantrine_20_120mg_cp_4: { ...quantities },
+    Oral_Combination_Pills_5: { ...quantities },
+    Paracetamol_250_mg_6: { ...quantities },
+    Paracetamol_500_mg_7: { ...quantities },
+    Pregnancy_Test_8: { ...quantities },
+    Sayana_Press_9: { ...quantities },
+    SRO_10: { ...quantities },
+    TDR_11: { ...quantities },
+    Vitamine_A_100000UI_12: { ...quantities },
+    Vitamine_A_200000UI_13: { ...quantities },
+    Zinc_14: { ...quantities },
+  };
+
+  var patologieData: PatologieData = {
+    diarrhee_pcime: {},
+    paludisme_pcime: {},
+    pneumonie_pcime: {},
+    malnutrition_pcime: {}
+  }
+
+  for (let i = 0; i < Chws.length; i++) {
+    const Chw = Chws[i];
+    for (let i = 0; i < currentData.length; i++) {
+      const data: any = currentData[i];
+      if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+
+        const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+        const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+        const idChwValid: boolean = data?.chw?.id == Chw.id;
+
+        if (idDistrictValid && idSiteValid && idChwValid) {
+          if (data.form == "drug_quantities") {
+            for (const field of dataFields) {
+              if (data.activity_type == "c_qty_received" && data[field.id]) {
+                outData[field.name].month_quantity_received += data[field.id];
+              }
+              if (data.activity_type == "c_qty_counted" && data[field.id]) {
+                outData[field.name].inventory_quantity += data[field.id];
+              }
+              if (data.activity_type == "c_qty_order" && data[field.id]) {
+                outData[field.name].quantity_to_order += data[field.id];
+              }
+            }
+          }
+
+          if (data.form == "drug_movements") {
+            for (const field of dataFields) {
+              if (data.activity_type == "c_med_loss" && data[field.id]) {
+                outData[field.name].quantity_loss += data[field.id];
+              }
+              if (data.activity_type == "c_med_expired" && data[field.id]) {
+                outData[field.name].quantity_expired += data[field.id];
+              }
+
+              if (data.activity_type == "c_med_borrowing" && data[field.id]) {
+                outData[field.name].borrowing_quantity += data[field.id];
+                if (outData[field.name].borrowing_quantity && outData[field.name].borrowing_quantity != 0) {
+                  if ((data.borrowing_chws_info ?? '') != '') {
+                    const bcc = outData[field.name].borrowing_chws_code != '' ? '|||' : '';
+                    outData[field.name].borrowing_chws_code! += `${bcc}${data.borrowing_chws_info}@@@${data[field.id]}@@@${data.reported_date}`;
+                    outData[field.name].borrowing = 'Emprunt';
+                  }
+                }
+              }
+
+              if (data.activity_type == "c_med_loan" && data[field.id]) {
+                outData[field.name].lending_quantity += data[field.id];
+                if (outData[field.name].lending_quantity && outData[field.name].lending_quantity != 0) {
+                  if ((data.lending_chws_info ?? '') != '') {
+                    const lcc = outData[field.name].lending_chws_code != '' ? '|||' : '';
+                    outData[field.name].lending_chws_code! += `${lcc}${data.lending_chws_info}@@@${data[field.id]}@@@${data.reported_date}`;
+                    outData[field.name].lending = 'Prêt';
+                  }
+                }
+              }
+
+              if (data.activity_type == "c_med_damaged" && data[field.id]) {
+                outData[field.name].quantity_damaged += data[field.id];
+              }
+
+              if (data.activity_type == "c_med_broken" && data[field.id]) {
+                outData[field.name].quantity_broken += data[field.id];
+              }
+
+              if (data.activity_type == "c_others" && data[field.id]) {
+                outData[field.name].other_quantity += data[field.id];
+              }
+
+              outData[field.name].comments = data.comments ?? '';
+            }
+          }
+
+          if (["pcime_c_asc", "pregnancy_family_planning", "fp_follow_up_renewal"].includes(data.form!)) {
+            for (const field of dataFields) {
+              if (data[field.id]) {
+                outData[field.name].month_consumption += data[field.id];
+              }
+            }
+          }
+
+        }
+      }
+    }
+
+    // ################################################
+
+    for (let i = 0; i < previousData.length; i++) {
+      const data: any = previousData[i];
+      if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+        const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+        const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+        const idChwValid: boolean = data?.chw?.id == Chw.id;
+
+        if (idDistrictValid && idSiteValid && idChwValid && data.form == "drug_quantities" && data.activity_type == "c_qty_counted") {
+          for (const field of dataFields) {
+            if (data[field.id]) {
+              outData[field.name].month_quantity_beginning += data[field.id];
+            }
+          }
+        }
+      }
+    }
+
+    // ################################################
+    for (let i = 0; i < drugUpdated.length; i++) {
+      const data = drugUpdated[i];
+      if (notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+        const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+        const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+        const idChwValid: boolean = data?.chw?.id == Chw.id;
+        if (idDistrictValid && idSiteValid && idChwValid) {
+          for (const field of dataFields) {
+            if (data.drug_index == field.index) {
+              outData[field.name].quantity_validated! += (data.quantity_validated ?? 0);
+              outData[field.name].delivered_quantity! += (data.delivered_quantity ?? 0);
+              outData[field.name].observations += (data.observations ?? '');
+            }
+          }
+        }
+      }
+    }
+
+    // ################################################
+    for (let i = 0; i < drugCmm.length; i++) {
+      const data = drugCmm[i];
+
+      if ((data.cmm_year_month_list ?? []).includes(`${month}-${year}`)) {
+        if (notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+          const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+          const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+          const idChwValid: boolean = data?.chw?.id == Chw.id;
+          if (idDistrictValid && idSiteValid && idChwValid) {
+            for (const field of dataFields) {
+              if (data.drug_index == field.index) {
+                outData[field.name].year_chw_cmm! += (data.year_chw_cmm ?? 0);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // ################################################
+    for (let i = 0; i < chwsChtData.length; i++) {
+      const data: ChwsData = chwsChtData[i];
+      if (data) {
+        const form = data.form;
+        const field = data.fields;
+        const chw: string = data.chw?.id ?? '';
+
+        if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+
+          const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+          const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+          const idChwValid: boolean = data?.chw?.id == Chw.id;
+
+          if (idDistrictValid && idSiteValid && idChwValid) {
+            if (data.source == 'Tonoudayo' && form === "pcime_c_asc") {
+              if (field["has_diarrhea"] == "true") {
+                if (!(data.reported_date in patologieData.diarrhee_pcime)) {
+                  patologieData.diarrhee_pcime[data.reported_date] = 0;
+                }
+                patologieData.diarrhee_pcime[data.reported_date] += 1;
+              }
+              if (field["fever_with_malaria"] == "true") {
+                if (!(data.reported_date in patologieData.paludisme_pcime)) {
+                  patologieData.paludisme_pcime[data.reported_date] = 0;
+                }
+                patologieData.paludisme_pcime[data.reported_date] += 1;
+              }
+              if (field["has_pneumonia"] == "true") {
+                if (!(data.reported_date in patologieData.pneumonie_pcime)) {
+                  patologieData.pneumonie_pcime[data.reported_date] = 0;
+                }
+                patologieData.pneumonie_pcime[data.reported_date] += 1;
+              }
+              if (field["has_malnutrition"] == "true") {
+                if (!(data.reported_date in patologieData.malnutrition_pcime)) {
+                  patologieData.malnutrition_pcime[data.reported_date] = 0;
+                }
+                patologieData.malnutrition_pcime[data.reported_date] += 1;
+              }
+            }
+
+            if (data.source == 'dhis2' && form === "PCIME" && data.fields['zNldrz5EUPR'] == 'Soins') {
+              if (data.fields['NPHYf8WAR9l'] == 'true') {
+                if (!(data.reported_date in patologieData.diarrhee_pcime)) {
+                  patologieData.diarrhee_pcime[data.reported_date] = 0;
+                }
+                patologieData.diarrhee_pcime[data.reported_date] += 1;
+              }
+              if (data.fields['Gl7HGePuIi3'] == 'true') {
+                if (!(data.reported_date in patologieData.paludisme_pcime)) {
+                  patologieData.paludisme_pcime[data.reported_date] = 0;
+                }
+                patologieData.paludisme_pcime[data.reported_date] += 1;
+              }
+              if (data.fields['LP33fMJRWrT'] == 'true') {
+                if (!(data.reported_date in patologieData.pneumonie_pcime)) {
+                  patologieData.pneumonie_pcime[data.reported_date] = 0;
+                }
+                patologieData.pneumonie_pcime[data.reported_date] += 1;
+              }
+              if (data.fields['y84NNODZ705'] == 'true') {
+                if (!(data.reported_date in patologieData.malnutrition_pcime)) {
+                  patologieData.malnutrition_pcime[data.reported_date] = 0;
+                }
+                patologieData.malnutrition_pcime[data.reported_date] += 1;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (const field of dataFields) {
+
+    outData[field.name].month_quantity_received += outData[field.name].borrowing_quantity;
+
+    const AllOutQty: number = outData[field.name].quantity_damaged + outData[field.name].quantity_broken + outData[field.name].quantity_expired + outData[field.name].other_quantity + outData[field.name].lending_quantity;
+
+    outData[field.name].month_total_quantity = outData[field.name].month_quantity_beginning + outData[field.name].month_quantity_received - AllOutQty;
+    outData[field.name].theoretical_quantity = outData[field.name].month_total_quantity - outData[field.name].month_consumption;
+    outData[field.name].inventory_variance = outData[field.name].inventory_quantity - outData[field.name].theoretical_quantity;
+
+    if (outData[field.name].delivered_quantity != 0 && outData[field.name].quantity_validated != 0) {
+      const rate = outData[field.name].delivered_quantity / outData[field.name].quantity_validated;
+      outData[field.name].satisfaction_rate = !Number.isNaN(rate) ? `${(rate * 100).toFixed(2)} %` : 'NA';
+    } else {
+      outData[field.name].satisfaction_rate = undefined;
+    }
+
+    outData[field.name].theoretical_quantity_to_order = (outData[field.name].year_chw_cmm - outData[field.name].inventory_quantity) * (req.body.cmm_mutipliation ?? 1)
+  }
+
+
+
+
+  // [0]   year: 2024,
+  // [0]   month: '03',
+  // [0]   districts: [ 'KOEmjPzRmPd' ],
+  // [0]   sites: [ 'f56baf28-02fc-4db8-96fc-b957081f3f01' ],
+  // [0]   chws: [ '36de2140-65d3-4d8c-a304-1d6e1976859a' ],
+  // [0]   cmm_start_year_month: 'juillet_2023_juin_2024',
+  // [0]   cmm_mutipliation: 1,
+
+  return { drugData: outData as ChwsDrugData, patologieData: patologieData };
+}
+
+// ##############################################
 // async function getDrugPrevYearInventoryData(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined): Promise<{ status: number; data: { chwId: any, chw: Chws, data: ChwsDrugData }[] | string | undefined; }> {
 //   const chwsDrug: { status: number, data: ChwsDrug[] } = await getChwsDrugWithParams(req, res, next, true);
 //   var chwsDrugFinalOut: { chwId: any, chw: Chws, data: ChwsDrugData }[] = [];
@@ -344,269 +1158,24 @@ export async function getIhDrugArrayData(req: Request, res: Response, next: Next
 //   return { status: 200, data: chwsDrugFinalOut };
 // }
 
-async function genarateIhDrugArray(data: ChwsDrug[], asc: Chws, req: Request, res: Response, next: NextFunction, onlyInventory: boolean = false): Promise<ChwsDrugData> {
-  return {
-    Albendazole_400_mg_cp_1: await getChwsDrugQantity(data, asc, 1, 'alben_400', req, res, next),
-    Amoxiciline_250_mg_2: await getChwsDrugQantity(data, asc, 2, 'amox_250', req, res, next),
-    Amoxiciline_500_mg_3: await getChwsDrugQantity(data, asc, 3, 'amox_500', req, res, next),
-    Artemether_Lumefantrine_20_120mg_cp_4: await getChwsDrugQantity(data, asc, 4, 'lumartem', req, res, next),
-    Oral_Combination_Pills_5: await getChwsDrugQantity(data, asc, 5, 'pills', req, res, next),
-    Paracetamol_250_mg_6: await getChwsDrugQantity(data, asc, 6, 'para_250', req, res, next),
-    Paracetamol_500_mg_7: await getChwsDrugQantity(data, asc, 7, 'para_500', req, res, next),
-    Pregnancy_Test_8: await getChwsDrugQantity(data, asc, 8, 'pregnancy_test', req, res, next),
-    Sayana_Press_9: await getChwsDrugQantity(data, asc, 9, 'sayana', req, res, next),
-    SRO_10: await getChwsDrugQantity(data, asc, 10, 'sro', req, res, next),
-    TDR_11: await getChwsDrugQantity(data, asc, 11, 'tdr', req, res, next),
-    Vitamine_A_100000UI_12: await getChwsDrugQantity(data, asc, 12, 'vit_A1', req, res, next),
-    Vitamine_A_200000UI_13: await getChwsDrugQantity(data, asc, 13, 'vit_A2', req, res, next),
-    Zinc_14: await getChwsDrugQantity(data, asc, 14, 'zinc', req, res, next)
-  };
-}
-
-async function getChwDrugInventoryQty(Chw: Chws, start_date: string, end_date: string, index: number, fieldId: string, reqt: Request, res: Response, next: NextFunction): Promise<ChwsDrugQantityInfo> {
-  var req = {
-    body: {
-      id: undefined,
-      forms: undefined,
-      start_date: start_date,
-      end_date: end_date,
-      sources: [Chw.source],
-      districts: [Chw.site?.district?.id],
-      sites: [Chw.site?.id],
-      chws: [Chw.id]
-    },
-    params: {
-      id: undefined,
-    }
-  }
-
-  var out: ChwsDrugQantityInfo = { inventory_quantity: 0 };
-  const chwsDrug: { status: number, data: ChwsDrug[] } = await getChwsDrugWithParams(req, res, next, true);
-  if (chwsDrug.status == 200 && chwsDrug.data) {
-    for (let i = 0; i < chwsDrug.data.length; i++) {
-      const data: ChwsDrug = chwsDrug.data[i];
-      if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
-        const idSourceValid: boolean = data?.source == 'Tonoudayo';
-        const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
-        const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
-        const idChwValid: boolean = data?.chw?.id == Chw.id;
-        const isDateValid: boolean = isBetween(`${start_date}`, data.activity_date, `${end_date}`);
-        if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
-          if (data.form == "drug_quantities" && data.activity_type == "c_qty_counted") out.inventory_quantity! += generateDrugQty(data, fieldId);
-        }
-      }
-    }
-  }
-  return out;
-}
-
-async function getChwsDrugQantity(ChwsDataFromDb: ChwsDrug[], Chw: Chws, index: number, fieldId: string, req: Request, res: Response, next: NextFunction): Promise<ChwsDrugQantityInfo> {
-  const { start_date, end_date, sources, districts, sites, chws } = req.body;
-
-  var out: ChwsDrugQantityInfo = {
-    month_quantity_beginning: 0, // A
-    month_quantity_received: 0, // B
-    month_total_quantity: 0, // C = A + B
-    month_consumption: 0, // D
-    theoretical_quantity: 0, // E = C - D
-    inventory_quantity: 0, // F
-    inventory_variance: 0, // J = F - E
-    year_cmm: 0, // N-1, G
-    theoretical_quantity_to_order: 0, // H
-    quantity_to_order: 0, // I
-    quantity_validated: 0,
-    delivered_quantity: 0,
-    satisfaction_rate: '',
-    loan_borrowing: '',
-    loan_borrowing_quantity: 0,
-    loan_borrowing_chws_code: '',
-    quantity_loss: 0,
-    quantity_damaged: 0,
-    quantity_broken: 0,
-    quantity_expired: 0,
-    other_quantity: 0,
-    comments: "",
-    observations: ""
-  };
-
-  for (let i = 0; i < ChwsDataFromDb.length; i++) {
-    var data: ChwsDrug = ChwsDataFromDb[i];
-    if (data && notEmpty(sources) && notEmpty(districts) && notEmpty(sites) && notEmpty(chws) && notEmpty(start_date) && notEmpty(end_date)) {
-      if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
-
-        const idSourceValid: boolean = sources?.includes(data?.source) && data?.source == 'Tonoudayo';
-        const idDistrictValid: boolean = districts?.includes(data?.district?.id) && data?.district?.id == Chw.district?.id;
-        const idSiteValid: boolean = sites?.includes(data?.site?.id) && data?.site?.id == Chw.site?.id;
-        const idChwValid: boolean = chws?.includes(data?.chw?.id) && data?.chw?.id == Chw.id;
-        const isDateValid: boolean = isBetween(`${start_date}`, data.activity_date, `${end_date}`);
-
-        if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
-
-          if (data.form == "drug_quantities") {
-            if (data.activity_type == "c_qty_received") out.month_quantity_received! += generateDrugQty(data, fieldId);
-            if (data.activity_type == "c_qty_counted") out.inventory_quantity! += generateDrugQty(data, fieldId);
-            if (data.activity_type == "c_qty_order") out.quantity_to_order! += generateDrugQty(data, fieldId);
-          }
-
-          if (data.form == "drug_movements") {
-            if (data.activity_type == "c_med_loss") out.quantity_loss! += generateDrugQty(data, fieldId);
-            if (data.activity_type == "c_med_expired") out.quantity_expired! += generateDrugQty(data, fieldId);
-
-            if (data.activity_type == "c_med_borrowing") {
-              out.loan_borrowing_quantity! += generateDrugQty(data, fieldId);
-              if (out.loan_borrowing_quantity && out.loan_borrowing_quantity != 0) {
-                out.loan_borrowing_chws_code! += `${data.loan_borrowing_chws_info!}, `;
-                out.loan_borrowing = 'Emprunt';
-              }
-            }
-
-            if (data.activity_type == "c_med_loan") {
-              out.loan_borrowing_quantity! += generateDrugQty(data, fieldId);
-              if (out.loan_borrowing_quantity && out.loan_borrowing_quantity != 0) {
-                out.loan_borrowing_chws_code! += `${data.loan_borrowing_chws_info!}, `;
-                out.loan_borrowing = 'Prêt';
-              }
-            }
-
-            if (data.activity_type == "c_med_damaged") out.quantity_damaged! += generateDrugQty(data, fieldId);
-            if (data.activity_type == "c_med_broken") out.quantity_broken! += generateDrugQty(data, fieldId);
-            if (data.activity_type == "c_others") out.other_quantity! += generateDrugQty(data, fieldId);
-            out.comments! = data.comments ?? '';
-          }
-
-          if (["pcime_c_asc", "pregnancy_family_planning", "fp_follow_up_renewal"].includes(data.form!)) out.month_consumption! += generateDrugQty(data, fieldId);
-        }
-      }
-    }
-  }
-
-  const dateArray = end_date.split('-');
-  const prevM = previousMonth(dateArray[1]);
-  const prevY = prevM == '12' ? parseInt(dateArray[0]) - 1 : dateArray[0];
-
-  const prevPrevM = previousMonth(prevM);
-  const prevPrevY = prevPrevM == '12' ? prevY - 1 : prevY;
-
-  const curInventory = await getChwDrugInventoryQty(Chw, start_date, end_date, index, fieldId, req, res, next);
-  const prevInventory = await getChwDrugInventoryQty(Chw, `${prevPrevY}-${prevPrevM}-21`, `${prevY}-${prevM}-20`, index, fieldId, req, res, next);
-
-  if (curInventory) out.inventory_quantity! += curInventory.inventory_quantity ?? 0.
-  if (prevInventory) out.month_quantity_beginning! += prevInventory.inventory_quantity ?? 0.
-
-  const dt = Chw.site?.district?.id;
-  const st = Chw.site?.id;
-  const cw = Chw.id;
-
-  if (dt && st && cw && notEmpty(dateArray)) {
-    const drugUpdateReq = {
-      district: dt,
-      site: st,
-      chw: cw,
-      year: parseInt(dateArray[0]),
-      month: dateArray[1],
-      drug_index: index
-    };
-    const drugUpdated = await getChwsDrugUpdatedWithCoustomParams(drugUpdateReq);
-
-    if (drugUpdated) {
-      for (let zi = 0; zi < drugUpdated.length; zi++) {
-        const found = drugUpdated[zi];
-        out.year_cmm! += found.year_cmm ?? 0;
-        out.quantity_validated! += found.quantity_validated ?? 0;
-        out.delivered_quantity! += found.delivered_quantity ?? 0;
-        out.theoretical_quantity_to_order! += found.theoretical_quantity_to_order ?? 0;
-        out.observations += found.observations ?? '';
-      }
-    }
-  }
-
-  out.month_total_quantity = out.month_quantity_beginning! + out.month_quantity_received!;
-  out.theoretical_quantity = out.month_total_quantity! - out.month_consumption!;
-  out.inventory_variance = out.inventory_quantity! - out.theoretical_quantity;
-
-  if (out.delivered_quantity != 0 && out.quantity_validated != 0) {
-    const rate = out.delivered_quantity! / out.quantity_validated!;
-    out.satisfaction_rate = !Number.isNaN(rate) ? `${(rate * 100).toFixed(2)} %` : 'NA';
-  } else {
-    out.satisfaction_rate = undefined;
-  }
-
-
-  return out;
-}
-
-function generateDrugQty(data: ChwsDrug, fieldId: string): number {
-  if (fieldId == "lumartem" && data.lumartem) return data.lumartem;
-  if (fieldId == "alben_400" && data.alben_400) return data.alben_400!;
-  if (fieldId == "amox_250" && data.amox_250) return data.amox_250!;
-  if (fieldId == "amox_500" && data.amox_500) return data.amox_500!;
-  if (fieldId == "pills" && data.pills) return data.pills!;
-  if (fieldId == "para_250" && data.para_250) return data.para_250!;
-  if (fieldId == "para_500" && data.para_500) return data.para_500!;
-  if (fieldId == "pregnancy_test" && data.pregnancy_test) return data.pregnancy_test!;
-  if (fieldId == "sayana" && data.sayana) return data.sayana!;
-  if (fieldId == "sro" && data.sro) return data.sro!;
-  if (fieldId == "tdr" && data.tdr) return data.tdr!;
-  if (fieldId == "vit_A1" && data.vit_A1) return data.vit_A1!;
-  if (fieldId == "vit_A2" && data.vit_A2) return data.vit_A2!;
-  if (fieldId == "zinc" && data.zinc) return data.zinc!;
-  if (fieldId == "other_drug" && data.other_drug) return data.other_drug!;
-  return 0;
-}
-
-export async function updateDrugPerChw(req: Request, res: Response, next: NextFunction) {
-  req.body.forms = MEG_FORMS;
-  req.body.sources = ['Tonoudayo'];
-  const { district, site, chw, year, month, drug_index, drug_name, year_cmm, quantity_validated, delivered_quantity, observations, theoretical_quantity_to_order, forms, sources, userId } = req.body;
-
-  const _repoChwsDrugUpdate = await getChwsDrugUpdateSyncRepository();
-  const _chwRepo = await getChwsSyncRepository();
-  try {
-    const _sync = new ChwsDrugUpdate();
-
-    _sync.id = `${site}-${chw}-${year}-${month}-${drug_index}`;
-    _sync.district = district;
-    _sync.site = site;
-    _sync.chw = chw;
-    _sync.year = year;
-    _sync.month = month;
-    _sync.drug_index = drug_index;
-    _sync.drug_name = drug_name;
-    _sync.year_cmm = year_cmm;
-    _sync.quantity_validated = quantity_validated;
-    _sync.delivered_quantity = delivered_quantity;
-    _sync.theoretical_quantity_to_order = theoretical_quantity_to_order;
-    _sync.observations = observations;
-    _sync.updatedBy = userId;
-    _sync.updatedAt = new Date();
-
-    await _repoChwsDrugUpdate.save(_sync);
-
-    const prevM = previousMonth(month);
-    const prevY = prevM == '12' ? parseInt(year) - 1 : year;
-
-    req.body.start_date = `${prevY}-${prevM}-21`;
-    req.body.end_date = `${year}-${month}-20`;
-    req.body.forms = forms;
-    req.body.sources = sources;
-    req.body.districts = [district];
-    req.body.sites = [site];
-    req.body.chws = [chw];
-
-    var Chw = await _chwRepo.findOneBy({ id: chw });
-    if (Chw) {
-      const updateOutPut = await getIhDrugArrayData(req, res, next, Chw);
-      if (updateOutPut) {
-        return res.status(updateOutPut.status).json(updateOutPut);
-      }
-    }
-    return res.status(201).json({ status: 201, data: 'No data found !' });
-
-  } catch (err: any) {
-    if (!err.statusCode) err.statusCode = 500;
-    return res.status(err.statusCode).json({ status: 201, data: 'No data found !' });
-  }
-}
+// function generateDrugQty(data: ChwsDrug, fieldId: string): number {
+//   if (fieldId == "lumartem" && data.lumartem) return data.lumartem;
+//   if (fieldId == "alben_400" && data.alben_400) return data.alben_400!;
+//   if (fieldId == "amox_250" && data.amox_250) return data.amox_250!;
+//   if (fieldId == "amox_500" && data.amox_500) return data.amox_500!;
+//   if (fieldId == "pills" && data.pills) return data.pills!;
+//   if (fieldId == "para_250" && data.para_250) return data.para_250!;
+//   if (fieldId == "para_500" && data.para_500) return data.para_500!;
+//   if (fieldId == "pregnancy_test" && data.pregnancy_test) return data.pregnancy_test!;
+//   if (fieldId == "sayana" && data.sayana) return data.sayana!;
+//   if (fieldId == "sro" && data.sro) return data.sro!;
+//   if (fieldId == "tdr" && data.tdr) return data.tdr!;
+//   if (fieldId == "vit_A1" && data.vit_A1) return data.vit_A1!;
+//   if (fieldId == "vit_A2" && data.vit_A2) return data.vit_A2!;
+//   if (fieldId == "zinc" && data.zinc) return data.zinc!;
+//   if (fieldId == "other_drug" && data.other_drug) return data.other_drug!;
+//   return 0;
+// }
 
 function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], AllDbChws$: Chws[], req: Request, res: Response): { chw: Chws, data: DataIndicators }[] {
   // 'Démarrage du calcule des indicateurs ...'

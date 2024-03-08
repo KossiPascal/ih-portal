@@ -189,6 +189,7 @@ export class UserComponent implements OnInit {
     const rolesName = GetRolesIdsOrNames(roles as UserRoles[], 'names')
     return rolesName ? (rolesName as string[]).includes('super_admin') : false;
   }
+  
   ShowRoles(user: User) {
     this.selectedRole = (GetRolesIdsOrNames(user.roles as UserRoles[], 'idsString') ?? []) as string[];
     this.selectedMR = user.meeting_report ?? [];

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
 import { generateSecret, getUsersRepository } from "../entity/User";
 import { GetRolesAndNamesPagesActionsList } from "../entity/Roles";
-import { notEmpty } from "../utils/functions";
+import { notEmpty, sslFolder } from "../utils/functions";
 
 export class Middelware {
   static authMiddleware = async (req: Request, res: Response, next: any) => {
@@ -22,7 +22,17 @@ export class Middelware {
         // const isChws = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesNames[0] == 'chws' : false;
         if (isSameRoles && isSamePages && isSameActions) {
           jwt.verify(token, generateSecret(false).secretOrPrivateKey, function (err, decoded) {
-            return err ? res.status(res.statusCode).send(err) : next();
+            if (err) {
+              return res.status(res.statusCode).send(err);
+            } else {
+              require('dotenv').config({ path: sslFolder('.ih-env') });
+              const { DHIS_HOST, DHIS_USER, DHIS_PASS } = process.env;
+              
+              req.body.dhisusername = req.body.dhisusername ?? DHIS_USER;
+              req.body.dhispassword = req.body.dhispassword ?? DHIS_PASS
+              return next();
+            }
+            
           });
         } else {
           return res.status(500).send('You do not have access');

@@ -4,15 +4,15 @@ const { v4: uuidv4 } = require('uuid');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 import path from 'path';
 import fs from 'fs';
-import { getIhDrugArrayData } from './controllers/dataFromDB';
+import { getIhDrugArrayDataPerChw } from './controllers/dataFromDB';
 import { ApiTokenAccess, Chws, Districts, Sites, Zones, getApiTokenAccessRepository, getChwsSyncRepository, getDistrictSyncRepository, getSiteSyncRepository, getZoneSyncRepository } from './entity/Sync';
-import { ChwsDrugData, ChwsDrugDataWithChws, ChwsDrugQantityInfo } from './utils/appInterface';
+import { ChwsDrugDataWithChws } from './utils/appInterface';
 import { AppDataSource } from './data_source';
 import { ServerStart, appVersion, getIPAddress, logNginx, normalizePort, notEmpty, sslFolder } from './utils/functions';
 import cors from 'cors';
 import bearerToken from 'express-bearer-token';
-import { IncomingMessage } from 'http';
-const { createProxyMiddleware } = require('http-proxy-middleware');
+// import { IncomingMessage } from 'http';
+// const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const session = require('express-session');
 const compression = require("compression");
@@ -88,44 +88,45 @@ async function getDistrictsSitesZonesChws(req: Request, res: Response, dataType:
 
 }
 async function chwsMegJson(req: Request, res: Response, next: NextFunction): Promise<ChwsDrugDataWithChws[]> {
-  const { start_date, end_date, districts, sites, zones, chws } = req.body ?? req.query ?? req.params;
+  const { year, month, districts, sites, zones, chws } = req.body ?? req.query ?? req.params;
 
   const districtsArray = parseInQuery(districts);
   const sitesArray = parseInQuery(sites);
   const zonesArray = parseInQuery(zones);
   const chwsArray = parseInQuery(chws);
 
-  if (!notEmpty(start_date)) {
-    res.status(401).json({ error: 'Le paramettre `start_date` est obligatoire.' });
+  if (!notEmpty(year) || !notEmpty(month)) {
+    res.status(401).json({ error: "L'année `year` et le mois `month` sont obligatoires." });
     return [];
   }
 
-  if (!notEmpty(end_date)) {
-    res.status(401).json({ error: 'Le paramettre `end_date` est obligatoire.' });
+  if (!notEmpty(districtsArray) || !notEmpty(sitesArray)) {
+    res.status(401).json({ error: "`districts` et `sites` sont obligatoire" });
     return [];
   }
 
-  if (!notEmpty(districtsArray) && !notEmpty(sitesArray) && !notEmpty(chwsArray)) {
-    res.status(401).json({ error: "[districts, sites, zones, chws] L'un des paramettre dans ce tableau est obligatoire" });
-    return [];
-  }
-
+  // if (!notEmpty(districtsArray) && !notEmpty(sitesArray) && !notEmpty(chwsArray)) {
+  //   res.status(401).json({ error: "[zones, chws] L'un des paramettre dans ce tableau est obligatoire" });
+  //   return [];
+  // }
+  
+  
   req.body = {
-    start_date: start_date,
-    end_date: end_date,
+    year: parseInt(year),
+    month: String(parseInt(month)).padStart(2, '0'),
     districts: districtsArray,
     sites: sitesArray,
     zones: zonesArray,
     chws: chwsArray
   };
 
-  const outPut = await getIhDrugArrayData(req, res, next);
+  const outPut = await getIhDrugArrayDataPerChw(req, res, next);
 
   if (outPut && outPut.status == 200) {
     const jsonData = outPut.data;
     if (jsonData && typeof jsonData != 'string') {
       const formatedJsonData = jsonData.map(meg => {
-        const data = meg.data as ChwsDrugDataWithChws;
+        const data = meg.drugData as ChwsDrugDataWithChws;
         data.chw = meg.chw;
         return data;
       });
@@ -154,7 +155,7 @@ async function uidsJson(req: Request, res: Response, next: NextFunction): Promis
 const app = express();
 
 const validPaths = [
-  '/api/documenations',
+  '/api/documentations',
   '/api/chws-meg',
   '/api/chws-meg.json',
   // '/api/chws-meg.csv',
@@ -219,27 +220,28 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed', allowedMethods: ['GET'] });
   if (!req.secure) return res.redirect(`https://${req.headers.host}${req.url}`);
   const apiRepo = await getApiTokenAccessRepository();
-  if (!api_access_key || api_access_key == '') return res.status(405).json({ error: 'You must provide a valid `api_access_key`' });
+
+  // if (!api_access_key || api_access_key == '') return res.status(405).json({ error: 'You must provide a valid `api_access_key`' });
   const validApiKeysElement: ApiTokenAccess[] = await apiRepo.findBy({ isActive: true });
   const validApiKeys = validApiKeysElement.map(api => api.token);
-  if (!validApiKeys.includes(api_access_key) || !validPaths.includes(req.path)) return res.status(401).json({ error: 'Unauthorized' });
+  // if (!validApiKeys.includes(api_access_key) || !validPaths.includes(req.path)) return res.status(401).json({ error: 'Unauthorized' });
   if (req.secure) next();
 });
 
-app.get('/api/documenations', async (req: Request, res: Response, next: NextFunction) => {
+app.get('/api/documentations', async (req: Request, res: Response, next: NextFunction) => {
   app.set('json spaces', 0);
   const { date } = req.body ?? req.query ?? req.params;
   const params = {
     host: 'https://portal-integratehealth.org:9998/api/chws-meg?',
     api_access_key: 'api_access_key = your_valid_api_access_key',
-    start_date: '& start_date = 2023-10-26',
-    end_date: '& end_date = 2023-12-25',
+    year: '& year = 2023',
+    month: '& month = 12',
     districts: '& districts = x8f4IKAC7TO',
     sites: '& sites = [552aafc3-11a9-4209-8f17-d1ea13bab8d5]',
     chws: '& chws = [eafabdf9-c16a-44d5-83e4-a619d5478919]',
-    full_url: 'https://portal-integratehealth.org:9998/api/chws-meg?api_access_key=your_valid_api_access_key&start_date=2023-10-26&end_date=2023-12-25&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]',
+    full_url: 'https://portal-integratehealth.org:9998/api/chws-meg?api_access_key=your_valid_api_access_key&year=2023&month=12&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]',
   };
-  return res.render('documenations', params);
+  return res.render('documentations', params);
 });
 
 app.get('/api/districts', async (req: Request, res: Response, next: NextFunction) => {
@@ -261,7 +263,7 @@ app.get('/api/chws', async (req: Request, res: Response, next: NextFunction) => 
 
 // app.get('/api/chws-meg', async (req, res) => {
 //   try {
-//     const response = await fetch('https://localhost:9998/api/chws-meg?api_access_key=afrikDigitalAZ-FGHJ@04jdkj2024&start_date=2023-10-26&end_date=2023-12-25&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]', {
+//     const response = await fetch('https://localhost:9998/api/chws-meg?api_access_key=afrikDigitalAZ-FGHJ@04jdkj2024&year=2023&month=12&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]', {
 //       method: 'GET',
 //       headers: {
 //         'Content-Type': 'application/json'

@@ -1,0 +1,518 @@
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="card card-info">
+
+      <h2 class="title" style="text-align: center; color: blue;">Gestion Médicament Des ASC</h2>
+
+      <div class="overlay-wrapper">
+
+        <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
+          <div class="text-bold pt-2"> {{initMsg}} </div>
+        </div>
+
+        <div class="card-header">
+          <form [formGroup]="chwsDrugDataForm" (ngSubmit)="initDataFilted()" novalidate>
+            <div class="row">
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Mois</label>
+                  <select style="font-size: 18px;" id="action_month" *ngIf="Months$.length > 0" class="form-control"
+                    (change)="yearCmmMonthStart()" formControlName="month">
+                    <!-- <option value="{{month$.id}}">{{month$.label}}</option> -->
+                    <option *ngFor="let m of Months$" value="{{m.id}}">
+                      {{ m.labelFR }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Année</label>
+                  <select style="font-size: 18px;" id="action_year" *ngIf="Years$.length > 0" class="form-control"
+                    (change)="yearCmmMonthStart()" formControlName="year">
+                    <!-- <option value="{{year$}}">{{year$}}</option> -->
+                    <option *ngFor="let y of Years$" value="{{y}}">
+                      {{ y }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>District</label>
+                  <select style="font-size: 18px;" *ngIf="Districts$.length > 0" (change)="genarateSites()"
+                    class="form-control" formControlName="districts">
+                    <!-- <option value=""></option> -->
+                    <option *ngFor="let dist of Districts$" value="{{dist.id}}">
+                      {{ dist.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Site</label>
+                  <select style="font-size: 18px;" (change)="genarateChws()" class="form-control"
+                    formControlName="sites">
+                    <option value=""></option>
+                    <option *ngFor="let site of site$" value="{{site.id}}">
+                      {{ site.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div *ngIf="!roles.isChws()" class="col-sm-3 col-6">
+                <div class="form-group">
+                  <label>ASC</label>
+                  <select style="font-size: 18px;" class="form-control" formControlName="chws">
+                    <option value=""></option>
+                    <option *ngFor="let chw of chw$" value="{{chw.id}}">
+                      {{chw.name}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Annee CMM</label>
+                  <select style="font-size: 18px;" class="form-control" formControlName="cmm_start_year_month">
+                    <option *ngFor="let scmmM of yearCmmMonthStartList$" value="{{scmmM.id}}">
+                      {{ scmmM.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>Calcul CMM</label>
+                  <select style="font-size: 18px;" class="form-control" formControlName="cmm_mutipliation">
+                    <option value="1">CMM * 1</option>
+                    <option value="2">CMM * 2</option>
+                    <option value="3">CMM * 3</option>
+                    <option value="4">CMM * 4</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label style="color: white;">.</label>
+                  <button class="submit" [disabled]="!chwsDrugDataForm.valid" type="submit"
+                    class="btn btn-primary form-control">
+                    Charger les Donnees <span class="fa fa-floppy-o fa-right"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="container-fluid">
+        <div class="col-sm-5">
+          <h2 *ngIf="data_error_messages!=''">
+            <div class="card card-info">
+              <div class="card-body">
+                {{ data_error_messages }}
+              </div>
+            </div>
+          </h2>
+          <h2 *ngIf="data_no_data_found == true">
+            <div class="card card-info">
+              <div class="card-body">
+                Pas de données trouvée avec les paramettres renseignés !
+              </div>
+            </div>
+          </h2>
+        </div>
+
+        <div *ngIf="data_error_messages=='' && OutputData$">
+          <div *ngIf="OutputData$ as datas">
+            <form (submit)="saveOrUpdate($event)" novalidate>
+              <div class="card-body p-0" class="card">
+                <div class="card-header">
+                  <div class="card-title">
+
+                    <p [innerHTML]="GenerateHearder(datas) | safeHtml" class="chw-info"
+                      style="color: blue;font-size:20px"></p>
+
+
+                    <ul
+                      *ngIf="roles.canDownloadReports() && editCmm!='edit' && editQtyValidated!='edit' && editQtyDelivered!='edit' && editObservations!='edit'">
+                      <li><span (click)="excel('export_table')">Excel</span></li>
+                      <li><span (click)="csv('export_table')">CSV</span></li>
+                      <li><span (click)="json('export_table')">JSON</span></li>
+                      <li><span (click)="pdf('export_table')">PDF</span></li>
+                      <li><span (click)="print('export_table')">PRINT</span></li>
+                    </ul>
+
+                    <button
+                      *ngIf="roles.canUpdateChwsDrug() && editCmm=='edit' || editQtyValidated=='edit' || editQtyDelivered=='edit' || editObservations=='edit' || isUpdateLoading == true"
+                      class="submit" [disabled]="isUpdateLoading == true" type="submit"
+                      class="submit-btn btn btn-warning">
+                      <i *ngIf="isUpdateLoading == true" style="margin-right: 20px!important;"
+                        class="fas fa-1x fa-sync-alt fa-spin"></i>
+                      {{ isUpdateLoading == true ? 'Sauvegarde en cours ...' : 'Mettre à jour'}}
+                    </button>
+                  </div>
+                </div>
+                <div style="overflow-x:scroll!important;">
+                  <table [id]="'export_table'" class="table table-sm table-striped" style="margin: auto;">
+                    <thead>
+                      <tr class="bg-primary head-elem">
+                        <th rowspan="3">Id</th>
+                        <th rowspan="3">
+                          <button style="width: 140px; height: 55px; font-size:large;" type="button" (click)="1==1"
+                            class="btn btn-info form-control" data-toggle="modal" data-target="#modal-patologies">
+                            <i class="fas fa-eye"></i> Patologies
+                          </button>
+                          <br>
+                          <br>
+
+                          M E G
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Quantité début du mois <br><br> (A)
+                          <!-- <br> <small> <br> <small>ou la quantité à l'inventaire précédent</small>(A)</small> -->
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Quantité reçue au cours du mois <br><br> (B)
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Quantité totale du mois <br><br> (C=A+B)
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Consommation mensuelle du mois <br><br> (D)
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Quantité théorique disponible à l'inventaire <br> (E=C-D)
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Quantité comptée à l'inventaire <br><br> (F)
+                        </th>
+                        <th rowspan="2" colspan="2">
+                          Ecart d'inventaire <br> (J=F-E)
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          CMM de l'année<br>N-1 <br><span style="color: green;">
+
+                          </span><br>
+                          (G) &nbsp;&nbsp;&nbsp;
+                          <i *ngIf="roles.canUpdateChwsDrug() && IsOkToUpdate" (click)="editCmmClick()"
+                            class="fas {{this.editCmm=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Quantité théorique à commander <br><br> H = {{ chwsDrugDataForm.value.cmm_mutipliation }} * (G-F)
+                          <!-- &nbsp;&nbsp;&nbsp; -->
+
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Quantités à commander <br><br>
+                          <small><small>(Expression besoins ASC)</small></small>
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Quantité validée <br><br><br> &nbsp;&nbsp;&nbsp;
+                          <i *ngIf="roles.canUpdateChwsDrug() && IsOkToUpdate" (click)="editQtyValidatedClick()"
+                            class="fas {{editQtyValidated=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Quantité livrée <br><br><br> &nbsp;&nbsp;&nbsp;
+                          <i *ngIf="roles.canUpdateChwsDrug() && IsOkToUpdate" (click)="editQtyDeliveredClick()"
+                            class="fas {{editQtyDelivered=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Taux de satisfaction <br><br><br>
+                        </th>
+                        <th colspan="9">
+                          Observation de l'ASC
+                        </th>
+                        <th rowspan="3">
+                          <div class="drug_thead"></div>
+                          Observations (Pharmacie) &nbsp;&nbsp;&nbsp;
+                          <i *ngIf="roles.canUpdateChwsDrug() && IsOkToUpdate" (click)="editObservationsClick()"
+                            class="fas {{editObservations=='edit' ? 'fa-times' : 'fa-edit'}}"></i>
+                        </th>
+                      </tr>
+
+                      <tr class="bg-info head-elem">
+                        <!-- <th>
+                          <div class="drug_thead"></div>
+                          Emprunt/Prêt <br><br>
+                        </th> -->
+
+                        <th colspan="3">Emprunt/Prêt du mois</th>
+
+                        <th rowspan="2">
+                          <div class="drug_thead"></div> Perte du mois <br>
+                        </th>
+                        <th rowspan="2">
+                          <div class="drug_thead"></div> Avarié du mois <br>
+                        </th>
+                        <th rowspan="2">
+                          <div class="drug_thead"></div> Cassé du mois <br>
+                        </th>
+                        <th rowspan="2">
+                          <div class="drug_thead"></div> Périmé du mois <br>
+                        </th>
+                        <th rowspan="2">
+                          <div class="drug_thead"></div> Autres sortie du mois <br>
+                        </th>
+                        <th rowspan="2">
+                          <div class="drug_thead"></div> Commentaires ASC <br>
+                        </th>
+                      </tr>
+
+                      <tr class="bg-info head-elem">
+                        <th>
+                          <div class="drug_thead"></div>Ecart en valeur
+                        </th>
+                        <th>Ecart en %</th>
+                        <th>
+                          <div class="drug_thead"></div> Quantité Emprunt du mois <br>
+                        </th>
+                        <th>
+                          <div class="drug_thead"></div> Quantité Prêt du mois <br>
+                        </th>
+                        <th>
+                          <div class="drug_thead"></div> Emprunt/Prêt<br>Nom & Code ASC<br>
+                        </th>
+                      </tr>
+
+                    </thead>
+
+                    <tbody>
+                      <ng-container *ngFor="let k of objectKeys(datas.drugData)">
+                        <ng-container *ngIf="toChwsDrugData(sortedArray(datas.drugData), k) as Bdata">
+                          <ng-container *ngIf="getKey(Bdata.key) as key">
+                            <ng-container *ngIf="Bdata.val as data">
+                              <ng-container *ngIf="getLabel(Bdata.key) as label">
+                                <tr>
+                                  <td><b>{{ key }}</b></td>
+                                  <td class="ajust-cells"><label><b>{{ label }}</b></label></td>
+                                  <td class="ajust-cells">
+                                    <p>{{ convertQty(data.month_quantity_beginning) }}</p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p>{{ convertQty(data.month_quantity_received) }}</p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p>{{ convertQty(data.month_total_quantity) }}</p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p>{{ convertQty(data.month_consumption) }}</p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p>{{ convertQty(data.theoretical_quantity) }}</p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p>{{ convertQty(data.inventory_quantity) }}</p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p *ngIf="EcartColor(data) as ec">
+                                      <!-- convertQty(data.inventory_variance) -->
+                                      <span [ngStyle]="{ 'color': ec.color, 'font-weight': 'bold' }">{{ ec.value
+                                        }}</span>
+                                    </p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p *ngIf="EcartColor(data) as ec">
+                                      <span [ngStyle]="{ 'color': ec.color }">{{ ec.ecart}}</span>
+                                    </p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p>
+                                      <span *ngIf="editCmm!='edit'">{{ convertQty(data.year_chw_cmm) }}</span>
+                                      <input *ngIf="roles.canUpdateChwsDrug() && editCmm=='edit'"
+                                        [disabled]="isUpdateLoading == true" class="custom-input form-control"
+                                        id="year_chw_cmm_{{key}}" [attr.data-drug-index]="key" type="number"
+                                        value="{{ data.year_chw_cmm }}" />
+                                    </p>
+                                  </td>
+
+                                  <td class="ajust-cells">
+                                    <p>{{ convertQty(data.theoretical_quantity_to_order) }}</p>
+                                  </td>
+
+                                  <td class="ajust-cells">
+                                    <p>{{ convertQty(data.quantity_to_order) }}</p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p>
+                                      <span *ngIf="editQtyValidated!='edit'">
+                                        {{ convertQty(data.quantity_validated) }}
+                                      </span>
+                                      <input *ngIf="roles.canUpdateChwsDrug() && editQtyValidated=='edit'"
+                                        [disabled]="isUpdateLoading == true" class="custom-input form-control"
+                                        id="quantity_validated_{{key}}" [attr.data-drug-index]="key" type="number"
+                                        value="{{ data.quantity_validated }}" />
+                                    </p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p>
+                                      <span *ngIf="editQtyDelivered!='edit'">
+                                        {{ convertQty(data.delivered_quantity) }}
+                                      </span>
+                                      <input *ngIf="roles.canUpdateChwsDrug() && editQtyDelivered=='edit'"
+                                        [disabled]="isUpdateLoading == true" class="custom-input form-control"
+                                        id="delivered_quantity_{{key}}" [attr.data-drug-index]="key" type="number"
+                                        value="{{ data.delivered_quantity }}" />
+                                    </p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p>{{ data.satisfaction_rate }}</p>
+                                  </td>
+
+                                  <!-- <td class="ajust-cells">
+                                  <p>{{ data.lending }}</p>
+                                </td> -->
+                                  <!-- <td class="ajust-cells">
+                                  <p>{{ data.borrowing }}</p>
+                                </td> -->
+
+                                  <td class="ajust-cells">
+                                    <p class="out-data">{{ convertQty(data.borrowing_quantity) }}</p>
+                                  </td>
+
+                                  <td class="ajust-cells">
+                                    <p class="out-data">{{ convertQty(data.lending_quantity) }}</p>
+                                  </td>
+
+                                  <td class="same-line">
+                                    <p>{{ cancelArobase(data.borrowing_chws_code) }} {{
+                                      cancelArobase(data.lending_chws_code) }}</p>
+                                    <i *ngIf="(data.lending_chws_code??'')!='' || (data.borrowing_chws_code??'')!=''"
+                                      (click)="BorrowingLendingShowHideMsg(label, data.borrowing_chws_code, data.lending_chws_code)"
+                                      class="fas fa-eye" data-toggle="modal" data-target="#modal-detail"></i>
+                                  </td>
+
+                                  <td class="ajust-cells">
+                                    <p class="out-data">{{ convertQty(data.quantity_loss) }}</p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p class="out-data">{{ convertQty(data.quantity_damaged) }}</p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p class="out-data">{{ convertQty(data.quantity_broken) }}</p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p class="out-data">{{ convertQty(data.quantity_expired) }}</p>
+                                  </td>
+                                  <td class="ajust-cells">
+                                    <p class="out-data">{{ convertQty(data.other_quantity) }}</p>
+                                  </td>
+                                  <td class="same-line">
+                                    <p>{{ data.comments }}</p>
+                                    <i *ngIf="(data.comments??'')!=''" (click)="showHideMsg(data.comments)"
+                                      class="fas fa-eye" data-toggle="modal" data-target="#modal-detail"></i>
+                                  </td>
+                                  <td class="same-line">
+                                    <span *ngIf="editObservations!='edit'">
+                                      {{ data.observations }}
+                                    </span>
+                                    <input *ngIf="roles.canUpdateChwsDrug() && editObservations=='edit'"
+                                      [disabled]="isUpdateLoading == true" class="custom-textarea form-control"
+                                      id="observations_{{key}}" [attr.data-drug-index]="key"
+                                      value="{{ data.observations }}" />
+                                    <i *ngIf="data.observations!=''" (click)="showHideMsg(data.observations)"
+                                      class="fas fa-eye" data-toggle="modal" data-target="#modal-detail"></i>
+                                  </td>
+                                </tr>
+                              </ng-container>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-detail">
+    <div class="modal-dialog">
+      <div class="modal-content bg-default">
+        <div class="modal-header">
+          <strong style="font-size: 20px;">Détail</strong>
+          <span id="active-update-modal" data-toggle="modal" data-target="#modal-detail"></span>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" [innerHTML]="dataDetail | safeHtml"></div>
+        <div class="modal-footer justify-content-between">
+          <p></p>
+          <button id="close-update-modal" type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-patologies">
+    <div class="modal-dialog">
+      <div class="modal-content bg-default">
+        <div class="modal-header">
+          <strong style="font-size: 20px;">Patologies</strong>
+          <span id="active-update-modal" data-toggle="modal" data-target="#modal-patologies"></span>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <ng-container *ngIf="OutputData$">
+            <h1 style="color:green;">Pcime</h1><br>
+            <ng-container *ngFor="let patologie of OutputData$.patologieData | keyvalue">
+              <table class="table table-sm detail-table">
+                <tr><th colspan="2" style="font-size: 25px!important; text-transform: uppercase; text-align: center;">{{ rewriteName(patologie.key) }} (Soins)</th></tr>
+                <tr>
+                  <th>Date</th>
+                  <th>Nombre d'actions</th>
+                </tr>
+                <tr *ngFor="let data of patologie.value| keyvalue">
+                  <td> {{ data.key }} </td>
+                  <td>{{ data.value }}</td>
+                </tr>
+                <tr>
+                  <td>Total Consultation</td>
+                  <td colspan="2" style="font-size: 20px!important;">{{ totalPatologie(patologie.value| keyvalue) }}</td>
+                </tr>
+                
+              </table>
+              <br><br>
+            </ng-container>
+          </ng-container>
+        </div>
+        <div class="modal-footer justify-content-between">
+          <p></p>
+          <button id="close-update-modal" type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

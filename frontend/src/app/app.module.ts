@@ -29,6 +29,8 @@ import { backenUrl } from './shared/functions';
 import { JwtInterceptor } from './_helpers/jwt.interceptor';
 import { ErrorInterceptor } from './_helpers/error.interceptor';
 
+import { SharedModule } from './shared/shared.module';
+
 MAT_MOMENT_DATE_FORMATS.parse = {
   dateInput: { month: 'short', year: 'numeric', day: 'numeric', date: 'long' },
 }
@@ -81,6 +83,7 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     MatIconModule,
     MatButtonModule,
     MatButtonToggleModule,
+    SharedModule,
     // NgMultiSelectDropDownModule.forRoot(), 
     
     TranslateModule.forRoot({
@@ -92,6 +95,8 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
     }),
     ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
     FontAwesomeModule,
+  ],
+  exports:[
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [

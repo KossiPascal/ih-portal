@@ -3,7 +3,6 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Chws, Districts, Sites } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
-import { DatabaseUtilService } from '@ih-app/services/database-utils.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import { Roles } from '@ih-app/models/Roles';
 import { returnDataAsArray, notNull, getSavedUrl } from '@ih-src/app/shared/functions';
@@ -32,7 +31,7 @@ export class SelectOrgUnitComponent implements OnInit {
   message: string = '';
   currentUser: User | null | undefined;
 
-  constructor(private db: DatabaseUtilService, private auth: AuthService, private sync: SyncService, private router: Router) {
+  constructor(private auth: AuthService, private sync: SyncService, private router: Router) {
   }
 
   public roles = new Roles(this.auth);

@@ -28,7 +28,7 @@ export async function getDistricts(req: Request, res: Response, next: NextFuncti
         const repository = await getDistrictSyncRepository();
         var districts: Districts[] = await repository.find({
             where: {
-                id: notEmpty(req.body.id) ? req.body.id : undefined,
+                id: notEmpty(req.body.id) ? req.body.id : (notEmpty(req.body.districts) ? In(req.body.districts) : undefined),
                 source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
             }
         });
@@ -48,7 +48,7 @@ export async function getSites(req: Request, res: Response, next: NextFunction) 
         const repository = await getSiteSyncRepository();
         var sites: Sites[] = await repository.find({
             where: {
-                id: notEmpty(req.body.id) ? req.body.id : undefined,
+                id: notEmpty(req.body.id) ? req.body.id : (notEmpty(req.body.sites) ? In(req.body.sites) : undefined),
                 // reported_date: notEmpty(req.body.start_date) && notEmpty(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
                 source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
                 district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined
@@ -69,7 +69,7 @@ export async function getZones(req: Request, res: Response, next: NextFunction) 
         const repository = await getZoneSyncRepository();
         var zones: Zones[] = await repository.find({
             where: {
-                id: notEmpty(req.body.id) ? req.body.id : undefined,
+                id: notEmpty(req.body.id) ? req.body.id : (notEmpty(req.body.zones) ? In(req.body.zones) : undefined),
                 // reported_date: notEmpty(req.body.start_date) && notEmpty(req.body.end_date) ? Between(req.body.start_date, req.body.end_date) : undefined,
                 source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
                 district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
@@ -99,14 +99,14 @@ export async function getChws(req: Request, res: Response, next: NextFunction, o
         const userId: string = req.body.userId;
         var chws: Chws[] = await _chwRepo.find({
             where: {
-                id: notEmpty(req.body.id) ? req.body.id : undefined,
+                id: notEmpty(req.body.id) ? req.body.id : (notEmpty(req.body.chws) ? In(req.body.chws) : undefined),
                 // reported_date: req.body.start_date && req.body.end_date ? Between(req.body.start_date, req.body.end_date) : undefined,
                 source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
                 district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
                 site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
                 zone: {
                     id: notEmpty(req.body.zones) ? In(req.body.zones) : undefined,
-                    chw_id: notEmpty(req.body.chws) ? In(req.body.chws) : undefined,
+                    // chw_id: notEmpty(req.body.chws) ? In(req.body.chws) : undefined,
                 },
             },
         });
@@ -125,7 +125,7 @@ export async function getFamilies(req: Request, res: Response, next: NextFunctio
         const repository = await getFamilySyncRepository();
         var families: Families[] = await repository.find({
             where: {
-                id: notEmpty(req.body.id) ? req.body.id : undefined,
+                id: notEmpty(req.body.id) ? req.body.id : (notEmpty(req.body.families) ? In(req.body.families) : undefined),
                 reported_date: req.body.start_date && req.body.end_date ? Between(req.body.start_date, req.body.end_date) : undefined,
                 source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
                 district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
@@ -152,7 +152,7 @@ export async function getPatients(req: Request, res: Response, next: NextFunctio
         const repository = await getPatientSyncRepository();
         var patients: Patients[] = await repository.find({
             where: {
-                id: notEmpty(req.body.id) ? req.body.id : undefined,
+                id: notEmpty(req.body.id) ? req.body.id : (notEmpty(req.body.patients) ? In(req.body.patients) : undefined),
                 // reported_date: req.body.start_date && req.body.end_date ? Between(req.body.start_date, req.body.end_date) : undefined,
                 source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
                 district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,

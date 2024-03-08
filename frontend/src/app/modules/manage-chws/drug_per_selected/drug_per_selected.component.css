@@ -1,0 +1,130 @@
+.fa-times {
+  color: red;
+  font-size: 25px;
+}
+
+.fa-edit {
+  color: orange;
+  font-size: 25px;
+}
+
+.custom-input{
+  width: 125px!important;
+  height: 23px!important;
+  margin: -2.5px 0px 0px 0px!important;
+  padding: 14px 1px 14px 5px!important;
+}
+
+.custom-textarea{
+  width: 200px!important;
+  height: 23px!important;
+  margin: -2.5px 0px 0px 0px!important;
+  padding: 14px 5px!important;
+}
+
+.same-line {
+  white-space: nowrap;
+}
+
+.same-line input,  .same-line i,  .same-line p{
+  display: inline-block;
+  vertical-align: top;
+}
+
+.same-line i{
+  cursor: pointer;
+  margin-left: 2.5px;
+}
+
+.same-line p{
+  width: 130px!important;
+  height: 15px!important;
+  overflow: hidden;
+}
+
+.ajust-cells label {
+  width: 265px!important;
+}
+
+.ajust-cells p{
+  width: 90px!important;
+  height: 0px!important;
+}
+
+.submit-btn {
+  min-width: 200px !important;
+  margin-right: 20px;
+  float: right;
+}
+
+.card-title {
+  width: 100% !important;
+}
+
+.chw-info {
+  float: left !important;
+}
+
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  float: right !important;
+}
+
+li {
+  background-color: #333;
+  float: right;
+}
+
+li span {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 2px 5px;
+  text-decoration: none;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Change the link color to #111 (black) on hover */
+li span:hover {
+  background-color: #111;
+}
+
+.head-elem {
+  background-color: aqua;
+}
+
+.head-elem th {
+  text-align: center!important;
+}
+
+.drug_thead{
+  width: 125px; 
+  /* height: 10px;
+  background-color: aqua; */
+}
+th, td {
+  border: 1px dashed rgb(177, 177, 177);
+}
+.out-data{
+  color: orangered;
+}
+
+
+.detail-table{
+  margin: auto;
+}
+
+.detail-table tr td{
+  border: 1px dashed rgb(177, 177, 177)!important;
+}
+
+.detail-table tr th {
+  border: 1px dashed rgb(177, 177, 177)!important;
+  background: rgb(0, 0, 67)!important; 
+  color: white!important;
+}

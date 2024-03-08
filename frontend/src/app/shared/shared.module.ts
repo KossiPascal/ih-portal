@@ -1,8 +1,17 @@
 import { NgModule } from '@angular/core';
-import { UtilsPipe } from './utils.pipe';
+// import { UtilsPipe } from '../pipes/utils.pipe';
+import { CommonModule } from '@angular/common';
+import { SafeHtmlPipe } from '../pipes/safe-html-pipe';
 
 @NgModule({
-  declarations: [UtilsPipe],
-  exports: [UtilsPipe,]
+  declarations: [
+    // UtilsPipe, 
+    SafeHtmlPipe
+  ],
+  imports: [CommonModule],
+  exports: [
+    // UtilsPipe, 
+    SafeHtmlPipe
+  ]
 })
 export class SharedModule { }

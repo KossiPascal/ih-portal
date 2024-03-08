@@ -151,5 +151,3 @@ if (CAN_ACCESS_INSECURE == 'true') {
   ServerStart({ isSecure: false, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: port, hostnames: hostnames })
 }
 ServerStart({ isSecure: true, credential: credentials, app: appSecured, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: portSecured, hostnames: hostnames })
-
-

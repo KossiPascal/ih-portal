@@ -107,7 +107,8 @@ export async function UpdateUserData(user: User): Promise<User> {
     const secret = await jwSecretKey({ user: user });
     const expireDate = Date.now() + secret.expiredIn;
     user.expiresIn = expireDate;
-    const formatedRoles = (await GetRolesAndNamesPagesActionsList(user.roles));
-    user.useLocalStorage = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesNames[0] == 'chws' : false;
+    // const formatedRoles = (await GetRolesAndNamesPagesActionsList(user.roles));
+    // user.useLocalStorage = formatedRoles && notEmpty(formatedRoles) ? formatedRoles.rolesNames[0] == 'chws' : false;
+    user.useLocalStorage = true;
     return user;
 }

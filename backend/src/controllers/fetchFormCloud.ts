@@ -1,16 +1,19 @@
-import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository, getChwsDrugSyncRepository, ChwsDrug } from "../entity/Sync";
+import { getChwsDataSyncRepository, ChwsData, getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, Districts, getDistrictSyncRepository, getChwsDrugSyncRepository, ChwsDrug, getCouchDbUsersSyncRepository, CouchDbUsers } from "../entity/Sync";
 import { CouchDbFetchData, Dhis2DataFormat } from "../utils/appInterface";
-import { Dhis2SyncConfig, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders, notEmpty, logNginx, date_to_milisecond, getJsonFieldsAsKeyValue, milisecond_to_date } from "../utils/functions";
+import { Dhis2SyncConfig, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders, notEmpty, logNginx, getJsonFieldsAsKeyValue, getDhis2DrugValue } from "../utils/functions";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import https from 'https';
 import { DataIndicators } from "../entity/DataAggragate";
+import { milisecond_to_date, date_to_milisecond, YearMonthBetween21And20, changeMonthOfDate } from "../utils/date-utils";
+import { Consts } from "../utils/constantes";
 
 const fetch = require('node-fetch');
 const request = require('request');
 require('dotenv').config({ path: sslFolder('.ih-env') });
 
-const { DHIS_HOST, NODE_TLS_REJECT_UNAUTHORIZED } = process.env;
+const { DHIS_HOST, CHT_HOST, PROD_CHT_PORT, DEV_CHT_PORT, NODE_TLS_REJECT_UNAUTHORIZED } = process.env;
+
 
 const _sepation = `\n\n\n\n__________\n\n\n\n`;
 
@@ -19,7 +22,7 @@ export async function getDhis2Chws(req: Request, res: Response, next: NextFuncti
         return res.status(201).json({ status: 201, data: 'Error when getting chws from dhis2' });
     }
     try {
-        const {dhisusername, dhispassword} = req.body;
+        const { dhisusername, dhispassword } = req.body;
         const link = `https://${DHIS_HOST}/api/options`;
         const params = `.json?paging=false&filter=optionSet.id:eq:uOKgQa2W8tn&fields=id,code,name,optionSet&order=created:desc`;
         request({
@@ -49,6 +52,7 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
     }
 
     const repository = await getChwsDataSyncRepository();
+    const _repoChwsDrug = await getChwsDrugSyncRepository();
     const _repoSite = await getSiteSyncRepository();
     req.body['host'] = DHIS_HOST;
     req.body['cibleName'] = 'events';
@@ -85,15 +89,56 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
                                     if (!outPutInfo.hasOwnProperty(`Données Total ${siteName}`)) outPutInfo[`Données Total ${siteName}`] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
                                     try {
                                         const _dhis2Sync = new ChwsData();
+                                        const reported_date = milisecond_to_date(dateVal, 'dateOnly');
+
+                                        // #####################################
+
+                                        // const _syncDrug = new ChwsDrug();
+                                        // const _report_year = (new Date(reported_date)).getFullYear();
+                                        // const _moth = (new Date(reported_date)).getMonth() + 1;
+
+                                        // // annee et mois selon 21 au 20 à implementer
+
+                                        // const _report_moth = `${_moth < 10 ? '0'+_moth : _moth}`;
+
+                                        // _syncDrug.source = 'dhis2';
+                                        // _syncDrug.id = row.event;
+                                        // _syncDrug.rev = row.event;
+
+                                        // _syncDrug.form = row.event
+                                        // _syncDrug.year = _report_year;
+                                        // _syncDrug.month = _report_moth;
+                                        // _syncDrug.activity_type = row.event
+
+                                        // _syncDrug.lumartem = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.alben_400 = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.amox_250 = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.amox_500 = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.pills = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.para_250 = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.para_500 = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.pregnancy_test = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.sayana = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.sro = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.tdr = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.vit_A1 = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.vit_A2 = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.zinc = getDhis2DrugValue(row.dataValues, '');
+                                        // _syncDrug.other_drug = getDhis2DrugValue(row.dataValues, '');
+                                        // await _repoChwsDrug.save(_syncDrug);
+
+                                        // #################################################
+                                        
+
                                         _dhis2Sync.source = 'dhis2';
                                         _dhis2Sync.id = row.event;
                                         _dhis2Sync.rev = row.event;
                                         _dhis2Sync.form = getValue(row.dataValues, 'plW6bCSnXKU');
-                                        _dhis2Sync.reported_date = milisecond_to_date(dateVal, 'dateOnly');
+                                        _dhis2Sync.reported_date = reported_date;
                                         _dhis2Sync.district = districtId;
                                         _dhis2Sync.site = siteId;
                                         _dhis2Sync.chw = chwsId;
-                                        _dhis2Sync.fields = getDataValuesAsMap(row.dataValues, ['JkMyqI3e6or', 'plW6bCSnXKU', 'RlquY86kI66', 'JC752xYegbJ']);
+                                        _dhis2Sync.fields = getDataValuesAsMap(row.dataValues, ['JkMyqI3e6or', 'plW6bCSnXKU', 'RlquY86kI66', 'JC752xYegbJ', 'qZKDFwp706E']);
                                         await repository.save(_dhis2Sync);
                                         outPutInfo[`Données Total ${siteName}`]["successCount"] += 1;
                                     } catch (error: any) {
@@ -160,7 +205,6 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
         endKey: [date_to_milisecond(req.body.end_date, false)],
     };
 
-    
     try {
         https.get(CouchDbFetchDataOptions(params), async function (res) {
             var body = "";
@@ -172,6 +216,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                     const _repoChwsData = await getChwsDataSyncRepository();
                     const _repoChwsDrug = await getChwsDrugSyncRepository();
                     const _repoSite = await getSiteSyncRepository();
+
                     var jsonBody: any = JSON.parse(body).rows;
                     if (jsonBody !== undefined && jsonBody !== '' && jsonBody !== null) {
                         var len = jsonBody.length;
@@ -192,32 +237,50 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                     // console.log('No district found !')
                                 }
 
-
                                 if (["drug_quantities", "drug_movements", "pregnancy_family_planning", "fp_follow_up_renewal", "pcime_c_asc"].includes(row.doc.form)) {
+                                    const reported_date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                    const _report_year = (new Date(reported_date)).getFullYear();
+
                                     _syncDrug.source = 'Tonoudayo';
                                     _syncDrug.id = row.doc._id;
                                     _syncDrug.rev = row.doc._rev;
                                     _syncDrug.form = row.doc.form;
+                                    _syncDrug.reported_date = reported_date;
+                                    _syncDrug.reported_full_date = milisecond_to_date(row.doc.reported_date, 'fulldate');
 
-                                    if(["drug_quantities", "drug_movements"].includes(row.doc.form)){
+                                    if (["drug_quantities", "drug_movements"].includes(row.doc.form)) {
                                         var qtyMvt;
-                                        if(row.doc.form == "drug_quantities" && row.doc.fields.hasOwnProperty("h_drug_quantities") && row.doc.fields.hasOwnProperty("b_drug_quantities")) {
-                                            _syncDrug.activity_date = row.doc.fields.h_drug_quantities.activity_date;
+                                        if (row.doc.form == "drug_quantities" && row.doc.fields.hasOwnProperty("h_drug_quantities") && row.doc.fields.hasOwnProperty("b_drug_quantities")) {
+                                            const _isPreviousYear = row.doc.fields.h_drug_quantities.med_year_type == 'previous';
+
+                                            _syncDrug.year = _isPreviousYear == true ? _report_year - 1 : _report_year;
+                                            _syncDrug.month = row.doc.fields.h_drug_quantities.med_month;
                                             _syncDrug.activity_type = row.doc.fields.h_drug_quantities.med_operation;
                                             qtyMvt = row.doc.fields.b_drug_quantities;
                                         }
 
-                                        if(row.doc.form == "drug_movements" && row.doc.fields.hasOwnProperty("h_drug_movements") && row.doc.fields.hasOwnProperty("b_drug_movements")) {
-                                            _syncDrug.activity_date = row.doc.fields.h_drug_movements.activity_date;
+                                        if (row.doc.form == "drug_movements" && row.doc.fields.hasOwnProperty("h_drug_movements") && row.doc.fields.hasOwnProperty("b_drug_movements")) {
+                                            const _isPreviousYear = row.doc.fields.h_drug_movements.med_year_type == 'previous';
+
+                                            _syncDrug.year = _isPreviousYear == true ? _report_year - 1 : _report_year;;
+                                            _syncDrug.month = row.doc.fields.h_drug_movements.med_month;
+
                                             const mvType = row.doc.fields.h_drug_movements.med_type;
-                                            qtyMvt = row.doc.fields.b_drug_movements;
                                             _syncDrug.activity_type = mvType;
-                                            
-                                            if(mvType == 'c_med_loan' || mvType == 'c_med_borrowing') _syncDrug.loan_borrowing_chws_info = row.doc.fields.h_drug_movements.med_chw_destination;
+                                            qtyMvt = row.doc.fields.b_drug_movements;
+
+                                            if (mvType == 'c_med_loan') {
+                                                _syncDrug.lending_chws_info = row.doc.fields.h_drug_movements.med_chw_destination;
+                                            }
+
+                                            if (mvType == 'c_med_borrowing') {
+                                                _syncDrug.borrowing_chws_info = row.doc.fields.h_drug_movements.med_chw_destination;
+                                            }
+
                                             _syncDrug.comments = qtyMvt.med_comment;
                                         }
 
-                                        if(notEmpty(qtyMvt)){
+                                        if (notEmpty(qtyMvt)) {
                                             _syncDrug.lumartem = notEmpty(qtyMvt.lumartem) ? parseInt(qtyMvt.lumartem) : undefined;
                                             _syncDrug.alben_400 = notEmpty(qtyMvt.alben_400) ? parseInt(qtyMvt.alben_400) : undefined;
                                             _syncDrug.amox_250 = notEmpty(qtyMvt.amox_250) ? parseInt(qtyMvt.amox_250) : undefined;
@@ -239,14 +302,14 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                 }
 
                                 if (row.doc.fields.hasOwnProperty('patient_id')) {
-                                    
+
                                     if (districtId && siteId) {
                                         if (!outPutInfo.hasOwnProperty("Données Total")) outPutInfo["Données Total"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
                                         try {
                                             const contactParent = row.doc.fields.inputs.contact.parent;
                                             const contactId = row.doc.fields.inputs.contact._id;
                                             const _sync = new ChwsData();
-                                            
+
                                             _sync.source = 'Tonoudayo';
                                             _sync.id = row.doc._id;
                                             _sync.rev = row.doc._rev;
@@ -270,43 +333,46 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
 
 
                                             if (["pregnancy_family_planning", "fp_follow_up_renewal", "pcime_c_asc"].includes(row.doc.form)) {
-                                                    _syncDrug.activity_type = "distributed";
-                                                    _syncDrug.activity_date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                                _syncDrug.activity_type = "distributed";
+                                                const _date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
+                                                const yM = YearMonthBetween21And20(_date);
+                                                _syncDrug.year = yM.year;
+                                                _syncDrug.month = yM.month;
 
-                                                    if(row.doc.form == "pcime_c_asc"){
-                                                        if (row.doc.fields.hasOwnProperty("s_fever_child_TDR")) {
-                                                            if (notEmpty(row.doc.fields.s_fever_child_TDR.s_fever_child_TDR_result)) _syncDrug.tdr = 1;
-                                                        }
-                                            
-                                                        if (row.doc.fields.hasOwnProperty("s_drug_administered")) {
-                                                            const dAdm = row.doc.fields.s_drug_administered;
-                                                            if(notEmpty(dAdm["c_albendazole_400_given"])) _syncDrug.alben_400 = dAdm["c_albendazole_400_given"];
-                                                            if(notEmpty(dAdm["c_amoxicilline_250_given"])) _syncDrug.amox_250 = dAdm["c_amoxicilline_250_given"];
-                                                            if(notEmpty(dAdm["c_amoxicilline_500_given"])) _syncDrug.amox_500 = dAdm["c_amoxicilline_500_given"];
-                                                            if(notEmpty(dAdm["c_paracetamol_250_given"])) _syncDrug.para_250 = dAdm["c_paracetamol_250_given"];
-                                                            if(notEmpty(dAdm["c_paracetamol_500_given"])) _syncDrug.para_500 = dAdm["c_paracetamol_500_given"];
-                                                            if(notEmpty(dAdm["s_zinc_given"])) _syncDrug.zinc = dAdm["s_zinc_given"];
-                                                            if(notEmpty(dAdm["s_ors_given"])) _syncDrug.sro = dAdm["s_ors_given"];
-                                                            if(notEmpty(dAdm["s_lumartem_given"])) _syncDrug.lumartem = dAdm["s_lumartem_given"];
-                                                            if(notEmpty(dAdm["s_vitamine_A1_given"])) _syncDrug.vit_A1 = dAdm["s_vitamine_A1_given"];
-                                                            if(notEmpty(dAdm["s_vitamine_A2_given"])) _syncDrug.vit_A2 = dAdm["s_vitamine_A2_given"];
-                                                            if(notEmpty(dAdm["s_other_drug_given"])) _syncDrug.other_drug = dAdm["s_other_drug_given"];
-                                                        }
-                                                    }
-    
-                                                    if(row.doc.form == "pregnancy_family_planning"){
-                                                        if (row.doc.fields.hasOwnProperty("s_reg_pregnancy_screen")) {
-                                                          if (row.doc.fields.s_reg_pregnancy_screen.s_reg_urine_test == "yes") _syncDrug.pregnancy_test = 1;
-                                                        }
-                                                        if (row.doc.fields.chosen_fp_method == 'oral_combination_pill') _syncDrug.pills = 1;
-                                                        if (row.doc.fields.chosen_fp_method == 'injectible') _syncDrug.sayana = 1;
+                                                if (row.doc.form == "pcime_c_asc") {
+                                                    if (row.doc.fields.hasOwnProperty("s_fever_child_TDR")) {
+                                                        if (notEmpty(row.doc.fields.s_fever_child_TDR.s_fever_child_TDR_result)) _syncDrug.tdr = 1;
                                                     }
 
-                                                    if (row.doc.form == "fp_follow_up_renewal") {
-                                                        if (row.doc.fields.fp_method == 'oral_combination_pill') _syncDrug.pills = 1;
-                                                        if (row.doc.fields.fp_method == 'injectible') _syncDrug.sayana = 1;
+                                                    if (row.doc.fields.hasOwnProperty("s_drug_administered")) {
+                                                        const dAdm = row.doc.fields.s_drug_administered;
+                                                        if (notEmpty(dAdm["c_albendazole_400_given"])) _syncDrug.alben_400 = dAdm["c_albendazole_400_given"];
+                                                        if (notEmpty(dAdm["c_amoxicilline_250_given"])) _syncDrug.amox_250 = dAdm["c_amoxicilline_250_given"];
+                                                        if (notEmpty(dAdm["c_amoxicilline_500_given"])) _syncDrug.amox_500 = dAdm["c_amoxicilline_500_given"];
+                                                        if (notEmpty(dAdm["c_paracetamol_250_given"])) _syncDrug.para_250 = dAdm["c_paracetamol_250_given"];
+                                                        if (notEmpty(dAdm["c_paracetamol_500_given"])) _syncDrug.para_500 = dAdm["c_paracetamol_500_given"];
+                                                        if (notEmpty(dAdm["s_zinc_given"])) _syncDrug.zinc = dAdm["s_zinc_given"];
+                                                        if (notEmpty(dAdm["s_ors_given"])) _syncDrug.sro = dAdm["s_ors_given"];
+                                                        if (notEmpty(dAdm["s_lumartem_given"])) _syncDrug.lumartem = dAdm["s_lumartem_given"];
+                                                        if (notEmpty(dAdm["s_vitamine_A1_given"])) _syncDrug.vit_A1 = dAdm["s_vitamine_A1_given"];
+                                                        if (notEmpty(dAdm["s_vitamine_A2_given"])) _syncDrug.vit_A2 = dAdm["s_vitamine_A2_given"];
+                                                        if (notEmpty(dAdm["s_other_drug_given"])) _syncDrug.other_drug = dAdm["s_other_drug_given"];
                                                     }
-                                                
+                                                }
+
+                                                if (row.doc.form == "pregnancy_family_planning") {
+                                                    if (row.doc.fields.hasOwnProperty("s_reg_pregnancy_screen")) {
+                                                        if (row.doc.fields.s_reg_pregnancy_screen.s_reg_urine_test == "yes") _syncDrug.pregnancy_test = 1;
+                                                    }
+                                                    if (row.doc.fields.chosen_fp_method == 'oral_combination_pill') _syncDrug.pills = 1;
+                                                    if (row.doc.fields.chosen_fp_method == 'injectible') _syncDrug.sayana = 1;
+                                                }
+
+                                                if (row.doc.form == "fp_follow_up_renewal") {
+                                                    if (row.doc.fields.fp_method == 'oral_combination_pill') _syncDrug.pills = 1;
+                                                    if (row.doc.fields.fp_method == 'injectible') _syncDrug.sayana = 1;
+                                                }
+
                                             }
 
                                             outPutInfo["Données Total"]["successCount"] += 1;
@@ -324,10 +390,10 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
 
                                 if (["drug_quantities", "drug_movements", "pregnancy_family_planning", "fp_follow_up_renewal", "pcime_c_asc"].includes(row.doc.form)) {
                                     if (districtId && siteId) {
-                                        _syncDrug.reported_date = milisecond_to_date(row.doc.reported_date, 'dateOnly');
                                         _syncDrug.district = districtId;
                                         _syncDrug.site = siteId;
                                         _syncDrug.chw = row.doc.contact._id;
+                                        _syncDrug.zone = row.doc.contact.parent._id;
                                         await _repoChwsDrug.save(_syncDrug);
                                     }
                                 }
@@ -367,6 +433,58 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
         resp.status(err.statusCode).json(outPutInfo);
     }
 }
+
+export async function fetchCouchDbUsersFromCouchDb(req: Request, res: Response, next: NextFunction) {
+    // const req_params: ChwUserParams = req.body;  
+
+    request({
+        url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/api/v1/users`,
+        method: 'GET',
+        headers: httpHeaders()
+    }, async function (error: any, response: any, body: any) {
+        if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
+        try {
+            const users = JSON.parse(body);
+            const _repo = await getCouchDbUsersSyncRepository();
+            for (let i = 0; i < users.length; i++) {
+                const user = users[i];
+                if (user.contact?._id && user.place?._id) {
+                    const _sync = new CouchDbUsers();
+                    _sync.id = user.id;
+                    _sync.rev = user.rev;
+                    _sync.username = user.username;
+                    _sync.fullname = user.contact.name;
+                    _sync.code = user.contact.external_id;
+                    _sync.type = user.type;
+                    _sync.contact = user.contact._id;
+                    _sync.role = user.contact.role;
+                    _sync.place = user.place._id;
+                    await _repo.save(_sync);
+                }
+            }
+            const couchUsers = await _repo.find();
+            if (couchUsers.length <= 0) return res.status(201).json({ status: 201, data: "Pas d'utilisateur couchDb trouvé" });
+            return res.status(200).json({ status: 200, data: couchUsers });
+        } catch (err: any) {
+            return res.status(500).json({ status: 500, data: err.toString() });
+        }
+
+    });
+}
+
+export async function getChtUsersFromDb(req: Request, res: Response, next: NextFunction) {
+    try {
+        const _repo = await getCouchDbUsersSyncRepository();
+        const users = await _repo.find();
+        if (users.length <= 0) return res.status(201).json({ status: 201, data: "Pas d'utilisateur couchDb trouvé" });
+        return res.status(200).json({ status: 200, data: users });
+    } catch (err: any) {
+        return res.status(500).json({ status: 500, data: err.toString() });
+    }
+}
+
+
+
 
 export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, next: NextFunction) {
     var outPutInfo: any = {};

@@ -9,13 +9,13 @@ const request = require('request');
 
 require('dotenv').config({ path: sslFolder('.ih-env') });
 
-const { DEFAULT_DHIS2_USER_ID, LOCALHOST, CHT_HOST, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED } = process.env
+const { DEFAULT_DHIS2_USER_ID, LOCALHOST, CHT_HOST, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED, DHIS_USER, DHIS_PASS } = process.env
 
 const portSecured = normalizePort((Consts.isProdEnv ? PROD_PORT_SECURED : DEV_PORT_SECURED) || Consts.defaultSecurePort);
 
 
 export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: { start_date: string, end_date: string }, createOutputFile: boolean }, req?: Request, res?: Response, next?: NextFunction) {
-  var output: { orgunit: any, tonoudayo: any, dhis2: any[], globalError: any, successDetails:any } = { orgunit: null, tonoudayo: null, dhis2: [], globalError: null, successDetails:null };
+  var output: { orgunit: any, tonoudayo: any, dhis2: any[], globalError: any, successDetails: any } = { orgunit: null, tonoudayo: null, dhis2: [], globalError: null, successDetails: null };
   try {
     const createOutputFile = data != null && notEmpty(data.createOutputFile) && data.createOutputFile != null ? data.createOutputFile : true;
     // const wait = data!=null && notEmpty(data.wait) && data.wait != null ? data.wait : true;
@@ -27,14 +27,14 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
     if (DEFAULT_DHIS2_USER_ID != null && DEFAULT_DHIS2_USER_ID != undefined && DEFAULT_DHIS2_USER_ID != "") {
       const userRepo = await getUsersRepository();
       const _repoSync = new JsonDatabase('syncs');
-      const user = await userRepo.findOneBy({id:DEFAULT_DHIS2_USER_ID});
+      const user = await userRepo.findOneBy({ id: DEFAULT_DHIS2_USER_ID });
       if (user) {
-        var initDate: {start_date: string,end_date: string};
+        var initDate: { start_date: string, end_date: string };
 
         if (customDate) {
           initDate = customDate;
         } else {
-          const initD =  startEnd21and20Date();
+          const initD = startEnd21and20Date();
           const str = initD.start_date.split('-');
           initDate = { start_date: `${str[0]}-${str[1]}-01`, end_date: initD.end_date };
         }
@@ -56,8 +56,8 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
             family: true,
             patient: true,
             chw: true,
-            // dhisusername: user.dhisusername,
-            // dhispassword: user.dhispassword,
+            dhisusername: DHIS_USER, // user.dhisusername
+            dhispassword: DHIS_PASS, // user.dhispassword
             userId: user.id,
             privileges: true
           }),
@@ -73,8 +73,8 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
             body: JSON.stringify({
               start_date: start_date,
               end_date: end_date,
-              // dhisusername: user.dhisusername,
-              // dhispassword: user.dhispassword,
+              dhisusername:  DHIS_USER, //user.dhisusername,
+              dhispassword:  DHIS_PASS, //user.dhispassword,
               userId: user.id,
               privileges: true
             }),
@@ -96,8 +96,8 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
                   orgUnit: orgUnit,
                   filter: [`RlquY86kI66:GE:${start_date}:LE:${end_date}`],
                   fields: ['event', 'orgUnit', 'orgUnitName', 'dataValues[dataElement,value]'],
-                  // dhisusername: user.dhisusername,
-                  // dhispassword: user.dhispassword,
+                  dhisusername:  DHIS_USER, //user.dhisusername,
+                  dhispassword:  DHIS_PASS, //user.dhispassword,
                   userId: user.id,
                   privileges: true
                 }),
@@ -120,8 +120,8 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
                     end_at: ends.split(' ')[1],
                     end_at_timestamp: now.getTime(),
                     duration: display,
-                    start_date_filter:initDate.start_date,
-                    end_date_filter:initDate.end_date
+                    start_date_filter: initDate.start_date,
+                    end_date_filter: initDate.end_date
                   };
 
                   if (createOutputFile == true) {
@@ -143,17 +143,17 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
                   console.log(`\n\nDurée de l'action: ${display}\n`);
                   logNginx(`\n\nDurée de l'action: ${display}\n`);
                   output.successDetails = {
-                    date:ends.split(' ')[0],
+                    date: ends.split(' ')[0],
                     start_at: starts.split(' ')[1],
                     start_at_timestamp: startAt,
                     end_at: ends.split(' ')[1],
                     end_at_timestamp: now.getTime(),
                     duration: display,
-                    start_date_filter:initDate.start_date,
-                    end_date_filter:initDate.end_date
+                    start_date_filter: initDate.start_date,
+                    end_date_filter: initDate.end_date
                   }
-                  
-                  if (res!=null) return res.status(200).json({ status: 200, data: output });
+
+                  if (res != null) return res.status(200).json({ status: 200, data: output });
                 };
               });
             }
@@ -162,8 +162,8 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
       }
     }
   } catch (err: any) {
-    output.globalError=`${err}`;
-    if (res!=null) return res.status(500).json({ status: 500, data: output });
+    output.globalError = `${err}`;
+    if (res != null) return res.status(500).json({ status: 500, data: output });
   }
 
 }

@@ -214,7 +214,8 @@ export class Dashboard2Component implements OnInit {
       this.defaultParams?.start_date != filters.start_date ||
       this.defaultParams?.end_date != filters.end_date ||
       this.defaultParams?.districts != filters.districts ||
-      this.defaultParams?.sites != filters.sites
+      this.defaultParams?.sites != filters.sites ||
+      this.defaultParams?.chws != filters.chws
     ) {
       this.FinalChwsOutputData$ = [];
       this.data_error_messages = '';

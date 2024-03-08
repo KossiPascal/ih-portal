@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ChwsReplacementManageComponent } from './chws_manage/chws_manage-list.component';
-import { ChwsDrugManageComponent } from './chws_drug/chws_drug.component';
 import { LoginAccessGuard } from '@ih-src/app/guards/login-access-guard';
-
+import { DrugPerChwManageComponent } from './drug_per_chw/drug_per_chw.component';
+import { DrugPerSelectedManageComponent } from './drug_per_selected/drug_per_selected.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'replacements', pathMatch: 'full'},
@@ -17,13 +17,22 @@ const routes: Routes = [
       title: 'Gestion ASC Remplacantes' 
     }
   },
-  { path: 'chws-drug', component: ChwsDrugManageComponent, 
+  { path: 'drug-per-chw', component: DrugPerChwManageComponent, 
     canActivate: [LoginAccessGuard], 
     data: {
-      href: "chws_drug",
+      href: "drug_per_chw",
       icon: "fa fa-user",
-      label: "chws_drug",
-      title: "Situation Médicament ASC"
+      label: "drug_per_chw",
+      title: "Médicament Par ASC"
+    }
+  },
+  { path: 'drug-per-selected', component: DrugPerSelectedManageComponent, 
+    canActivate: [LoginAccessGuard], 
+    data: {
+      href: "drug_per_selected",
+      icon: "fa fa-user",
+      label: "drug_per_selected",
+      title: "Gestion Médicament ASC"
     }
   }
   

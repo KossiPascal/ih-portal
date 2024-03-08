@@ -97,7 +97,7 @@ export interface MailConfig {
     text: any
   }
 }
-export interface ChwsDrugQantityInfo {
+export interface ChwsDrugQuantityInfo {
   month_quantity_beginning?: number
   month_quantity_received?: number
   month_total_quantity?: number
@@ -105,15 +105,21 @@ export interface ChwsDrugQantityInfo {
   theoretical_quantity?: number
   inventory_quantity?: number
   inventory_variance?: number
-  year_cmm?: number
+  year_chw_cmm?: number
   theoretical_quantity_to_order?: number
   quantity_to_order?: number
   quantity_validated?: number
   delivered_quantity?: number
   satisfaction_rate?: string
-  loan_borrowing?: string
-  loan_borrowing_quantity?: number
-  loan_borrowing_chws_code?: string
+
+  lending?: string
+  lending_quantity?: number
+  lending_chws_code?: string
+
+  borrowing?: string
+  borrowing_quantity?: number
+  borrowing_chws_code?: string
+
   quantity_loss?: number
   quantity_damaged?: number
   quantity_broken?: number
@@ -123,38 +129,38 @@ export interface ChwsDrugQantityInfo {
   observations?: string
 }
 export interface ChwsDrugData {
-  Albendazole_400_mg_cp_1: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  Amoxiciline_250_mg_2: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  Amoxiciline_500_mg_3: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  Artemether_Lumefantrine_20_120mg_cp_4: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  Oral_Combination_Pills_5: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  Paracetamol_250_mg_6: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  Paracetamol_500_mg_7: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  Pregnancy_Test_8: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  Sayana_Press_9: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  SRO_10: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  TDR_11: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  Vitamine_A_100000UI_12: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  Vitamine_A_200000UI_13: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
-  Zinc_14: ChwsDrugQantityInfo | ChwsUpdateDrugInfo
+  Albendazole_400_mg_cp_1: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  Amoxiciline_250_mg_2: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  Amoxiciline_500_mg_3: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  Artemether_Lumefantrine_20_120mg_cp_4: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  Oral_Combination_Pills_5: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  Paracetamol_250_mg_6: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  Paracetamol_500_mg_7: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  Pregnancy_Test_8: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  Sayana_Press_9: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  SRO_10: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  TDR_11: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  Vitamine_A_100000UI_12: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  Vitamine_A_200000UI_13: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
+  Zinc_14: ChwsDrugQuantityInfo | ChwsUpdateDrugInfo
 }
 
 export interface ChwsDrugDataWithChws {
   chw:Chws,
-  Albendazole_400_mg_cp_1: ChwsDrugQantityInfo
-  Amoxiciline_250_mg_2: ChwsDrugQantityInfo
-  Amoxiciline_500_mg_3: ChwsDrugQantityInfo
-  Artemether_Lumefantrine_20_120mg_cp_4: ChwsDrugQantityInfo
-  Oral_Combination_Pills_5: ChwsDrugQantityInfo
-  Paracetamol_250_mg_6: ChwsDrugQantityInfo
-  Paracetamol_500_mg_7: ChwsDrugQantityInfo
-  Pregnancy_Test_8: ChwsDrugQantityInfo
-  Sayana_Press_9: ChwsDrugQantityInfo
-  SRO_10: ChwsDrugQantityInfo
-  TDR_11: ChwsDrugQantityInfo
-  Vitamine_A_100000UI_12: ChwsDrugQantityInfo
-  Vitamine_A_200000UI_13: ChwsDrugQantityInfo
-  Zinc_14: ChwsDrugQantityInfo
+  Albendazole_400_mg_cp_1: ChwsDrugQuantityInfo
+  Amoxiciline_250_mg_2: ChwsDrugQuantityInfo
+  Amoxiciline_500_mg_3: ChwsDrugQuantityInfo
+  Artemether_Lumefantrine_20_120mg_cp_4: ChwsDrugQuantityInfo
+  Oral_Combination_Pills_5: ChwsDrugQuantityInfo
+  Paracetamol_250_mg_6: ChwsDrugQuantityInfo
+  Paracetamol_500_mg_7: ChwsDrugQuantityInfo
+  Pregnancy_Test_8: ChwsDrugQuantityInfo
+  Sayana_Press_9: ChwsDrugQuantityInfo
+  SRO_10: ChwsDrugQuantityInfo
+  TDR_11: ChwsDrugQuantityInfo
+  Vitamine_A_100000UI_12: ChwsDrugQuantityInfo
+  Vitamine_A_200000UI_13: ChwsDrugQuantityInfo
+  Zinc_14: ChwsDrugQuantityInfo
 }
 export interface ChwsUpdateDrugInfo {
   district: string
@@ -164,15 +170,22 @@ export interface ChwsUpdateDrugInfo {
   month: string
   drug_index: number
   drug_name: String
-  year_cmm: number
+  year_chw_cmm: number
   quantity_validated: number
   delivered_quantity: number
-  theoretical_quantity_to_order: number
   observations: number
   userId?: string
   dhisusername?: string
   dhispassword?: string
 }
+
+export interface PatologieData {
+  diarrhee_pcime: Record<string, number>
+  paludisme_pcime: Record<string, number>
+  pneumonie_pcime: Record<string, number>
+  malnutrition_pcime: Record<string, number>
+}
+
 
 // export class Roles {
 //   isSuperUser: boolean = false;

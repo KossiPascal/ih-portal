@@ -1,5 +1,17 @@
 import { DataIndicators } from "./DataAggragate"
 
+export class CouchDbUsers {
+  id!: string
+  rev!:string;
+  username!:string;
+  fullname!:string;
+  code!:string;
+  type!:string;
+  contact!:string;
+  role!:string;
+  place!:string;
+}
+
 export interface ApiTokenAccess {
   id?: number
   token: string
@@ -133,6 +145,16 @@ export interface FilterParams {
   withDhis2Data?: boolean
 }
 
+export interface FilterParamsWithYearMonth {
+  year:number, 
+  month:string, 
+  districts:string[], 
+  sites:string[], 
+  chws:string[],
+  cmm_start_year_month:string
+  cmm_mutipliation:number
+}
+
 export interface ChwsDataFormDb {
   id: string
   rev: string
@@ -152,13 +174,15 @@ export interface ChwsDataFormDb {
 }
 
 export interface ChwsDrugFormDb {
-  id: string
-  rev: string
-  source: string
-  form: string
-  activity_date: string
+  id: string;
+  rev: string;
+  source: string;
+  form: string;
+  year: number;
+  month: string;
   activity_type: string;
-  loan_borrowing_chws_info: string;
+  lending_chws_info: string;
+  borrowing_chws_info: string;
   lumartem: number;
   alben_400: number;
   amox_250: number;
@@ -176,9 +200,9 @@ export interface ChwsDrugFormDb {
   other_drug: number;
   comments: string;
   district: Districts;
-  site: Sites
-  chw: Chws
-  reported_date: string
+  site: Sites;
+  chw: Chws;
+  reported_date: string;
 }
 
 export interface Districts {

@@ -132,7 +132,6 @@
                 </a>
               </div>
 
-
               <div *ngIf="roles().canLogOut()">
                 <div class="dropdowndivider2"></div>
                 <a href="#" class="nav-link" data-toggle="modal" data-target="#modal-logout">
@@ -155,7 +154,7 @@
           </span>
         </a>
 
-        <div class="sidebar" style="height: 80%!important;">
+        <div class="sidebar" style="height: 85%!important; border-bottom: 2px solid white;">
           <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
               <br>
@@ -228,7 +227,7 @@
           {{ 'HOME.TITLE' | translate }}:{{ 'HOME.SELECT' | translate }}
         </form> -->
 
-        <br><br>
+        <br>
         <h3 *ngIf="appVersion()!=null"
           style="position:relative;bottom:0;width:100%; text-align: center;font-size: large; color: white;">
           Version: {{ appVersion() }}
@@ -236,8 +235,7 @@
 
       </aside>
 
-      <div *ngIf="roles().canViewLeftNavigation()" class="content-wrapper iframe-mode" data-widget="iframe"
-        data-loading-screen="750">
+      <div *ngIf="roles().canViewLeftNavigation()" class="content-wrapper iframe-mode" data-widget="iframe" data-loading-screen="750">
         <ng-container *ngTemplateOutlet="template"></ng-container>
       </div>
 

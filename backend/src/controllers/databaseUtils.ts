@@ -3,7 +3,7 @@ import { validationResult } from "express-validator";
 import { DataSource, EntityMetadata, In } from "typeorm";
 import { AppDataSource } from "../data_source";
 import { httpHeaders, sslFolder } from "../utils/functions";
-import { getChwsDataSyncRepository, getChwsSyncRepository, getFamilySyncRepository, getPatientSyncRepository } from "../entity/Sync";
+import { getChwsDataSyncRepository, getChwsSyncRepository, getCouchDbUsersSyncRepository, getFamilySyncRepository, getPatientSyncRepository } from "../entity/Sync";
 import { getChwsDataWithParams } from "./dataFromDB";
 import { getPatients, getFamilies } from "./orgUnitsFromDB ";
 import { Consts } from "../utils/constantes";
@@ -34,12 +34,13 @@ export async function truncatePostgresMysqlJsonDatabase(req: Request, res: Respo
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
     try {
-        if (req.body.procide == true) {
+        const { procide, entities } = req.body;
+        if (procide == true) {
             const Connection: DataSource = AppDataSource.manager.connection;
-            const entities: { name: string, table: string }[] = req.body.entities;
-            for (const entity of entities) {
-                const repository = await Connection.getRepository(entity.name);
-                await repository.query(`TRUNCATE ${entity.table} RESTART IDENTITY CASCADE;`);
+            const _entities = entities as { name: string, table: string }[];
+            for (const entity of _entities) {
+                const _repo = Connection.getRepository(entity.name);
+                await _repo.query(`TRUNCATE ${entity.table} RESTART IDENTITY CASCADE;`);
             }
             return res.status(200).json({ status: 200, data: 'Done successfully' });
         } else {
@@ -168,93 +169,82 @@ export async function deleteFromCouchDb(req: Request, res: Response, next: NextF
     }
 }
 
-async function updateChws(chwId: string, data: any) {
+async function updateChwsZone(chwId: string, zoneId: any) {
     try {
-        const _repoChws = await getChwsSyncRepository();
-        const chwUpdated = await _repoChws.update({ id: chwId, }, data);
-        return true;
-    } catch (err: any) {
-        return false;
-    }
+        const _repo = await getChwsSyncRepository();
+        const chw = await _repo.findOneBy({ id: chwId });
+        if (chw) { 
+            chw.zone = zoneId;
+            await _repo.save(chw);
+            return true;
+        }
+    } catch (err: any) {}
+    return false;
 }
 
 export async function updateUserFacilityIdAndContactPlace(req: Request, res: Response, next: NextFunction) {
-    // const req_params: ChwUserParams = req.body;
-    request({
-        url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/api/v1/users`,
-        method: 'GET',
-        headers: httpHeaders()
-    }, function (error: any, response: any, body: any) {
-        if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
+    // const req_params: ChwUserParams = req.body;  
 
-        try {
-            const users = JSON.parse(body);
+    try {
+        const { code, parent, contact, new_parent, } = req.body;
 
-            var dataFound: string[] = [];
+        
 
-            for (let i = 0; i < users.length; i++) {
-                const user = users[i];
+        const _repo = await getCouchDbUsersSyncRepository();
 
-                if (user.type == "chw") {
-                    if (user.hasOwnProperty('contact')) {
-                        if (user.contact.hasOwnProperty('_id')) {
-                            if (user.place._id === req.body.parent && user.contact._id === req.body.contact && user.contact.role === "chw") {
-                                dataFound.push('OK');
+        const user = await _repo.findOneBy({ type: 'chw', role: 'chw', code: code, place: parent, contact: contact });
 
-                                // start updating facility_id
-                                return request({
-                                    url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/api/v1/users/${user.username}`,
-                                    method: 'POST',
-                                    body: JSON.stringify({ "place": req.body.new_parent }),
-                                    headers: httpHeaders()
-                                }, function (error: any, response: any, body: any) {
-                                    if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
-                                    request({
-                                        url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/medic/${req.body.contact}`,
-                                        method: 'GET',
-                                        headers: httpHeaders()
-                                    }, function (error: any, response: any, body: any) {
-                                        try {
-                                            if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
-                                            const data = JSON.parse(body);
-                                            data.parent._id = req.body.new_parent;
+        if (user) {
+            // start updating facility_id
+            return request({
+                url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/api/v1/users/${user.username}`,
+                method: 'POST',
+                body: JSON.stringify({ "place": new_parent }),
+                headers: httpHeaders()
+            }, function (error: any, response: any, body: any) {
+                if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
+                request({
+                    url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/medic/${user.contact}`,
+                    method: 'GET',
+                    headers: httpHeaders()
+                }, function (error: any, response: any, body: any) {
+                    try {
+                        if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
+                        const data = JSON.parse(body);
+                        data.parent._id = new_parent;
 
-                                            // start updating Contact Place Informations
-                                            request({
-                                                url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/api/v1/people`,
-                                                method: 'POST',
-                                                body: JSON.stringify(data),
-                                                headers: httpHeaders()
-                                            }, async function (error: any, response: any, body: any) {
-                                                try {
-                                                    if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
-                                                    const update = await updateChws(req.body.contact, { zone: req.body.new_parent });
-                                                    if (update) {
-                                                        return res.status(200).json({ status: 200, message: "Vous avez changé la zone de l'ASC avec succes!" });
-                                                    } else {
-                                                        return res.status(201).json({ status: 201, message: "Erruer trouvée, Contacter immédiatement l'administrateur!" });
-                                                    }
-                                                } catch (err: any) {
-                                                    return res.status(500).json({ status: 500, message: err.toString() });
-                                                }
-                                            });
-                                        } catch (err: any) {
-                                            return res.status(500).json({ status: 500, message: err.toString() });
-                                        }
-                                    });
-                                });
+                        // start updating Contact Place Informations
+                        request({
+                            url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/api/v1/people`,
+                            method: 'POST',
+                            body: JSON.stringify(data),
+                            headers: httpHeaders()
+                        }, async function (error: any, response: any, body: any) {
+                            try {
+                                if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
+                                const update = await updateChwsZone(contact, new_parent);
+                                if (update) {
+                                    user.place = new_parent;
+                                    await _repo.save(user);
+                                    return res.status(200).json({ status: 200, message: "Vous avez changé la zone de l'ASC avec succes!" });
+                                } else {
+                                    return res.status(201).json({ status: 201, message: "Erruer trouvée, Contacter immédiatement l'administrateur!" });
+                                }
+                            } catch (err: any) {
+                                return res.status(500).json({ status: 500, message: err.toString() });
                             }
-                        }
+                        });
+                    } catch (err: any) {
+                        return res.status(500).json({ status: 500, message: err.toString() });
                     }
-                }
-            }
-
-            if (dataFound.length <= 0) return res.status(201).json({ status: 201, message: "Pas d'ASC trouvé pour procéder à l'opération, Réessayer !" });
-        } catch (err: any) {
-            return res.status(500).json({ status: 500, message: err.toString() });
+                });
+            });
+        } else {
+            return res.status(201).json({ status: 201, message: "Pas d'ASC trouvé pour procéder à l'opération, Réessayer !" });
         }
-
-    });
+    } catch (err: any) {
+        return res.status(500).json({ status: 500, message: err.toString() });
+    }
 }
 
 

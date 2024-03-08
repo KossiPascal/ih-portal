@@ -128,6 +128,11 @@ export class SyncService {
     return this.http.post(`${backenUrl()}/sync/update_drug_per_chw`, fparams, CustomHttpHeaders(this.store));
   }
 
+  ihDrugUpdateYearCmmPerChw(params: ChwsUpdateDrugInfo): any {
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/update_drug_year_cmm_per_chw`, fparams, CustomHttpHeaders(this.store));
+  }
+
   getChwsList(params?: FilterParams): any {
     const fparams = this.ApiParams(params);
     return this.http.post(`${backenUrl()}/sync/app/chws`, fparams, CustomHttpHeaders(this.store));
@@ -148,10 +153,22 @@ export class SyncService {
     return this.http.post(`${backenUrl()}/sync/patients`, fparams, CustomHttpHeaders(this.store));
   }
 
-  syncCouchDbChwsData(params: Sync): any {
+  syncCouchDbOrgUnit(params: Sync): any {
     const fparams = this.ApiParams(params);
     return this.http.post(`${backenUrl()}/sync/fetch/data`, fparams, CustomHttpHeaders(this.store));
   }
+
+  syncCouchDbUsers(): any {
+    const fparams = this.ApiParams();
+    return this.http.post(`${backenUrl()}/sync/save-couchdb-users`, fparams, CustomHttpHeaders(this.store));
+  }
+
+  getChtUsers(): any {
+    const fparams = this.ApiParams();
+    return this.http.post(`${backenUrl()}/sync/get-cht-users`, fparams, CustomHttpHeaders(this.store));
+  }
+
+  
 
   syncThinkMdWeeklyChwsData(params: Sync): any {
     const fparams = this.ApiParams(params);
@@ -184,6 +201,11 @@ export class SyncService {
   ihDrugDataPerChw(params: any): any {
     const fparams = this.ApiParams(params);
     return this.http.post(`${backenUrl()}/sync/ih_drug_data_per_chw`, fparams, CustomHttpHeaders(this.store));
+  }
+
+  ihDrugDataPerSelected(params: any): any {
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/ih_drug_data_per_selected`, fparams, CustomHttpHeaders(this.store));
   }
 
   insertOrUpdateDhis2Data(chwsDataToDhis2: DataIndicators): any {

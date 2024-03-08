@@ -6,7 +6,7 @@ import * as path from 'path';
 import fs from 'fs';
 import { getIhDrugArrayData } from './controllers/dataFromDB';
 import { ApiTokenAccess, Chws, getApiTokenAccessRepository } from './entity/Sync';
-import { ChwsDrugData, ChwsDrugDataWithChws, ChwsDrugQantityInfo } from './utils/appInterface';
+import { ChwsDrugData, ChwsDrugDataWithChws, ChwsDrugQuantityInfo } from './utils/appInterface';
 import { AppDataSource } from './data_source';
 import { ServerStart, appVersion, getIPAddress, logNginx, normalizePort, notEmpty, sslFolder } from './utils/functions';
 const { createProxyMiddleware } = require('http-proxy-middleware');

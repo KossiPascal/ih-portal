@@ -7,7 +7,6 @@ import { DatabaseUtilService } from '@ih-app/services/database-utils.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import { Consts } from '@ih-app/shared/constantes';
 import { notNull, returnDataAsArray } from '@ih-app/shared/functions';
-import { Roles } from '@ih-app/models/Roles';
 // import usersDb from '@ih-databases/users.json'; 
 
 declare var $: any;
@@ -130,6 +129,7 @@ export class ChwsReplacementManageComponent implements OnInit {
     return new FormGroup({
       contact: new FormControl(chw != null ? chw.id : '', [Validators.required]),
       parent: new FormControl(chw != null ? chw.zone.id : '', [Validators.required]),
+      code: new FormControl(chw != null ? chw.external_id : '', [Validators.required]),
       new_parent: new FormControl('', [Validators.required]),
     }, [this.MatchValidator('parent', 'new_parent')]);
   }

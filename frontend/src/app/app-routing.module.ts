@@ -20,7 +20,7 @@ const routes: Routes = [
 @NgModule({
   imports: [
     CommonModule,
-    FormsModule, 
+    FormsModule,
     SharedModule,
     RouterModule.forRoot(routes, { useHash: false, relativeLinkResolution: 'legacy' })
   ],

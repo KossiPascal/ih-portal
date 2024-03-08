@@ -244,7 +244,6 @@ export class AuthUserController {
 
     static updateUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            console.log(req.body)
             const { userId } = req.body;
             const { id, email, password, fullname, roles, meeting_report, isActive } = req.body.user;
             if (!id) return res.status(201).json({ status: 201, data: 'Invalid user ID' });
@@ -385,7 +384,7 @@ export class AuthUserController {
             if (roleFound && notEmpty(roleFound) && id) {
                 const userRepo = await getUsersRepository();
                 const users = await userRepo.find();
-                const selectedUsers = users.filter(user => (user.roles as string[]).includes(`${id}`));
+                const selectedUsers = users.filter(user => ((user.roles ?? []) as string[]).includes(`${id}`));
                 selectedUsers.forEach(user => {
                     user.mustLogin = true;
                     userRepo.update(user.id, user);
@@ -443,23 +442,21 @@ export class AuthUserController {
 
     static ApiAccessKeyList = async (req: Request, res: Response, next: NextFunction) => {
         try {
-
-            console.log(req.body)
-            const { userId, id, token, isActive, action  } = req.body;
+            const { userId, id, token, isActive, action } = req.body;
             if (userId) {
                 const apiRepo = await getApiTokenAccessRepository();
 
                 if (action == 'list') {
                     const apis = await apiRepo.find();
                     return res.status(200).json({ status: 200, data: apis });
-                } else if(action == 'create' && !id && token){
+                } else if (action == 'create' && !id && token) {
                     const api = new ApiTokenAccess();
                     api.token = token;
                     api.isActive = isActive;
                     await apiRepo.save(api);
                     const apis = await apiRepo.find();
                     return res.status(200).json({ status: 200, data: apis });
-                } else if(action == 'update' && id && token){
+                } else if (action == 'update' && id && token) {
                     const api = await apiRepo.findOneBy({ id: id });
                     if (api) {
                         api.token = token;
@@ -468,7 +465,7 @@ export class AuthUserController {
                         const apis = await apiRepo.find();
                         return res.status(200).json({ status: 200, data: apis });
                     }
-                } else if(action == 'delete' && id){
+                } else if (action == 'delete' && id) {
                     const api = await apiRepo.findOneBy({ id: id });
                     if (api) {
                         await apiRepo.delete(api);
@@ -529,7 +526,8 @@ export class AuthUserController {
         "admin/users-list",
         "admin/roles-list",
         "admin/api-access-list",
-        "admin/database-utils",
+        "admin/delete-couchdb-data",
+        "admin/truncate-database",
         "admin/documentations",
 
         "manage-data/auto-full-sync",
@@ -538,7 +536,8 @@ export class AuthUserController {
         "manage-data/sync-weekly-data",
 
         "manage-chws/replacements",
-        "manage-chws/chws-drug",
+        "manage-chws/drug-per-chw",
+        "manage-chws/drug-per-selected",
 
         "view-chws-data/dashboard1",
         "view-chws-data/dashboard2",

@@ -372,15 +372,21 @@ export class ChwsDrug {
   @Column({ type: 'varchar', default: '', nullable: true })
   form?: string
 
+  @Column({ type: 'float', nullable: true })
+  year!:number
+
   @Column({ type: 'varchar', nullable: true })
-  activity_date!: string
+  month!:string
 
   @Column({ type: 'varchar', nullable: true })
   activity_type?: string;
 
   @Column({ type: 'varchar', nullable: true })
-  loan_borrowing_chws_info?: string;
-  
+  lending_chws_info?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  borrowing_chws_info?: string;
+
   @Column({ type: 'float', nullable: true })
   lumartem?: number;
   
@@ -429,7 +435,6 @@ export class ChwsDrug {
   @Column({ type: 'varchar', nullable: true })
   comments?: string;
 
-
   @ManyToOne(() => Districts, district => district.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'district_id', referencedColumnName: 'id' })
   district!: Districts;
@@ -438,12 +443,19 @@ export class ChwsDrug {
   @JoinColumn({ name: 'site_id', referencedColumnName: 'id' })
   site!: Sites
 
+  @ManyToOne(() => Zones, zone => zone.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'zone_id', referencedColumnName: 'id' })
+  zone!: Zones
+
   @ManyToOne(() => Chws, chw => chw.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'chw_id', referencedColumnName: 'id' })
   chw!: Chws
 
   @Column({ type: 'varchar', nullable: true })
   reported_date!: string
+
+  @Column({ type: 'varchar', nullable: true })
+  reported_full_date!: string
 
   @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
@@ -478,6 +490,10 @@ export class ChwsDrugUpdate {
   @JoinColumn({ name: 'site_id', referencedColumnName: 'id' })
   site!: Sites
 
+  @ManyToOne(() => Zones, zone => zone.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'zone_id', referencedColumnName: 'id' })
+  zone!: Zones
+
   @ManyToOne(() => Chws, chw => chw.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'chw_id', referencedColumnName: 'id' })
   chw!: Chws
@@ -495,16 +511,10 @@ export class ChwsDrugUpdate {
   drug_name!:string
 
   @Column({ type: 'float', nullable: true })
-  year_cmm!:number
-
-  @Column({ type: 'float', nullable: true })
   quantity_validated!:number
 
   @Column({ type: 'float', nullable: true })
   delivered_quantity!:number
-
-  @Column({ type: 'float', nullable: true })
-  theoretical_quantity_to_order!:number
   
   @Column({ type: 'varchar', nullable: true })
   observations!:string
@@ -514,18 +524,75 @@ export class ChwsDrugUpdate {
   createdBy!:User
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt!: Date;
+  createdAt!: Date
 
   @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
   updatedBy!:User
   
   @UpdateDateColumn({ type: 'timestamp', nullable: true })
-  updatedAt!: Date;
+  updatedAt!: Date
 
 }
 export async function getChwsDrugUpdateSyncRepository(): Promise<Repository<ChwsDrugUpdate>> {
   return Connection.getRepository(ChwsDrugUpdate);
+}
+
+
+@Entity()
+export class DrugChwYearCmm {
+  constructor() { };
+  @PrimaryColumn({ type: 'varchar' })
+  id?: string
+
+  @ManyToOne(() => Districts, (district) => district.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'district_id', referencedColumnName: 'id' })
+  district!: Districts|null
+
+  @ManyToOne(() => Sites, site => site.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'site_id', referencedColumnName: 'id' })
+  site!: Sites
+
+  @ManyToOne(() => Zones, zone => zone.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'zone_id', referencedColumnName: 'id' })
+  zone!: Zones
+
+  @ManyToOne(() => Chws, chw => chw.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'chw_id', referencedColumnName: 'id' })
+  chw!: Chws
+
+  @Column({ type: 'varchar', nullable: true })
+  cmm_start_year_month!:string
+
+  @Column({ type: 'simple-array', nullable: true })
+  cmm_year_month_list!: string[]
+
+  @Column({ type: 'float', nullable: true })
+  drug_index!:number
+
+  @Column({ type: 'varchar', nullable: true })
+  drug_name!:string
+
+  @Column({ type: 'float', nullable: true })
+  year_chw_cmm!:number
+
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
+  createdBy!:User
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt!: Date
+
+  @ManyToOne(() => User, user => user.id, { eager: true, nullable: true, onDelete: "CASCADE", onUpdate: 'CASCADE' })
+  @JoinColumn({ name: 'updated_by', referencedColumnName: 'id' })
+  updatedBy!:User
+  
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  updatedAt!: Date
+
+}
+export async function getDrugChwYearCmmSyncRepository(): Promise<Repository<DrugChwYearCmm>> {
+  return Connection.getRepository(DrugChwYearCmm);
 }
 
 @Entity()
@@ -591,6 +658,42 @@ export class Persons {
 export async function GetPersonsRepository(): Promise<Repository<Persons>> {
   return Connection.getRepository(Persons);
 }
+
+@Entity()
+export class CouchDbUsers {
+  constructor() { };
+  @PrimaryColumn({ type: 'varchar' })
+  id!: string
+  
+  @Column({ type: 'varchar', nullable: true })
+  rev!:string;
+  
+  @Column({ type: 'varchar', nullable: true })
+  username!:string;
+  
+  @Column({ type: 'varchar', nullable: true })
+  fullname!:string;
+  
+  @Column({ type: 'varchar', nullable: true })
+  code!:string;
+
+  @Column({ type: 'varchar', nullable: true })
+  type!:string;
+
+  @Column({ type: 'varchar', nullable: true })
+  contact!:string;
+
+  @Column({ type: 'varchar', nullable: true })
+  role!:string;
+
+  @Column({ type: 'varchar', nullable: true })
+  place!:string;
+
+}
+export async function getCouchDbUsersSyncRepository(): Promise<Repository<CouchDbUsers>> {
+  return Connection.getRepository(CouchDbUsers);
+}
+
 
 @Entity()
 export class MeetingReportData {

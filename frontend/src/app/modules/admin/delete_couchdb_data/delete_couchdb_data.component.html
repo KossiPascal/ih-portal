@@ -1,0 +1,136 @@
+<h1 style="color:red;"> {{ responseMsg }} </h1>
+
+<section class="content-header">
+  <div class="container-fluid">
+    <h2>Delete Chws Data From Couch Database (Tonoudayo App)</h2>
+    <div class="card card-info">
+      <div class="overlay-wrapper">
+        <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
+          <div class="text-bold pt-2"> {{initMsg}}</div>
+        </div>
+        <div class="card-header">
+          <form [formGroup]="dataListToDeleteForm" (ngSubmit)="getListOfDataToDeleteFromCouchDb()" novalidate>
+            <div class="row">
+
+              <div class="col-sm-3 col-6">
+                <div class="form-group">
+                  <label>Date Début</label>
+                  <input type="date" class="form-control" formControlName="start_date" />
+                </div>
+              </div>
+
+              <div class="col-sm-3 col-6">
+                <div class="form-group">
+                  <label>Date Fin</label>
+                  <input type="date" class="form-control" formControlName="end_date" />
+                </div>
+              </div>
+
+              <div class="col-sm-3 col-6">
+                <div class="form-group">
+                  <label>District</label>
+                  <select (change)="genarateSites()" class="form-control" formControlName="districts">
+                    <option value=""></option>
+                    <option *ngFor="let district of Districts$" value="{{district.id}}">
+                      {{ district.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-sm-3 col-6">
+                <div class="form-group">
+                  <label>Site</label>
+                  <select (change)="genarateZones()" class="form-control" formControlName="sites">
+                    <option value=""></option>
+                    <option *ngFor="let site of sites$" value="{{site.id}}">
+                      {{ site.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-sm-3 col-6">
+                <div class="form-group">
+                  <label>Zone</label>
+                  <select (change)="genarateChws()" class="form-control" formControlName="zones">
+                    <option value=""></option>
+                    <option *ngFor="let zone of zones$" value="{{zone.id}}">
+                      {{ zone.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-sm-3 col-6">
+                <div class="form-group">
+                  <label>Chw</label>
+                  <select class="form-control" formControlName="chws">
+                    <option value=""></option>
+                    <option *ngFor="let chw of chws$" value="{{chw.id}}">
+                      {{ chw.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-sm-3 col-6">
+                <div class="form-group">
+                  <label>Type</label>
+                  <select class="form-control" formControlName="type">
+                    <option value=""></option>
+                    <option *ngFor="let type of types$" value="{{type}}">
+                      {{ type.toUpperCase() }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-sm-2 col-6">
+                <div class="form-group">
+                  <label>.</label>
+                  <button [disabled]="!dataListToDeleteForm.valid" type="submit" class="btn btn-warning form-control">
+                    OK <span class="fa fa-floppy-o fa-right"></span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+
+        </div>
+        <div class="panel-body">
+          <button *ngIf="selectedListToBeDelete.length > 0" (click)="deleteSelectedDataFromCouchDb()" type="button"
+            class="btn btn-warning">
+            Delete Selected Data From CouchDb
+          </button>
+          <br>
+          <table class="table datatable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>REV</th>
+                <th>Zone Name</th>
+                <th>Site</th>
+              </tr>
+            </thead>
+
+            <tbody *ngFor="let data of foundedDataToDelete">
+              <tr>
+                <td>{{ data.id }}</td>
+                <td>{{ data.rev }}</td>
+                <td>{{ data.zone.name }}</td>
+                <td>{{ data.site.name }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

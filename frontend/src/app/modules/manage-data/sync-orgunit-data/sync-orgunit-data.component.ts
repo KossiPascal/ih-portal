@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Districts, OrgUnitImport, Sites } from '@ih-app/models/Sync';
+import { CouchDbUsers, Districts, OrgUnitImport, Sites } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import { notNull, returnEmptyArrayIfNul } from '@ih-app/shared/functions';
@@ -22,10 +22,14 @@ export class SyncOrgUnitDataComponent implements OnInit {
   tab1_messages: OrgUnitImport | null = null;
   tab2_messages: OrgUnitImport | null = null;
   tab3_messages: OrgUnitImport[] = [];
+  tab4_messages!: string|null;
 
   loading1!: boolean;
   loading2!: boolean;
   loading3!: boolean;
+  loading4!: boolean;
+
+  users$!:CouchDbUsers[];
 
 
   LoadingMsg: string = "Loading..."
@@ -47,6 +51,7 @@ export class SyncOrgUnitDataComponent implements OnInit {
         this.Districts$ = _d$.data;
         this.sync.getSitesList().subscribe(async (res: { status: number, data: Sites[] }) => {
           if (res.status == 200) this.Sites$ = res.data;
+          this.getChtUsersFromDb();
         }, (err: any) => console.log(err));
       }
     }, (err: any) => console.log(err));
@@ -54,6 +59,7 @@ export class SyncOrgUnitDataComponent implements OnInit {
     this.loading1 = false;
     this.loading2 = false;
     this.loading3 = false;
+    this.loading4 = false;
 
     this.chwsDataForm = this.createChwsDataFormGroup();
     this.dhis2ChwsDataForm = this.createDhis2ChwsDataFormGroup();
@@ -69,7 +75,7 @@ export class SyncOrgUnitDataComponent implements OnInit {
       zone: new FormControl(true, [Validators.required]),
       family: new FormControl(true, [Validators.required]),
       patient: new FormControl(true, [Validators.required]),
-      chw: new FormControl(true, [Validators.required])
+      chw: new FormControl(true, [Validators.required]),
     });
   }
 
@@ -126,12 +132,36 @@ export class SyncOrgUnitDataComponent implements OnInit {
     });
   }
 
-  
+  syncChtUsersFromCouchDb(): void {
+    this.loading4 = true;
+    this.tab4_messages = null;
+    this.sync.syncCouchDbUsers().subscribe((res: {status:number, data:CouchDbUsers[]|string}) => {
+      if (res.status == 200) {
+        this.users$ = res.data as CouchDbUsers[];
+      } else {
+        this.tab4_messages = res.data as string;
+      }
+      this.loading4 = false;
+      // console.log(response);
+    }, (err: any) => {
+      this.tab4_messages = err.error;
+      this.loading4 = false;
+    });
+  }
 
-  syncChwsDataFromCouchDb(): void {
+  getChtUsersFromDb(): void {
+    this.sync.getChtUsers().subscribe((res: {status:number, data:CouchDbUsers[]|string}) => {
+      if (res.status == 200) {
+        this.users$ = res.data as CouchDbUsers[];
+      }
+    }, (err: any) => {
+    });
+  }
+  // syncCouchDbUsers
+  syncChtOrgUnitFromCouchDb(): void {
     this.loading2 = true;
     this.tab2_messages = null;
-    this.sync.syncCouchDbChwsData(this.chwsDataForm.value).subscribe((response: OrgUnitImport) => {
+    this.sync.syncCouchDbOrgUnit(this.chwsDataForm.value).subscribe((response: OrgUnitImport) => {
       this.loading2 = false;
       this.tab2_messages = response;
       // console.log(response);

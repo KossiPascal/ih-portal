@@ -1,3 +1,19 @@
+import { notEmpty } from "./functions";
+
+export function changeMonthOfDate(dateObj: any, newMonth: any, asString: boolean = true): string | Date | undefined {
+    try {
+        var date: Date = dateObj instanceof Date ? dateObj : new Date(dateObj);
+        const month = notEmpty(newMonth) ? parseInt(`${newMonth}`) : 0;
+        if (month >= 1 && month <=12) {
+            date.setUTCMonth(month - 1);
+        }
+        return asString ? date.toISOString().slice(0, 10) : date;;
+    } catch (error) {
+        return undefined;
+    }
+}
+
+
 export function getAgeInMilliseconds(birth_date?: string): Date | null {
     if (birth_date != null) {
         return new Date(Date.now() - (new Date(birth_date)).getTime());
@@ -130,18 +146,17 @@ export function previousDate(dateObj: any): Date {
     var now: Date = dateObj instanceof Date ? dateObj : new Date(dateObj);
 
     var y = now.getFullYear();
-    var m = String(now.getMonth()).padStart(2, '0');
+    var m = String(now.getMonth() + 1).padStart(2, '0'); // Add 1 to get the correct month number
     var d = String(now.getDate()).padStart(2, '0');
     var h = String(now.getHours()).padStart(2, '0');
     var mm = String(now.getMinutes()).padStart(2, '0');
     var s = String(now.getSeconds()).padStart(2, '0');
 
-    if (m == '00') {
+    if (m == '01') {
         return new Date(`${y - 1}-12-${d} ${h}:${mm}:${s}`);
     } else {
         return new Date(`${y}-${m}-${d} ${h}:${mm}:${s}`);
     }
-
 }
 
 export function startEnd21and20Date(): { start_date: string, end_date: string } {
@@ -187,6 +202,62 @@ export function isDayInDate(date: any, day: any): boolean {
 export function isBetween21and20(date: string): boolean {
     var betweenDate = startEnd21and20Date();
     return isGreaterOrEqual(date, betweenDate.start_date) && isLessOrEqual(date, betweenDate.end_date)
+}
+
+export function YearMonthBetween21And20(dateObj: any): { year: number, month: string } {
+    const now: Date = (dateObj instanceof Date) ? dateObj : (new Date(dateObj));
+
+    const y = now.getFullYear();
+    const m = now.getMonth() + 1;
+    const d = now.getDate();
+
+    const month = d >= 21 && d <= 31 ? (m == 12 ? 1 : m + 1) : m;
+    const year = d >= 21 && d <= 31 ? (m == 12 ? y + 1 : y) : y;
+
+    return { year: year, month: String(month).padStart(2, '0') }
+}
+
+export function GetPreviousDate(dateObj: any): string | undefined {
+    try {
+        if (notEmpty(dateObj)) {
+            const now: Date = (dateObj instanceof Date) ? dateObj : (new Date(dateObj));
+            const y = now.getFullYear();
+            const m = now.getMonth() + 1;
+            const d = now.getDate();
+            const month = m == 1 ? 12 : m - 1;
+            const year = m == 1 ? y - 1 : y
+            return `${year}-${String(month).padStart(2, '0')}-${d}`;
+        }
+    } catch (error) { }
+    return undefined;
+}
+
+export function GetPreviousYearMonth(year: number, month: string): { year: number, month: string } {
+    const m: number = parseInt(month);
+    return { year: m == 1 ? year - 1 : year, month: String((m == 1 ? 12 : m - 1)).padStart(2, '0') }
+}
+
+
+export function previousMonth(monthId: string): string {
+    let cMonth: number = parseInt(monthId, 10);
+    if (cMonth === 1) return '12';
+    cMonth--;
+    return cMonth < 10 ? `0${cMonth}` : cMonth.toString();
+}
+
+export function date_to_milisecond(stringDate: string, start: boolean = true): string {
+    if (stringDate != "") {
+        let dt = start ? " 00:00:00.000001" : " 23:59:59.999999";
+        let date = new Date(`${stringDate}` + dt);
+        return `${date.getTime()}`;
+    }
+    return stringDate;
+}
+
+export function milisecond_to_date(timestamp: string | number, type = 'fulldate'): string {
+    const date = new Date(timestamp);
+    if (type === 'dateOnly') return date.toLocaleString('sv').split(' ')[0].trim();
+    return date.toLocaleString('sv');
 }
 
 export function getMondays(dateObj: any, format: string = `en`, withHour: boolean = false): string[] {

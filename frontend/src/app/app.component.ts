@@ -219,7 +219,13 @@ export class AppComponent implements OnInit {
     },
     {
       icon: 'far fa-circle nav-icon',
-      link: 'admin/database-utils',
+      link: 'admin/delete-couchdb-data',
+      label: 'Delete Couchdb Data',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'admin/truncate-database',
       label: 'Admin Truncate Database',
       show: true
     },
@@ -323,8 +329,14 @@ export class AppComponent implements OnInit {
     },
     {
       icon: 'far fa-circle nav-icon',
-      link: 'manage-chws/chws-drug',
-      label: 'Situation Médicament ASC',
+      link: 'manage-chws/drug-per-chw',
+      label: 'Médicament Par ASC',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'manage-chws/drug-per-selected',
+      label: 'Gestion Médicament ASC',
       show: true
     },
   ];
@@ -355,8 +367,14 @@ export class AppComponent implements OnInit {
     },
     {
       icon: 'far fa-circle nav-icon',
-      link: 'manage-chws/chws-drug',
-      label: 'Situation Médicament ASC',
+      link: 'manage-chws/drug-per-chw',
+      label: 'Médicament Par ASC',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
+      link: 'manage-chws/drug-per-selected',
+      label: 'Gestion Médicament ASC',
       show: true
     },
     {
