@@ -221,10 +221,10 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   if (!req.secure) return res.redirect(`https://${req.headers.host}${req.url}`);
   const apiRepo = await getApiTokenAccessRepository();
 
-  // if (!api_access_key || api_access_key == '') return res.status(405).json({ error: 'You must provide a valid `api_access_key`' });
+  if (!api_access_key || api_access_key == '') return res.status(405).json({ error: 'You must provide a valid `api_access_key`' });
   const validApiKeysElement: ApiTokenAccess[] = await apiRepo.findBy({ isActive: true });
   const validApiKeys = validApiKeysElement.map(api => api.token);
-  // if (!validApiKeys.includes(api_access_key) || !validPaths.includes(req.path)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!validApiKeys.includes(api_access_key) || !validPaths.includes(req.path)) return res.status(401).json({ error: 'Unauthorized' });
   if (req.secure) next();
 });
 

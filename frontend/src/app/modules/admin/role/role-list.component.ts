@@ -191,7 +191,6 @@ export class RoleComponent implements OnInit {
     };
   }
 
-
   ToStringNewLine(value: string[] | null, type: 'pages' | 'actions'): string {
     return value != null ? `${value}`.toString().replace(/,/g, '<br>') : '';
   }

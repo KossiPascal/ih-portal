@@ -215,7 +215,6 @@ export class DrugPerChwManageComponent implements OnInit {
                   this.editQtyValidatedClick(id, true);
                   this.editQtyDeliveredClick(id, true);
                   this.editObservationsClick(id, true);
-
                 }
               } else {
                 this.drugUpdateErrorMsg += _res$.data.toString();

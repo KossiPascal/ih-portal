@@ -9,7 +9,6 @@ import { Roles } from '@ih-src/app/models/Roles';
 import { startEnd21and20Date } from '@ih-src/app/shared/dates-utils';
 
 
-
 @Component({
   selector: 'app-dashboard-1',
   templateUrl: `./dashboard-1.component.html`,
@@ -54,16 +53,12 @@ export class Dashboard1Component implements OnInit {
     return item.Code;
   }
 
-
   ngOnInit(): void {
     this.isLoading = false;
     this.initDate = startEnd21and20Date();
     this.aggradateDataForm = this.createDataFilterFormGroup();
     this.initAllData();
   }
-
-
-
 
   async initAllData() {
     this.isLoading = true;

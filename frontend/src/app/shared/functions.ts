@@ -54,6 +54,23 @@ export function previousMonth(monthId: string): string {
 }
 
 
+
+export function getMonthsList(): { labelEN: string; labelFR: string; id: string; uid: number }[] {
+  return [
+    { labelEN: "January", labelFR: "Janvier", id: "01", uid: 1 },
+    { labelEN: "February", labelFR: "Février", id: "02", uid: 2 },
+    { labelEN: "March", labelFR: "Mars", id: "03", uid: 3 },
+    { labelEN: "April", labelFR: "Avril", id: "04", uid: 4 },
+    { labelEN: "May", labelFR: "Mai", id: "05", uid: 5 },
+    { labelEN: "June", labelFR: "Juin", id: "06", uid: 6 },
+    { labelEN: "July", labelFR: "Juillet", id: "07", uid: 7 },
+    { labelEN: "August", labelFR: "Août", id: "08", uid: 8 },
+    { labelEN: "September", labelFR: "Septembre", id: "09", uid: 9 },
+    { labelEN: "October", labelFR: "Octobre", id: "10", uid: 10 },
+    { labelEN: "November", labelFR: "Novembre", id: "11", uid: 11 },
+    { labelEN: "December", labelFR: "Décembre", id: "12", uid: 12 },
+  ];
+}
 export function getMonthLabelById(id: string, lang: 'fr' | 'en' = 'fr'): string {
   for (var i = 0; i < months().length; i++) {
     var m = months()[i];
@@ -83,7 +100,9 @@ export function getYearsList(biginYear: number = 2022): number[] {
   return [biginYear]
 }
 
-
+export function toArray(data: any): string[] {
+  return notNull(data) ? Array.isArray(data) ? data : [data] : [];
+}
 
 export function currentYear(date?: string): number {
   try {

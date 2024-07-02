@@ -101,6 +101,11 @@ export class SyncService {
     return this.http.post(`${backenUrl()}/sync/get/datainfos`, fparams, CustomHttpHeaders(this.store));
   }
 
+  getPatientDataInfos(params?: FilterParams): any {
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/get/patientdatainfos`, fparams, CustomHttpHeaders(this.store));
+  }
+
 
   syncDhis2ChwsData(params: Dhis2Sync): any {
     const fparams = this.ApiParams(params);

@@ -277,3 +277,28 @@ export function getMondays(dateObj: any, format: string = `en`, withHour: boolea
     }
     return mondays;
 }
+
+export function getDateRange(d:{month:string, year:number, startDay?:number, endDay?:number}): { start_date: string, end_date: string } {
+    let month = parseInt(d.month, 10);
+    let startDay = d.startDay ?? 26;
+    let endDay = d.endDay ?? 25;
+    let startMonth, endMonth, startYear, endYear;
+    if (month === 1) {
+        startMonth = 11;
+        endMonth = 0;
+        startYear = d.year - 1;
+        endYear = d.year;
+    } else {
+        startMonth = month - 2;
+        endMonth = month -1;
+        startYear = d.year;
+        endYear = d.year;
+    }
+    let startDate = new Date(startYear, startMonth, startDay);
+    let endDate = new Date(endYear, endMonth, endDay);
+
+    return {
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0]
+    };
+}

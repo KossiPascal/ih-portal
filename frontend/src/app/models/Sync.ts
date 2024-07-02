@@ -129,6 +129,8 @@ export interface OrgUnitImport {
 export interface FilterParams {
   start_date?: string
   end_date?: string
+  year?: number
+  months?: string[]
   sources?: string[]
   forms?: string[]
   chws?: string[]

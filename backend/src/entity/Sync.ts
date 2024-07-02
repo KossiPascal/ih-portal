@@ -260,7 +260,6 @@ export async function getChwsSyncRepository(): Promise<Repository<Chws>> {
   return Connection.getRepository(Chws);
 }
 
-
 // ##################################################################
 
 

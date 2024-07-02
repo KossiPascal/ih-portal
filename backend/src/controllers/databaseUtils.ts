@@ -134,12 +134,7 @@ export async function getChwDataToBeDeleteFromCouchDb(req: Request, resp: Respon
 export async function deleteFromCouchDb(req: Request, res: Response, next: NextFunction) {
     var todelete: { _deleted: boolean, _id: string, _rev: string }[] = req.body.array_data_to_delete;
     var reqType = req.body.type;
-    var allIds: string[] = [];
-
-    for (let i = 0; i < todelete.length; i++) {
-        const ids = todelete[i];
-        allIds.push(ids._id);
-    }
+    const allIds: string[] = todelete.map(data => data._id);
 
     if (todelete.length > 0 && allIds.length > 0 && reqType) {
         request({
@@ -187,11 +182,7 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
 
     try {
         const { code, parent, contact, new_parent, } = req.body;
-
-        
-
         const _repo = await getCouchDbUsersSyncRepository();
-
         const user = await _repo.findOneBy({ type: 'chw', role: 'chw', code: code, place: parent, contact: contact });
 
         if (user) {

@@ -495,14 +495,13 @@
                   <th>Nombre d'actions</th>
                 </tr>
                 <tr *ngFor="let data of patologie.value| keyvalue">
-                  <td> {{ data.key }} </td>
+                  <td>{{ data.key }}</td>
                   <td>{{ data.value }}</td>
                 </tr>
                 <tr>
                   <td>Total Consultation</td>
                   <td colspan="2" style="font-size: 20px!important;">{{ totalPatologie(patologie.value| keyvalue) }}</td>
                 </tr>
-                
               </table>
               <br><br>
             </ng-container>

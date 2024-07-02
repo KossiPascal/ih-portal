@@ -4,6 +4,7 @@ import { Dashboard1Component } from './dash1/dashboard-1.component';
 import { Dashboard2Component } from './dash2/dashboard-2.component';
 import { Dashboard3Component } from './dash3/dashboard-3.component';
 import { Dashboard4Component } from './dash4/dashboard-4.component';
+import { Dashboard5Component } from './dash5/dashboard-5.component';
 import { MapChartComponent } from './map-chart/map-chart.component';
 import { HighchartMap1Component } from './highchart1/highchart1.component';
 import { HighchartMap2Component } from './highchart2/highchart2.component';
@@ -54,6 +55,17 @@ const routes: Routes = [
       icon: 'fa fa-user',
       label: 'Dashboard-4',
       title: 'Détails Visite Ménages',
+    },
+  },
+  {
+    path: 'dashboard5',
+    component: Dashboard5Component,
+    canActivate: [LoginAccessGuard],
+    data: {
+      href: 'dashboard5',
+      icon: 'fa fa-user',
+      label: 'Dashboard-5',
+      title: 'Patients Uniques Visités',
     },
   },
   {

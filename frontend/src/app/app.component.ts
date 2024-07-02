@@ -263,6 +263,12 @@ export class AppComponent implements OnInit {
     },
     {
       icon: 'far fa-circle nav-icon',
+      link: 'view-chws-data/dashboard5',
+      label: 'Patients Uniques Visités',
+      show: true
+    },
+    {
+      icon: 'far fa-circle nav-icon',
       link: 'view-chws-data/highchartmap1',
       label: 'M . A . P - 1',
       show: true

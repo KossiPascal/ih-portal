@@ -2,9 +2,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, Component } from '@angular/core';
 
 
-
-
-
 https://ng-findme.surge.sh/
 
 https://arminzia.com/blog/working-with-google-maps-in-angular/
@@ -17,9 +14,6 @@ https://developers.google.com/maps/documentation/javascript/geolocation?hl=fr
 https://kevinkreuzer.medium.com/how-to-implement-an-address-search-with-angular-and-google-maps-32a2df09f8e9
 https://thingsmatic.com/2020/02/04/geolocation-with-angular-and-net-core-part-2/
 https://www.digitalocean.com/community/tutorials/angular-angular-google-maps
-
-
-
 
     findMe() {
         if (navigator.geolocation) {

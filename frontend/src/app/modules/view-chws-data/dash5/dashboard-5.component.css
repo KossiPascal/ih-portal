@@ -1,0 +1,72 @@
+.info {
+  color:blue;
+  font-weight: bolder;
+}
+
+.warning {
+  color:orange;
+  font-size: large;
+  font-weight: bolder;
+}
+
+.primary {
+  color: purple;
+  font-size: large;
+  font-weight: bolder;
+}
+
+.secondary {
+  color: rgb(9, 228, 191);
+  font-size: large;
+  font-weight: bolder;
+}
+
+.success {
+  color:green;
+  font-size: large;
+  font-weight: bolder;
+}
+
+.success0 {
+  color:green;
+  font-weight: bolder;
+}
+
+.danger {
+  color:red;
+  font-size: large;
+  font-weight: bolder;
+}
+
+.danger0 {
+  color:red;
+  font-weight: bolder;
+}
+
+.line {
+  color:black;
+  font-size: large;
+  font-weight: bolder;
+}
+
+/* .table-header {
+} */
+
+.table-header th {
+  background-color: #00ccff!important;
+  font-weight: bold!important;
+  padding: 10px!important;
+  text-align: left!important;
+  font-size: 20px!important;
+}
+
+.no-last-row {
+  font-size: 20px!important;
+}
+
+.last-row th {
+  background-color: #65c6d2!important;
+  font-weight: bold!important;
+  padding: 10px!important;
+  text-align: left!important;
+}

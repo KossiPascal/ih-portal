@@ -2,12 +2,12 @@ import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import { Between, In } from "typeorm";
 import { ChtOutPutData, DataIndicators } from "../entity/DataAggragate";
-import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository, ChwsDrug, getChwsDrugSyncRepository, getChwsDrugUpdateSyncRepository, ChwsDrugUpdate, GetPersonsRepository, Persons, Teams, GetTeamsRepository, MeetingReportData, GetMeetingReportDataRepository, Districts, Sites, getSiteSyncRepository, getDistrictSyncRepository, getDrugChwYearCmmSyncRepository, DrugChwYearCmm } from "../entity/Sync";
+import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository, ChwsDrug, getChwsDrugSyncRepository, getChwsDrugUpdateSyncRepository, ChwsDrugUpdate, GetPersonsRepository, Persons, Teams, GetTeamsRepository, MeetingReportData, GetMeetingReportDataRepository, Districts, Sites, getSiteSyncRepository, getDistrictSyncRepository, getDrugChwYearCmmSyncRepository, DrugChwYearCmm, getPatientSyncRepository, Patients } from "../entity/Sync";
 import { Consts } from "../utils/constantes";
 import { notEmpty } from "../utils/functions";
 import { getChws } from "./orgUnitsFromDB ";
 import { ChwsDrugData, ChwsDrugQuantityInfo, PatologieData } from "../utils/appInterface";
-import { GetPreviousDate, GetPreviousYearMonth, YearMonthBetween21And20, getDateInFormat, isBetween } from "../utils/date-utils";
+import { GetPreviousDate, GetPreviousYearMonth, YearMonthBetween21And20, getDateInFormat, getDateRange, isBetween } from "../utils/date-utils";
 
 const request = require('request');
 // const fetch = require('node-fetch');
@@ -317,6 +317,79 @@ function getChwInfos(chw: Chws[], chwId: string): Chws | null {
   }
   return null;
 }
+
+export async function getPatientDataInfos(req: Request, res: Response, next: NextFunction): Promise<any> {
+  var respData: { status: number, data: any };
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    respData = { status: 201, data: 'Informations you provided are not valid' }
+    return res.status(201).json(respData);
+  }
+
+  const errorMsg: string = "Your request provides was rejected !";
+  try {
+    const months: string[] = req.body.months;
+    const year = req.body.year;
+    const brutData: { month: string, year: number, data: ChwsData[] }[] = [];
+    for (const m of months) {
+      const date = getDateRange({ month: m, year: year, startDay: 26, endDay: 25 });
+    // console.log(date);
+      req.body.start_date = date.start_date;
+      req.body.end_date = date.end_date;
+      const dt: { status: number, data: any } = await getChwsDataWithParams(req, res, next, true);
+      if (dt.status == 200) {
+        brutData.push({ month: m, year: year, data: dt.data });
+      }
+    }
+     // const _patientRepo = await getPatientSyncRepository();
+      // var patients: Patients[] = await _patientRepo.find({
+      //   where: {
+      //     district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+      //     site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+      //     zone: {
+      //       id: notEmpty(req.body.zones) ? In(req.body.zones) : undefined,
+      //     },
+      //   }
+      // });
+
+      // if (!patients) return res.status(201).json({ status: 201, data: 'Not patient found with parametter!' });
+
+    const finalData: { month: string, year: number, data: { pecime: number, maternel: number, total: number } }[] = [];
+    if (brutData.length > 0) {
+      for (const dtJ of brutData) {
+        var hasVisit: string[] = [];
+        var fpData = { pecime: 0, maternel: 0, total: 0 };
+        // var finalPatientData = { childCount: 0, womenCound: 0, cibleCount: 0, uniquePecimeData: 0, uniqueMaternelData: 0, uniqueTotalData: 0 };
+        for (const d of dtJ.data) {
+          if (d.family_id && d.family_id != "" && d.patient_id && d.patient_id != "" && d.form && d.form != "") {
+            try {
+              if (!hasVisit.includes(d.patient_id)) {
+                hasVisit.push(d.patient_id);
+                if (Consts.child_forms.includes(d.form)) {
+                  fpData.pecime += 1;
+                  fpData.total += 1;
+                }
+                if (Consts.women_forms.includes(d.form)) {
+                  fpData.maternel += 1;
+                  fpData.total += 1;
+                }
+              }
+            } catch (error) { }
+          }
+        }
+        finalData.push({ month: dtJ.month, year: dtJ.year, data: fpData })
+      }
+      return res.status(200).json({ status: 200, data: finalData });
+    } else {
+      return res.status(201).json({ status: 201, data: 'No data found' });
+    }
+  } catch (err) {
+    // return next(err);
+    respData = { status: 201, data: errorMsg };
+  }
+  return res.status(respData.status).json(respData);
+}
+
 
 export async function getDataInformations(req: Request, res: Response, next: NextFunction): Promise<any> {
   var respData: { status: number, data: any };

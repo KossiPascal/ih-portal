@@ -543,6 +543,7 @@ export class AuthUserController {
         "view-chws-data/dashboard2",
         "view-chws-data/dashboard3",
         "view-chws-data/dashboard4",
+        "view-chws-data/dashboard5",
         "view-chws-data/highchartmap1",
         "view-chws-data/highchartmap2",
         "view-chws-data/highchartmap3",
