@@ -1,8 +1,8 @@
 export class Consts {
 
   static portInfo = this.getPort();
-  static APP_LOGO = this.portInfo.port == 4432 || this.portInfo.port == 8832 ? 'assets/logo/logo.png' : 'assets/logo/dev_logo.png';
-  static APP_LOGO_1 = this.portInfo.port == 4432 || this.portInfo.port == 8832 ? 'assets/logo/logo1.png' : 'assets/logo/dev_logo1.png';
+  static APP_LOGO = [4432, 8832, 443].includes(this.portInfo.port)  ? 'assets/logo/logo.png' : 'assets/logo/dev_logo.png';
+  static APP_LOGO_1 = [4432, 8832, 443].includes(this.portInfo.port) ? 'assets/logo/logo1.png' : 'assets/logo/dev_logo1.png';
 
   static isProdEnv() {
     return true;//false;//
