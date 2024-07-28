@@ -24,10 +24,9 @@ const smtpTransport = require('nodemailer-smtp-transport');
 var rootCas = require('ssl-root-cas').create();
 
 require('dotenv').config({ path: sslFolder('.ih-env') });
-const { CHT_USER, CHT_PASS, CHT_HOST, PROD_CHT_PORT, DEV_CHT_PORT, NODE_TLS_REJECT_UNAUTHORIZED } = process.env;
+const { CHT_USER, CHT_PASS, PROD_CHT_HOST, DEV_CHT_HOST } = process.env;
 
 export function httpHeaders(Username?: string, Password?: string, WithParams: boolean = true) {
-    // NODE_TLS_REJECT_UNAUTHORIZED = '0';
     var p: any = {
         'Authorization': 'Basic ' + Buffer.from(notEmpty(Username) && notEmpty(Password) ? `${Username}:${Password}` : `${CHT_USER}:${CHT_PASS}`).toString('base64'),
         "Accept": "application/json",
@@ -171,15 +170,18 @@ export function ServerStart(data: {
         key: string;
         ca: string;
         cert: string;
-    }, app: any, access_ports: boolean, port: any, hostnames: any[]
+    }, app: any, access_ports: boolean, port: any, hostnames: any[],useLocalhost: boolean
 }) {
     const server = data.isSecure == true ? https.createServer(data.credential!, data.app) : http.createServer(data.app);
     // var io = require('socket.io')(server, {});
     // server.listen(data.port, '0.0.0.0', () => onProcess)
     if (data.access_ports) server.listen(data.port, '0.0.0.0', () => onProcess);
-    if (!data.access_ports) server.listen(data.port, data.hostnames[0], () => onProcess);
+    if (!data.access_ports) {
+        if (data.useLocalhost) server.listen(data.port, '127.0.0.1', () => onProcess);
+        if (!data.useLocalhost) server.listen(data.port, data.hostnames[0], () => onProcess);
+    }
     server.on('error', (err) => onError(err, data.port));
-    server.on('listening', () => onListening(server, data.hostnames, 'https'));
+    server.on('listening', () => onListening(server, data.useLocalhost ? ['localhost'] : data.hostnames, 'https'));
     server.on('connection', (stream) => console.log('someone connected!'));
     return server;
 }
@@ -315,13 +317,12 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
     couchArg.push(`descending=${params.descending == true}`);
     if (notEmpty(params.startKey)) couchArg.push(`key=[${params.startKey}]`);
     if (notEmpty(params.endKey)) couchArg.push(`endkey=[${params.endKey}]`);
-    const port = parseInt((Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT) ?? '443');
     var options = {
-        host: CHT_HOST ?? '',
-        port: port,
+        host: Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST ?? '',
+        port: 443,
         path: `${dbCibleUrl}?${couchArg.join('&')}`,
-        url: `${CHT_HOST}:${port}${dbCibleUrl}?${couchArg.join('&')}`,
-        use_SSL_verification: true,
+        url: `${Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST}${dbCibleUrl}?${couchArg.join('&')}`,
+        use_SSL_verification: false,
         user: CHT_USER ?? '',
         pass: CHT_PASS ?? '',
     };

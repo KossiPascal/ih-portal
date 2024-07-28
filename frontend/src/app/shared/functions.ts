@@ -283,7 +283,7 @@ export function backenUrl(cible: string = 'api'): string {
     return `${location.protocol}//${location.hostname}:${portInfo.port}/${cible}`;
   }
   return `${location.origin}/${cible}`;
-  // return 'https://portal-integratehealth.org:9999/api'
+  // return 'https://localhost:4432/api'
 }
 
 export function custumRequest(method: string, http: HttpClient, store: AppStorageService, url: string, data?: any, responseType?: any) {

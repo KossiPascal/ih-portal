@@ -69,7 +69,7 @@ export class MeetingReportComponent implements OnInit {
     this.GetPerson();
     this.GetTeams();
     this.GetReports();
-    this.selected_report_url = 'https://portal-integratehealth.org:9999/manage-reports/meeting-report';
+    this.selected_report_url = 'https://tonoudayoanalyse.portal-integratehealth.org/manage-reports/meeting-report';
   }
 
   openNewWindow(event:Event) {

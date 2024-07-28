@@ -27,7 +27,7 @@ const compression = require("compression");
 const responseTime = require('response-time')
 
 require('dotenv').config({ path: sslFolder('.ih-env') });
-const { ACCESS_ALL_AVAILABE_PORT, CAN_ACCESS_INSECURE, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED } = process.env
+const { ACCESS_ALL_AVAILABE_PORT, CAN_ACCESS_INSECURE, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED, USE_LOCALHOST } = process.env
 
 
 const hostnames = getIPAddress(ACCESS_ALL_AVAILABE_PORT == 'true');
@@ -148,6 +148,14 @@ cron.schedule("00 59 23 * * *", function () {
 // uploadData();
 
 if (CAN_ACCESS_INSECURE == 'true') {
-  ServerStart({ isSecure: false, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: port, hostnames: hostnames })
+  ServerStart({ isSecure: false, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: port, hostnames: hostnames, useLocalhost: USE_LOCALHOST === 'true' })
 }
-ServerStart({ isSecure: true, credential: credentials, app: appSecured, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: portSecured, hostnames: hostnames })
+ServerStart({ 
+  isSecure: true, 
+  credential: credentials, 
+  app: appSecured, 
+  access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', 
+  port: portSecured, 
+  hostnames: hostnames,
+      useLocalhost: USE_LOCALHOST === 'true'
+})

@@ -1,8 +1,8 @@
 export class Consts {
 
   static portInfo = this.getPort();
-  static APP_LOGO = this.portInfo.port == 9999 || this.portInfo.port == 9990 ? 'assets/logo/logo.png' : 'assets/logo/dev_logo.png';
-  static APP_LOGO_1 = this.portInfo.port == 9999 || this.portInfo.port == 9990 ? 'assets/logo/logo1.png' : 'assets/logo/dev_logo1.png';
+  static APP_LOGO = this.portInfo.port == 4432 || this.portInfo.port == 8832 ? 'assets/logo/logo.png' : 'assets/logo/dev_logo.png';
+  static APP_LOGO_1 = this.portInfo.port == 4432 || this.portInfo.port == 8832 ? 'assets/logo/logo1.png' : 'assets/logo/dev_logo1.png';
 
   static isProdEnv() {
     return true;//false;//
@@ -12,8 +12,8 @@ export class Consts {
     if (location.port == '4200') {
       // const port = location.protocol === 'https:' ? envs.PORT_SECURED : envs.PORT;
       const isHttps: boolean = location.protocol === 'https:';
-      const prodPort = isHttps ? 9999 : 9990;
-      const devPort = isHttps ? 7777 : 7770;
+      const prodPort = isHttps ? 4432 : 8832;
+      const devPort = isHttps ? 4433 : 8833;
       return { isLocal: true, port: Consts.isProdEnv() == true ? prodPort : devPort };
       // return environment.apiURL;
     }

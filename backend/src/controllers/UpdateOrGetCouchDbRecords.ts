@@ -6,10 +6,10 @@ import https from 'https';
 const axios = require('axios');
 
 require('dotenv').config({ path: sslFolder('.ih-env') });
-const { CHT_USER, CHT_PASS, CHT_HOST, PROD_CHT_PORT, DEV_CHT_PORT, NODE_TLS_REJECT_UNAUTHORIZED } = process.env;
+const { CHT_USER, CHT_PASS, PROD_CHT_HOST, DEV_CHT_HOST } = process.env;
 
 const databaseName = 'medic';
-const couchDbUrl = `${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}`;
+const couchDbUrl = `${Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST}`;
 const username = CHT_USER;
 const password = CHT_PASS;
 

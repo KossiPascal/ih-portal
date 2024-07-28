@@ -1,11 +1,11 @@
 {
   "name": "ih-portal-backend",
-  "version": "1.3.23",
+  "version": "1.3.34",
   "main": "index.js",
   "author": "TSOLEGNAGBO Kossi <kossi.tsolegnagbo@gmail.com>",
   "private": true,
   "description": "Integratehealth analytics backend app for chws followup",
-  "homepage": "https://portal-integratehealth.org:9999",
+  "homepage": "https://tonoudayoanalyse.portal-integratehealth.org",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/KossiPascal/ih-portal.git"

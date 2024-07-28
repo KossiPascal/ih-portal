@@ -12,7 +12,7 @@ const fetch = require('node-fetch');
 const request = require('request');
 require('dotenv').config({ path: sslFolder('.ih-env') });
 
-const { DHIS_HOST, CHT_HOST, PROD_CHT_PORT, DEV_CHT_PORT, NODE_TLS_REJECT_UNAUTHORIZED } = process.env;
+const { DHIS_HOST, PROD_CHT_HOST, DEV_CHT_HOST } = process.env;
 
 
 const _sepation = `\n\n\n\n__________\n\n\n\n`;
@@ -404,9 +404,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                     } else {
                         return resp.status(200).json(outPutInfo);
                     }
-                    // if (sync.use_SSL_verification !== true) NODE_TLS_REJECT_UNAUTHORIZED = undefined;
                 } catch (err: any) {
-                    // NODE_TLS_REJECT_UNAUTHORIZED = undefined;
                     if (!err.statusCode) err.statusCode = 500;
                     outPutInfo["Message"] = {}
                     outPutInfo["Message"]["errorElements"] = err.message;
@@ -438,7 +436,7 @@ export async function fetchCouchDbUsersFromCouchDb(req: Request, res: Response, 
     // const req_params: ChwUserParams = req.body;  
 
     request({
-        url: `https://${CHT_HOST}:${Consts.isProdEnv ? PROD_CHT_PORT : DEV_CHT_PORT}/api/v1/users`,
+        url: `https://${Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST}/api/v1/users`,
         method: 'GET',
         headers: httpHeaders()
     }, async function (error: any, response: any, body: any) {
@@ -762,11 +760,9 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                         }
                     }
 
-                    // if (sync.use_SSL_verification !== true) NODE_TLS_REJECT_UNAUTHORIZED = undefined;
                     if (done === len * outDoneLenght) resp.status(200).json(outPutInfo);
                     // resp.status(200).json(outPutInfo);
                 } catch (err: any) {
-                    // NODE_TLS_REJECT_UNAUTHORIZED = undefined;
                     if (!err.statusCode) err.statusCode = 500;
                     outPutInfo["Message"] = {};
                     outPutInfo["Message"]["errorElements"] = err.message;

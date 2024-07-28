@@ -20,7 +20,7 @@ const responseTime = require('response-time')
 const fetch = require('node-fetch');
 
 require('dotenv').config({ path: sslFolder('.ih-env') });
-const { ACCESS_ALL_AVAILABE_PORT, SERVER_2_API_PORT } = process.env;
+const { ACCESS_ALL_AVAILABE_PORT, SERVER_2_API_PORT, USE_LOCALHOST } = process.env;
 
 const hostnames = getIPAddress(ACCESS_ALL_AVAILABE_PORT == 'true');
 const PORT_FOR_GET_API = normalizePort(SERVER_2_API_PORT || 9998);
@@ -174,7 +174,7 @@ const validPaths = [
 
 app.use(helmet());
 
-// const apiTarget = 'https://localhost:9998/api';
+// const apiTarget = 'https://localhost:4434/api';
 // app.use(
 //   createProxyMiddleware({
 //     target: apiTarget,
@@ -232,14 +232,14 @@ app.get('/api/documentations', async (req: Request, res: Response, next: NextFun
   app.set('json spaces', 0);
   const { date } = req.body ?? req.query ?? req.params;
   const params = {
-    host: 'https://portal-integratehealth.org:9998/api/chws-meg?',
+    host: 'https://tonoudayoapi.portal-integratehealth.org/api/chws-meg?',
     api_access_key: 'api_access_key = your_valid_api_access_key',
     year: '& year = 2023',
     month: '& month = 12',
     districts: '& districts = x8f4IKAC7TO',
     sites: '& sites = [552aafc3-11a9-4209-8f17-d1ea13bab8d5]',
     chws: '& chws = [eafabdf9-c16a-44d5-83e4-a619d5478919]',
-    full_url: 'https://portal-integratehealth.org:9998/api/chws-meg?api_access_key=your_valid_api_access_key&year=2023&month=12&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]',
+    full_url: 'https://tonoudayoapi.portal-integratehealth.org/api/chws-meg?api_access_key=your_valid_api_access_key&year=2023&month=12&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]',
   };
   return res.render('documentations', params);
 });
@@ -263,7 +263,7 @@ app.get('/api/chws', async (req: Request, res: Response, next: NextFunction) => 
 
 // app.get('/api/chws-meg', async (req, res) => {
 //   try {
-//     const response = await fetch('https://localhost:9998/api/chws-meg?api_access_key=afrikDigitalAZ-FGHJ@04jdkj2024&year=2023&month=12&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]', {
+//     const response = await fetch('https://localhost:4432/api/chws-meg?api_access_key=afrikDigitalAZ-FGHJ@04jdkj2024&year=2023&month=12&districts=x8f4IKAC7TO&sites=[552aafc3-11a9-4209-8f17-d1ea13bab8d5]&chws=[eafabdf9-c16a-44d5-83e4-a619d5478919]', {
 //       method: 'GET',
 //       headers: {
 //         'Content-Type': 'application/json'
@@ -417,7 +417,7 @@ const credentials = {
 };
 app.set('port', PORT_FOR_GET_API);
 
-const server = ServerStart({ isSecure: true, credential: credentials, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: PORT_FOR_GET_API, hostnames: hostnames })
+const server = ServerStart({ isSecure: true, credential: credentials, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: PORT_FOR_GET_API, hostnames: hostnames, useLocalhost: USE_LOCALHOST === 'true' })
 
 
 // process.on('SIGTERM', () => {

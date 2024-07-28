@@ -9,7 +9,7 @@ const request = require('request');
 
 require('dotenv').config({ path: sslFolder('.ih-env') });
 
-const { DEFAULT_DHIS2_USER_ID, LOCALHOST, CHT_HOST, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED, DHIS_USER, DHIS_PASS } = process.env
+const { DEFAULT_DHIS2_USER_ID, LOCALHOST, PROD_CHT_HOST, DEV_CHT_HOST, PROD_PORT_SECURED, DEV_PORT_SECURED, DHIS_USER, DHIS_PASS } = process.env
 
 const portSecured = normalizePort((Consts.isProdEnv ? PROD_PORT_SECURED : DEV_PORT_SECURED) || Consts.defaultSecurePort);
 
@@ -41,7 +41,7 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
 
         const start_date = initDate.start_date;
         const end_date = initDate.end_date;
-        const api_host = `https://${LOCALHOST || CHT_HOST}:${portSecured}/api`;
+        const api_host = `https://${LOCALHOST || Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST}:${portSecured}/api`;
         const headers = { "Content-Type": "application/json" };
         console.log('\n\nstart fetching orgunits\n');
         logNginx('\n\nstart fetching orgunits\n');
