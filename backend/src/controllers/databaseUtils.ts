@@ -11,7 +11,7 @@ const request = require('request');
 // const axios = require('axios');
 // const fetch = require('node-fetch')
 require('dotenv').config({ path: sslFolder('.ih-env') });
-const { PROD_CHT_HOST, DEV_CHT_HOST } = process.env;
+const { CHT_PROD_HOST, CHT_DEV_HOST } = process.env;
 
 export async function databaseEntitiesList(req: Request, res: Response, next: NextFunction) {
     const errors = validationResult(req);
@@ -113,7 +113,7 @@ export async function getChwDataToBeDeleteFromCouchDb(req: Request, resp: Respon
         return resp.status(resp.statusCode).json({ status: 200, data: "You dont'provide a valide parametters" })
     }
     // if (req.body.delete_one == true && req.body.dataId) {
-    //     url = `https://${Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST}/medic/${req.body.dataId}`;
+    //     url = `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/medic/${req.body.dataId}`;
     // } else {
     //     url = (CouchDbFetchDataOptions(params) as any).url;
     // }
@@ -138,7 +138,7 @@ export async function deleteFromCouchDb(req: Request, res: Response, next: NextF
 
     if (todelete.length > 0 && allIds.length > 0 && reqType) {
         request({
-            url: `https://${Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST}/medic/_bulk_docs`,
+            url: `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/medic/_bulk_docs`,
             method: 'POST',
             body: JSON.stringify({ "docs": todelete }),
             headers: httpHeaders()
@@ -188,14 +188,14 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
         if (user) {
             // start updating facility_id
             return request({
-                url: `https://${Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST}/api/v1/users/${user.username}`,
+                url: `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/api/v1/users/${user.username}`,
                 method: 'POST',
                 body: JSON.stringify({ "place": new_parent }),
                 headers: httpHeaders()
             }, function (error: any, response: any, body: any) {
                 if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
                 request({
-                    url: `https://${Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST}/medic/${user.contact}`,
+                    url: `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/medic/${user.contact}`,
                     method: 'GET',
                     headers: httpHeaders()
                 }, function (error: any, response: any, body: any) {
@@ -206,7 +206,7 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
 
                         // start updating Contact Place Informations
                         request({
-                            url: `https://${Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST}/api/v1/people`,
+                            url: `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/api/v1/people`,
                             method: 'POST',
                             body: JSON.stringify(data),
                             headers: httpHeaders()

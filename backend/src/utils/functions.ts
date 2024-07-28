@@ -24,7 +24,7 @@ const smtpTransport = require('nodemailer-smtp-transport');
 var rootCas = require('ssl-root-cas').create();
 
 require('dotenv').config({ path: sslFolder('.ih-env') });
-const { CHT_USER, CHT_PASS, PROD_CHT_HOST, DEV_CHT_HOST } = process.env;
+const { CHT_USER, CHT_PASS, CHT_PROD_HOST, CHT_DEV_HOST } = process.env;
 
 export function httpHeaders(Username?: string, Password?: string, WithParams: boolean = true) {
     var p: any = {
@@ -318,10 +318,10 @@ export function CouchDbFetchDataOptions(params: CouchDbFetchData,) {
     if (notEmpty(params.startKey)) couchArg.push(`key=[${params.startKey}]`);
     if (notEmpty(params.endKey)) couchArg.push(`endkey=[${params.endKey}]`);
     var options = {
-        host: Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST ?? '',
+        host: Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST ?? '',
         port: 443,
         path: `${dbCibleUrl}?${couchArg.join('&')}`,
-        url: `${Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST}${dbCibleUrl}?${couchArg.join('&')}`,
+        url: `${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}${dbCibleUrl}?${couchArg.join('&')}`,
         use_SSL_verification: false,
         user: CHT_USER ?? '',
         pass: CHT_PASS ?? '',

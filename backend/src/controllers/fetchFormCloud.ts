@@ -12,7 +12,7 @@ const fetch = require('node-fetch');
 const request = require('request');
 require('dotenv').config({ path: sslFolder('.ih-env') });
 
-const { DHIS_HOST, PROD_CHT_HOST, DEV_CHT_HOST } = process.env;
+const { DHIS_HOST, CHT_PROD_HOST, CHT_DEV_HOST } = process.env;
 
 
 const _sepation = `\n\n\n\n__________\n\n\n\n`;
@@ -436,7 +436,7 @@ export async function fetchCouchDbUsersFromCouchDb(req: Request, res: Response, 
     // const req_params: ChwUserParams = req.body;  
 
     request({
-        url: `https://${Consts.isProdEnv ? PROD_CHT_HOST : DEV_CHT_HOST}/api/v1/users`,
+        url: `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/api/v1/users`,
         method: 'GET',
         headers: httpHeaders()
     }, async function (error: any, response: any, body: any) {
