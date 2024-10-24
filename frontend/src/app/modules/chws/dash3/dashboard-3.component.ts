@@ -3,7 +3,7 @@ import { AggragateData, Chws, Districts, Families, FilterParams, Patients, Sites
 import { SyncService } from '@ih-app/services/sync.service';
 import { FormControl, FormGroup } from '@angular/forms';
 import { IndexDbService } from '@ih-src/app/services/index-db/index-db.service';
-import { capitaliseDataGiven, notNull, patientAgeDetails, returnDataAsArray, returnEmptyArrayIfNul } from '@ih-app/shared/functions';
+import { capitaliseDataGiven, notNull, patientAgeDetails, returnDataAsArray } from '@ih-app/shared/functions';
 import { AuthService } from '@ih-app/services/auth.service';
 import { User } from '@ih-src/app/models/User';
 import { Router } from '@angular/router';
@@ -130,7 +130,7 @@ export class ChwsDashboard3Component implements OnInit {
   genarateSites() {
     this.sites$ = [];
     this.chws$ = [];
-    const dist: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.districts);
+    const dist: string[] = returnDataAsArray(this.aggradateDataForm.value.districts);
     this.aggradateDataForm.value["sites"] = [];
     this.aggradateDataForm.value["chws"] = [];
 
@@ -145,7 +145,7 @@ export class ChwsDashboard3Component implements OnInit {
   }
 
   genarateChws() {
-    const sites: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.sites);
+    const sites: string[] = returnDataAsArray(this.aggradateDataForm.value.sites);
     this.chws$ = [];
     this.aggradateDataForm.value["chws"] = [];
     if (notNull(sites)) {

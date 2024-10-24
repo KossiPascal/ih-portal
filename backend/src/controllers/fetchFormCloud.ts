@@ -22,17 +22,19 @@ export async function getDhis2Chws(req: Request, res: Response, next: NextFuncti
         return res.status(201).json({ status: 201, data: 'Error when getting chws from dhis2' });
     }
     try {
+        const enable_strict_SSL_checking = false;
         const { dhisusername, dhispassword } = req.body;
         const link = `https://${DHIS_HOST}/api/options`;
         const params = `.json?paging=false&filter=optionSet.id:eq:uOKgQa2W8tn&fields=id,code,name,optionSet&order=created:desc`;
         request({
             url: link + params,
             method: 'GET',
-            headers: httpHeaders(dhisusername, dhispassword)
+            headers: httpHeaders(dhisusername, dhispassword),
+            strictSSL: enable_strict_SSL_checking,
         }, async function (err: any, response: any, body: any) {
             if (err) return res.status(201).json({ status: 201, data: 'Error when getting chws from dhis2' });
             const jsonBody = JSON.parse(body);
-            if (jsonBody.hasOwnProperty('options')) return res.status(200).json({ status: 200, data: jsonBody["options"] });
+            if (jsonBody && jsonBody.hasOwnProperty('options')) return res.status(200).json({ status: 200, data: jsonBody["options"] });
             return res.status(201).json({ status: 201, data: 'Error when getting chws from dhis2' });
         });
     } catch (err: any) {
@@ -86,7 +88,7 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
                                 const chwsId: any = await getChwsByDhis2Uid(getValue(row.dataValues, 'JkMyqI3e6or'));
                                 const dateVal = getValue(row.dataValues, 'RlquY86kI66');
                                 if (districtId && notEmpty(siteId) && notEmpty(chwsId) && notEmpty(dateVal)) {
-                                    if (!outPutInfo.hasOwnProperty(`Données Total ${siteName}`)) outPutInfo[`Données Total ${siteName}`] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
+                                    if (outPutInfo && !outPutInfo.hasOwnProperty(`Données Total ${siteName}`)) outPutInfo[`Données Total ${siteName}`] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' }
                                     try {
                                         const _dhis2Sync = new ChwsData();
                                         const reported_date = milisecond_to_date(dateVal, 'dateOnly');
@@ -225,7 +227,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                         for (let i = 0; i < len; i++) {
                             done++;
                             const row: any = jsonBody[i];
-                            if (row.doc.hasOwnProperty('form') && row.doc.hasOwnProperty('fields')) {
+                            if (row.doc && row.doc.hasOwnProperty('form') && row.doc.hasOwnProperty('fields')) {
                                 const _syncDrug = new ChwsDrug();
                                 var districtId = undefined;
                                 var siteId = undefined;
@@ -434,11 +436,13 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
 
 export async function fetchCouchDbUsersFromCouchDb(req: Request, res: Response, next: NextFunction) {
     // const req_params: ChwUserParams = req.body;  
+    const enable_strict_SSL_checking = false;
 
     request({
         url: `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/api/v1/users`,
         method: 'GET',
-        headers: httpHeaders()
+        headers: httpHeaders(),
+        strictSSL: enable_strict_SSL_checking,
     }, async function (error: any, response: any, body: any) {
         if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
         try {
@@ -480,9 +484,6 @@ export async function getChtUsersFromDb(req: Request, res: Response, next: NextF
         return res.status(500).json({ status: 500, data: err.toString() });
     }
 }
-
-
-
 
 export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, next: NextFunction) {
     var outPutInfo: any = {};
@@ -733,7 +734,7 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                                         // console.log('No district found !')
                                     }
                                     if (districtId && siteId) {
-                                        if (!outPutInfo.hasOwnProperty("Asc")) outPutInfo["Asc"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' };
+                                        if (outPutInfo && !outPutInfo.hasOwnProperty("Asc")) outPutInfo["Asc"] = { successCount: 0, errorCount: 0, errorElements: '', errorIds: '' };
                                         try {
                                             const _syncChws = new Chws();
                                             _syncChws.source = dataSource;
@@ -787,7 +788,6 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
             outPutInfo["Message"]["errorElements"] = err.message;
             resp.status(err.statusCode).json(outPutInfo);
         });
-
     } catch (err: any) {
         if (!err.statusCode) err.statusCode = 500;
         outPutInfo["Message"] = {}
@@ -814,16 +814,18 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
             const headers = httpHeaders(dhisusername, dhispassword);
             const link = `https://${DHIS_HOST}/api/events`;
             const params = `.json?paging=false&program=${program}&orgUnit=${sit}&filter=${data_filter}&fields=${fields}&order=created:desc`;
+            const enable_strict_SSL_checking = false;
 
             await request({
                 url: link + params,
                 method: 'GET',
-                headers: headers
+                headers: headers,
+                strictSSL: enable_strict_SSL_checking,
             }, async function (err: any, response1: any, body: any) {
                 if (err) return res.status(201).json({ status: 201, data: err.toString(), chw: chw });
                 try {
                     const jsonBody = JSON.parse(body);
-                    if (jsonBody.hasOwnProperty('events')) {
+                    if (jsonBody && jsonBody.hasOwnProperty('events')) {
                         var reqData: Dhis2DataFormat[] = jsonBody["events"] as Dhis2DataFormat[];
                         const dataId = reqData.length == 1 ? reqData[0].event : ''
 
@@ -835,7 +837,8 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
                             referrerPolicy: 'no-referrer',
                             method: reqData.length == 1 ? 'PUT' : 'POST',
                             body: JSON.stringify(jsonData),
-                            headers: headers
+                            headers: headers,
+                            strictSSL: enable_strict_SSL_checking,
                         }, async function (err: any, response2: any, body: any) {
                             if (err) return res.status(201).json({ status: 201, data: err.toString(), chw: chw });
                             if (response2.statusCode != 200) return res.status(201).json({ status: 201, data: `Error Found, retry!`, chw: chw })
@@ -846,9 +849,7 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
                         return res.status(201).json({ status: 201, data: 'Connection Error! Retry', chw: chw });
                     }
                 } catch (error) {
-                    console.log(error);
                     logNginx(error)
-                    // console.log(chwsDataToDhis2);
                 }
             });
         } else {

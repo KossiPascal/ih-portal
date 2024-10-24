@@ -2,15 +2,17 @@ import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
 import { Between, In } from "typeorm";
 import { ChtOutPutData, DataIndicators } from "../entity/DataAggragate";
-import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository, ChwsDrug, getChwsDrugSyncRepository, getChwsDrugUpdateSyncRepository, ChwsDrugUpdate, GetPersonsRepository, Persons, Teams, GetTeamsRepository, MeetingReportData, GetMeetingReportDataRepository, Districts, Sites, getSiteSyncRepository, getDistrictSyncRepository, getDrugChwYearCmmSyncRepository, DrugChwYearCmm, getPatientSyncRepository, Patients } from "../entity/Sync";
+import { getChwsDataSyncRepository, ChwsData, Chws, getFamilySyncRepository, Families, getChwsSyncRepository, ChwsDrug, getChwsDrugSyncRepository, getChwsDrugUpdateSyncRepository, ChwsDrugUpdate, GetPersonsRepository, Persons, Teams, GetTeamsRepository, MeetingReportData, GetMeetingReportDataRepository, Districts, Sites, getSiteSyncRepository, getDistrictSyncRepository, getDrugChwYearCmmSyncRepository, DrugChwYearCmm } from "../entity/Sync";
 import { Consts } from "../utils/constantes";
-import { notEmpty } from "../utils/functions";
+import { generateCacheKey, notEmpty } from "../utils/functions";
 import { getChws } from "./orgUnitsFromDB ";
 import { ChwsDrugData, ChwsDrugQuantityInfo, PatologieData } from "../utils/appInterface";
-import { GetPreviousDate, GetPreviousYearMonth, YearMonthBetween21And20, getDateInFormat, getDateRange, isBetween } from "../utils/date-utils";
-
+import { GetPreviousDate, GetPreviousYearMonth, getDateInFormat, getDateRange, isBetween } from "../utils/date-utils";
+import NodeCache from 'node-cache';
 const request = require('request');
 // const fetch = require('node-fetch');
+
+// #################################################################
 
 const MEG_FORMS: string[] = ["drug_movements", "drug_quantities", "pcime_c_asc", "pregnancy_family_planning", "fp_follow_up_renewal"];
 const quantities: ChwsDrugQuantityInfo = {
@@ -41,7 +43,6 @@ const quantities: ChwsDrugQuantityInfo = {
   comments: "",
   observations: ""
 };
-
 const dataFields: { id: string, name: string, index: number }[] = [
   { id: "alben_400", name: "Albendazole_400_mg_cp_1", index: 1 },
   { id: "amox_250", name: "Amoxiciline_250_mg_2", index: 2 },
@@ -58,7 +59,6 @@ const dataFields: { id: string, name: string, index: number }[] = [
   { id: "vit_A2", name: "Vitamine_A_200000UI_13", index: 13 },
   { id: "zinc", name: "Zinc_14", index: 14 }
 ];
-
 function YearCmmMonthStart(year: number, startMonth: string): { name: string, interval: string[] } {
   const y = parseInt(`${year}`);
   const lY = parseInt(`${year}`) - 1;
@@ -81,7 +81,11 @@ function YearCmmMonthStart(year: number, startMonth: string): { name: string, in
   };
 
   return months[startMonth];
-}
+};
+
+// #################################################################
+
+const cache = new NodeCache({ stdTTL: 300 }); // 5 min de cache
 
 export async function GetPersonsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };
@@ -92,11 +96,19 @@ export async function GetPersonsDataWithParams(req: Request, res: Response, next
   }
   const errorMsg: string = "Your request provides was rejected !";
   try {
+    const cacheKey = generateCacheKey(req, 'GetPersonsDataWithParams');
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      respData = cachedData as { status: number, data: any };
+      return onlyData ? respData : res.status(respData.status).json(respData);
+    }
     const repository = await GetPersonsRepository();
     var allSync: Persons[] = await repository.findBy({
       id: notEmpty(req.body.id) ? req.body.id : undefined,
     });
-    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
+    
+    respData = !allSync ? { status: 201, data: 'No data found with parametter!' } : { status: 200, data: allSync };
+    cache.set(cacheKey, respData);
   }
   catch (err) {
     // return next(err);
@@ -104,7 +116,6 @@ export async function GetPersonsDataWithParams(req: Request, res: Response, next
   }
   return onlyData ? respData : res.status(respData.status).json(respData);
 }
-
 export async function GetTeamsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };
   const errors = validationResult(req);
@@ -114,13 +125,22 @@ export async function GetTeamsDataWithParams(req: Request, res: Response, next: 
   }
   const errorMsg: string = "Your request provides was rejected !";
   try {
+    const cacheKey = generateCacheKey(req, 'GetTeamsDataWithParams');
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      respData = cachedData as { status: number, data: any };
+      return onlyData ? respData :  res.status(respData.status).json(respData);
+    }
+
     const repository = await GetTeamsRepository();
     var allSync: Teams[] = await repository.find({
       where: {
         id: notEmpty(req.body.id) ? req.body.id : undefined,
       }
     });
-    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
+
+    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync };
+    cache.set(cacheKey, respData);
   }
   catch (err) {
     // return next(err);
@@ -128,7 +148,6 @@ export async function GetTeamsDataWithParams(req: Request, res: Response, next: 
   }
   return onlyData ? respData : res.status(respData.status).json(respData);
 }
-
 export async function getChwsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false, filter?: { start_date?: string, end_date?: string, forms?: string[], sources?: string[] }): Promise<any> {
   var respData: { status: number, data: any };
   const errors = validationResult(req);
@@ -138,6 +157,12 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
   }
   const errorMsg: string = "Your request provides was rejected !";
   try {
+    const cacheKey = generateCacheKey(req, 'getChwsDataWithParams');
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+        respData = cachedData as { status: number, data: any };
+        return onlyData ? respData : res.status(respData.status).json(respData);
+    }
     const repository = await getChwsDataSyncRepository();
 
     const start_date = (filter?.start_date ?? '') != '' ? filter?.start_date : req.body.start_date;
@@ -157,7 +182,9 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
         chw: notEmpty(req.body.chws) ? { id: In(req.body.chws) } : undefined
       }
     });
-    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
+    
+    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync };
+    cache.set(cacheKey, respData);
   }
   catch (err) {
     // return next(err);
@@ -165,7 +192,6 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
   }
   return onlyData ? respData : res.status(respData.status).json(respData);
 }
-
 export async function getChwsDrugWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var msg = 'Not data found with parametter!';
   var respData: { previous: { status: number, data: any }, current: { status: number, data: any } } = { previous: { status: 201, data: msg }, current: { status: 201, data: msg } };
@@ -176,7 +202,14 @@ export async function getChwsDrugWithParams(req: Request, res: Response, next: N
     return onlyData ? respData : res.status(201).json(respData);
   }
   const errorMsg: string = "Your request provides was rejected !";
+
   try {
+    const cacheKey = generateCacheKey(req, 'getChwsDrugWithParams');
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      respData = cachedData as { previous: { status: number, data: any }, current: { status: number, data: any } };
+      return onlyData ? respData : res.status(respData.current.status).json(respData);
+    }
     const repository = await getChwsDrugSyncRepository();
     const CurrentSyncs: ChwsDrug[] = await repository.find({
       where: {
@@ -191,13 +224,9 @@ export async function getChwsDrugWithParams(req: Request, res: Response, next: N
         chw: notEmpty(req.body.chws) ? { id: In(req.body.chws) } : undefined
       }
     });
-
-
     // const prev_start_date = GetPreviousDate(req.body.start_date);
     // const prev_end_date = GetPreviousDate(req.body.end_date);
-
     const ym = GetPreviousYearMonth(req.body.year, req.body.month);
-
     const PreviousSyncs: ChwsDrug[] = await repository.find({
       where: {
         id: notEmpty(req.body.id) ? req.body.id : notEmpty(req.params.id) ? req.params.id : undefined,
@@ -211,10 +240,13 @@ export async function getChwsDrugWithParams(req: Request, res: Response, next: N
         chw: notEmpty(req.body.chws) ? { id: In(req.body.chws) } : undefined
       }
     });
-
-    if (CurrentSyncs) respData.current = { status: 200, data: CurrentSyncs };
-    if (PreviousSyncs) respData.previous = { status: 200, data: PreviousSyncs };
-
+    if (CurrentSyncs) {
+      respData.current = { status: 200, data: CurrentSyncs };
+    }
+    if (PreviousSyncs) {
+      respData.previous = { status: 200, data: PreviousSyncs };
+    }
+    cache.set(cacheKey, respData);
   }
   catch (err) {
     // return next(err);
@@ -223,7 +255,6 @@ export async function getChwsDrugWithParams(req: Request, res: Response, next: N
   }
   return onlyData ? respData : res.status(respData.current.status).json(respData);
 }
-
 export async function getChwsDrugUpdatedWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };
   const errors = validationResult(req);
@@ -233,6 +264,12 @@ export async function getChwsDrugUpdatedWithParams(req: Request, res: Response, 
   }
   const errorMsg: string = "Your request provides was rejected !";
   try {
+    const cacheKey = generateCacheKey(req, 'getChwsDrugUpdatedWithParams');
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      respData = cachedData as { status: number, data: any };
+      return onlyData ? respData : res.status(respData.status).json(respData);
+    }
     const repository = await getChwsDrugUpdateSyncRepository();
 
     var allSync: ChwsDrugUpdate[] = await repository.find({
@@ -247,7 +284,9 @@ export async function getChwsDrugUpdatedWithParams(req: Request, res: Response, 
         drug_index: notEmpty(req.body.drugs_index) ? In(req.body.drugs_index) : undefined
       }
     });
-    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
+
+    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync };
+    cache.set(cacheKey, respData);
   }
   catch (err) {
     // return next(err);
@@ -255,7 +294,6 @@ export async function getChwsDrugUpdatedWithParams(req: Request, res: Response, 
   }
   return onlyData ? respData : res.status(respData.status).json(respData);
 }
-
 export async function getChwsDrugYearCmmWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };
   const errors = validationResult(req);
@@ -265,6 +303,12 @@ export async function getChwsDrugYearCmmWithParams(req: Request, res: Response, 
   }
   const errorMsg: string = "Your request provides was rejected !";
   try {
+    const cacheKey = generateCacheKey(req, 'getChwsDrugYearCmmWithParams');
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+        respData = cachedData as { status: number, data: any };
+      return onlyData ? respData : res.status(respData.status).json(respData);
+    }
     const repository = await getDrugChwYearCmmSyncRepository();
     var allSync: DrugChwYearCmm[] = await repository.find({
       where: {
@@ -278,7 +322,9 @@ export async function getChwsDrugYearCmmWithParams(req: Request, res: Response, 
         drug_index: notEmpty(req.body.drugs_index) ? In(req.body.drugs_index) : undefined
       }
     });
-    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync }
+
+    respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync };
+    cache.set(cacheKey, respData);
   }
   catch (err) {
     // return next(err);
@@ -286,9 +332,13 @@ export async function getChwsDrugYearCmmWithParams(req: Request, res: Response, 
   }
   return onlyData ? respData : res.status(respData.status).json(respData);
 }
-
 // export async function getChwsDrugUpdatedWithCoustomParams(req: { districts?: string[], sites?: string[], zones?: string[], chws?: string[], years?: number[], months?: string[], drug_index?: number[] }): Promise<ChwsDrugUpdate[] | undefined> {
 //   try {
+//     const cacheKey = generateCacheKey(req as any, 'getChwsDrugUpdatedWithCoustomParams');
+//     const cachedData = cache.get(cacheKey);
+//     if (cachedData) {
+//         return cachedData as any;
+//     }
 //     const repository = await getChwsDrugUpdateSyncRepository();
 //     const allSync = await repository.find({
 //       where: {
@@ -301,13 +351,12 @@ export async function getChwsDrugYearCmmWithParams(req: Request, res: Response, 
 //         drug_index: notEmpty(req.drug_index) ? In(req.drug_index!) : undefined
 //       }
 //     });
+//     cache.set(cacheKey, allSync);
 //     return allSync;
 //   } catch (err) {
 //     return undefined;
 //   }
-
 // }
-
 function getChwInfos(chw: Chws[], chwId: string): Chws | null {
   if (notEmpty(chwId)) {
     for (let i = 0; i < chw.length; i++) {
@@ -317,8 +366,7 @@ function getChwInfos(chw: Chws[], chwId: string): Chws | null {
   }
   return null;
 }
-
-export async function getPatientDataInfos(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function getPatientDataInfos(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -328,6 +376,12 @@ export async function getPatientDataInfos(req: Request, res: Response, next: Nex
 
   const errorMsg: string = "Your request provides was rejected !";
   try {
+    const cacheKey = generateCacheKey(req, 'getPatientDataInfos');
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      respData = cachedData as { status: number, data: any };
+      return onlyData ? respData : res.status(respData.status).json(respData);
+    }
     const months: string[] = req.body.months;
     const year = req.body.year;
     const brutData: { month: string, year: number, data: ChwsData[] }[] = [];
@@ -379,19 +433,18 @@ export async function getPatientDataInfos(req: Request, res: Response, next: Nex
         }
         finalData.push({ month: dtJ.month, year: dtJ.year, data: fpData })
       }
-      return res.status(200).json({ status: 200, data: finalData });
+      respData = { status: 200, data: finalData };
     } else {
-      return res.status(201).json({ status: 201, data: 'No data found' });
+      respData = { status: 201, data: 'No data found' };
     }
+    cache.set(cacheKey, respData);
   } catch (err) {
     // return next(err);
     respData = { status: 201, data: errorMsg };
   }
-  return res.status(respData.status).json(respData);
+  return onlyData ? respData : res.status(respData.status).json(respData);
 }
-
-
-export async function getDataInformations(req: Request, res: Response, next: NextFunction): Promise<any> {
+export async function getDataInformations(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -401,6 +454,12 @@ export async function getDataInformations(req: Request, res: Response, next: Nex
 
   const errorMsg: string = "Your request provides was rejected !";
   try {
+    const cacheKey = generateCacheKey(req, 'getDataInformations');
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      respData = cachedData as { status: number, data: any };
+      return onlyData ? respData : res.status(respData.status).json(respData);
+    }
     const dataWithParams: { status: number, data: any } = await getChwsDataWithParams(req, res, next, true);
     if (dataWithParams.status == 200) {
       const _familyRepo = await getFamilySyncRepository();
@@ -433,7 +492,6 @@ export async function getDataInformations(req: Request, res: Response, next: Nex
       for (let f = 0; f < families.length; f++) {
         const family = families[f];
         familiesInfos[`${family.id}`] = { family: family, chw: getChwInfos(chws, family.zone?.chw_id!), data: { all_visit: 0, visit_in_day: 0, death: 0, child_visit: 0, women_visit: 0, home_visit: 0, isVisited: false } };
-
       }
 
       const chwsData: ChwsData[] = dataWithParams.data;
@@ -475,37 +533,63 @@ export async function getDataInformations(req: Request, res: Response, next: Nex
       }
 
       finalData.detail = details;
+
       respData = { status: 200, data: finalData }
-      return res.status(respData.status).json(respData);
+      // return res.status(respData.status).json(respData);
     } else {
-      return res.status(dataWithParams.status).json(dataWithParams);
+      respData = { status: dataWithParams.status, data: dataWithParams }
+      // return res.status(dataWithParams.status).json(dataWithParams);
     }
+    cache.set(cacheKey, respData);
   } catch (err) {
     // return next(err);
     respData = { status: 201, data: errorMsg };
   }
-  return res.status(respData.status).json(respData);
+  return onlyData ? respData : res.status(respData.status).json(respData);
 }
+export async function fetchIhChtDataPerChw(req: Request, res: Response, next: NextFunction, onlyData: boolean = false) {
+  var respData: { status: number, data: any };
+  const cacheKey = generateCacheKey(req, 'fetchIhChtDataPerChw');
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+      respData = cachedData as { status: number, data: any };
+    return onlyData ? respData : res.status(respData.status).json(respData);
+  }
 
-export async function fetchIhChtDataPerChw(req: Request, res: Response, next: NextFunction) {
   const chwsData: { status: number, data: ChwsData[] } = await getChwsDataWithParams(req, res, next, true);
   const chws: { status: number, data: Chws[] } = await getChws(req, res, next, true);
+  
+
   if (chwsData.status == 200 && chws.status == 200) {
     const chwRepo = await getChwsSyncRepository();
     const allChws = await chwRepo.find();
     const dbChwsData: { chw: Chws, data: DataIndicators }[] = getAllAboutData(chwsData.data, chws.data, allChws, req, res);
     if (!dbChwsData) return res.status(201).json({ status: 201, data: 'No data found !' });
-    return res.status(200).json({ status: 200, data: dbChwsData });
+
+    respData = { status: 200, data: dbChwsData };
   } else {
-    return res.status(chwsData.status).json({ status: 201, data: 'No data found !' });
+    respData = { status: 201, data: 'No data found !' };
   }
+  cache.set(cacheKey, respData);
+  return onlyData ? respData : res.status(respData.status).json(respData);
 }
+
 // ###################################### PER CHW ######################################
-export async function fetchIhDrugDataPerChw(req: Request, res: Response, next: NextFunction) {
-  const outPut = await getIhDrugArrayDataPerChw(req, res, next)
-  return res.status(outPut.status).json(outPut);
+export async function fetchIhDrugDataPerChw(req: Request, res: Response, next: NextFunction, onlyData: boolean = false) {
+  var respData: { status: number, data: any };
+  // const cacheKey = generateCacheKey(req, 'fetchIhDrugDataPerChw');
+  // const cachedData = cache.get(cacheKey);
+  // if (cachedData) {
+  //     respData = cachedData as { status: number, data: any };
+  //   return onlyData ? respData : res.status(respData.status).json(respData);
+  // }  
+  
+  respData = await getIhDrugArrayDataPerChw(req, res, next)
+
+  // cache.set(cacheKey, respData);
+  return onlyData ? respData : res.status(respData.status).json(respData);
 }
-export async function getIhDrugArrayDataPerChw(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined): Promise<{ status: number, data: { chwId: any, chw: Chws, drugData: ChwsDrugData, patologieData: PatologieData }[] | string | undefined; }> {
+export async function getIhDrugArrayDataPerChw(req: Request, res: Response, next: NextFunction, Chw: Chws | undefined = undefined, onlyData: boolean = false): Promise<{ status: number, data: { chwId: any, chw: Chws, drugData: ChwsDrugData, patologieData: PatologieData }[] | string | undefined; }> {
   // const dateArray = req.body.end_date.split('-');
   req.body.forms = MEG_FORMS;
   req.body.sources = ['Tonoudayo'];
@@ -551,6 +635,8 @@ export async function getIhDrugArrayDataPerChw(req: Request, res: Response, next
   if (!chwsDrugFinalOut) return { status: 201, data: 'No data found !' };
   return { status: 200, data: chwsDrugFinalOut };
 }
+
+
 export async function updateDrugPerChw(req: Request, res: Response, next: NextFunction) {
 
   const { district, site, chw, year, month, drug_index, drug_name, quantity_validated, delivered_quantity, observations, userId } = req.body;
@@ -604,6 +690,7 @@ export async function updateDrugPerChw(req: Request, res: Response, next: NextFu
     return res.status(err.statusCode).json({ status: 201, data: 'No data found !' });
   }
 }
+
 export async function updateDrugYearCmmPerChw(req: Request, res: Response, next: NextFunction) {
 
   const { district, site, chw, year, drug_index, drug_name, year_chw_cmm, cmm_start_year_month, userId } = req.body;
@@ -640,6 +727,9 @@ export async function updateDrugYearCmmPerChw(req: Request, res: Response, next:
     return res.status(err.statusCode).json({ status: 201, data: 'No data found !' });
   }
 }
+
+
+
 async function getChwsDrugQantityPerChw(currentData: ChwsDrug[], previousData: ChwsDrug[], drugUpdated: ChwsDrugUpdate[], drugCmm: DrugChwYearCmm[], chwsChtData: ChwsData[], Chw: Chws, req: Request): Promise<{ drugData: ChwsDrugData, patologieData: PatologieData }> {
   // const { start_date, end_date, sources, districts, sites, chws } = req.body;
 
@@ -893,14 +983,28 @@ async function getChwsDrugQantityPerChw(currentData: ChwsDrug[], previousData: C
   return { drugData: outData as ChwsDrugData, patologieData: patologieData };
 }
 
-
 // ###################################### PER SELECTED ######################################
 export async function fetchIhDrugDataPerSelected(req: Request, res: Response, next: NextFunction) {
   const outPut = await getIhDrugArrayDataPerSelected(req, res, next)
   return res.status(outPut.status).json(outPut);
 }
 
-export async function getIhDrugArrayDataPerSelected(req: Request, res: Response, next: NextFunction): Promise<{ status: number, data: { cibleId: any, cible: Districts | Sites | Chws, drugData: ChwsDrugData, patologieData: PatologieData } | string | undefined; }> {
+export async function fetchIhDrugDataWithMultiChwsSelected(req: Request, res: Response, next: NextFunction) {
+  const selectedChws = req.body.chws;
+  let bigOutPut: { status: number, data: { cibleId: any, cible: Districts | Sites | Chws, drugData: ChwsDrugData, patologieData: PatologieData, hasEmptyData:boolean } | string | undefined }[] = [];
+
+  for (const chw of selectedChws) {
+    req.body.chws = [chw];
+    let outPut:any = await getIhDrugArrayDataPerSelected(req, res, next);
+    outPut['hasEmptyData'] = typeof outPut.data == 'string' || typeof outPut.data == undefined || typeof outPut.data == 'undefined';
+    bigOutPut.push(outPut);
+  }
+  
+  return res.status(200).json(bigOutPut);
+}
+
+
+export async function getIhDrugArrayDataPerSelected(req: Request, res: Response, next: NextFunction,withPatologie=true): Promise<{ status: number, data: { cibleId: any, cible: Districts | Sites | Chws, drugData: ChwsDrugData, patologieData: PatologieData } | string | undefined; }> {
   // const dateArray = req.body.end_date.split('-');
   req.body.forms = MEG_FORMS;
   req.body.sources = ['Tonoudayo'];
@@ -908,18 +1012,21 @@ export async function getIhDrugArrayDataPerSelected(req: Request, res: Response,
   const month = req.body.month;
   // req.body.year = parseInt(dateArray[0]);
   // req.body.month = dateArray[1];
-
-  const chwsChtDataFilter = {
-    start_date: GetPreviousDate(`${year}-${month}-21`),
-    end_date: `${year}-${month}-20`,
-    sources: ["Tonoudayo", "dhis2"],
-    forms: ["pcime_c_asc", "PCIME"],
-  };
+  let chwsChtData = [];
 
   const chwsDrug = await getChwsDrugWithParams(req, res, next, true);
   const drugUpdated = await getChwsDrugUpdatedWithParams(req, res, next, true);
   const drugYearCmm = await getChwsDrugYearCmmWithParams(req, res, next, true);
-  const chwsChtData = await getChwsDataWithParams(req, res, next, true, chwsChtDataFilter);
+
+  if (withPatologie===true) {
+    const chwsChtDataFilter = {
+      start_date: GetPreviousDate(`${year}-${month}-21`),
+      end_date: `${year}-${month}-20`,
+      sources: ["Tonoudayo", "dhis2"],
+      forms: ["pcime_c_asc", "PCIME"],
+    };
+    chwsChtData =  await getChwsDataWithParams(req, res, next, true, chwsChtDataFilter);
+  }
   const chws = await getChws(req, res, next, true);
 
   var cible: Districts | Sites | Chws | undefined | undefined = undefined;
@@ -936,14 +1043,13 @@ export async function getIhDrugArrayDataPerSelected(req: Request, res: Response,
   }
 
   if (chwsDrug.current.status == 200 && chwsDrug.previous.status == 200 && chws.status == 200 && drugUpdated.status == 200 && drugYearCmm.status == 200 && chws.status == 200 && chwsChtData.status == 200 && cible) {
-    const outPut = await getChwsDrugQantityPerSelected(chwsDrug.current.data, chwsDrug.previous.data, drugUpdated.data, drugYearCmm.data, chwsChtData.data, chws.data, req);
+    const outPut = await getChwsDrugQantityPerSelected(chwsDrug.current.data, chwsDrug.previous.data, drugUpdated.data, drugYearCmm.data, chwsChtData.data, chws.data, req, withPatologie);
     return { status: 200, data: { cibleId: cible.id, cible: cible, drugData: outPut.drugData, patologieData: outPut.patologieData } };
   } else {
     return { status: 201, data: 'No data found !' };
   }
 }
-
-async function getChwsDrugQantityPerSelected(currentData: ChwsDrug[], previousData: ChwsDrug[], drugUpdated: ChwsDrugUpdate[], drugCmm: DrugChwYearCmm[], chwsChtData: ChwsData[], Chws: Chws[], req: Request): Promise<{ drugData: ChwsDrugData, patologieData: PatologieData }> {
+async function getChwsDrugQantityPerSelected(currentData: ChwsDrug[], previousData: ChwsDrug[], drugUpdated: ChwsDrugUpdate[], drugCmm: DrugChwYearCmm[], chwsChtData: ChwsData[], Chws: Chws[], req: Request, withPatologie=true): Promise<{ drugData: ChwsDrugData, patologieData: PatologieData }> {
   const { year, month } = req.body;
   const outData: any = {
     Albendazole_400_mg_cp_1: { ...quantities },
@@ -1094,7 +1200,6 @@ async function getChwsDrugQantityPerSelected(currentData: ChwsDrug[], previousDa
     // ################################################
     for (let i = 0; i < drugCmm.length; i++) {
       const data = drugCmm[i];
-
       if ((data.cmm_year_month_list ?? []).includes(`${month}-${year}`)) {
         if (notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
           const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
@@ -1112,71 +1217,73 @@ async function getChwsDrugQantityPerSelected(currentData: ChwsDrug[], previousDa
     }
 
     // ################################################
-    for (let i = 0; i < chwsChtData.length; i++) {
-      const data: ChwsData = chwsChtData[i];
-      if (data) {
-        const form = data.form;
-        const field = data.fields;
-        const chw: string = data.chw?.id ?? '';
+    if (withPatologie === true) {
+      for (let i = 0; i < chwsChtData.length; i++) {
+        const data: ChwsData = chwsChtData[i];
+        if (data) {
+          const form = data.form;
+          const field = data.fields;
+          const chw: string = data.chw?.id ?? '';
 
-        if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
+          if (notEmpty(data?.source) && notEmpty(data?.district?.id) && notEmpty(data?.site?.id) && notEmpty(data?.chw?.id)) {
 
-          const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
-          const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
-          const idChwValid: boolean = data?.chw?.id == Chw.id;
+            const idDistrictValid: boolean = data?.district?.id == Chw.district?.id;
+            const idSiteValid: boolean = data?.site?.id == Chw.site?.id;
+            const idChwValid: boolean = data?.chw?.id == Chw.id;
 
-          if (idDistrictValid && idSiteValid && idChwValid) {
-            if (data.source == 'Tonoudayo' && form === "pcime_c_asc") {
-              if (field["has_diarrhea"] == "true") {
-                if (!(data.reported_date in patologieData.diarrhee_pcime)) {
-                  patologieData.diarrhee_pcime[data.reported_date] = 0;
+            if (idDistrictValid && idSiteValid && idChwValid) {
+              if (data.source == 'Tonoudayo' && form === "pcime_c_asc") {
+                if (field["has_diarrhea"] == "true") {
+                  if (!(data.reported_date in patologieData.diarrhee_pcime)) {
+                    patologieData.diarrhee_pcime[data.reported_date] = 0;
+                  }
+                  patologieData.diarrhee_pcime[data.reported_date] += 1;
                 }
-                patologieData.diarrhee_pcime[data.reported_date] += 1;
-              }
-              if (field["fever_with_malaria"] == "true") {
-                if (!(data.reported_date in patologieData.paludisme_pcime)) {
-                  patologieData.paludisme_pcime[data.reported_date] = 0;
+                if (field["fever_with_malaria"] == "true") {
+                  if (!(data.reported_date in patologieData.paludisme_pcime)) {
+                    patologieData.paludisme_pcime[data.reported_date] = 0;
+                  }
+                  patologieData.paludisme_pcime[data.reported_date] += 1;
                 }
-                patologieData.paludisme_pcime[data.reported_date] += 1;
-              }
-              if (field["has_pneumonia"] == "true") {
-                if (!(data.reported_date in patologieData.pneumonie_pcime)) {
-                  patologieData.pneumonie_pcime[data.reported_date] = 0;
+                if (field["has_pneumonia"] == "true") {
+                  if (!(data.reported_date in patologieData.pneumonie_pcime)) {
+                    patologieData.pneumonie_pcime[data.reported_date] = 0;
+                  }
+                  patologieData.pneumonie_pcime[data.reported_date] += 1;
                 }
-                patologieData.pneumonie_pcime[data.reported_date] += 1;
-              }
-              if (field["has_malnutrition"] == "true") {
-                if (!(data.reported_date in patologieData.malnutrition_pcime)) {
-                  patologieData.malnutrition_pcime[data.reported_date] = 0;
+                if (field["has_malnutrition"] == "true") {
+                  if (!(data.reported_date in patologieData.malnutrition_pcime)) {
+                    patologieData.malnutrition_pcime[data.reported_date] = 0;
+                  }
+                  patologieData.malnutrition_pcime[data.reported_date] += 1;
                 }
-                patologieData.malnutrition_pcime[data.reported_date] += 1;
               }
-            }
 
-            if (data.source == 'dhis2' && form === "PCIME" && data.fields['zNldrz5EUPR'] == 'Soins') {
-              if (data.fields['NPHYf8WAR9l'] == 'true') {
-                if (!(data.reported_date in patologieData.diarrhee_pcime)) {
-                  patologieData.diarrhee_pcime[data.reported_date] = 0;
+              if (data.source == 'dhis2' && form === "PCIME" && data.fields['zNldrz5EUPR'] == 'Soins') {
+                if (data.fields['NPHYf8WAR9l'] == 'true') {
+                  if (!(data.reported_date in patologieData.diarrhee_pcime)) {
+                    patologieData.diarrhee_pcime[data.reported_date] = 0;
+                  }
+                  patologieData.diarrhee_pcime[data.reported_date] += 1;
                 }
-                patologieData.diarrhee_pcime[data.reported_date] += 1;
-              }
-              if (data.fields['Gl7HGePuIi3'] == 'true') {
-                if (!(data.reported_date in patologieData.paludisme_pcime)) {
-                  patologieData.paludisme_pcime[data.reported_date] = 0;
+                if (data.fields['Gl7HGePuIi3'] == 'true') {
+                  if (!(data.reported_date in patologieData.paludisme_pcime)) {
+                    patologieData.paludisme_pcime[data.reported_date] = 0;
+                  }
+                  patologieData.paludisme_pcime[data.reported_date] += 1;
                 }
-                patologieData.paludisme_pcime[data.reported_date] += 1;
-              }
-              if (data.fields['LP33fMJRWrT'] == 'true') {
-                if (!(data.reported_date in patologieData.pneumonie_pcime)) {
-                  patologieData.pneumonie_pcime[data.reported_date] = 0;
+                if (data.fields['LP33fMJRWrT'] == 'true') {
+                  if (!(data.reported_date in patologieData.pneumonie_pcime)) {
+                    patologieData.pneumonie_pcime[data.reported_date] = 0;
+                  }
+                  patologieData.pneumonie_pcime[data.reported_date] += 1;
                 }
-                patologieData.pneumonie_pcime[data.reported_date] += 1;
-              }
-              if (data.fields['y84NNODZ705'] == 'true') {
-                if (!(data.reported_date in patologieData.malnutrition_pcime)) {
-                  patologieData.malnutrition_pcime[data.reported_date] = 0;
+                if (data.fields['y84NNODZ705'] == 'true') {
+                  if (!(data.reported_date in patologieData.malnutrition_pcime)) {
+                    patologieData.malnutrition_pcime[data.reported_date] = 0;
+                  }
+                  patologieData.malnutrition_pcime[data.reported_date] += 1;
                 }
-                patologieData.malnutrition_pcime[data.reported_date] += 1;
               }
             }
           }
@@ -1204,9 +1311,6 @@ async function getChwsDrugQantityPerSelected(currentData: ChwsDrug[], previousDa
 
     outData[field.name].theoretical_quantity_to_order = (outData[field.name].year_chw_cmm - outData[field.name].inventory_quantity) * (req.body.cmm_mutipliation ?? 1)
   }
-
-
-
 
   // [0]   year: 2024,
   // [0]   month: '03',
@@ -1282,14 +1386,14 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], All
     femme_postpartum: {},
     femme_postpartum_NC: {},
     total_PF_NC: {},
-    total_PF: {},
+    total_PF: {}
   }
 
   for (let i = 0; i < Chws$.length; i++) {
     const ascId = Chws$[i].id;
     if (ascId && ascId != '') {
       Object.entries(outPutData).map(([key, val]) => {
-        if (!val.hasOwnProperty(ascId)) val[ascId] = { chwId: ascId, tonoudayo: 0, dhis2: 0 }
+        if (val && !val.hasOwnProperty(ascId)) val[ascId] = { chwId: ascId, tonoudayo: 0, dhis2: 0 }
       });
     }
   }
@@ -1310,7 +1414,7 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], All
       if (isDateValid && idSourceValid && idDistrictValid && idSiteValid && idChwValid) {
 
         Object.entries(outPutData).map(([key, val]) => {
-          if (!val.hasOwnProperty(chw)) {
+          if (val && !val.hasOwnProperty(chw)) {
             const chwFound = getChwInfos(AllDbChws$, chw);
             if (chwFound) {
               const isDInData: boolean = Chws$.some(ch => ch.id === chwFound.id);
@@ -1395,7 +1499,7 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], All
               if (field["group_summary.s_have_you_refer_child"] == "yes") outPutData.reference_enceinte_postpartum[chw].tonoudayo += 1
             } else if (form == "fp_followup_danger_sign_check") {
               outPutData.total_PF[chw].tonoudayo += 1;
-              if (field["s_summary.r_have_you_refer_child"]) outPutData.reference_Pf[chw].tonoudayo += 1;
+              if (field["s_summary.r_have_you_refer_child"] == "yes") outPutData.reference_Pf[chw].tonoudayo += 1;
             } else if (form == "fp_follow_up_renewal") {
               outPutData.total_PF[chw].tonoudayo += 1;
               if (field["checklist2.s_refer_for_health_state"] == "true") outPutData.reference_Pf[chw].tonoudayo += 1;
@@ -1477,7 +1581,6 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], All
   return transformChwsData(outPutData, Chws$, req, res);
 
 }
-
 function transformChwsData(allDatasFound: ChtOutPutData, Chws$: Chws[], req: Request, res: Response): { chw: Chws, data: DataIndicators }[] {
   const { end_date, params, withDhis2Data } = req.body;
 
@@ -1686,45 +1789,78 @@ function transformChwsData(allDatasFound: ChtOutPutData, Chws$: Chws[], req: Req
 
   return allAggragateData;
 }
-
 export async function FetchMeetingPersons(req: Request, res: Response, next: NextFunction) {
+  var respData: { status: number, data: any };
   try {
+    const cacheKey = generateCacheKey(req, 'FetchMeetingPersons');
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+        respData = cachedData as { status: number, data: any };
+      return res.status(respData.status).json(respData);
+    }
     const _repo = await GetPersonsRepository();
     const data: Persons[] = await _repo.find();
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
-    return res.status(200).json({ status: 200, data: data });
+    respData = { status: 200, data: data };
+    cache.set(cacheKey, respData);
   } catch (e) {
-    return res.status(201).json({ status: 201, data: 'No data found !' });
+    respData = { status: 201, data: 'No data found !' };
   }
-}
 
+  return res.status(respData.status).json(respData);
+}
 export async function FetchMeetingTeams(req: Request, res: Response, next: NextFunction) {
+  var respData: { status: number, data: any };
   try {
+    const cacheKey = generateCacheKey(req, 'FetchMeetingTeams');
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      respData = cachedData as { status: number, data: any };
+      return res.status(respData.status).json(respData);
+    }
     const _repo = await GetTeamsRepository();
     const data: Teams[] = await _repo.find();
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
-    return res.status(200).json({ status: 200, data: data });
+    respData = { status: 200, data: data };
+    cache.set(cacheKey, respData);
   } catch (e) {
-    return res.status(201).json({ status: 201, data: 'No data found !' });
+    respData = { status: 201, data: 'No data found !' };
   }
-}
 
+  return res.status(respData.status).json(respData);
+}
 export async function FetchMeetingReports(req: Request, res: Response, next: NextFunction) {
+  var respData: { status: number, data: any };
   try {
+    const cacheKey = generateCacheKey(req, 'FetchMeetingReports');
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+        respData = cachedData as { status: number, data: any };
+      return res.status(respData.status).json(respData);
+    }
     const _repo = await GetMeetingReportDataRepository();
     const data = await _repo.find({ where: { team: { id: req.body.team } } });
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
-    return res.status(200).json({ status: 200, data: data });
+
+    respData = { status: 200, data: data };
+    cache.set(cacheKey, respData);
   } catch (e) {
-    return res.status(201).json({ status: 201, data: 'No data found !' });
+    respData = { status: 201, data: 'No data found !' };
   }
+
+  return res.status(respData.status).json(respData);
 }
-
 export async function SaveOrUpdateMeetingTeam(req: Request, res: Response, next: NextFunction) {
-  const _repo = await GetTeamsRepository();
-  const _sync = new Teams();
+  var respData: { status: number, data: any };
   try {
-
+    // const cacheKey = generateCacheKey(req, 'SaveOrUpdateMeetingTeam');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //     respData = cachedData as { status: number, data: any };
+    //   return res.status(respData.status).json(respData);
+    // }
+    const _repo = await GetTeamsRepository();
+    const _sync = new Teams();
     const id: any = req.body.id;
 
     _sync.id = id;
@@ -1740,16 +1876,26 @@ export async function SaveOrUpdateMeetingTeam(req: Request, res: Response, next:
     }
     const data = await _repo.save(_sync);
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
-    return res.status(200).json({ status: 200, data: data });
-  } catch (error) {
-    return res.status(201).json({ status: 201, data: 'No data found !' });
-  }
-}
 
+    respData = { status: 200, data: data };
+    // cache.set(cacheKey, respData);
+  } catch (error) {
+    respData = { status: 201, data: 'No data found !' };
+  }
+
+  return res.status(respData.status).json(respData);
+}
 export async function SaveOrUpdateMeetingPerson(req: Request, res: Response, next: NextFunction) {
-  const _repo = await GetPersonsRepository();
-  const _sync = new Persons();
+  var respData: { status: number, data: any };
   try {
+    // const cacheKey = generateCacheKey(req, 'SaveOrUpdateMeetingPerson');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //     respData = cachedData as { status: number, data: any };
+    //   return res.status(respData.status).json(respData);
+    // }
+    const _repo = await GetPersonsRepository();
+    const _sync = new Persons();
 
     const id: any = req.body.id;
 
@@ -1766,16 +1912,26 @@ export async function SaveOrUpdateMeetingPerson(req: Request, res: Response, nex
     }
     const data = await _repo.save(_sync);
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
-    return res.status(200).json({ status: 200, data: data });
-  } catch (error) {
-    return res.status(201).json({ status: 201, data: 'No data found !' });
-  }
-}
 
+    respData = { status: 200, data: data };
+    // cache.set(cacheKey, respData);
+  } catch (error) {
+    respData = { status: 201, data: 'No data found !' };
+  }
+
+  return res.status(respData.status).json(respData);
+}
 export async function SaveOrUpdateMeetingReports(req: Request, res: Response, next: NextFunction) {
-  const _repo = await GetMeetingReportDataRepository();
-  const _sync = new MeetingReportData();
+  var respData: { status: number, data: any };
   try {
+    // const cacheKey = generateCacheKey(req, 'SaveOrUpdateMeetingReports');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //     respData = cachedData as { status: number, data: any };
+    //   return res.status(respData.status).json(respData);
+    // }
+    const _repo = await GetMeetingReportDataRepository();
+    const _sync = new MeetingReportData();
     const id: any = req.body.id;
 
     _sync.id = id;
@@ -1804,45 +1960,78 @@ export async function SaveOrUpdateMeetingReports(req: Request, res: Response, ne
     const data = await _repo.find({ where: { team: { id: req.body.team } } });
 
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
-    return res.status(200).json({ status: 200, data: data });
-  } catch (error) {
-    return res.status(201).json({ status: 201, data: 'No data found !' });
-  }
-}
 
+    respData = { status: 200, data: data };
+    // cache.set(cacheKey, respData);
+  } catch (error) {
+    respData = { status: 201, data: 'No data found !' };
+  }
+
+  return res.status(respData.status).json(respData);
+}
 export async function DeleteMeetingReport(req: Request, res: Response, next: NextFunction) {
+  var respData: { status: number, data: any };
   try {
+    // const cacheKey = generateCacheKey(req, 'DeleteMeetingReport');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //     respData = cachedData as { status: number, data: any };
+    //   return res.status(respData.status).json(respData);
+    // }
     const _repo = await GetMeetingReportDataRepository();
     const data = await _repo.delete({ id: req.body.dataId });
-    return res.status(200).json({ status: 200, data: data });
-  } catch (error) {
-    return res.status(201).json({ status: 201, data: 'No data found !' });
-  }
-}
 
+    respData = { status: 200, data: data };
+    // cache.set(cacheKey, respData);
+  } catch (error) {
+    respData = { status: 201, data: 'No data found !' };
+  }
+
+  return res.status(respData.status).json(respData);
+}
 export async function DeleteMeetingPerson(req: Request, res: Response, next: NextFunction) {
+  var respData: { status: number, data: any };
   try {
+    // const cacheKey = generateCacheKey(req, 'DeleteMeetingPerson');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //     respData = cachedData as { status: number, data: any };
+    //   return res.status(respData.status).json(respData);
+    // }
     const _repo = await GetPersonsRepository();
     const data = await _repo.delete({ id: req.body.dataId });
-    return res.status(200).json({ status: 200, data: data });
-  } catch (error) {
-    return res.status(201).json({ status: 201, data: 'No data found !' });
-  }
-}
 
+    respData = { status: 200, data: data };
+    // cache.set(cacheKey, respData);
+  } catch (error) {
+    respData = { status: 201, data: 'No data found !' };
+  }
+
+  return res.status(respData.status).json(respData);
+}
 export async function DeleteMeetingTeams(req: Request, res: Response, next: NextFunction) {
-  const _repo = await GetTeamsRepository();
-  const _sync = new Teams();
+  var respData: { status: number, data: any };
   try {
+    // const cacheKey = generateCacheKey(req, 'DeleteMeetingTeams');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //     respData = cachedData as { status: number, data: any };
+    //   return res.status(respData.status).json(respData);
+    // }
+    const _repo = await GetTeamsRepository();
+    const _sync = new Teams();
     _sync.id = req.body.dataId;
     _sync.show = false;
     const data = await _repo.save(_sync);
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
-    return res.status(200).json({ status: 200, data: data });
-  } catch (error) {
-    return res.status(201).json({ status: 201, data: 'No data found !' });
-  }
-}
 
+    respData = { status: 200, data: data };
+    // cache.set(cacheKey, respData);
+  } catch (error) {
+    respData = { status: 201, data: 'No data found !' };
+  }
+
+  return res.status(respData.status).json(respData);
+}
 export async function deleteChwsData(req: Request, res: Response, next: NextFunction) { }
 

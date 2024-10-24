@@ -163,9 +163,9 @@ export class HighchartMap1Component implements OnInit {
 
     //     if (!this.roles.isChws()) {
     //         // const sources: string[] = returnDataAsArray(this.aggradateDataForm.value.sources) as string[];
-    //         districts = returnEmptyArrayIfNul(this.aggradateDataForm.value.districts);
-    //         sites = returnEmptyArrayIfNul(this.aggradateDataForm.value.sites);
-    //         // const chws: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
+    //         districts = returnDataAsArray(this.aggradateDataForm.value.districts);
+    //         sites = returnDataAsArray(this.aggradateDataForm.value.sites);
+    //         // const chws: string[] = returnDataAsArray(this.aggradateDataForm.value.chws);
     //     } else {
     //         if (this.chwOU != null && notNull(this.chwOU)) {
     //             districts = returnDataAsArray(this.chwOU.site.district.id);

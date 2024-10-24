@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { DatabaseUtilService } from '@ih-app/services/database-utils.service';
-import { returnEmptyArrayIfNul } from '@ih-app/shared/functions';
+import { returnDataAsArray } from '@ih-src/app/shared/functions';
 
 @Component({
   selector: 'app-user',
@@ -48,7 +48,7 @@ export class TruncateDatabaseComponent implements OnInit {
 
   EntitiesSelectedList(): { name: string, table: string }[] {
     var entitiesSelected: { name: string, table: string }[] = [];
-    const entities: string[] = returnEmptyArrayIfNul(this.EntitiesForm.value.entities);
+    const entities: string[] = returnDataAsArray(this.EntitiesForm.value.entities);
     this.initEntity = entities;
     for (let i = 0; i < this.EntitiesList$.length; i++) {
       const entity = this.EntitiesList$[i];

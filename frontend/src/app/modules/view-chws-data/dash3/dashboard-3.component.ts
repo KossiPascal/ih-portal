@@ -3,7 +3,7 @@ import { AggragateData, Chws, Districts, Families, FilterParams, Patients, Sites
 import { SyncService } from '@ih-app/services/sync.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { IndexDbService } from '@ih-src/app/services/index-db/index-db.service'; // db index start
-import { capitaliseDataGiven, notNull, patientAgeDetails, returnEmptyArrayIfNul } from '@ih-app/shared/functions';
+import { capitaliseDataGiven, notNull, patientAgeDetails, returnDataAsArray } from '@ih-app/shared/functions';
 import { AuthService } from '@ih-app/services/auth.service';
 
 
@@ -126,7 +126,7 @@ export class Dashboard3Component implements OnInit {
   genarateSites() {
     this.sites$ = [];
     this.chws$ = [];
-    const dist: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.districts);
+    const dist: string[] = returnDataAsArray(this.aggradateDataForm.value.districts);
     this.aggradateDataForm.value["sites"] = [];
     this.aggradateDataForm.value["chws"] = [];
 
@@ -141,7 +141,7 @@ export class Dashboard3Component implements OnInit {
   }
 
   genarateChws() {
-    const sites: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.sites);
+    const sites: string[] = returnDataAsArray(this.aggradateDataForm.value.sites);
     this.chws$ = [];
     this.aggradateDataForm.value["chws"] = [];
     if (notNull(sites)) {
@@ -155,9 +155,9 @@ export class Dashboard3Component implements OnInit {
   }
 
   ParamsToFilter(): FilterParams {
-    const districts: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.districts);
-    const sites: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.sites);
-    const chws: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
+    const districts: string[] = returnDataAsArray(this.aggradateDataForm.value.districts);
+    const sites: string[] = returnDataAsArray(this.aggradateDataForm.value.sites);
+    const chws: string[] = returnDataAsArray(this.aggradateDataForm.value.chws);
 
     var params: FilterParams = {
       districts: districts,

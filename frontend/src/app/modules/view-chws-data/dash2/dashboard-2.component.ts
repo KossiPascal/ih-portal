@@ -3,7 +3,7 @@ import { AggragateData, Chws, Districts, Families, FilterParams, Patients, Sites
 import { SyncService } from '@ih-app/services/sync.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { DataIndicators } from '@ih-app/models/DataAggragate';
-import { capitaliseDataGiven, notNull, range, returnDataAsArray, returnEmptyArrayIfNul } from '@ih-app/shared/functions';
+import { capitaliseDataGiven, notNull, range, returnDataAsArray } from '@ih-app/shared/functions';
 import { AuthService } from '@ih-app/services/auth.service';
 import { startEnd21and20Date } from '@ih-src/app/shared/dates-utils';
 import { Roles } from '@ih-src/app/models/Roles';
@@ -134,7 +134,7 @@ export class Dashboard2Component implements OnInit {
   genarateSites() {
     this.sites$ = [];
     this.chws$ = [];
-    const dist: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.districts);
+    const dist: string[] = returnDataAsArray(this.aggradateDataForm.value.districts);
     this.aggradateDataForm.value.sites = [];
     this.aggradateDataForm.value.chws = [];
 
@@ -149,7 +149,7 @@ export class Dashboard2Component implements OnInit {
   }
 
   genarateChws() {
-    const sites: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.sites);
+    const sites: string[] = returnDataAsArray(this.aggradateDataForm.value.sites);
     this.chws$ = [];
     this.aggradateDataForm.value.chws = [];
     if (notNull(sites)) {
@@ -168,9 +168,9 @@ export class Dashboard2Component implements OnInit {
     const src: string = this.aggradateDataForm.value.sources;
     const sources: string[] = notNull(src) ? returnDataAsArray(src) : [];
 
-    var districts: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.districts);
-    var sites: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.sites);
-    var chws: string[] = returnEmptyArrayIfNul(this.aggradateDataForm.value.chws);
+    var districts: string[] = returnDataAsArray(this.aggradateDataForm.value.districts);
+    var sites: string[] = returnDataAsArray(this.aggradateDataForm.value.sites);
+    var chws: string[] = returnDataAsArray(this.aggradateDataForm.value.chws);
     
 
     var params: FilterParams = {
@@ -185,7 +185,7 @@ export class Dashboard2Component implements OnInit {
     return params;
   }
 
-  returnEmptyArrayIfNul(data: any): string[] {
+  returnDataAsArray(data: any): string[] {
     return notNull(data) ? data : [];
   }
 

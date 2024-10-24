@@ -38,12 +38,10 @@
 // AppDataSource
 //   .initialize()
 //   .then(async () => {
-//     console.log("initialize success !");
 //     logNginx("initialize success !");
-//     console.log(`App Version: ${appVersion()}`);
 //     logNginx(`App Version: ${appVersion()}`);
 //   })
-//   .catch(error => { console.log(`${error}`); logNginx(`${error}`) });
+//   .catch(error => { logNginx(`${error}`) });
 
 
 //   // const apiTarget = 'https://localhost:4434';

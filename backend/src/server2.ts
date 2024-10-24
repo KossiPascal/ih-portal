@@ -45,12 +45,10 @@ const parseInQuery = (input: string): string[] => {
 AppDataSource
   .initialize()
   .then(async () => {
-    console.log("initialize success !");
-    logNginx("initialize success !");
-    console.log(`App Version: ${appVersion()}`);
-    logNginx(`App Version: ${appVersion()}`);
+    logNginx("Server 2 -> initialize success !");
+    logNginx(`Server 2 -> App Version: ${appVersion()}`);
   })
-  .catch(error => { console.log(`${error}`); logNginx(`${error}`) });
+  .catch(error => { logNginx(`Server 2 -> ${error}`) });
 
 
 async function getDistrictsSitesZonesChws(req: Request, res: Response, dataType: 'districts' | 'sites' | 'zones' | 'chws') {
@@ -417,7 +415,7 @@ const credentials = {
 };
 app.set('port', PORT_FOR_GET_API);
 
-const server = ServerStart({ isSecure: true, credential: credentials, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: PORT_FOR_GET_API, hostnames: hostnames, useLocalhost: USE_LOCALHOST === 'true' })
+const server = ServerStart(2, { isSecure: true, credential: credentials, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: PORT_FOR_GET_API, hostnames: hostnames, useLocalhost: USE_LOCALHOST === 'true' })
 
 
 // process.on('SIGTERM', () => {

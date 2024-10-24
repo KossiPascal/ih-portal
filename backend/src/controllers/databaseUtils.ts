@@ -137,11 +137,14 @@ export async function deleteFromCouchDb(req: Request, res: Response, next: NextF
     const allIds: string[] = todelete.map(data => data._id);
 
     if (todelete.length > 0 && allIds.length > 0 && reqType) {
+        const enable_strict_SSL_checking = false;
+        
         request({
             url: `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/medic/_bulk_docs`,
             method: 'POST',
             body: JSON.stringify({ "docs": todelete }),
-            headers: httpHeaders()
+            headers: httpHeaders(),
+            strictSSL: enable_strict_SSL_checking,
         }, async function (err: any, response: any, body: any) {
             if (err) {
                 return res.status(201).json({ status: 201, data: err });
@@ -187,17 +190,20 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
 
         if (user) {
             // start updating facility_id
+            const enable_strict_SSL_checking = false;
             return request({
                 url: `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/api/v1/users/${user.username}`,
                 method: 'POST',
                 body: JSON.stringify({ "place": new_parent }),
-                headers: httpHeaders()
+                headers: httpHeaders(),
+                strictSSL: enable_strict_SSL_checking,
             }, function (error: any, response: any, body: any) {
                 if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
                 request({
                     url: `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/medic/${user.contact}`,
                     method: 'GET',
-                    headers: httpHeaders()
+                    headers: httpHeaders(),
+                    strictSSL: enable_strict_SSL_checking,
                 }, function (error: any, response: any, body: any) {
                     try {
                         if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });
@@ -209,7 +215,8 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
                             url: `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/api/v1/people`,
                             method: 'POST',
                             body: JSON.stringify(data),
-                            headers: httpHeaders()
+                            headers: httpHeaders(),
+                            strictSSL: enable_strict_SSL_checking,
                         }, async function (error: any, response: any, body: any) {
                             try {
                                 if (error) return res.status(201).json({ status: 201, message: 'Error Found!' });

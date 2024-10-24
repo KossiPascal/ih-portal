@@ -205,12 +205,11 @@ export function range(size: number, startAt: number = 0) {
   return [...Array(size).keys()].map(i => i + startAt);
 }
 
-export function returnEmptyArrayIfNul(data: any): string[] {
-  return notNull(data) ? data : [];
-}
-
 export function returnDataAsArray(data: any): string[] {
-  return notNull(data) ? [data] : [];
+  if (notNull(data)) {
+    return Array.isArray(data) ? data : [data];
+  }
+  return [];
 }
 
 export function convertToArray(data: any): string[] {

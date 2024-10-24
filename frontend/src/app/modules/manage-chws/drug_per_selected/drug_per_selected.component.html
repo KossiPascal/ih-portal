@@ -3,7 +3,6 @@
     <div class="card card-info">
 
       <h2 class="title" style="text-align: center; color: blue;">Gestion Médicament Des ASC</h2>
-
       <div class="overlay-wrapper">
 
         <div *ngIf="isLoading" class="overlay"> <i class="fas fa-3x fa-sync-alt fa-spin"></i>
@@ -40,12 +39,11 @@
                 </div>
               </div>
 
-
               <div *ngIf="!roles.isChws()" class="col-sm-2 col-6">
                 <div class="form-group">
                   <label>District</label>
                   <select style="font-size: 18px;" *ngIf="Districts$.length > 0" (change)="genarateSites()"
-                    class="form-control" formControlName="districts">
+                    class="form-control" formControlName="districts" multiple>
                     <!-- <option value=""></option> -->
                     <option *ngFor="let dist of Districts$" value="{{dist.id}}">
                       {{ dist.name }}
@@ -58,8 +56,8 @@
                 <div class="form-group">
                   <label>Site</label>
                   <select style="font-size: 18px;" (change)="genarateChws()" class="form-control"
-                    formControlName="sites">
-                    <option value=""></option>
+                    formControlName="sites" multiple>
+                    <!-- <option value=""></option> -->
                     <option *ngFor="let site of site$" value="{{site.id}}">
                       {{ site.name }}
                     </option>
@@ -70,8 +68,8 @@
               <div *ngIf="!roles.isChws()" class="col-sm-3 col-6">
                 <div class="form-group">
                   <label>ASC</label>
-                  <select style="font-size: 18px;" class="form-control" formControlName="chws">
-                    <option value=""></option>
+                  <select style="font-size: 18px;" class="form-control" formControlName="chws" multiple>
+                    <!-- <option value=""></option> -->
                     <option *ngFor="let chw of chw$" value="{{chw.id}}">
                       {{chw.name}}
                     </option>
@@ -136,19 +134,33 @@
           </h2>
         </div>
 
-        <div *ngIf="data_error_messages=='' && OutputData$">
+        <div *ngIf="OutPutDataArray$ && isMultiDataMode" class="card-body p-0" class="card">
+          <div class="card-header">
+            <div class="card-title" style="display: flex; justify-content: center;align-items: center; padding: 100px;">
+
+              <button 
+                (click)="GenerateAndDownloadExcelFile()" 
+                class="btn btn-success form-control" 
+                style="width: 350px; text-align: center; padding: 40px 10px 40px 10px; display: flex; justify-content: center;align-items: center; font-size: 20px;"
+                >
+                Télécharger les données en Excel <div style="margin-left: 10px;" class="fa fa-file-download fa-right"></div>
+              </button>
+
+            </div>
+          </div>
+          <!-- <div style="overflow-x:scroll!important;"> </div> -->
+        </div>
+
+        <div *ngIf="data_error_messages=='' && OutputData$ && !isMultiDataMode">
           <div *ngIf="OutputData$ as datas">
             <form (submit)="saveOrUpdate($event)" novalidate>
               <div class="card-body p-0" class="card">
                 <div class="card-header">
                   <div class="card-title">
 
-                    <p [innerHTML]="GenerateHearder(datas) | safeHtml" class="chw-info"
-                      style="color: blue;font-size:20px"></p>
+                    <p [innerHTML]="GenerateHearder(datas) | safeHtml" class="chw-info" style="color: blue;font-size:20px"></p>
 
-
-                    <ul
-                      *ngIf="roles.canDownloadReports() && editCmm!='edit' && editQtyValidated!='edit' && editQtyDelivered!='edit' && editObservations!='edit'">
+                    <ul *ngIf="roles.canDownloadReports() && editCmm!='edit' && editQtyValidated!='edit' && editQtyDelivered!='edit' && editObservations!='edit'">
                       <li><span (click)="excel('export_table')">Excel</span></li>
                       <li><span (click)="csv('export_table')">CSV</span></li>
                       <li><span (click)="json('export_table')">JSON</span></li>
@@ -166,7 +178,9 @@
                     </button>
                   </div>
                 </div>
+
                 <div style="overflow-x:scroll!important;">
+
                   <table [id]="'export_table'" class="table table-sm table-striped" style="margin: auto;">
                     <thead>
                       <tr class="bg-primary head-elem">
@@ -446,6 +460,7 @@
                       </ng-container>
                     </tbody>
                   </table>
+                  
                 </div>
               </div>
             </form>

@@ -10,6 +10,9 @@ import { startEnd21and20Date } from '@ih-src/app/shared/dates-utils';
 import { User } from '@ih-src/app/models/User';
 import { Router } from '@angular/router';
 import { KeyValue } from '@angular/common';
+import { ExcelService } from '@ih-src/app/services/drug-per-selected-to-excel.service';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 declare var sortTable: any;
 declare var $: any;
 declare var table2pdf: any;
@@ -27,7 +30,7 @@ declare var printTable: any;
 })
 export class DrugPerSelectedManageComponent implements OnInit {
 
-  constructor(private auth: AuthService, private sync: SyncService, private router: Router) { }
+  constructor(private auth: AuthService, private sync: SyncService, private excelService: ExcelService, private router: Router) { }
 
   public roles = new Roles(this.auth);
 
@@ -40,10 +43,16 @@ export class DrugPerSelectedManageComponent implements OnInit {
   data_error_messages: string = '';
   data_no_data_found: boolean = false;
 
-  OutputData$!: { cibleId: any, cible: any, drugData: ChwsDrugData, patologieData: PatologieData };
+  OutputData$: { cibleId: any, cible: any, drugData: ChwsDrugData, patologieData: PatologieData }|undefined;
+  response$: { status: number, data: { chwId: any, chw: Chws, drugData: ChwsDrugData, patologieData: PatologieData } | any } | undefined
+
+  OutPutDataArray$: { status: number, data: { cibleId: any, cible: Chws, drugData: ChwsDrugData, patologieData: PatologieData, hasEmptyData:boolean } | string | undefined }[] | undefined;
+
   ChwsDataFromDbError: string = '';
 
   dataDetail: string = '';
+
+  isMultiDataMode:boolean = false;
 
   createDataFilterFormGroup(): FormGroup {
     return new FormGroup({
@@ -54,7 +63,7 @@ export class DrugPerSelectedManageComponent implements OnInit {
       sources: new FormControl(""),
       districts: new FormControl("", !this.roles.isChws() ? [Validators.required] : []),
       sites: new FormControl(""),
-      chws: new FormControl(""),
+      chws: new FormControl([]),
       cmm_start_year_month: new FormControl(this.yearCmmMonthStartList$?.[0]?.id, [Validators.required]),
       cmm_mutipliation: new FormControl(1, [Validators.required]),
     });
@@ -76,8 +85,6 @@ export class DrugPerSelectedManageComponent implements OnInit {
 
   month$!: { labelEN: string; labelFR: string; id: string; uid: number };
   year$!: number;
-
-  response$!: { status: number, data: { chwId: any, chw: Chws, drugData: ChwsDrugData, patologieData: PatologieData } | any }
 
   drugUpdateResponse$!: { status: number, data: ChwsUpdateDrugInfo }
   drugUpdateErrorMsg: string = '';
@@ -106,16 +113,55 @@ export class DrugPerSelectedManageComponent implements OnInit {
   editObservationsClick(cancel: boolean = false) {
     this.editObservations = cancel == true ? this.editObservations = '' : this.editObservations == 'edit' ? '' : 'edit';
   }
-  GenerateHearder(data: { cibleId: any; cible: any; drugData: ChwsDrugData, patologieData: PatologieData }) {
+  GenerateHearder(data: { cibleId: any; cible: any; drugData: ChwsDrugData, patologieData: PatologieData }, useHtmlOutput = true, onlyDetail = false):any {
     const c = data.cible;
     try {
-      return `${c.site.district.name} > ${c.site.name} > <strong>${c.name}</strong> (${c.external_id}) `;
+      if (useHtmlOutput) {
+        return `${c.site.district.name} > ${c.site.name} > <strong>${c.name}</strong> (${c.external_id}) `;
+      }
+      if (onlyDetail) {
+        return {
+          district: c.site.district.name,
+          districtId: c.site.district.external_id,
+          site: c.site.name,
+          siteId: c.site.external_id,
+          chw: c.name,
+          chwId: c.external_id
+        }
+      }
+      return `${c.site.district.name} > ${c.site.name} > ${c.name} (${c.external_id})`;
     } catch (error) {
       try {
-        return `${c.district.name} > <strong>${c.name}</strong> (${c.external_id}) `;
+        if (useHtmlOutput) {
+          return `${c.district.name} > <strong>${c.name}</strong> (${c.external_id}) `;
+        }
+        if (onlyDetail) {
+          return {
+            district: c.district.name,
+            districtId: c.district.external_id,
+            site: c.name,
+            siteId: c.site.external_id,
+            chw: undefined,
+            chwId: undefined
+          }
+        }
+        return `${c.district.name} > ${c.name} (${c.external_id})`;
       } catch (error) {
         try {
-          return `<strong>${c.name}</strong> (${c.id}) `;
+          if (useHtmlOutput) {
+            return `<strong>${c.name}</strong> (${c.id}) `;
+          }
+          if (onlyDetail) {
+            return {
+              district: c.name,
+              districtId: c.id,
+              site: undefined,
+              siteId: undefined,
+              chw: undefined,
+              chwId: undefined
+            }
+          }
+          return `${c.name} (${c.id}) `;
         } catch (error) { }
       }
     }
@@ -187,7 +233,7 @@ export class DrugPerSelectedManageComponent implements OnInit {
       const month = this.chwsDrugDataForm.value.month;
       const district = this.chwsDrugDataForm.value.districts;
       const site = this.chwsDrugDataForm.value.sites;
-      const chw = this.chwsDrugDataForm.value.chws;
+      const chw = this.chwsDrugDataForm.value.chws[0];
       const cmm_start_year_month = this.chwsDrugDataForm.value.cmm_start_year_month;
       const cmm_mutipliation = this.chwsDrugDataForm.value.cmm_mutipliation;
 
@@ -229,7 +275,7 @@ export class DrugPerSelectedManageComponent implements OnInit {
                   order += 1;
                   if (_res$.status == 200) {
                     if (order == objectKeysLen - 1 && _res$.data) {
-                      if (this.OutputData$.cibleId == chw) {
+                      if (this.OutputData$!.cibleId == chw) {
                         const dataFound = _res$.data;
                         this.OutputData$ = {
                           cibleId: dataFound.chwId,
@@ -526,6 +572,10 @@ export class DrugPerSelectedManageComponent implements OnInit {
 
     const filters: FilterParamsWithYearMonth = params ?? this.ParamsToFilter();
 
+    this.isMultiDataMode = filters.chws.length > 1;
+
+    console.log(this.isMultiDataMode)
+
     if (
       this.defaultParams?.year != filters.year ||
       this.defaultParams?.month != filters.month ||
@@ -533,13 +583,31 @@ export class DrugPerSelectedManageComponent implements OnInit {
       this.defaultParams?.sites != filters.sites ||
       this.defaultParams?.chws != filters.chws
     ) {
-      this.sync.ihDrugDataPerSelected(filters).subscribe((_res$: { status: number, data: { cibleId: any, cible: any, drugData: ChwsDrugData, patologieData: PatologieData } | any }) => {
-        this.response$ = _res$;
-        this.startTraitement(filters);
-      }, (err: any) => {
-        this.isLoading = false;
-        this.ChwsDataFromDbError = err.toString();
-      });
+      if (this.isMultiDataMode) {
+        this.sync.ihDrugDataWithMultiChwsSelected(filters).subscribe((_res$: { status: number, data: { cibleId: any, cible: any, drugData: ChwsDrugData, patologieData: PatologieData } | any }[]) => {
+          this.response$ = undefined;
+          this.OutputData$ = undefined;
+          this.OutPutDataArray$ = _res$.sort((a, b) => {
+            if (a && a.data && a.data.cible && a.data.cible.external_id && b && b.data && b.data.cible && b.data.cible.external_id) {
+              return a.data.cible.external_id.localeCompare(b.data.cible.external_id);
+            }
+            return true;
+          });
+          this.startTraitement(filters);
+        }, (err: any) => {
+          this.isLoading = false;
+          this.ChwsDataFromDbError = err.toString();
+        });
+      } else {
+        this.sync.ihDrugDataPerSelected(filters).subscribe((_res$: { status: number, data: { cibleId: any, cible: any, drugData: ChwsDrugData, patologieData: PatologieData } | any }) => {
+          this.OutPutDataArray$= undefined;
+          this.response$ = _res$;
+          this.startTraitement(filters);
+        }, (err: any) => {
+          this.isLoading = false;
+          this.ChwsDataFromDbError = err.toString();
+        });
+      }
     } else {
       this.startTraitement(filters);
     }
@@ -547,23 +615,165 @@ export class DrugPerSelectedManageComponent implements OnInit {
 
   startTraitement(params?: FilterParamsWithYearMonth) {
     this.isLoading = true;
-
     this.IsOkToUpdateFields();
-
     const filters: FilterParamsWithYearMonth = params ?? this.ParamsToFilter();
-    if (this.response$.status == 200) {
-      const fOutData$ = this.response$.data as { cibleId: any, cible: any, drugData: ChwsDrugData, patologieData: PatologieData };
-      this.OutputData$ = fOutData$;
-      // this.OutputData$ = fOutData$.sort((a, b) => {
-      //   return a.chw.external_id.localeCompare(b.chw.external_id);
-      // });
-      this.defaultParams = filters;
-      this.data_no_data_found = (this.OutputData$ ?? null) == null;
-    } else {
-      this.data_error_messages = this.response$.data.toString();
-      this.data_no_data_found = true;
-    }
-    this.isLoading = false;
 
+    this.isMultiDataMode = filters.chws.length > 1;
+
+    if (this.isMultiDataMode) {
+        // this.OutPutDataArray$ = this.responseArray$!.data as { cibleId: any, cible: any, drugData: ChwsDrugData, patologieData: PatologieData }[];
+        this.defaultParams = filters;
+        this.data_no_data_found = (this.OutPutDataArray$ ?? null) == null || this.OutPutDataArray$!.length == 0;
+    } else {
+      if (this.response$!.status == 200) {
+        this.OutputData$ = this.response$!.data as { cibleId: any, cible: any, drugData: ChwsDrugData, patologieData: PatologieData };
+        // this.OutputData$ = fOutData$.sort((a, b) => {
+        //   return a.chw.external_id.localeCompare(b.chw.external_id);
+        // });
+        this.defaultParams = filters;
+        this.data_no_data_found = (this.OutputData$ ?? null) == null;
+      } else {
+        this.data_error_messages = this.response$!.data.toString();
+        this.data_no_data_found = true;
+      }
+    }
+
+    this.isLoading = false;
   }
+
+  GenerateAndDownloadExcelFile(fileName: string = 'Chws-Meg') {
+    // Crée un nouveau classeur (workbook)
+    const workbook: XLSX.WorkBook = XLSX.utils.book_new();
+
+    // Boucle pour ajouter 5 feuilles avec des cellules fusionnées
+    for (const brutDrugData of this.OutPutDataArray$!) {
+
+      if (brutDrugData!.status == 200) {
+        const drugData = brutDrugData.data as {cibleId: any, cible: Chws, drugData: ChwsDrugData, patologieData: PatologieData}
+        const cible = this.GenerateHearder(drugData, false, true) as {district: any,districtId: any,site: any,siteId: any,chw: any,chwId: any};
+        
+        const sheetName = `${cible.chw.split(' ')[0]} (${cible.chwId})`;
+        let tableData = [
+          ['GESTION MEDICAMENT ASC DANS TONOUDAYO'],  // Titre unique par feuille
+          [`${cible.district} > ${cible.site} > ${cible.chw} (${cible.chwId})`],
+          ['Id', 'M E G', 'Quantité début du mois\n(A)', 'Quantité reçue au cours du mois\n(B)','Quantité totale du mois\n(C=A+B)','Consommation mensuelle du mois\n(D)','Quantité théorique disponible à l\'inventaire\n(E=C-D)','Quantité comptée à l\'inventaire\n(F)','Ecart d\'inventaire\n(J=F-E)','','CMM de l\'année\nN-1 (G)','Quantité théorique à commander\nH = 1 * (G-F)','Quantités à commander\n(Expression besoins ASC)','Quantité validée','Quantité livrée','Taux de satisfaction','Observation de l\'ASC','','','','','','','','','Observations\n(Pharmacie)'],
+          ['','','','','','','','','','','','','','','','','Emprunt/Prêt du mois','','','Perte du mois','Avarié du mois','Cassé du mois','Périmé du mois','Autres sortie du mois','Commentaires ASC',''],
+          ['','','','','','','','','Ecart en valeur','Ecart en %','','','','','','','Quantité Emprunt du mois','Quantité Prêt du mois','Emprunt/Prêt Nom & Code ASC','','','','','','',''],
+          // ['Row 1 Col 1', 'Row 1 Col 2', 'Row 1 Col 3', 'Row 1 Col 4'],
+          // ['Row 2 Col 1', 'Row 2 Col 2', 'Row 2 Col 3', 'Row 2 Col 4'],
+          // ['Row 3 Col 1', 'Row 3 Col 2', 'Row 3 Col 3', 'Row 3 Col 4'],
+        ];
+        for (const k of this.objectKeys(drugData.drugData)) {
+          const Bdata = this.toChwsDrugData(this.sortedArray(drugData.drugData), k);
+          const key = this.getKey(Bdata.key);
+          const data = Bdata.val;
+          const label = this.getLabel(Bdata.key);
+          const ec = this.EcartColor(data);
+
+          tableData.push([
+            key, 
+            label, 
+            this.convertQty(data.month_quantity_beginning),
+            this.convertQty(data.month_quantity_received),
+            this.convertQty(data.month_total_quantity),
+            this.convertQty(data.month_consumption),
+            this.convertQty(data.theoretical_quantity),
+            this.convertQty(data.inventory_quantity),
+            this.convertQty(ec.value),
+            this.convertQty(ec.ecart),
+            this.convertQty(data.year_chw_cmm),
+            this.convertQty(data.theoretical_quantity_to_order),
+            this.convertQty(data.quantity_to_order),
+            this.convertQty(data.quantity_validated),
+            this.convertQty(data.delivered_quantity),
+            this.convertQty(data.satisfaction_rate),
+            this.convertQty(data.borrowing_quantity),
+            this.convertQty(data.lending_quantity),
+            this.cancelArobase(data.borrowing_chws_code) + ' ' + this.cancelArobase(data.lending_chws_code),
+            this.convertQty(data.quantity_loss),
+            this.convertQty(data.quantity_damaged),
+            this.convertQty(data.quantity_broken),
+            this.convertQty(data.quantity_expired),
+            this.convertQty(data.other_quantity),
+            this.convertQty(data.comments),
+            this.convertQty(data.observations),
+          ]);
+        }
+        // Convertit les données en un format de feuille de calcul (worksheet)
+        const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(tableData);
+        // Définition des cellules à fusionner
+        worksheet['!merges'] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: 25 } }, // Fusionne A1:D1 (Titre)
+          { s: { r: 1, c: 0 }, e: { r: 1, c: 25 } }, // Fusionne A1:D1 (Titre)
+
+          { s: { r: 2, c: 0 }, e: { r: 4, c: 0 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 1 }, e: { r: 4, c: 1 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 2 }, e: { r: 4, c: 2 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 3 }, e: { r: 4, c: 3 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 4 }, e: { r: 4, c: 4 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 5 }, e: { r: 4, c: 5 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 6 }, e: { r: 4, c: 6 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 7 }, e: { r: 4, c: 7 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 8 }, e: { r: 3, c: 9 } },
+          { s: { r: 2, c: 10 }, e: { r: 4, c: 10 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 11 }, e: { r: 4, c: 11 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 12 }, e: { r: 4, c: 12 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 13 }, e: { r: 4, c: 13 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 14 }, e: { r: 4, c: 14 } }, // Fusionne A4:A6
+          { s: { r: 2, c: 15 }, e: { r: 4, c: 15 } },
+
+          { s: { r: 2, c: 16 }, e: { r: 2, c: 23 } },
+          { s: { r: 3, c: 16 }, e: { r: 3, c: 18 } },
+
+          { s: { r: 3, c: 19 }, e: { r: 4, c: 19 } }, // Fusionne A4:A6
+          { s: { r: 3, c: 20 }, e: { r: 4, c: 20 } }, // Fusionne A4:A6
+          { s: { r: 3, c: 21 }, e: { r: 4, c: 21 } }, // Fusionne A4:A6
+          { s: { r: 3, c: 22 }, e: { r: 4, c: 22 } }, // Fusionne A4:A6
+          { s: { r: 3, c: 23 }, e: { r: 4, c: 23 } }, // Fusionne A4:A6
+          { s: { r: 3, c: 24 }, e: { r: 4, c: 24 } }, // Fusionne A4:A6
+          
+          { s: { r: 2, c: 25 }, e: { r: 4, c: 25 } }, // Fusionne A4:A6
+
+          // { s: { r: 3, c: 1 }, e: { r: 3, c: 2 } }, // Fusionne B4:C4 (Deux colonnes sur la même ligne)
+        ];
+        // Styles pour toutes les cellules
+        const cellStyle = {
+          alignment: {
+            horizontal: 'center',    // Centre le contenu horizontalement
+            vertical: 'center',      // Centre le contenu verticalement
+            wrapText: true,          // Active le retour automatique à la ligne
+          },
+        };
+        // Applique les styles de centrage et de retour à la ligne à toutes les cellules
+        const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1'); // Définit la plage de cellules à styliser
+        for (let row = range.s.r; row <= range.e.r; row++) {
+          for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+            if (!worksheet[cellAddress]) continue;
+            worksheet[cellAddress].s = cellStyle;  // Appliquer les styles à la cellule
+          }
+        }
+
+        // Ajoute la feuille au classeur avec un nom spécifique
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      } else {
+        
+      }
+    }
+
+    // Écrit le classeur en format binaire
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+
+    // Sauvegarde le fichier Excel
+    // Crée un Blob à partir des données Excel
+    const data: Blob = new Blob([excelBuffer], {
+      type: 'application/octet-stream',
+    });
+    // Utilise file-saver pour déclencher le téléchargement du fichier
+    saveAs(data, `${fileName}.xlsx`);
+  }
+
 }

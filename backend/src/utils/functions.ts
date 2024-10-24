@@ -1,6 +1,7 @@
 import path from "path";
 import https from "https";
 import http from "http";
+import { NextFunction, Request, Response } from "express";
 import { CouchDbFetchData, Dhis2Sync, MailConfig } from "./appInterface";
 import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws, Patients } from "../entity/Sync";
 import { Consts } from "./constantes";
@@ -8,15 +9,35 @@ import { getAgeInDays, getAgeInMonths, getAgeInYear, isChildUnder5, isFemaleInCi
 var fs = require('fs');
 var JFile = require('jfile'); 
 //  "npm install jfile --save" required
+import crypto from 'crypto';
+
+
+export function generateHash(input: any): string {
+  if (!input) {
+    throw new Error('Input for hashing is required.');
+  }
+  return crypto.createHash('sha256').update(JSON.stringify(input)).digest('hex');
+}
+
+export function generateCacheKey(req: Request, cible:string=''): string {
+  const bodyHash = generateHash(req.body); 
+  const cacheKey = {
+    bodyHash,
+  };
+  const bobyStringify =  JSON.stringify(cacheKey);
+  if (notEmpty(cible)){
+    return `${cible}-${bobyStringify}`;
+  }
+  return bobyStringify;
+}
 
 
 export function logNginx(message: any) {
+    console.log(message);
     try {
         let nxFile = new JFile('/var/log/nginx/access.log'); // check path before if exist in your system . IF no , change it with the available path
         nxFile.text += `\n${message}`; //append new line in nginx log file
-    } catch (error) {
-
-    }
+    } catch (error) {}
 }
 
 const nodemailer = require("nodemailer");
@@ -66,7 +87,7 @@ export function listatts(parent: string, currentJson: any) {
     if (typeof currentJson !== 'object' || currentJson == undefined || currentJson.length > 0) return;
     for (var attributename in currentJson) {
         const attrKey = getKeyPath(parent, attributename);
-        if (Object.prototype.hasOwnProperty.call(currentJson, attributename)) {
+        if (Object.prototype && Object.prototype.hasOwnProperty.call(currentJson, attributename)) {
             let childAtts = listatts(attrKey, currentJson[attributename])
             if (childAtts != undefined && childAtts.length > 0) {
                 attList = [...attList, ...childAtts]
@@ -127,11 +148,11 @@ export function onError(error: any, port: any) {
     // handle specific listen errors with friendly messages
     switch (error.code) {
         case 'EACCES':
-            console.error(bind + ' requires elevated privileges');
+            logNginx(bind + ' requires elevated privileges');
             process.exit(1);
             break;
         case 'EADDRINUSE':
-            console.error(bind + ' is already in use');
+            logNginx(bind + ' is already in use');
             process.exit(1);
             break;
         default:
@@ -139,33 +160,28 @@ export function onError(error: any, port: any) {
     }
 }
 
-export function onListening(server: https.Server | http.Server, hostnames: any[], protocole: string = 'http') {
+export function onListening(server: https.Server | http.Server, serverNumber:number, hostnames: any[], protocole: string = 'http') {
     var addr = server.address();
     var bind = typeof addr === 'string' ? addr : addr!.port;
     for (let i = 0; i < hostnames.length; i++) {
-        console.log(`🚀 ${protocole.toLocaleUpperCase()} Server is available at ${protocole}://${hostnames[i]}:${bind}`);
-        logNginx(`🚀 ${protocole.toLocaleUpperCase()} Server is available at ${protocole}://${hostnames[i]}:${bind}`);
+        logNginx(`🚀 ${protocole.toLocaleUpperCase()} Server ${serverNumber} is available at ${protocole}://${hostnames[i]}:${bind}`);
     }
-    console.log('\n');
     logNginx('\n');
 }
 
 export function onProcess() {
     process.on('unhandledRejection', (error, promise) => {
-        console.log('Alert! ERROR : ', error)
         logNginx(`Alert! ERROR : ${error}`);
     });
     process.on('uncaughtException', err => {
-        console.error(err && err.stack);
         logNginx(`${err && err.stack}`)
     });
     process.on('ERR_HTTP_HEADERS_SENT', err => {
-        console.error(err && err.stack);
         logNginx(`${err && err.stack}`)
     });
 }
 
-export function ServerStart(data: {
+export function ServerStart(serverNumber:number, data: {
     isSecure: boolean, credential?: {
         key: string;
         ca: string;
@@ -181,7 +197,7 @@ export function ServerStart(data: {
         if (!data.useLocalhost) server.listen(data.port, data.hostnames[0], () => onProcess);
     }
     server.on('error', (err) => onError(err, data.port));
-    server.on('listening', () => onListening(server, data.useLocalhost ? ['localhost'] : data.hostnames, 'https'));
+    server.on('listening', () => onListening(server, serverNumber, data.useLocalhost ? ['localhost'] : data.hostnames, 'https'));
     server.on('connection', (stream) => console.log('someone connected!'));
     return server;
 }

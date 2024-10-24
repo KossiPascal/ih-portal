@@ -213,6 +213,11 @@ export class SyncService {
     return this.http.post(`${backenUrl()}/sync/ih_drug_data_per_selected`, fparams, CustomHttpHeaders(this.store));
   }
 
+  ihDrugDataWithMultiChwsSelected(params: any): any {
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/ih_drug_data_with_multi_chws_selected`, fparams, CustomHttpHeaders(this.store));
+  }
+
   insertOrUpdateDhis2Data(chwsDataToDhis2: DataIndicators): any {
     const fparams = this.ApiParams({ chwsDataToDhis2: chwsDataToDhis2});
     return this.http.post(`${backenUrl()}/sync/dhis2/insert_or_update`, fparams, CustomHttpHeaders(this.store));

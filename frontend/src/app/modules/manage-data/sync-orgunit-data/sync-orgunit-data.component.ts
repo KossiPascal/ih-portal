@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CouchDbUsers, Districts, OrgUnitImport, Sites } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
 import { SyncService } from '@ih-app/services/sync.service';
-import { notNull, returnEmptyArrayIfNul } from '@ih-app/shared/functions';
+import { notNull, returnDataAsArray } from '@ih-app/shared/functions';
 import { startEnd21and20Date } from '@ih-src/app/shared/dates-utils';
 
 @Component({
@@ -99,7 +99,7 @@ export class SyncOrgUnitDataComponent implements OnInit {
 
   genarateSites() {
     this.sites$ = [];
-    const dist: string[] = returnEmptyArrayIfNul(this.dhis2ChwsDataForm.value.districts);
+    const dist: string[] = returnDataAsArray(this.dhis2ChwsDataForm.value.districts);
     this.dhis2ChwsDataForm.value.sites = "";
     if (notNull(dist)) {
       for (let d = 0; d < this.Sites$.length; d++) {
@@ -172,7 +172,7 @@ export class SyncOrgUnitDataComponent implements OnInit {
   }
 
  async syncChwsDataFromDhis2(): Promise<void> {
-    const sites: string[] = returnEmptyArrayIfNul(this.dhis2ChwsDataForm.value.sites);
+    const sites: string[] = returnDataAsArray(this.dhis2ChwsDataForm.value.sites);
 
     this.tab3_messages = [];
     this.loading3 = true;

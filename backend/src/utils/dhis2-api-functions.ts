@@ -45,7 +45,6 @@
   
 // 	  return userFound;
 // 	} catch (err) {
-// 	  console.error(err);
 // 	  logNginx(err);
 // 	  throw err; // Rethrow the error to indicate failure
 // 	}

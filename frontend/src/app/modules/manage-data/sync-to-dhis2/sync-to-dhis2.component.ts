@@ -5,7 +5,7 @@ import { AuthService } from '@ih-app/services/auth.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import * as moment from 'moment';
 import { KeyValue } from '@angular/common';
-import { capitaliseDataGiven, notNull, returnEmptyArrayIfNul } from '@ih-app/shared/functions';
+import { capitaliseDataGiven, notNull, returnDataAsArray } from '@ih-app/shared/functions';
 import { ActivatedRoute } from '@angular/router'
 import { DataIndicators } from '@ih-app/models/DataAggragate';
 import { startEnd21and20Date, isDayInDate, daysDiff } from '@ih-src/app/shared/dates-utils';
@@ -165,7 +165,7 @@ export class SyncToDhis2Component implements OnInit {
   genarateSites(cibleForm: FormGroup) {
     this.sites$ = [];
     this.chws$ = [];
-    const dist: string[] = returnEmptyArrayIfNul(cibleForm.value.districts);
+    const dist: string[] = returnDataAsArray(cibleForm.value.districts);
     cibleForm.value["sites"] = "";
     cibleForm.value["chws"] = [];
 
@@ -189,7 +189,7 @@ export class SyncToDhis2Component implements OnInit {
   }
 
   genarateChws(cibleForm: FormGroup) {
-    const sites: string[] = returnEmptyArrayIfNul(cibleForm.value.sites);
+    const sites: string[] = returnDataAsArray(cibleForm.value.sites);
     this.chws$ = [];
     cibleForm.value["chws"] = [];
     if (notNull(sites)) {
@@ -208,8 +208,8 @@ export class SyncToDhis2Component implements OnInit {
       start_date: this.ihChtToDhis2Form.value.start_date,
       end_date: this.ihChtToDhis2Form.value.end_date,
       sources: ['Tonoudayo'],
-      districts: returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.districts),
-      sites: returnEmptyArrayIfNul(this.ihChtToDhis2Form.value.sites),
+      districts: returnDataAsArray(this.ihChtToDhis2Form.value.districts),
+      sites: returnDataAsArray(this.ihChtToDhis2Form.value.sites),
       InsertIntoDhis2: this.ihChtToDhis2Form.value.InsertIntoDhis2,
     }
   }

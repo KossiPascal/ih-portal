@@ -19,16 +19,14 @@ import { AuthUserController } from "./controllers/auth-user";
 
 
 const helmet = require('helmet');
-const { v4: uuidv4 } = require('uuid');
-
+// const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const cron = require("node-cron");
 const compression = require("compression");
 const responseTime = require('response-time')
-
 require('dotenv').config({ path: sslFolder('.ih-env') });
-const { ACCESS_ALL_AVAILABE_PORT, CAN_ACCESS_INSECURE, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED, USE_LOCALHOST } = process.env
 
+const { ACCESS_ALL_AVAILABE_PORT, CAN_ACCESS_INSECURE, PROD_PORT, PROD_PORT_SECURED, DEV_PORT, DEV_PORT_SECURED, USE_LOCALHOST } = process.env
 
 const hostnames = getIPAddress(ACCESS_ALL_AVAILABE_PORT == 'true');
 const port = normalizePort((Consts.isProdEnv ? PROD_PORT : DEV_PORT) || Consts.defaultPort);
@@ -40,13 +38,13 @@ var session = require('express-session');
 AppDataSource
   .initialize()
   .then(async () => {
-    console.log("initialize success !");
-    logNginx("initialize success !");
-    console.log(`App Version: ${appVersion()}`);
-    logNginx(`App Version: ${appVersion()}`);
+    logNginx("Server 1 -> initialize success !");
+    logNginx(`Server 1 -> App Version: ${appVersion()}`);
     await AuthUserController.DefaultAdminCreation()
   })
-  .catch(error => { console.log(`${error}`); logNginx(`${error}`) });
+  .catch(error => { 
+    logNginx(`Server 1 -> ${error}`) 
+  });
 
 // const corsOptions = {
 //   origin: '*',
@@ -56,35 +54,17 @@ AppDataSource
 // };
 
 const app = express()
-  .use(helmet({ contentSecurityPolicy: false }))
-  // .use(helmet({
-  //   contentSecurityPolicy: {
-  //     directives: {
-  //       defaultSrc: ["'self'"],
-  //       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", '*'],
-  //       // scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://localhost'],
-  //       styleSrc: ["'self'", "'unsafe-inline'", '*'],
-  //       // styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-  //       fontSrc: ["'self'", '*'],
-  //       // fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-  //       imgSrc: ["'self'", 'data:', '*'],
-  //       // imgSrc: ["'self'", 'data:'],
-  //       connectSrc: ["'self'", '*'],
-  //       // connectSrc: ["'self'", 'https://localhost'],
-  //     },
-  //   }
-  // }))
-  //.options('*', cors(corsOptions))
-  .use(cors()) //.use(cors(corsOptions))
-  .use(json())
-  .use(responseTime())
-  .use(compression())
-  .use(urlencoded({ extended: false }))
   .enable('trust proxy')
   .set('trust proxy', 1)
   .set("view engine", "ejs")
   .set('json spaces', 2)
   .set('content-type', 'application/json; charset=utf-8')
+  .use(helmet({ contentSecurityPolicy: false }))
+  .use(cors()) //.use(cors(corsOptions))
+  .use(json())
+  .use(responseTime())
+  .use(compression())
+  .use(urlencoded({ extended: false }))
   .use(session({
     secret: 'session',
     cookie: {
@@ -103,8 +83,8 @@ const app = express()
   .use('/api/database', databaseRouter)
   .use('/api/assets', express.static(__dirname + '/assets'))
   .use(express.static(path.join(projectFolder(), "views")))
-  .use("/", (req: Request, res: Response, next: NextFunction) => res.sendFile(path.join(projectFolder(), "views/index.html")))
-  .all('*', (req: Request, res: Response, next: NextFunction) => res.status(200).redirect("/"))
+  .use("/", (req: Request, res: Response) => res.sendFile(path.join(projectFolder(), "views/index.html")))
+  .all('*', (req: Request, res: Response) => res.status(200).redirect("/"))
   .use(Errors.get404)
   .use(Errors.get500);
 
@@ -114,9 +94,12 @@ const app = express()
 
 const appSecured = app;
 const credentials = {
+  // key: fs.readFileSync(`${sslFolder('localhost/key.pem')}`, 'utf8'),
+  // ca: fs.readFileSync(`${sslFolder('localhost/ca.pem')}`, 'utf8'),
+  // cert: fs.readFileSync(`${sslFolder('localhost/cert.pem')}`, 'utf8'),
   key: fs.readFileSync(`${sslFolder('server.key')}`, 'utf8'),
   ca: fs.readFileSync(`${sslFolder('server-ca.crt')}`, 'utf8'),
-  cert: fs.readFileSync(`${sslFolder('server.crt')}`, 'utf8')
+  cert: fs.readFileSync(`${sslFolder('server.crt')}`, 'utf8'),
 };
 
 app.set('port', port);
@@ -129,18 +112,17 @@ appSecured.use((req: Request, res: Response, next: NextFunction) => {
   if (!req.secure) res.redirect(`https://${req.headers.host}${req.url}`);
 })
 
-//  ┌────────────── second (0 - 59) (optional)
-//  │ ┌──────────── minute (0 - 59) 
-//  │ │ ┌────────── hour (0 - 23)
-//  │ │ │ ┌──────── day of the month (1 - 31)
-//  │ │ │ │ ┌────── month (1 - 12)
-//  │ │ │ │ │ ┌──── day of the week (0 - 6) (0 and 7 both represent Sunday)
-//  │ │ │ │ │ │
-//  │ │ │ │ │ │
-//  * * * * * * 
+            //  ┌────────────── second (0 - 59) (optional)
+            //  │ ┌──────────── minute (0 - 59) 
+            //  │ │ ┌────────── hour (0 - 23)
+            //  │ │ │ ┌──────── day of the month (1 - 31)
+            //  │ │ │ │ ┌────── month (1 - 12)
+            //  │ │ │ │ │ ┌──── day of the week (0 - 6) (0 and 7 both represent Sunday)
+            //  │ │ │ │ │ │
+            //  │ │ │ │ │ │
+            //  * * * * * * 
 cron.schedule("00 59 23 * * *", function () {
   const msg = `running this task every 23h 59 min 0 seconds.`;
-  console.log(msg);
   logNginx(msg);
   AutoSyncDataFromCloud();
 });
@@ -148,9 +130,16 @@ cron.schedule("00 59 23 * * *", function () {
 // uploadData();
 
 if (CAN_ACCESS_INSECURE == 'true') {
-  ServerStart({ isSecure: false, app: app, access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', port: port, hostnames: hostnames, useLocalhost: USE_LOCALHOST === 'true' })
+  ServerStart(1, { 
+    isSecure: false, 
+    app: app, 
+    access_ports: ACCESS_ALL_AVAILABE_PORT == 'true', 
+    port: port, 
+    hostnames: hostnames, 
+    useLocalhost: USE_LOCALHOST === 'true' 
+  })
 }
-ServerStart({ 
+ServerStart(1, { 
   isSecure: true, 
   credential: credentials, 
   app: appSecured, 
@@ -159,3 +148,24 @@ ServerStart({
   hostnames: hostnames,
       useLocalhost: USE_LOCALHOST === 'true'
 })
+
+
+
+  // .use(helmet({
+  //   contentSecurityPolicy: {
+  //     directives: {
+  //       defaultSrc: ["'self'"],
+  //       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", '*'],
+  //       // scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://localhost'],
+  //       styleSrc: ["'self'", "'unsafe-inline'", '*'],
+  //       // styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+  //       fontSrc: ["'self'", '*'],
+  //       // fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+  //       imgSrc: ["'self'", 'data:', '*'],
+  //       // imgSrc: ["'self'", 'data:'],
+  //       connectSrc: ["'self'", '*'],
+  //       // connectSrc: ["'self'", 'https://localhost'],
+  //     },
+  //   }
+  // }))
+  //.options('*', cors(corsOptions))

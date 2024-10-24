@@ -9,7 +9,7 @@ const request = require('request');
 
 require('dotenv').config({ path: sslFolder('.ih-env') });
 
-const { DEFAULT_DHIS2_USER_ID, LOCALHOST, CHT_PROD_HOST, CHT_DEV_HOST, PROD_PORT_SECURED, DEV_PORT_SECURED, DHIS_USER, DHIS_PASS } = process.env
+const { DEFAULT_DHIS2_USER_ID, LOCALHOST, USE_LOCALHOST, CHT_PROD_HOST, CHT_DEV_HOST, PROD_PORT_SECURED, DEV_PORT_SECURED, DHIS_USER, DHIS_PASS } = process.env
 
 const portSecured = normalizePort((Consts.isProdEnv ? PROD_PORT_SECURED : DEV_PORT_SECURED) || Consts.defaultSecurePort);
 
@@ -41,10 +41,16 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
 
         const start_date = initDate.start_date;
         const end_date = initDate.end_date;
-        const api_host = `https://${LOCALHOST || Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}:${portSecured}/api`;
         const headers = { "Content-Type": "application/json" };
-        console.log('\n\nstart fetching orgunits\n');
+
+        //const api_host = `https://${LOCALHOST || Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}:${portSecured}/api`;
+        // const api_host = `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/api`;
+        const api_host = `https://${LOCALHOST}:${portSecured}/api`;
+
         logNginx('\n\nstart fetching orgunits\n');
+
+        const enable_strict_SSL_checking = false;
+
         request({
           url: `${api_host}/sync/fetch/orgunits`,
           method: 'POST',
@@ -61,11 +67,11 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
             userId: user.id,
             privileges: true
           }),
-          headers: headers
+          headers: headers,
+          strictSSL: enable_strict_SSL_checking,
         }, async function (error1: any, response1: any, body1: any) {
           if (!error1 && notEmpty(body1)) output.orgunit = JSON.parse(`${body1}`);
 
-          console.log('\n\nstart fetching tonoudayo data\n');
           logNginx('\n\nstart fetching tonoudayo data\n');
           request({
             url: `${api_host}/sync/fetch/data`,
@@ -78,7 +84,8 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
               userId: user.id,
               privileges: true
             }),
-            headers: headers
+            headers: headers,
+            strictSSL: enable_strict_SSL_checking,
           }, async function (error2: any, response2: any, body2: any) {
             if (!error2 && notEmpty(body2)) output.tonoudayo = JSON.parse(`${body2}`);
 
@@ -87,7 +94,7 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
             var _resp = [];
             for (let ou = 0; ou < sites.length; ou++) {
               const orgUnit = sites[ou].external_id;
-              console.log(`\n\nstart fetching dhis2 data with orgUnit = ${orgUnit}\n`);
+
               logNginx(`\n\nstart fetching dhis2 data with orgUnit = ${orgUnit}\n`);
               request({
                 url: `${api_host}/sync/dhis2/data`,
@@ -101,8 +108,8 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
                   userId: user.id,
                   privileges: true
                 }),
-
-                headers: headers
+                headers: headers,
+                strictSSL: enable_strict_SSL_checking,
               }, async function (error3: any, response3: any, body3: any) {
                 if (!error3 && notEmpty(body3)) output.dhis2.push(JSON.parse(`${body3}`));
                 _resp.push('Ok');
@@ -140,7 +147,7 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
                     }
                     await _repoSync.save(sync);
                   }
-                  console.log(`\n\nDurée de l'action: ${display}\n`);
+
                   logNginx(`\n\nDurée de l'action: ${display}\n`);
                   output.successDetails = {
                     date: ends.split(' ')[0],
@@ -159,7 +166,14 @@ export async function AutoSyncDataFromCloud(data?: { wait: boolean, customDate: 
             }
           });
         });
+      
+      } else {
+        output.globalError = `No default user found with id = ${DEFAULT_DHIS2_USER_ID}`;
+        if (res != null) return res.status(500).json({ status: 500, data: output });
       }
+    } else {
+      output.globalError = `No default user provide!`;
+      if (res != null) return res.status(500).json({ status: 500, data: output });
     }
   } catch (err: any) {
     output.globalError = `${err}`;

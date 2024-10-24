@@ -4,7 +4,7 @@ import { Chws, DataFromPython, Districts, Sites } from '@ih-app/models/Sync';
 import { AuthService } from '@ih-app/services/auth.service';
 import { SyncService } from '@ih-app/services/sync.service';
 import { KeyValue } from '@angular/common';
-import { capitaliseDataGiven, isNumber, notNull, returnEmptyArrayIfNul } from '@ih-app/shared/functions';
+import { capitaliseDataGiven, isNumber, notNull, returnDataAsArray } from '@ih-app/shared/functions';
 import { ActivatedRoute } from '@angular/router'
 import { getMondays, getDateInFormat } from '@ih-src/app/shared/dates-utils';
 
@@ -69,7 +69,7 @@ export class SyncWeeklyDataComponent implements OnInit {
   genarateSites() {
     this.sites$ = [];
     this.chws$ = [];
-    const dist: string[] = returnEmptyArrayIfNul(this.ThinkMdWeeklyForm.value.districts);
+    const dist: string[] = returnDataAsArray(this.ThinkMdWeeklyForm.value.districts);
     this.ThinkMdWeeklyForm.value["sites"] = "";
     this.ThinkMdWeeklyForm.value["chws"] = [];
 
@@ -84,7 +84,7 @@ export class SyncWeeklyDataComponent implements OnInit {
   }
 
   genarateWeekyDataChws() {
-    const dhis2Sites: string[] = returnEmptyArrayIfNul(this.ThinkMdWeeklyForm.value.sites);
+    const dhis2Sites: string[] = returnDataAsArray(this.ThinkMdWeeklyForm.value.sites);
     this.dhis2Chws$ = [];
     if (notNull(dhis2Sites)) {
       for (let d = 0; d < this.Dhis2Chws$.length; d++) {

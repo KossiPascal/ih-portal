@@ -1,4 +1,4 @@
-import { getChwsDataWithParams, getDataInformations, deleteChwsData, updateDrugPerChw, updateDrugYearCmmPerChw, fetchIhChtDataPerChw, fetchIhDrugDataPerChw, fetchIhDrugDataPerSelected, SaveOrUpdateMeetingPerson, SaveOrUpdateMeetingTeam, FetchMeetingPersons, FetchMeetingTeams, SaveOrUpdateMeetingReports, FetchMeetingReports, DeleteMeetingReport, DeleteMeetingPerson, DeleteMeetingTeams, getPatientDataInfos } from "../controllers/dataFromDB";
+import { getChwsDataWithParams, getDataInformations, deleteChwsData, updateDrugPerChw, updateDrugYearCmmPerChw, fetchIhChtDataPerChw, fetchIhDrugDataPerChw, fetchIhDrugDataPerSelected, SaveOrUpdateMeetingPerson, SaveOrUpdateMeetingTeam, FetchMeetingPersons, FetchMeetingTeams, SaveOrUpdateMeetingReports, FetchMeetingReports, DeleteMeetingReport, DeleteMeetingPerson, DeleteMeetingTeams, getPatientDataInfos, fetchIhDrugDataWithMultiChwsSelected } from "../controllers/dataFromDB";
 import { getChws, getDistricts, getFamilies, getPatients, getSites, getZones } from "../controllers/orgUnitsFromDB ";
 import { fetchChwsDataFromCouchDb, fetchChwsDataFromDhis2, fetchCouchDbUsersFromCouchDb, fetchOrgUnitsFromCouchDb, getChtUsersFromDb, getDhis2Chws, insertOrUpdateDataToDhis2 } from "../controllers/fetchFormCloud";
 import { Middelware } from "../middleware/auth";
@@ -37,6 +37,7 @@ syncRouter.post('/delete/data', Middelware.authMiddleware, deleteChwsData);
 syncRouter.post('/update_drug_per_chw', Middelware.authMiddleware, updateDrugPerChw);
 
 syncRouter.post('/update_drug_year_cmm_per_chw', Middelware.authMiddleware, updateDrugYearCmmPerChw);
+
 
 syncRouter.post(
   '/fetch/all',
@@ -83,6 +84,8 @@ syncRouter.post(
   Middelware.authMiddleware,
   fetchIhDrugDataPerSelected
 );
+
+syncRouter.post('/ih_drug_data_with_multi_chws_selected', Middelware.authMiddleware, fetchIhDrugDataWithMultiChwsSelected);
 
 syncRouter.post(
   '/flush_meeting_reports',
