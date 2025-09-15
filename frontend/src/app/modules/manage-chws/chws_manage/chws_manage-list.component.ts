@@ -107,7 +107,7 @@ export class ChwsReplacementManageComponent implements OnInit {
     this.isLoading2 = true;
     this.message = '';
     return this.db.updateUserFacilityContactPlace(this.replacementChwsForm.value).subscribe((res: any) => {
-      this.message = res.message;
+      this.message = res?.message;
       this.getReplacementChws();
       this.closeModal();
       this.isLoading2 = false;

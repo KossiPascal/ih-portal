@@ -413,12 +413,12 @@ const credentials = {
   // ca: fs.readFileSync(`${sslFolder('localhost/ca.pem')}`, 'utf8'),
   // cert: fs.readFileSync(`${sslFolder('localhost/cert.pem')}`, 'utf8'),
 
-  // key: fs.readFileSync(`${sslFolder('server.key')}`, 'utf8'),
-  // ca: fs.readFileSync(`${sslFolder('server-ca.crt')}`, 'utf8'),
-  // cert: fs.readFileSync(`${sslFolder('server.crt')}`, 'utf8'),
+  key: fs.readFileSync(`${sslFolder('server.key')}`, 'utf8'),
+  ca: fs.readFileSync(`${sslFolder('server-ca.crt')}`, 'utf8'),
+  cert: fs.readFileSync(`${sslFolder('server.crt')}`, 'utf8'),
     
-  key: fs.readFileSync('/etc/ssl/private/tonoudayoanalyse.key', 'utf8'),
-  cert: fs.readFileSync('/etc/ssl/certs/tonoudayoanalyse.crt', 'utf8')
+  // key: fs.readFileSync('/etc/ssl/private/tonoudayoanalyse.key', 'utf8'),
+  // cert: fs.readFileSync('/etc/ssl/certs/tonoudayoanalyse.crt', 'utf8')
 };
 
 app.set('port', PORT_FOR_GET_API);

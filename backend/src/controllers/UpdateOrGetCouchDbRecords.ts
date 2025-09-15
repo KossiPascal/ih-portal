@@ -30,9 +30,9 @@ async function getAllDocumentsWithAxios() {
         prociedTraitement(rows)
 
 
-    } catch (error: any) {
-        console.error('Error retrieving documents:', error.message);
-        throw error;
+    } catch (err: any) {
+        console.error('Error retrieving documents:', err?.message ?? err);
+        throw err;
     }
 }
 
@@ -151,9 +151,9 @@ async function getDocument(documentId:string) {
             }
         });
         return response.data;
-    } catch (error: any) {
-        console.error('Error retrieving document:', error.message);
-        throw error;
+    } catch (err: any) {
+        console.error('Error retrieving document:', err?.message ?? err);
+        throw err;
     }
 }
 // Function to update the document
@@ -166,9 +166,9 @@ async function updateDocument(documentId:string, updatedDocument: any) {
             }
         });
         console.log('Document updated:', documentId);
-    } catch (error: any) {
-        console.error('Error updating document:', error.message);
-        throw error;
+    } catch (err: any) {
+        console.error('Error updating document:', err?.message ?? err);
+        throw err;
     }
 }
 
@@ -184,29 +184,27 @@ async function bulkUpdateDocuments(docs:any[]) {
             }
         });
         return response.data;
-    } catch (error:any) {
-        console.error('Error performing bulk update:', error.message);
-        throw error;
+    } catch (err:any) {
+        console.error('Error performing bulk update:', err?.message ?? err);
+        throw err;
     }
 }
 
 // Usage example
 export async function GetDocumentUpdateDocument() {
     try {
-
         await getAllDocuments()
         // Retrieve the current version of the document
         // const currentDocument = await getDocument();
-
-        // console.log(currentDocument)
 
         // Make changes to the document
         // currentDocument.updatedField = 'new value';
 
         // // Update the document
         // await updateDocument(currentDocument);
-    } catch (error: any) {
-        console.error('An error occurred:', error.message);
+    } catch (err: any) {
+        console.error('An error occurred:', err?.message ?? err);
+        throw err;
     }
 }
 

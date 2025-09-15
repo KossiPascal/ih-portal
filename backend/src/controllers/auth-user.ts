@@ -175,7 +175,7 @@ export class AuthUserController {
 
             return res.status(200).json({ status: 200, data: 'User registered successfully' });
         } catch (err: any) {
-            return res.status(500).json({ status: 500, data: `${err.message || 'Internal Server Error'}` });
+            return res.status(500).json({ status: 500, data: `${err?.message || 'Internal Server Error'}` });
         }
     };
 
@@ -272,7 +272,7 @@ export class AuthUserController {
 
             return res.status(200).json({ status: 200, data: userFound });
         } catch (err: any) {
-            return res.status(500).json({ status: 500, data: `${err.message || 'Internal Server Error'}` });
+            return res.status(500).json({ status: 500, data: `${err?.message || 'Internal Server Error'}` });
         }
     };
 
@@ -304,7 +304,7 @@ export class AuthUserController {
 
             return res.status(200).json({ status: 200, data: userFound });
         } catch (err: any) {
-            return res.status(500).json({ status: 500, data: `${err.message || 'Internal Server Error'}` });
+            return res.status(500).json({ status: 500, data: `${err?.message || 'Internal Server Error'}` });
         }
     };
 

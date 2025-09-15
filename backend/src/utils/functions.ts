@@ -426,7 +426,7 @@ export function mailService(data: MailConfig) {
     // sending email
     mailTransporter.sendMail(mailDetails, function (err: any, data: any) {
         if (err) {
-            console.log("error occurred", err.message);
+            console.log("error occurred", err?.message);
         } else {
             console.log("---------------------");
             console.log("email sent successfully");

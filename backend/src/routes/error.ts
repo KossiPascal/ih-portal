@@ -9,7 +9,7 @@ export class Errors {
     const data = error.data;
     return res.status(error.statusCode || 500).json({
       error: {
-        message: error.message,
+        message: error?.message,
         data: data,
       },
     });
