@@ -31,7 +31,7 @@ async function getAllDocumentsWithAxios() {
 
 
     } catch (err: any) {
-        console.error('Error retrieving documents:', err?.message ?? err);
+        console.error('Error retrieving documents:', err?.message ?? err.toString());
         throw err;
     }
 }
@@ -152,7 +152,7 @@ async function getDocument(documentId:string) {
         });
         return response.data;
     } catch (err: any) {
-        console.error('Error retrieving document:', err?.message ?? err);
+        console.error('Error retrieving document:', err?.message ?? err.toString());
         throw err;
     }
 }
@@ -167,7 +167,7 @@ async function updateDocument(documentId:string, updatedDocument: any) {
         });
         console.log('Document updated:', documentId);
     } catch (err: any) {
-        console.error('Error updating document:', err?.message ?? err);
+        console.error('Error updating document:', err?.message ?? err.toString());
         throw err;
     }
 }
@@ -185,7 +185,7 @@ async function bulkUpdateDocuments(docs:any[]) {
         });
         return response.data;
     } catch (err:any) {
-        console.error('Error performing bulk update:', err?.message ?? err);
+        console.error('Error performing bulk update:', err?.message ?? err.toString());
         throw err;
     }
 }
@@ -203,7 +203,7 @@ export async function GetDocumentUpdateDocument() {
         // // Update the document
         // await updateDocument(currentDocument);
     } catch (err: any) {
-        console.error('An error occurred:', err?.message ?? err);
+        console.error('An error occurred:', err?.message ?? err.toString());
         throw err;
     }
 }

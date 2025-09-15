@@ -166,26 +166,26 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
                 process.on('UnhandledPromiseRejectionWarning', (err: any) => {
                     // outPutInfo.status = 201;
                     outPutInfo[`Message ${siteName}`] = {}
-                    outPutInfo[`Message ${siteName}`]["errorElements"] = err?.message ?? err;
+                    outPutInfo[`Message ${siteName}`]["errorElements"] = err?.message ?? err.toString();
                     return res.status(201).json(outPutInfo);
                 });
                 process.on('uncaughtException', (err: any) => {
                     // outPutInfo.status = 201;
                     outPutInfo[`Message ${siteName}`] = {}
-                    outPutInfo[`Message ${siteName}`]["errorElements"] = err?.message ?? err;
+                    outPutInfo[`Message ${siteName}`]["errorElements"] = err?.message ?? err.toString();
                     return res.status(201).json(outPutInfo);
                 });
 
             } catch (err: any) {
                 // outPutInfo.status = 201;
                 outPutInfo[`Message ${siteName}`] = {}
-                outPutInfo[`Message ${siteName}`]["errorElements"] = err?.message ?? err;
+                outPutInfo[`Message ${siteName}`]["errorElements"] = err?.message ?? err.toString();
                 return res.status(201).json(outPutInfo);
             }
         }).catch(async (err: any) => {
             // outPutInfo.status = 201;
             outPutInfo[`Message ${siteName}`] = {}
-            outPutInfo[`Message ${siteName}`]["errorElements"] = err?.message ?? err;
+            outPutInfo[`Message ${siteName}`]["errorElements"] = err?.message ?? err.toString();
             return res.status(201).json(outPutInfo);
         });
 
@@ -407,27 +407,27 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                 } catch (err: any) {
                     if (!err.statusCode) err.statusCode = 500;
                     outPutInfo["Message"] = {}
-                    outPutInfo["Message"]["errorElements"] = err?.message ?? err;
+                    outPutInfo["Message"]["errorElements"] = err?.message ?? err.toString();
                     resp.status(err.statusCode).json(outPutInfo);
                 }
             });
             process.on('uncaughtException', (err: any) => {
                 if (!err.statusCode) err.statusCode = 500;
                 outPutInfo["Message"] = {}
-                outPutInfo["Message"]["errorElements"] = err?.message ?? err;
+                outPutInfo["Message"]["errorElements"] = err?.message ?? err.toString();
                 resp.status(err.statusCode).json(outPutInfo);
             });
             res.on('error', (err: any) => {
                 if (!err.statusCode) err.statusCode = 500;
                 outPutInfo["Message"] = {}
-                outPutInfo["Message"]["errorElements"] = err?.message ?? err;
+                outPutInfo["Message"]["errorElements"] = err?.message ?? err.toString();
                 resp.status(err.statusCode).json(outPutInfo);
             });
         });
     } catch (err: any) {
         if (!err.statusCode) err.statusCode = 500;
         outPutInfo["Message"] = {}
-        outPutInfo["Message"]["errorElements"] = err?.message ?? err;
+        outPutInfo["Message"]["errorElements"] = err?.message ?? err.toString();
         resp.status(err.statusCode).json(outPutInfo);
     }
 }
@@ -771,32 +771,32 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
                 } catch (err: any) {
                     if (!err.statusCode) err.statusCode = 500;
                     outPutInfo["Message"] = {};
-                    outPutInfo["Message"]["errorElements"] = err?.message ?? err;
+                    outPutInfo["Message"]["errorElements"] = err?.message ?? err.toString();
                     resp.status(err.statusCode).json(outPutInfo);
                 }
             });
             process.on('uncaughtException', (err: any) => {
                 if (!err.statusCode) err.statusCode = 500;
                 outPutInfo["Message"] = {}
-                outPutInfo["Message"]["errorElements"] = err?.message ?? err;
+                outPutInfo["Message"]["errorElements"] = err?.message ?? err.toString();
                 resp.status(err.statusCode).json(outPutInfo);
             });
             res.on('error', (err: any) => {
                 if (!err.statusCode) err.statusCode = 500;
                 outPutInfo["Message"] = {}
-                outPutInfo["Message"]["errorElements"] = err?.message ?? err;
+                outPutInfo["Message"]["errorElements"] = err?.message ?? err.toString();
                 resp.status(err.statusCode).json(outPutInfo);
             });
         }).on('error', (err: any) => {
             if (!err.statusCode) err.statusCode = 500;
             outPutInfo["Message"] = {}
-            outPutInfo["Message"]["errorElements"] = err?.message ?? err;
+            outPutInfo["Message"]["errorElements"] = err?.message ?? err.toString();
             resp.status(err.statusCode).json(outPutInfo);
         });
     } catch (err: any) {
         if (!err.statusCode) err.statusCode = 500;
         outPutInfo["Message"] = {}
-        outPutInfo["Message"]["errorElements"] = err?.message ?? err;
+        outPutInfo["Message"]["errorElements"] = err?.message ?? err.toString();
         resp.status(err.statusCode).json(outPutInfo);
     }
 }
