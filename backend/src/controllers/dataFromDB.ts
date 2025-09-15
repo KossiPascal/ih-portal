@@ -8,9 +8,21 @@ import { generateCacheKey, notEmpty } from "../utils/functions";
 import { getChws } from "./orgUnitsFromDB ";
 import { ChwsDrugData, ChwsDrugQuantityInfo, PatologieData } from "../utils/appInterface";
 import { GetPreviousDate, GetPreviousYearMonth, getDateInFormat, getDateRange, isBetween } from "../utils/date-utils";
-import NodeCache from 'node-cache';
+// import NodeCache from 'node-cache';
 const request = require('request');
 // const fetch = require('node-fetch');
+
+export interface RecapActivity {
+  program: string;
+  orgUnit: string;
+  eventDate: string;
+  status: string;
+  completedDate: string;
+  dataValues: {
+    dataElement: string;
+    value: any;
+  }[];
+}
 
 // #################################################################
 
@@ -42,7 +54,7 @@ const quantities: ChwsDrugQuantityInfo = {
   other_quantity: 0,
   comments: "",
   observations: ""
-};
+}
 const dataFields: { id: string, name: string, index: number }[] = [
   { id: "alben_400", name: "Albendazole_400_mg_cp_1", index: 1 },
   { id: "amox_250", name: "Amoxiciline_250_mg_2", index: 2 },
@@ -58,7 +70,7 @@ const dataFields: { id: string, name: string, index: number }[] = [
   { id: "vit_A1", name: "Vitamine_A_100000UI_12", index: 12 },
   { id: "vit_A2", name: "Vitamine_A_200000UI_13", index: 13 },
   { id: "zinc", name: "Zinc_14", index: 14 }
-];
+]
 function YearCmmMonthStart(year: number, startMonth: string): { name: string, interval: string[] } {
   const y = parseInt(`${year}`);
   const lY = parseInt(`${year}`) - 1;
@@ -81,11 +93,10 @@ function YearCmmMonthStart(year: number, startMonth: string): { name: string, in
   };
 
   return months[startMonth];
-};
-
+}
 // #################################################################
 
-const cache = new NodeCache({ stdTTL: 300 }); // 5 min de cache
+// const cache = new NodeCache({ stdTTL: 300 }); // 5 min de cache
 
 export async function GetPersonsDataWithParams(req: Request, res: Response, next: NextFunction, onlyData: boolean = false): Promise<any> {
   var respData: { status: number, data: any };
@@ -96,19 +107,19 @@ export async function GetPersonsDataWithParams(req: Request, res: Response, next
   }
   const errorMsg: string = "Your request provides was rejected !";
   try {
-    const cacheKey = generateCacheKey(req, 'GetPersonsDataWithParams');
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      respData = cachedData as { status: number, data: any };
-      return onlyData ? respData : res.status(respData.status).json(respData);
-    }
+    // const cacheKey = generateCacheKey(req, 'GetPersonsDataWithParams');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //   respData = cachedData as { status: number, data: any };
+    //   return onlyData ? respData : res.status(respData.status).json(respData);
+    // }
     const repository = await GetPersonsRepository();
     var allSync: Persons[] = await repository.findBy({
       id: notEmpty(req.body.id) ? req.body.id : undefined,
     });
-    
+
     respData = !allSync ? { status: 201, data: 'No data found with parametter!' } : { status: 200, data: allSync };
-    cache.set(cacheKey, respData);
+    // cache.set(cacheKey, respData);
   }
   catch (err) {
     // return next(err);
@@ -125,13 +136,12 @@ export async function GetTeamsDataWithParams(req: Request, res: Response, next: 
   }
   const errorMsg: string = "Your request provides was rejected !";
   try {
-    const cacheKey = generateCacheKey(req, 'GetTeamsDataWithParams');
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      respData = cachedData as { status: number, data: any };
-      return onlyData ? respData :  res.status(respData.status).json(respData);
-    }
-
+    // const cacheKey = generateCacheKey(req, 'GetTeamsDataWithParams');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //   respData = cachedData as { status: number, data: any };
+    //   return onlyData ? respData :  res.status(respData.status).json(respData);
+    // }
     const repository = await GetTeamsRepository();
     var allSync: Teams[] = await repository.find({
       where: {
@@ -140,7 +150,7 @@ export async function GetTeamsDataWithParams(req: Request, res: Response, next: 
     });
 
     respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync };
-    cache.set(cacheKey, respData);
+    // cache.set(cacheKey, respData);
   }
   catch (err) {
     // return next(err);
@@ -157,14 +167,13 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
   }
   const errorMsg: string = "Your request provides was rejected !";
   try {
-    const cacheKey = generateCacheKey(req, 'getChwsDataWithParams');
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-        respData = cachedData as { status: number, data: any };
-        return onlyData ? respData : res.status(respData.status).json(respData);
-    }
+    // const cacheKey = generateCacheKey(req, 'getChwsDataWithParams');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //     respData = cachedData as { status: number, data: any };
+    //     return onlyData ? respData : res.status(respData.status).json(respData);
+    // }
     const repository = await getChwsDataSyncRepository();
-
     const start_date = (filter?.start_date ?? '') != '' ? filter?.start_date : req.body.start_date;
     const end_date = (filter?.end_date ?? '') != '' ? filter?.end_date : req.body.end_date;
     const sources = (filter?.sources ?? '') != '' ? filter?.sources : req.body.sources;
@@ -182,11 +191,9 @@ export async function getChwsDataWithParams(req: Request, res: Response, next: N
         chw: notEmpty(req.body.chws) ? { id: In(req.body.chws) } : undefined
       }
     });
-    
     respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync };
-    cache.set(cacheKey, respData);
-  }
-  catch (err) {
+    // cache.set(cacheKey, respData);
+  } catch (err) {
     // return next(err);
     respData = { status: 201, data: errorMsg };
   }
@@ -204,12 +211,12 @@ export async function getChwsDrugWithParams(req: Request, res: Response, next: N
   const errorMsg: string = "Your request provides was rejected !";
 
   try {
-    const cacheKey = generateCacheKey(req, 'getChwsDrugWithParams');
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      respData = cachedData as { previous: { status: number, data: any }, current: { status: number, data: any } };
-      return onlyData ? respData : res.status(respData.current.status).json(respData);
-    }
+    // const cacheKey = generateCacheKey(req, 'getChwsDrugWithParams');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //   respData = cachedData as { previous: { status: number, data: any }, current: { status: number, data: any } };
+    //   return onlyData ? respData : res.status(respData.current.status).json(respData);
+    // }
     const repository = await getChwsDrugSyncRepository();
     const CurrentSyncs: ChwsDrug[] = await repository.find({
       where: {
@@ -246,7 +253,7 @@ export async function getChwsDrugWithParams(req: Request, res: Response, next: N
     if (PreviousSyncs) {
       respData.previous = { status: 200, data: PreviousSyncs };
     }
-    cache.set(cacheKey, respData);
+    // cache.set(cacheKey, respData);
   }
   catch (err) {
     // return next(err);
@@ -264,12 +271,12 @@ export async function getChwsDrugUpdatedWithParams(req: Request, res: Response, 
   }
   const errorMsg: string = "Your request provides was rejected !";
   try {
-    const cacheKey = generateCacheKey(req, 'getChwsDrugUpdatedWithParams');
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      respData = cachedData as { status: number, data: any };
-      return onlyData ? respData : res.status(respData.status).json(respData);
-    }
+    // const cacheKey = generateCacheKey(req, 'getChwsDrugUpdatedWithParams');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //   respData = cachedData as { status: number, data: any };
+    //   return onlyData ? respData : res.status(respData.status).json(respData);
+    // }
     const repository = await getChwsDrugUpdateSyncRepository();
 
     var allSync: ChwsDrugUpdate[] = await repository.find({
@@ -286,7 +293,7 @@ export async function getChwsDrugUpdatedWithParams(req: Request, res: Response, 
     });
 
     respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync };
-    cache.set(cacheKey, respData);
+    // cache.set(cacheKey, respData);
   }
   catch (err) {
     // return next(err);
@@ -303,12 +310,12 @@ export async function getChwsDrugYearCmmWithParams(req: Request, res: Response, 
   }
   const errorMsg: string = "Your request provides was rejected !";
   try {
-    const cacheKey = generateCacheKey(req, 'getChwsDrugYearCmmWithParams');
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-        respData = cachedData as { status: number, data: any };
-      return onlyData ? respData : res.status(respData.status).json(respData);
-    }
+    // const cacheKey = generateCacheKey(req, 'getChwsDrugYearCmmWithParams');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //     respData = cachedData as { status: number, data: any };
+    //   return onlyData ? respData : res.status(respData.status).json(respData);
+    // }
     const repository = await getDrugChwYearCmmSyncRepository();
     var allSync: DrugChwYearCmm[] = await repository.find({
       where: {
@@ -324,7 +331,7 @@ export async function getChwsDrugYearCmmWithParams(req: Request, res: Response, 
     });
 
     respData = !allSync ? { status: 201, data: 'Not data found with parametter!' } : { status: 200, data: allSync };
-    cache.set(cacheKey, respData);
+    // cache.set(cacheKey, respData);
   }
   catch (err) {
     // return next(err);
@@ -334,11 +341,11 @@ export async function getChwsDrugYearCmmWithParams(req: Request, res: Response, 
 }
 // export async function getChwsDrugUpdatedWithCoustomParams(req: { districts?: string[], sites?: string[], zones?: string[], chws?: string[], years?: number[], months?: string[], drug_index?: number[] }): Promise<ChwsDrugUpdate[] | undefined> {
 //   try {
-//     const cacheKey = generateCacheKey(req as any, 'getChwsDrugUpdatedWithCoustomParams');
-//     const cachedData = cache.get(cacheKey);
-//     if (cachedData) {
-//         return cachedData as any;
-//     }
+//     // const cacheKey = generateCacheKey(req as any, 'getChwsDrugUpdatedWithCoustomParams');
+//     // const cachedData = cache.get(cacheKey);
+//     // if (cachedData) {
+//     //     return cachedData as any;
+//     // }
 //     const repository = await getChwsDrugUpdateSyncRepository();
 //     const allSync = await repository.find({
 //       where: {
@@ -351,7 +358,7 @@ export async function getChwsDrugYearCmmWithParams(req: Request, res: Response, 
 //         drug_index: notEmpty(req.drug_index) ? In(req.drug_index!) : undefined
 //       }
 //     });
-//     cache.set(cacheKey, allSync);
+//     // cache.set(cacheKey, allSync);
 //     return allSync;
 //   } catch (err) {
 //     return undefined;
@@ -376,18 +383,18 @@ export async function getPatientDataInfos(req: Request, res: Response, next: Nex
 
   const errorMsg: string = "Your request provides was rejected !";
   try {
-    const cacheKey = generateCacheKey(req, 'getPatientDataInfos');
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      respData = cachedData as { status: number, data: any };
-      return onlyData ? respData : res.status(respData.status).json(respData);
-    }
+    // const cacheKey = generateCacheKey(req, 'getPatientDataInfos');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //   respData = cachedData as { status: number, data: any };
+    //   return onlyData ? respData : res.status(respData.status).json(respData);
+    // }
     const months: string[] = req.body.months;
     const year = req.body.year;
     const brutData: { month: string, year: number, data: ChwsData[] }[] = [];
     for (const m of months) {
       const date = getDateRange({ month: m, year: year, startDay: 26, endDay: 25 });
-    // console.log(date);
+      // console.log(date);
       req.body.start_date = date.start_date;
       req.body.end_date = date.end_date;
       const dt: { status: number, data: any } = await getChwsDataWithParams(req, res, next, true);
@@ -395,18 +402,18 @@ export async function getPatientDataInfos(req: Request, res: Response, next: Nex
         brutData.push({ month: m, year: year, data: dt.data });
       }
     }
-     // const _patientRepo = await getPatientSyncRepository();
-      // var patients: Patients[] = await _patientRepo.find({
-      //   where: {
-      //     district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
-      //     site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
-      //     zone: {
-      //       id: notEmpty(req.body.zones) ? In(req.body.zones) : undefined,
-      //     },
-      //   }
-      // });
+    // const _patientRepo = await getPatientSyncRepository();
+    // var patients: Patients[] = await _patientRepo.find({
+    //   where: {
+    //     district: notEmpty(req.body.districts) ? { id: In(req.body.districts) } : undefined,
+    //     site: notEmpty(req.body.sites) ? { id: In(req.body.sites) } : undefined,
+    //     zone: {
+    //       id: notEmpty(req.body.zones) ? In(req.body.zones) : undefined,
+    //     },
+    //   }
+    // });
 
-      // if (!patients) return res.status(201).json({ status: 201, data: 'Not patient found with parametter!' });
+    // if (!patients) return res.status(201).json({ status: 201, data: 'Not patient found with parametter!' });
 
     const finalData: { month: string, year: number, data: { pecime: number, maternel: number, total: number } }[] = [];
     if (brutData.length > 0) {
@@ -437,7 +444,7 @@ export async function getPatientDataInfos(req: Request, res: Response, next: Nex
     } else {
       respData = { status: 201, data: 'No data found' };
     }
-    cache.set(cacheKey, respData);
+    // cache.set(cacheKey, respData);
   } catch (err) {
     // return next(err);
     respData = { status: 201, data: errorMsg };
@@ -454,12 +461,12 @@ export async function getDataInformations(req: Request, res: Response, next: Nex
 
   const errorMsg: string = "Your request provides was rejected !";
   try {
-    const cacheKey = generateCacheKey(req, 'getDataInformations');
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      respData = cachedData as { status: number, data: any };
-      return onlyData ? respData : res.status(respData.status).json(respData);
-    }
+    // const cacheKey = generateCacheKey(req, 'getDataInformations');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //   respData = cachedData as { status: number, data: any };
+    //   return onlyData ? respData : res.status(respData.status).json(respData);
+    // }
     const dataWithParams: { status: number, data: any } = await getChwsDataWithParams(req, res, next, true);
     if (dataWithParams.status == 200) {
       const _familyRepo = await getFamilySyncRepository();
@@ -540,7 +547,7 @@ export async function getDataInformations(req: Request, res: Response, next: Nex
       respData = { status: dataWithParams.status, data: dataWithParams }
       // return res.status(dataWithParams.status).json(dataWithParams);
     }
-    cache.set(cacheKey, respData);
+    // cache.set(cacheKey, respData);
   } catch (err) {
     // return next(err);
     respData = { status: 201, data: errorMsg };
@@ -549,16 +556,15 @@ export async function getDataInformations(req: Request, res: Response, next: Nex
 }
 export async function fetchIhChtDataPerChw(req: Request, res: Response, next: NextFunction, onlyData: boolean = false) {
   var respData: { status: number, data: any };
-  const cacheKey = generateCacheKey(req, 'fetchIhChtDataPerChw');
-  const cachedData = cache.get(cacheKey);
-  if (cachedData) {
-      respData = cachedData as { status: number, data: any };
-    return onlyData ? respData : res.status(respData.status).json(respData);
-  }
-
+  // const cacheKey = generateCacheKey(req, 'fetchIhChtDataPerChw');
+  // const cachedData = cache.get(cacheKey);
+  // if (cachedData) {
+  //     respData = cachedData as { status: number, data: any };
+  //   return onlyData ? respData : res.status(respData.status).json(respData);
+  // }
   const chwsData: { status: number, data: ChwsData[] } = await getChwsDataWithParams(req, res, next, true);
   const chws: { status: number, data: Chws[] } = await getChws(req, res, next, true);
-  
+
 
   if (chwsData.status == 200 && chws.status == 200) {
     const chwRepo = await getChwsSyncRepository();
@@ -570,7 +576,7 @@ export async function fetchIhChtDataPerChw(req: Request, res: Response, next: Ne
   } else {
     respData = { status: 201, data: 'No data found !' };
   }
-  cache.set(cacheKey, respData);
+  // cache.set(cacheKey, respData);
   return onlyData ? respData : res.status(respData.status).json(respData);
 }
 
@@ -583,7 +589,7 @@ export async function fetchIhDrugDataPerChw(req: Request, res: Response, next: N
   //     respData = cachedData as { status: number, data: any };
   //   return onlyData ? respData : res.status(respData.status).json(respData);
   // }  
-  
+
   respData = await getIhDrugArrayDataPerChw(req, res, next)
 
   // cache.set(cacheKey, respData);
@@ -635,8 +641,6 @@ export async function getIhDrugArrayDataPerChw(req: Request, res: Response, next
   if (!chwsDrugFinalOut) return { status: 201, data: 'No data found !' };
   return { status: 200, data: chwsDrugFinalOut };
 }
-
-
 export async function updateDrugPerChw(req: Request, res: Response, next: NextFunction) {
 
   const { district, site, chw, year, month, drug_index, drug_name, quantity_validated, delivered_quantity, observations, userId } = req.body;
@@ -690,7 +694,6 @@ export async function updateDrugPerChw(req: Request, res: Response, next: NextFu
     return res.status(err.statusCode).json({ status: 201, data: 'No data found !' });
   }
 }
-
 export async function updateDrugYearCmmPerChw(req: Request, res: Response, next: NextFunction) {
 
   const { district, site, chw, year, drug_index, drug_name, year_chw_cmm, cmm_start_year_month, userId } = req.body;
@@ -988,23 +991,20 @@ export async function fetchIhDrugDataPerSelected(req: Request, res: Response, ne
   const outPut = await getIhDrugArrayDataPerSelected(req, res, next)
   return res.status(outPut.status).json(outPut);
 }
-
 export async function fetchIhDrugDataWithMultiChwsSelected(req: Request, res: Response, next: NextFunction) {
   const selectedChws = req.body.chws;
-  let bigOutPut: { status: number, data: { cibleId: any, cible: Districts | Sites | Chws, drugData: ChwsDrugData, patologieData: PatologieData, hasEmptyData:boolean } | string | undefined }[] = [];
+  let bigOutPut: { status: number, data: { cibleId: any, cible: Districts | Sites | Chws, drugData: ChwsDrugData, patologieData: PatologieData, hasEmptyData: boolean } | string | undefined }[] = [];
 
   for (const chw of selectedChws) {
     req.body.chws = [chw];
-    let outPut:any = await getIhDrugArrayDataPerSelected(req, res, next);
+    let outPut: any = await getIhDrugArrayDataPerSelected(req, res, next);
     outPut['hasEmptyData'] = typeof outPut.data == 'string' || typeof outPut.data == undefined || typeof outPut.data == 'undefined';
     bigOutPut.push(outPut);
   }
-  
+
   return res.status(200).json(bigOutPut);
 }
-
-
-export async function getIhDrugArrayDataPerSelected(req: Request, res: Response, next: NextFunction,withPatologie=true): Promise<{ status: number, data: { cibleId: any, cible: Districts | Sites | Chws, drugData: ChwsDrugData, patologieData: PatologieData } | string | undefined; }> {
+export async function getIhDrugArrayDataPerSelected(req: Request, res: Response, next: NextFunction, withPatologie = true): Promise<{ status: number, data: { cibleId: any, cible: Districts | Sites | Chws, drugData: ChwsDrugData, patologieData: PatologieData } | string | undefined; }> {
   // const dateArray = req.body.end_date.split('-');
   req.body.forms = MEG_FORMS;
   req.body.sources = ['Tonoudayo'];
@@ -1018,14 +1018,14 @@ export async function getIhDrugArrayDataPerSelected(req: Request, res: Response,
   const drugUpdated = await getChwsDrugUpdatedWithParams(req, res, next, true);
   const drugYearCmm = await getChwsDrugYearCmmWithParams(req, res, next, true);
 
-  if (withPatologie===true) {
+  if (withPatologie === true) {
     const chwsChtDataFilter = {
       start_date: GetPreviousDate(`${year}-${month}-21`),
       end_date: `${year}-${month}-20`,
       sources: ["Tonoudayo", "dhis2"],
       forms: ["pcime_c_asc", "PCIME"],
     };
-    chwsChtData =  await getChwsDataWithParams(req, res, next, true, chwsChtDataFilter);
+    chwsChtData = await getChwsDataWithParams(req, res, next, true, chwsChtDataFilter);
   }
   const chws = await getChws(req, res, next, true);
 
@@ -1049,7 +1049,7 @@ export async function getIhDrugArrayDataPerSelected(req: Request, res: Response,
     return { status: 201, data: 'No data found !' };
   }
 }
-async function getChwsDrugQantityPerSelected(currentData: ChwsDrug[], previousData: ChwsDrug[], drugUpdated: ChwsDrugUpdate[], drugCmm: DrugChwYearCmm[], chwsChtData: ChwsData[], Chws: Chws[], req: Request, withPatologie=true): Promise<{ drugData: ChwsDrugData, patologieData: PatologieData }> {
+async function getChwsDrugQantityPerSelected(currentData: ChwsDrug[], previousData: ChwsDrug[], drugUpdated: ChwsDrugUpdate[], drugCmm: DrugChwYearCmm[], chwsChtData: ChwsData[], Chws: Chws[], req: Request, withPatologie = true): Promise<{ drugData: ChwsDrugData, patologieData: PatologieData }> {
   const { year, month } = req.body;
   const outData: any = {
     Albendazole_400_mg_cp_1: { ...quantities },
@@ -1364,7 +1364,6 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], All
     home_visit: {},
     soins_pcime: {},
     suivi_pcime: {},
-    reference_pcime: {},
     diarrhee_pcime: {},
     paludisme_pcime: {},
     pneumonie_pcime: {},
@@ -1378,15 +1377,17 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], All
     prompt_pcime_pneumonie_24h: {},
     prompt_pcime_pneumonie_48h: {},
     prompt_pcime_pneumonie_72h: {},
-    reference_Pf: {},
-    reference_enceinte_postpartum: {},
     femme_enceinte: {},
     femme_enceinte_NC: {},
     test_de_grossesse: {},
     femme_postpartum: {},
     femme_postpartum_NC: {},
     total_PF_NC: {},
-    total_PF: {}
+    total_PF: {},
+
+    reference_pcime: {},
+    reference_Pf: {},
+    reference_enceinte_postpartum: {},
   }
 
   for (let i = 0; i < Chws$.length; i++) {
@@ -1476,17 +1477,27 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], All
             if (form == "pregnancy_family_planning") {
               var pregnant_1 = field["s_reg_pregnancy_screen.s_reg_urine_result"] == "positive"
               var pregnant_2 = field["s_reg_pregnancy_screen.s_reg_why_urine_test_not_done"] == "already_pregnant"
-              if (field["s_reg_pregnancy_screen.s_reg_urine_test"] == "yes") outPutData.test_de_grossesse[chw].tonoudayo += 1;
+              if (field["s_reg_pregnancy_screen.s_reg_urine_test"] == "yes") {
+                outPutData.test_de_grossesse[chw].tonoudayo += 1;
+              }
               if (pregnant_1 == true || pregnant_2 == true) {
                 outPutData.femme_enceinte[chw].tonoudayo += 1;
-                if (field["s_summary.s_have_you_refer_child"] == "yes") outPutData.reference_enceinte_postpartum[chw].tonoudayo += 1;
+                if (field["s_summary.s_have_you_refer_child"] == "yes") {
+                  outPutData.reference_enceinte_postpartum[chw].tonoudayo += 1;
+                }
               } else {
                 outPutData.total_PF[chw].tonoudayo += 1;
-                if (field["s_fam_plan_screen.agreed_to_fp"] == "yes") outPutData.total_PF_NC[chw].tonoudayo += 1;
-                if (field["s_summary.s_have_you_refer_child"] == "yes") outPutData.reference_Pf[chw].tonoudayo += 1;
+                if (field["s_fam_plan_screen.agreed_to_fp"] == "yes") {
+                  outPutData.total_PF_NC[chw].tonoudayo += 1;
+                }
+                if (field["s_summary.s_have_you_refer_child"] == "yes") {
+                  outPutData.reference_Pf[chw].tonoudayo += 1;
+                }
               }
             } else if (form == "women_emergency_followup") {
-              if (field["group_summary.s_have_you_refer_child"] == "yes") outPutData.reference_enceinte_postpartum[chw].tonoudayo += 1;
+              if (field["group_summary.s_have_you_refer_child"] == "yes") {
+                outPutData.reference_enceinte_postpartum[chw].tonoudayo += 1;
+              }
               if (field["initial.woman_status"] == "pregnant") {
                 outPutData.femme_enceinte[chw].tonoudayo += 1;
               } else if (field["initial.woman_status"] == "postpartum") {
@@ -1496,13 +1507,20 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], All
               }
             } else if (form == "delivery") {
               outPutData.femme_postpartum[chw].tonoudayo += 1;
-              if (field["group_summary.s_have_you_refer_child"] == "yes") outPutData.reference_enceinte_postpartum[chw].tonoudayo += 1
+              if (field["group_summary.s_have_you_refer_child"] == "yes") {
+                outPutData.reference_enceinte_postpartum[chw].tonoudayo += 1;
+              }
             } else if (form == "fp_followup_danger_sign_check") {
               outPutData.total_PF[chw].tonoudayo += 1;
-              if (field["s_summary.r_have_you_refer_child"] == "yes") outPutData.reference_Pf[chw].tonoudayo += 1;
+              if (field["s_summary.r_have_you_refer_child"] == "yes") {
+                outPutData.reference_Pf[chw].tonoudayo += 1;
+              }
             } else if (form == "fp_follow_up_renewal") {
               outPutData.total_PF[chw].tonoudayo += 1;
-              if (field["checklist2.s_refer_for_health_state"] == "true") outPutData.reference_Pf[chw].tonoudayo += 1;
+              // if (field["checklist2.s_refer_for_health_state"] == "true") {
+              if (field["s_summary.s_have_you_refer_woman"] == "yes") {
+                outPutData.reference_Pf[chw].tonoudayo += 1;
+              }
             }
           }
 
@@ -1581,6 +1599,7 @@ function getAllAboutData(ChwsDataFromDb$: ChwsData[], SelectedChws$: Chws[], All
   return transformChwsData(outPutData, Chws$, req, res);
 
 }
+
 function transformChwsData(allDatasFound: ChtOutPutData, Chws$: Chws[], req: Request, res: Response): { chw: Chws, data: DataIndicators }[] {
   const { end_date, params, withDhis2Data } = req.body;
 
@@ -1618,17 +1637,13 @@ function transformChwsData(allDatasFound: ChtOutPutData, Chws$: Chws[], req: Req
       femmes_enceintes_NC: { tonoudayo: 0, dhis2: 0 },
       femme_postpartum_NC: { tonoudayo: 0, dhis2: 0 },
       test_de_grossesse: { tonoudayo: 0, dhis2: 0 },
-
       sum_total_vad: 0,
       sum_soins_pcime: 0,
       sum_suivi_pcime: 0,
       sum_pcime: 0,
       sum_femmes_enceinte: 0,
       sum_femmes_postpartum: 0,
-      sum_enceinte_postpartum: {
-        tonoudayo: 0,
-        dhis2: 0
-      },
+      sum_enceinte_postpartum: { tonoudayo: 0, dhis2: 0 },
       sum_maternel: 0,
       sum_home_visit: 0,
       sum_pf: 0,
@@ -1650,7 +1665,7 @@ function transformChwsData(allDatasFound: ChtOutPutData, Chws$: Chws[], req: Req
       sum_prompt_pcime_pneumonie_72h: 0,
       sum_femmes_enceintes_NC: 0,
       sum_femme_postpartum_NC: 0,
-      sum_test_de_grossesse: 0
+      sum_test_de_grossesse: 0,
     };
 
     if (params != 'onlydata') {
@@ -1789,20 +1804,704 @@ function transformChwsData(allDatasFound: ChtOutPutData, Chws$: Chws[], req: Req
 
   return allAggragateData;
 }
+
+
+// START CHWS RECAP-APP
+export async function fetchRecapActivityPerChw(req: Request, res: Response, next: NextFunction, onlyData: boolean = false) {
+  const { districts, sites, start_date, end_date } = req.body;
+
+  const dataParams = { districts, sites, start_date, end_date, sources: ["Tonoudayo"], forms: ["recap_activity"] }
+
+  var respData: { status: number, data: any };
+
+  console.log(dataParams)
+
+  const recapData: { status: number, data: ChwsData[] } = await getChwsDataWithParams(req, res, next, true, dataParams);
+  // const chws: { status: number, data: Chws[] } = await getChws(req, res, next, true);
+
+  if (recapData && recapData.data && recapData.status == 200) {
+    const formatedRecapData: RecapActivity[] = [];
+
+    for (const recap of recapData.data) {
+      const dt = transformRecapActivityData(recap);
+      formatedRecapData.push(dt)
+    }
+
+    respData = { status: 200, data: formatedRecapData };
+  } else {
+    respData = { status: 201, data: 'No data found !' };
+  }
+
+  return onlyData ? respData : res.status(respData.status).json(respData);
+}
+
+
+
+
+function transformRecapActivityData(chwsData: ChwsData): RecapActivity {
+
+  const getBool = (data: any) => {
+    return data == 'yes' || data == true ? 'true' : '';
+    // try {
+    //   if (typeof data === "undefined") {
+    //     return "";
+    //   } else {
+    //     if (data == 1 || data == "1" || data == "true" || data == "checked" || data == true) {
+    //       return "true";
+    //     } else {
+    //       // console.log(data);
+    //       return "";
+    //     }
+    //   }
+    // } catch (error) {
+    //   return "";
+    // }
+  }
+  const formatDate = (date: any, type: 'fullDate' | 'fullLineDate' | 'onlyHour' | '' = "", output = "en") => {
+    var d = !date || date === "now" ? new Date() : new Date(date);
+
+    var year = d.getUTCFullYear(),
+      month = String(d.getUTCMonth() + 1).padStart(2, '0'),
+      day = String(d.getUTCDate()).padStart(2, '0'),
+      h = String(d.getUTCHours()).padStart(2, '0'),
+      m = String(d.getUTCMinutes()).padStart(2, '0'),
+      s = String(d.getUTCSeconds()).padStart(2, '0');
+
+    var enDateEn = [year, month, day].join('-');
+    var enDateFr = [day, month, year].join('/');
+    var enHour = [h, m, s].join(':');
+
+    if (type === "fullDate") {
+      return `${enDateEn}T${enHour}.000Z`; // Ensuring the correct UTC format
+    } else if (type === "fullLineDate") {
+      return output === "fr" ? `${enDateFr} à ${enHour}` : `${enDateEn} at ${enHour}`;
+    } else if (type === "onlyHour") {
+      return enHour;
+    } else {
+      return output === "fr" ? enDateFr : enDateEn;
+    }
+  }
+  const formatPrompt = (data: any) => {
+    if (data == '24' || data == 24) return "≤24";
+    if (data == '48' || data == 48) return "≤48";
+    if (data == '72' || data == 72) return "≤72";
+    if (data == 'sup_72') return ">72";
+    return "";
+  }
+  const formatNCAC = (data: any) => {
+    if (data == 'nc') return 'NC';
+    if (data == 'oc') return 'AC'
+    return '';
+  }
+  const formatPregnancyPostpartum = (data: any) => {
+    if (data == "pregnant") return "Enceinte";
+    if (data == "postpartum") return "Post_Partum";
+    return '';
+  }
+  const toOuiNon = (data: any) => {
+    if (data == "yes") return "Oui";
+    if (data == "no") return "Non";
+    return '';
+  }
+  const formatVisitType = (data: any) => {
+    if (data == "pcime") return "PCIME";
+    if (data == "maternal") return "Maternelle";
+    if (data == "fp") return "PF";
+    if (data == "research") return "Recherche";
+    return '';
+  }
+  const formatNo_fp_given_reasons = (data: any) => {
+    if (data == 'refusal') return "Refus";
+    if (data == 'wants_think') return "Veut_Reflechir";
+    if (data == 'fp_followup') return "Suivi_PF";
+    if (data == 'others') return "Autres_Raisons";
+    return '';
+  }
+  const formatConsultation_followup = (data: any) => {
+    if (data == 'consultation') return "Soins";
+    if (data == 'followup') return "Suivi";
+    return '';
+  }
+  const formatFpMethod = (data: any) => {
+    if (data == 'oral_pill') return "Pilule";
+    if (data == 'sayana') return "Sayana_Press";
+    if (data == 'depo_provera') return "Depo_Provera";
+    if (data == 'others') return "Autres_Methodes";
+    return '';
+  }
+  const ageEnAnneesMois = (ageJours: number) => {
+    // Approximation : 1 an = 365 jours, 1 mois = 30 jours
+    const year = Math.floor(ageJours / 365);
+    const resteJours = ageJours % 365;
+    const month = Math.floor(resteJours / 30);
+    const restDay = resteJours % 30;
+
+    return { year, month, day: restDay };
+  }
+
+  const formatValues = (val:any)=>{
+    const tv = typeof val;
+    if (tv  == undefined || tv == "undefined" || tv == null || val == undefined || val == 'undefined' || val == null || val == 'null' ) {
+      return '';
+    }
+    return val
+  }
+
+
+  const field = chwsData.fields
+
+  const visitType = field["visit_start.visit_type"];
+
+  var dataValues: { dataElement: string, value: any }[] = [
+    {
+      "dataElement": "VlI0nWrGuHB",//ASC_Data_External_id
+      "value": formatValues(chwsData.id),//"uid"
+    },
+    {
+      "dataElement": "waNsMdOeCw6",//ASC_Source_données
+      "value": "Tonoudayo",//"Tonoudayo"
+    },
+    {
+      "dataElement": "JC752xYegbJ",//"XmvZ4JrR8wf",//District
+      "value": formatValues(chwsData.district.name),//"Kozah"
+    },
+    {
+      "dataElement": "JkMyqI3e6or",//Liste des asc
+      "value": formatValues(chwsData.chw.external_id),//"KKOADA-002"
+    },
+    {
+      "dataElement": "RlquY86kI66", //ASC_Date de visite
+      "value": formatValues(field["visit_start.visit_date"]),//"2021-04-26"
+    },
+    {
+      "dataElement": "plW6bCSnXKU",//ASC_Type de visite
+      "value": formatValues(formatVisitType(visitType)),//"PCIME"
+    },
+    {
+      "dataElement": "SWcMIA8MIcf", //ASC_Data_Cible_Id
+      "value": formatValues(chwsData.patient_id)
+    }
+  ];
+
+         
+
+       
+
+
+  if (['pcime', 'maternal', 'fp'].includes(visitType)) {
+
+    const sex = field["inputs.contact.sex"];
+    const birthDate = field["inputs.contact.date_of_birth"];
+
+    const ageInDay = parseInt(field.patient_age_in_days);
+    const ageObj = ageEnAnneesMois(ageInDay);
+    const ageYear = parseFloat((ageInDay / 365).toFixed(2));
+
+
+    dataValues.push({
+      "dataElement": "WaN8nOieIhs",//ASC_AC ou NC ?
+      "value": formatValues(formatNCAC(field["visit_start.nc_oc"])),//"NC"
+    });
+    dataValues.push({
+      "dataElement": "qkZQFY3Osxg",//ASC_Sexe
+      "value": formatValues(sex == 'male' ? 'M' : sex == 'female' ? 'F' : ''),//"M"
+    });
+    dataValues.push({
+      "dataElement": "BLWjEQQdBFi",//Age(Annee)
+      "value": formatValues(ageObj.year),//2
+    });
+    dataValues.push({
+      "dataElement": "BshwAFxKGpp",//Age(mois)
+      "value": formatValues(ageObj.month),//4
+    });
+    dataValues.push({
+      "dataElement": "l913ugb2EgY",//Age(jour)
+      "value": formatValues(ageObj.day),//3
+    });
+    dataValues.push({
+      "dataElement": "qwVpaVaTGVy",//Age calculé (en année)
+      "value": formatValues(ageYear),//4.25
+    });
+    dataValues.push({
+      "dataElement": "x4ntGZTag3y",//ASC_Age
+      "value": formatValues(birthDate),//"2021-04-26T00:00:00.000Z"
+    });
+    dataValues.push({
+      "dataElement": "pMjjh6JLEz2",//ASC_Référé
+      "value": formatValues(toOuiNon(field["reference.referred"])),//Oui
+    });
+
+    if (visitType == 'pcime') {
+      const visitReasons: string[] = field["visit_reasons_gp.visit_reasons"].split(' ');
+      // const dangerSigns: string[] = (field["danger_signs_gp.danger_signs"]).split(' ');
+
+      dataValues.push({
+        "dataElement": "U3c13SP8AQz",//ASC_Promptitude
+        "value": formatValues(formatPrompt(field["pcime.promptitude"])),//"≤24"
+      });
+      dataValues.push({
+        "dataElement": "UazQ6TfZa04",//ASC_Fièvre simple
+        "value": formatValues(getBool(visitReasons.includes('mild_fever'))),//"true"
+      });
+      dataValues.push({
+        "dataElement": "y84NNODZ705",//ASC_Malnutrition
+        "value": formatValues(getBool(visitReasons.includes('malnutrition'))),//"true"
+      });
+      dataValues.push({
+        "dataElement": "Gl7HGePuIi3",//ASC_Paludisme
+        "value": formatValues(getBool(visitReasons.includes('malaria'))),//"true"
+      });
+      dataValues.push({
+        "dataElement": "LP33fMJRWrT",//ASC_Pneumonie
+        "value": formatValues(getBool(visitReasons.includes('pneumonia'))),//"true"
+      });
+      dataValues.push({
+        "dataElement": "LxGwhehKQ2w",//ASC_Signe de danger
+        "value": formatValues(getBool(visitReasons.includes('danger_sign'))),//"true"
+      });
+      dataValues.push({
+        "dataElement": "NPHYf8WAR9l",//ASC_Diarrhée
+        "value": formatValues(getBool(visitReasons.includes('diarrhea'))),//"true"
+      });
+      dataValues.push({
+        "dataElement": "TIJN6BQNA5z",//ASC_Toux ou Rhume
+        "value": formatValues(getBool(visitReasons.includes('cough_or_cold'))),//"true"
+      });
+      dataValues.push({
+        "dataElement": "gdPHkJ8L90f",//ASC_Autre Motif
+        "value": formatValues(getBool(visitReasons.includes('others'))),//"true"
+      });
+      dataValues.push({
+        "dataElement": "m8U4BXLutT1",//ASC_Autre
+        "value": formatValues(field["visit_reasons_gp.other_visit_reasons"]),//"EZERR"
+      });
+      dataValues.push({
+        "dataElement": "pBVNq3V36q4",//ASC_motif_NR
+        "value": formatValues(getBool(visitReasons.length == 0)),//"true"
+      });
+      dataValues.push({
+        "dataElement": "zNldrz5EUPR",//ASC_Soins ou suivi
+        "value": formatValues(formatConsultation_followup(field["pcime.consultation_followup"])),//"Soins"
+      });
+    }
+    if (visitType == 'maternal') {
+      dataValues.push({
+        "dataElement": "reULiF7LW3w",//Enceinte ou postpartum
+        "value": formatValues(formatPregnancyPostpartum(field["maternal_fp.pregnancy_postpartum"])),//"Enceinte" //Post_Partum
+      });
+      dataValues.push({
+        "dataElement": "rFlbd27poqd",//Suivi CPN
+        "value": formatValues(field["maternal_fp.pregnancy_followup"]).toUpperCase(),//"CPN1"
+      });
+      dataValues.push({
+        "dataElement": "WRwCp1UsW3b",//Suivi CPON
+        "value": formatValues(field["maternal_fp.postpartum_followup"]).toUpperCase(),//"CPON1"
+      });
+      dataValues.push({
+        "dataElement": "sUzIuALcZ9P", //Suivi après référencement
+        "value": formatValues(getBool(field["maternal_fp.referral_followup"])),//"true"
+      });
+      dataValues.push({
+        "dataElement": "n8HnXoFncna", //PTME
+        "value": formatValues(getBool(field["maternal_fp.ptme"])),//"true"
+      });
+    }
+
+    if (visitType == 'fp') {
+      dataValues.push({
+        "dataElement": "kY42apNsghu",//ASC_PF Administré
+        "value": formatValues(toOuiNon(field["maternal_fp.fp_given"])),//"Oui"
+      });
+      dataValues.push({
+        "dataElement": "nO3Ez6TWFsA",//ASC_PF_Raison_non_administree
+        "value": formatValues(formatNo_fp_given_reasons(field["maternal_fp.no_fp_given_reasons"])),//"Veut_Reflechir"
+      });
+      dataValues.push({
+        "dataElement": "rLa7tD0wkQt",//ASC_Counciling
+        "value": formatValues(toOuiNon(field["maternal_fp.counseling"])) //"Oui"
+      });
+      dataValues.push({
+        "dataElement": "poTUIjg7MyZ",//ASC_Liste des PF
+        "value": formatValues(formatFpMethod(field["maternal_fp.fp_method"])),//"Pilule"
+      });
+
+    }
+
+    if (['pcime', 'maternal'].includes(visitType)) {
+      dataValues.push({
+        "dataElement": "q02O7PbSX0Z",//ASC_Dormir Sous Moustiquaire
+        "value": formatValues(toOuiNon(field["reference.sleep_under_mosquito_net"])) //Oui
+      });
+    }
+
+    if (['fp', 'maternal'].includes(visitType)) {
+      dataValues.push({
+        "dataElement": "DNzefvCYfZz", //Test de grossesse
+        "value": formatValues(getBool(field["maternal_fp.pregnant_test"])) //"true"
+      });
+    }
+  }
+
+  if (visitType == 'research') { }
+
+  var newDataValues = [];
+
+  for (let item in dataValues) {
+    if (dataValues[item]["value"] != "") {
+      newDataValues.push(dataValues[item]);
+    }
+  }
+
+  var dataFormated = {
+    // "event": uid,
+    program: "siupB4uk4O2",
+    orgUnit: `${chwsData.site.external_id}`,//"PgoyKuRs20z",
+    eventDate: formatDate(Date.now(), "fullDate"),//"2021-05-07T00:00:00.000",
+    status: "COMPLETED",
+    completedDate: formatDate(Date.now()),//"2013-05-18",
+    dataValues: newDataValues
+  };
+
+  return dataFormated;
+}
+
+
+// function transformRecapActivityData(chwsData: ChwsData): RecapActivity {
+
+//   const getBool = (data: any) => {
+//     return data == 'yes' || data == true ? 'true' : '';
+//     // try {
+//     //   if (typeof data === "undefined") {
+//     //     return "";
+//     //   } else {
+//     //     if (data == 1 || data == "1" || data == "true" || data == "checked" || data == true) {
+//     //       return "true";
+//     //     } else {
+//     //       // console.log(data);
+//     //       return "";
+//     //     }
+//     //   }
+//     // } catch (error) {
+//     //   return "";
+//     // }
+//   }
+//   const formatDate = (date: any, type: 'fullDate' | 'fullLineDate' | 'onlyHour' | '' = "", output = "en") => {
+//     var d = !date || date === "now" ? new Date() : new Date(date);
+
+//     var year = d.getUTCFullYear(),
+//       month = String(d.getUTCMonth() + 1).padStart(2, '0'),
+//       day = String(d.getUTCDate()).padStart(2, '0'),
+//       h = String(d.getUTCHours()).padStart(2, '0'),
+//       m = String(d.getUTCMinutes()).padStart(2, '0'),
+//       s = String(d.getUTCSeconds()).padStart(2, '0');
+
+//     var enDateEn = [year, month, day].join('-');
+//     var enDateFr = [day, month, year].join('/');
+//     var enHour = [h, m, s].join(':');
+
+//     if (type === "fullDate") {
+//       return `${enDateEn}T${enHour}.000Z`; // Ensuring the correct UTC format
+//     } else if (type === "fullLineDate") {
+//       return output === "fr" ? `${enDateFr} à ${enHour}` : `${enDateEn} at ${enHour}`;
+//     } else if (type === "onlyHour") {
+//       return enHour;
+//     } else {
+//       return output === "fr" ? enDateFr : enDateEn;
+//     }
+//   }
+//   const formatPrompt = (data: any) => {
+//     if (data == '24' || data == 24) return "≤24";
+//     if (data == '48' || data == 48) return "≤48";
+//     if (data == '72' || data == 72) return "≤72";
+//     if (data == 'sup_72') return ">72";
+//     return "NR";
+//   }
+//   const formatNCAC = (data: any) => {
+//     if (data == 'nc') return 'NC';
+//     if (data == 'oc') return 'AC'
+//     return 'NR';
+//   }
+//   const formatPregnancyPostpartum = (data: any) => {
+//     if (data == "pregnant") return "Enceinte";
+//     if (data == "postpartum") return "Post_Partum";
+//     return '';
+//   }
+//   const toOuiNon = (data: any) => {
+//     if (data == "yes") return "Oui";
+//     if (data == "no") return "Non";
+//     return '';
+//   }
+//   const formatVisitType = (data: any) => {
+//     if (data == "pcime") return "PCIME";
+//     if (data == "maternal") return "Maternelle";
+//     if (data == "fp") return "PF";
+//     if (data == "research") return "Recherche";
+//     return '';
+//   }
+//   const formatNo_fp_given_reasons = (data: any) => {
+//     if (data == 'refusal') return "Refus";
+//     if (data == 'wants_think') return "Veut_Reflechir";
+//     if (data == 'fp_followup') return "Suivi_PF";
+//     if (data == 'others') return "Autres_Raisons";
+//     return '';
+//   }
+//   const formatConsultation_followup = (data: any) => {
+//     if (data == 'consultation') return "Soins";
+//     if (data == 'followup') return "Suivi";
+//     return '';
+//   }
+//   const formatFpMethod = (data: any) => {
+//     if (data == 'oral_pill') return "Pilule";
+//     if (data == 'sayana') return "Sayana_Press";
+//     if (data == 'depo_provera') return "Depo_Provera";
+//     if (data == 'others') return "Autres_Methodes";
+//     return '';
+//   }
+//   const ageEnAnneesMois = (ageJours: number) => {
+//     // Approximation : 1 an = 365 jours, 1 mois = 30 jours
+//     const year = Math.floor(ageJours / 365);
+//     const resteJours = ageJours % 365;
+//     const month = Math.floor(resteJours / 30);
+//     const restDay = resteJours % 30;
+
+//     return { year, month, day: restDay };
+//   }
+
+
+//   const field = chwsData.fields
+//   console.log(field)
+//   const visitType = field.visit_start.visit_type;
+
+//   var dataValues: { dataElement: string, value: any }[] = [
+//     {
+//       "dataElement": "VlI0nWrGuHB",//ASC_Data_External_id
+//       "value": chwsData.id,//"uid"
+//     },
+//     {
+//       "dataElement": "waNsMdOeCw6",//ASC_Source_données
+//       "value": "Tonoudayo",//"Tonoudayo"
+//     },
+//     {
+//       "dataElement": "JC752xYegbJ",//"XmvZ4JrR8wf",//District
+//       "value": chwsData.district.name,//"Kozah"
+//     },
+//     {
+//       "dataElement": "JkMyqI3e6or",//Liste des asc
+//       "value": chwsData.chw.external_id,//"KKOADA-002"
+//     },
+//     {
+//       "dataElement": "RlquY86kI66", //ASC_Date de visite
+//       "value": field.visit_start.visit_date,//"2021-04-26"
+//     },
+//     {
+//       "dataElement": "plW6bCSnXKU",//ASC_Type de visite
+//       "value": formatVisitType(visitType),//"PCIME"
+//     },
+//     {
+//       "dataElement": "SWcMIA8MIcf", //ASC_Data_Cible_Id
+//       "value": chwsData.patient_id
+//     }
+//   ];
+
+         
+
+       
+
+
+//   if (['pcime', 'maternal', 'fp'].includes(visitType)) {
+
+//     const sex = field.inputs.contact.sex;
+//     const birthDate = field.inputs.contact.date_of_birth;
+
+//     const ageInDay = parseInt(field.patient_age_in_days);
+//     const ageObj = ageEnAnneesMois(ageInDay);
+//     const ageYear = parseFloat((ageInDay / 365).toFixed(2));
+
+
+//     dataValues.push({
+//       "dataElement": "WaN8nOieIhs",//ASC_AC ou NC ?
+//       "value": formatNCAC(field.visit_start.nc_oc),//"NC"
+//     });
+//     dataValues.push({
+//       "dataElement": "qkZQFY3Osxg",//ASC_Sexe
+//       "value": sex == 'male' ? 'M' : sex == 'female' ? 'M' : '',//"M"
+//     });
+//     dataValues.push({
+//       "dataElement": "BLWjEQQdBFi",//Age(Annee)
+//       "value": ageObj.year,//2
+//     });
+//     dataValues.push({
+//       "dataElement": "BshwAFxKGpp",//Age(mois)
+//       "value": ageObj.month,//4
+//     });
+//     dataValues.push({
+//       "dataElement": "l913ugb2EgY",//Age(jour)
+//       "value": ageObj.day,//3
+//     });
+//     dataValues.push({
+//       "dataElement": "qwVpaVaTGVy",//Age calculé (en année)
+//       "value": ageYear,//4.25
+//     });
+//     dataValues.push({
+//       "dataElement": "x4ntGZTag3y",//ASC_Age
+//       "value": birthDate,//"2021-04-26T00:00:00.000Z"
+//     });
+//     dataValues.push({
+//       "dataElement": "pMjjh6JLEz2",//ASC_Référé
+//       "value": toOuiNon(field.reference.referred),//Oui
+//     });
+
+//     if (visitType == 'pcime') {
+//       const visitReasons: string[] = field.visit_reasons_gp.visit_reasons.split(' ');
+//       // const dangerSigns: string[] = (field.danger_signs_gp.danger_signs).split(' ');
+
+//       dataValues.push({
+//         "dataElement": "U3c13SP8AQz",//ASC_Promptitude
+//         "value": formatPrompt(field.pcime.promptitude),//"≤24"
+//       });
+//       dataValues.push({
+//         "dataElement": "UazQ6TfZa04",//ASC_Fièvre simple
+//         "value": getBool(visitReasons.includes('mild_fever')),//"true"
+//       });
+//       dataValues.push({
+//         "dataElement": "y84NNODZ705",//ASC_Malnutrition
+//         "value": getBool(visitReasons.includes('malnutrition')),//"true"
+//       });
+//       dataValues.push({
+//         "dataElement": "Gl7HGePuIi3",//ASC_Paludisme
+//         "value": getBool(visitReasons.includes('malaria')),//"true"
+//       });
+//       dataValues.push({
+//         "dataElement": "LP33fMJRWrT",//ASC_Pneumonie
+//         "value": getBool(visitReasons.includes('pneumonia')),//"true"
+//       });
+//       dataValues.push({
+//         "dataElement": "LxGwhehKQ2w",//ASC_Signe de danger
+//         "value": getBool(visitReasons.includes('danger_sign')),//"true"
+//       });
+//       dataValues.push({
+//         "dataElement": "NPHYf8WAR9l",//ASC_Diarrhée
+//         "value": getBool(visitReasons.includes('diarrhea')),//"true"
+//       });
+//       dataValues.push({
+//         "dataElement": "TIJN6BQNA5z",//ASC_Toux ou Rhume
+//         "value": getBool(visitReasons.includes('cough_or_cold')),//"true"
+//       });
+//       dataValues.push({
+//         "dataElement": "gdPHkJ8L90f",//ASC_Autre Motif
+//         "value": getBool(visitReasons.includes('others')),//"true"
+//       });
+//       dataValues.push({
+//         "dataElement": "m8U4BXLutT1",//ASC_Autre
+//         "value": field.visit_reasons_gp.other_visit_reasons,//"EZERR"
+//       });
+//       dataValues.push({
+//         "dataElement": "pBVNq3V36q4",//ASC_motif_NR
+//         "value": getBool(visitReasons.length == 0),//"true"
+//       });
+//       dataValues.push({
+//         "dataElement": "zNldrz5EUPR",//ASC_Soins ou suivi
+//         "value": formatConsultation_followup(field.pcime.consultation_followup),//"Soins"
+//       });
+//     }
+//     if (visitType == 'maternal') {
+//       dataValues.push({
+//         "dataElement": "reULiF7LW3w",//Enceinte ou postpartum
+//         "value": formatPregnancyPostpartum(field.maternal_fp.pregnancy_postpartum),//"Enceinte" //Post_Partum
+//       });
+//       dataValues.push({
+//         "dataElement": "rFlbd27poqd",//Suivi CPN
+//         "value": ("" + field.maternal_fp.pregnancy_followup).toUpperCase(),//"CPN1"
+//       });
+//       dataValues.push({
+//         "dataElement": "WRwCp1UsW3b",//Suivi CPON
+//         "value": ("" + field.maternal_fp.postpartum_followup).toUpperCase(),//"CPON1"
+//       });
+//       dataValues.push({
+//         "dataElement": "sUzIuALcZ9P", //Suivi après référencement
+//         "value": getBool(field.maternal_fp.referral_followup),//"true"
+//       });
+//       dataValues.push({
+//         "dataElement": "n8HnXoFncna", //PTME
+//         "value": getBool(field.maternal_fp.ptme),//"true"
+//       });
+//     }
+
+//     if (visitType == 'fp') {
+//       dataValues.push({
+//         "dataElement": "kY42apNsghu",//ASC_PF Administré
+//         "value": toOuiNon(field.maternal_fp.fp_given),//"Oui"
+//       });
+//       dataValues.push({
+//         "dataElement": "nO3Ez6TWFsA",//ASC_PF_Raison_non_administree
+//         "value": formatNo_fp_given_reasons(field.maternal_fp.no_fp_given_reasons),//"Veut_Reflechir"
+//       });
+//       dataValues.push({
+//         "dataElement": "rLa7tD0wkQt",//ASC_Counciling
+//         "value": toOuiNon(field.maternal_fp.counseling) //"Oui"
+//       });
+//       dataValues.push({
+//         "dataElement": "poTUIjg7MyZ",//ASC_Liste des PF
+//         "value": formatFpMethod(field.maternal_fp.fp_method),//"Pilule"
+//       });
+
+//     }
+
+//     if (['pcime', 'maternal'].includes(visitType)) {
+//       dataValues.push({
+//         "dataElement": "q02O7PbSX0Z",//ASC_Dormir Sous Moustiquaire
+//         "value": toOuiNon(field.reference.sleep_under_mosquito_net)//Oui
+//       });
+//     }
+
+//     if (['fp', 'maternal'].includes(visitType)) {
+//       dataValues.push({
+//         "dataElement": "DNzefvCYfZz", //Test de grossesse
+//         "value": getBool(field.maternal_fp.pregnant_test),//"true"
+//       });
+//     }
+
+
+
+//   }
+
+//   if (visitType == 'research') { }
+
+//   var newDataValues = [];
+
+//   for (let item in dataValues) {
+//     if (dataValues[item]["value"] != "") {
+//       newDataValues.push(dataValues[item]);
+//     }
+//   }
+
+//   var dataFormated = {
+//     // "event": uid,
+//     program: "siupB4uk4O2",
+//     orgUnit: `${chwsData.site.external_id}`,//"PgoyKuRs20z",
+//     eventDate: formatDate(Date.now(), "fullDate"),//"2021-05-07T00:00:00.000",
+//     status: "COMPLETED",
+//     completedDate: formatDate(Date.now()),//"2013-05-18",
+//     dataValues: newDataValues
+//   };
+
+//   return dataFormated;
+// }
+
 export async function FetchMeetingPersons(req: Request, res: Response, next: NextFunction) {
   var respData: { status: number, data: any };
   try {
-    const cacheKey = generateCacheKey(req, 'FetchMeetingPersons');
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-        respData = cachedData as { status: number, data: any };
-      return res.status(respData.status).json(respData);
-    }
+    // const cacheKey = generateCacheKey(req, 'FetchMeetingPersons');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //     respData = cachedData as { status: number, data: any };
+    //   return res.status(respData.status).json(respData);
+    // }
     const _repo = await GetPersonsRepository();
     const data: Persons[] = await _repo.find();
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
     respData = { status: 200, data: data };
-    cache.set(cacheKey, respData);
+    // cache.set(cacheKey, respData);
   } catch (e) {
     respData = { status: 201, data: 'No data found !' };
   }
@@ -1812,17 +2511,17 @@ export async function FetchMeetingPersons(req: Request, res: Response, next: Nex
 export async function FetchMeetingTeams(req: Request, res: Response, next: NextFunction) {
   var respData: { status: number, data: any };
   try {
-    const cacheKey = generateCacheKey(req, 'FetchMeetingTeams');
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      respData = cachedData as { status: number, data: any };
-      return res.status(respData.status).json(respData);
-    }
+    // const cacheKey = generateCacheKey(req, 'FetchMeetingTeams');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //   respData = cachedData as { status: number, data: any };
+    //   return res.status(respData.status).json(respData);
+    // }
     const _repo = await GetTeamsRepository();
     const data: Teams[] = await _repo.find();
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
     respData = { status: 200, data: data };
-    cache.set(cacheKey, respData);
+    // cache.set(cacheKey, respData);
   } catch (e) {
     respData = { status: 201, data: 'No data found !' };
   }
@@ -1832,18 +2531,18 @@ export async function FetchMeetingTeams(req: Request, res: Response, next: NextF
 export async function FetchMeetingReports(req: Request, res: Response, next: NextFunction) {
   var respData: { status: number, data: any };
   try {
-    const cacheKey = generateCacheKey(req, 'FetchMeetingReports');
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-        respData = cachedData as { status: number, data: any };
-      return res.status(respData.status).json(respData);
-    }
+    // const cacheKey = generateCacheKey(req, 'FetchMeetingReports');
+    // const cachedData = cache.get(cacheKey);
+    // if (cachedData) {
+    //     respData = cachedData as { status: number, data: any };
+    //   return res.status(respData.status).json(respData);
+    // }
     const _repo = await GetMeetingReportDataRepository();
     const data = await _repo.find({ where: { team: { id: req.body.team } } });
     if (!data) return res.status(201).json({ status: 201, data: 'No data found !' });
 
     respData = { status: 200, data: data };
-    cache.set(cacheKey, respData);
+    // cache.set(cacheKey, respData);
   } catch (e) {
     respData = { status: 201, data: 'No data found !' };
   }
@@ -2034,4 +2733,3 @@ export async function DeleteMeetingTeams(req: Request, res: Response, next: Next
   return res.status(respData.status).json(respData);
 }
 export async function deleteChwsData(req: Request, res: Response, next: NextFunction) { }
-

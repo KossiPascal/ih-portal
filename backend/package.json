@@ -1,6 +1,6 @@
 {
   "name": "ih-portal-backend",
-  "version": "1.3.44",
+  "version": "1.3.56",
   "main": "index.js",
   "author": "TSOLEGNAGBO Kossi <kossi.tsolegnagbo@gmail.com>",
   "private": true,

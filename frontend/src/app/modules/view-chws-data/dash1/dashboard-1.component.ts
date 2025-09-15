@@ -20,8 +20,10 @@ export class Dashboard1Component implements OnInit {
   sum(arg0: any) {
     throw new Error('Method not implemented.');
   }
+
   constructor(private auth: AuthService, private sync: SyncService) {
   }
+  
   public roles = new Roles(this.auth);
 
   aggradateDataForm!: FormGroup;
@@ -89,6 +91,7 @@ export class Dashboard1Component implements OnInit {
       console.log(err.error);
     });
   }
+
   genarateSites() {
     this.sites$ = [];
     this.chws$ = [];
@@ -136,7 +139,6 @@ export class Dashboard1Component implements OnInit {
     return params;
   }
 
-
   initDataFilted(params?: FilterParams): void {
     this.initMsg = 'Loading Data ...';
     this.isLoading = true;
@@ -154,7 +156,6 @@ export class Dashboard1Component implements OnInit {
       console.log(err);
     });
   }
-
 
   isRatioChecked(): boolean {
     return this.aggradateDataForm.value.withRatio == true;

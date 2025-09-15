@@ -11,3 +11,17 @@ export interface AppLink {
     label: string
     show: boolean
 }
+
+
+
+export interface RecapActivity {
+  program: string;
+  orgUnit: string;
+  eventDate: string;
+  status: string;
+  completedDate: string;
+  dataValues: {
+    dataElement: string;
+    value: any;
+  }[];
+}

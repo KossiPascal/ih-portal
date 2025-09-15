@@ -55,3 +55,36 @@ export class Consts {
 
 
 
+// const home_actions_forms = [
+//     `home_visit`,
+
+//   `pcime_c_asc`,
+//   `pcime_c_referral`,
+//   `pcime_c_followup`,
+//   `usp_pcime_followup`,
+//   `malnutrition_followup`,
+//   `newborn_followup`,
+
+//   `pregnancy_family_planning`,
+
+//   `delivery`,
+
+//   `prenatal_followup`,
+//   `postnatal_followup`,
+//   `women_emergency_followup`,
+
+//   `fp_followup_danger_sign_check`,
+//   `fp_follow_up_renewal`,
+
+//   `death_report`,
+
+//   // `vaccination_followup`,
+// ];
+
+// drug_movements
+// drug_quantities
+
+// drugs_management
+
+
+

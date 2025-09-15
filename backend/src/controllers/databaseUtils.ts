@@ -187,7 +187,7 @@ export async function updateUserFacilityIdAndContactPlace(req: Request, res: Res
         const { code, parent, contact, new_parent, } = req.body;
         const _repo = await getCouchDbUsersSyncRepository();
         const user = await _repo.findOneBy({ type: 'chw', role: 'chw', code: code, place: parent, contact: contact });
-
+        
         if (user) {
             // start updating facility_id
             const enable_strict_SSL_checking = false;

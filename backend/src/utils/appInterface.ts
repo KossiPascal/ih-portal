@@ -70,6 +70,7 @@ export interface Dhis2Sync {
   user: string
   dhisusername?: string
   dhispassword?: string
+  pageSize?: number
 }
 export interface Dhis2DataFormat {
   event: string

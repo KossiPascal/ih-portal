@@ -7,7 +7,7 @@ import { Between, Equal, In } from "typeorm";
 import { getFamilySyncRepository, Families, Sites, getSiteSyncRepository, getPatientSyncRepository, Patients, getChwsSyncRepository, Chws, getZoneSyncRepository, Zones, getDistrictSyncRepository, Districts } from "../entity/Sync";
 import { generateCacheKey, notEmpty } from "../utils/functions";
 
-import NodeCache from 'node-cache';
+// import NodeCache from 'node-cache';
 
 // OperatorSymbolToFunction = new Map<FilterOperator, (...args: any[]) => FindOperator<string>>([
 //     [FilterOperator.EQ, Equal],
@@ -22,17 +22,17 @@ import NodeCache from 'node-cache';
 // ])
 
 
-const cache = new NodeCache({ stdTTL: 300 }); // 5 min de cache
+// const cache = new NodeCache({ stdTTL: 300 }); // 5 min de cache
 
 export async function getDistricts(req: Request, res: Response, next: NextFunction) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
     try {
-        const cacheKey = generateCacheKey(req, 'getDistricts');
-        const cachedData = cache.get(cacheKey);
-        if (cachedData) {
-          return res.status(200).json({ status: 200, data: cachedData });
-        }
+        // const cacheKey = generateCacheKey(req, 'getDistricts');
+        // const cachedData = cache.get(cacheKey);
+        // if (cachedData) {
+        //   return res.status(200).json({ status: 200, data: cachedData });
+        // }
 
         const repository = await getDistrictSyncRepository();
         var districts: Districts[] = await repository.find({
@@ -41,8 +41,9 @@ export async function getDistricts(req: Request, res: Response, next: NextFuncti
                 source: notEmpty(req.body.sources) ? In(req.body.sources) : undefined,
             }
         });
+
         if (!districts) return res.status(201).json({ status: 201, data: 'No Data Found !' });
-        cache.set(cacheKey, districts);
+        // cache.set(cacheKey, districts);
         return res.status(200).json({ status: 200, data: districts });
     }
     catch (err) {
@@ -55,11 +56,11 @@ export async function getSites(req: Request, res: Response, next: NextFunction) 
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
     try {
-        const cacheKey = generateCacheKey(req, 'getSites');
-        const cachedData = cache.get(cacheKey);
-        if (cachedData) {
-          return res.status(200).json({ status: 200, data: cachedData });
-        }
+        // const cacheKey = generateCacheKey(req, 'getSites');
+        // const cachedData = cache.get(cacheKey);
+        // if (cachedData) {
+        //   return res.status(200).json({ status: 200, data: cachedData });
+        // }
         const repository = await getSiteSyncRepository();
         var sites: Sites[] = await repository.find({
             where: {
@@ -70,7 +71,7 @@ export async function getSites(req: Request, res: Response, next: NextFunction) 
             }
         });
         if (!sites) return res.status(201).json({ status: 201, data: 'No Data Found !' });
-        cache.set(cacheKey, sites);
+        // cache.set(cacheKey, sites);
         return res.status(200).json({ status: 200, data: sites });
     } catch (err) {
         // return next(err);
@@ -82,11 +83,11 @@ export async function getZones(req: Request, res: Response, next: NextFunction) 
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
     try {
-        const cacheKey = generateCacheKey(req, 'getZones');
-        const cachedData = cache.get(cacheKey);
-        if (cachedData) {
-          return res.status(200).json({ status: 200, data: cachedData });
-        }
+        // const cacheKey = generateCacheKey(req, 'getZones');
+        // const cachedData = cache.get(cacheKey);
+        // if (cachedData) {
+        //   return res.status(200).json({ status: 200, data: cachedData });
+        // }
         const repository = await getZoneSyncRepository();
         var zones: Zones[] = await repository.find({
             where: {
@@ -99,7 +100,7 @@ export async function getZones(req: Request, res: Response, next: NextFunction) 
             }
         });
         if (!zones) return res.status(201).json({ status: 201, data: 'No Data Found !' });
-        cache.set(cacheKey, zones);
+        // cache.set(cacheKey, zones);
         return res.status(200).json({ status: 200, data: zones });
     }
     catch (err) {
@@ -117,12 +118,12 @@ export async function getChws(req: Request, res: Response, next: NextFunction, o
     }
     
     try {
-        const cacheKey = generateCacheKey(req, 'getChws');
-        const cachedData = cache.get(cacheKey);
-        if (cachedData) {
-            respData = cachedData as { status: number, data: any };
-          return onlyData ? respData : res.status(respData.status).json(respData);
-        }
+        // const cacheKey = generateCacheKey(req, 'getChws');
+        // const cachedData = cache.get(cacheKey);
+        // if (cachedData) {
+        //     respData = cachedData as { status: number, data: any };
+        //   return onlyData ? respData : res.status(respData.status).json(respData);
+        // }
         const _chwRepo = await getChwsSyncRepository();
         const userId: string = req.body.userId;
         var chws: Chws[] = await _chwRepo.find({
@@ -140,7 +141,7 @@ export async function getChws(req: Request, res: Response, next: NextFunction, o
         });
 
         respData = !chws ? { status: 201, data: 'No Data Found !' } : { status: 200, data: chws }
-        cache.set(cacheKey, respData);
+        // cache.set(cacheKey, respData);
         
     } catch (err) {
         // return next(err);
@@ -153,11 +154,11 @@ export async function getFamilies(req: Request, res: Response, next: NextFunctio
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
     try {
-        const cacheKey = generateCacheKey(req, 'getFamilies');
-        const cachedData = cache.get(cacheKey);
-        if (cachedData) {
-          return res.status(200).json({ status: 200, data: cachedData });
-        }
+        // const cacheKey = generateCacheKey(req, 'getFamilies');
+        // const cachedData = cache.get(cacheKey);
+        // if (cachedData) {
+        //   return res.status(200).json({ status: 200, data: cachedData });
+        // }
         const repository = await getFamilySyncRepository();
         var families: Families[] = await repository.find({
             where: {
@@ -173,7 +174,7 @@ export async function getFamilies(req: Request, res: Response, next: NextFunctio
             }
         });
         if (!families) return res.status(201).json({ status: 201, data: 'No Data Found !' });
-        cache.set(cacheKey, families);
+        // cache.set(cacheKey, families);
         return res.status(200).json({ status: 200, data: families });
     }
     catch (err) {
@@ -186,11 +187,11 @@ export async function getPatients(req: Request, res: Response, next: NextFunctio
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(201).json({ status: 201, data: 'Informations you provided are not valid' });
     try {
-        const cacheKey = generateCacheKey(req, 'getPatients');
-        const cachedData = cache.get(cacheKey);
-        if (cachedData) {
-          return res.status(200).json({ status: 200, data: cachedData });
-        }
+        // const cacheKey = generateCacheKey(req, 'getPatients');
+        // const cachedData = cache.get(cacheKey);
+        // if (cachedData) {
+        //   return res.status(200).json({ status: 200, data: cachedData });
+        // }
         const repository = await getPatientSyncRepository();
         var patients: Patients[] = await repository.find({
             where: {
@@ -207,7 +208,7 @@ export async function getPatients(req: Request, res: Response, next: NextFunctio
             }
         });
         if (!patients) return res.status(201).json({ status: 201, data: 'No Data Found !' });
-        cache.set(cacheKey, patients);
+        // cache.set(cacheKey, patients);
         return res.status(200).json({ status: 200, data: patients });
     }
     catch (err) {

@@ -30,11 +30,15 @@ def insertOrUpdateDataToDhis2(data, KWARG):
         r = ih_dhis_api.get("events", params={"paging": "false", "program": program, "orgUnit": site,"filter": data_filter, "fields": "event,eventDate,dataValues[dataElement, value]"})
 
         if len(r.json()["events"]) == 1:
+
             r = ih_dhis_api.put("events/"+r.json()["events"][0]['event'], json=json)
+
             outPutData['Dhis2Import']['Updated'] += 1
             return [str(r.status_code), 'Updated']
         else:
+
             r = ih_dhis_api.post("events", json=json)
+            
             outPutData['Dhis2Import']['Created'] += 1
             return [str(r.status_code), 'Created']
     except:

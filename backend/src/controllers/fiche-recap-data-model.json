@@ -1,0 +1,59 @@
+{
+    "visit_start": {
+        "visit_date": "2025-09-06",
+        "visit_type": "pcime", // maternal | fp | pcime | research
+        "nc_oc": "oc" // nc
+    },
+    "research_visit": {
+        "research_purpose": "home_visit lost_sight_visit lost_sight_visit_anc lost_sight_visit_pnc lost_sight_visit_fp",
+        "found_someone": "not_found" // found_healthy
+    },
+    "visit_reasons_gp": {
+        "visit_reasons": "diarrhea mild_fever malnutrition malaria pneumonia danger_sign cough_or_cold others",
+        "other_visit_reasons": "efefe"
+    },
+    "pcime": {
+        "consultation_followup": "followup", // consultation
+        "promptitude": "24", // 48 72 sup_72
+        "drug_given": "yes" // no
+    },
+    "b_drug_movements": {
+        "alben_400": 2,
+        "para_250": 2,
+        "para_500": 2,
+        "amox_250": 2,
+        "amox_500": 2,
+        "tdr": 2,
+        "lumartem": 2,
+        "sro": 2,
+        "zinc": 2,
+        "vit_A1": 2,
+        "vit_A2": 2
+    },
+    "danger_signs_gp": {
+        "danger_signs": "child_cannot_drink child_throwup child_convulsion blood_stools child_often_sick diarrhea_more_14 urine_cocacola child_unconscious child_convulsing child_anemia child_difficulty_breathing child_slimming dehydration neck_stiffness fontanelle rashes edema others",
+        "other_danger_signs": ""
+    },
+    "maternal_fp": {
+        "pregnant_test": "yes", // no
+        "pregnancy_postpartum": "pregnant", // postpartum
+        "pregnancy_followup": "cpn0", // cpn1 cpn2 cpn3 cpn4 cpn5 cpn6 cpn7 cpn8
+        "postpartum_followup": "cpon1", // cpon2 cpon3 cpon4
+        "referral_followup": "yes", // no
+        "ptme": "yes", // no
+        "counseling": "yes", // no
+        "fp_given": "yes", // no
+        "no_fp_given_reasons": "refusal", // refusal wants_think fp_followup others
+        "other_no_fp_given_reasons": "sdfegg",
+        "fp_method": "oral_pill", // sayana  depo_provera  others
+        "sayana": 2,
+        "pills": 2,
+        "depo_provera": 2,
+        "other_fp_method": ""
+    },
+    "reference": {
+        "sleep_under_mosquito_net": "no", // yes
+        "referred": "no" // yes
+    }
+
+}

@@ -3,10 +3,11 @@ import { CouchDbFetchData, Dhis2DataFormat } from "../utils/appInterface";
 import { Dhis2SyncConfig, CouchDbFetchDataOptions, getChwsByDhis2Uid, getDataValuesAsMap, getSiteByDhis2Uid, getValue, sslFolder, httpHeaders, notEmpty, logNginx, getJsonFieldsAsKeyValue, getDhis2DrugValue } from "../utils/functions";
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from 'express-validator';
-import https from 'https';
 import { DataIndicators } from "../entity/DataAggragate";
 import { milisecond_to_date, date_to_milisecond, YearMonthBetween21And20, changeMonthOfDate } from "../utils/date-utils";
 import { Consts } from "../utils/constantes";
+import https from 'https';
+import { RecapActivity } from "./dataFromDB";
 
 const fetch = require('node-fetch');
 const request = require('request');
@@ -14,8 +15,11 @@ require('dotenv').config({ path: sslFolder('.ih-env') });
 
 const { DHIS_HOST, CHT_PROD_HOST, CHT_DEV_HOST } = process.env;
 
-
 const _sepation = `\n\n\n\n__________\n\n\n\n`;
+
+const dhis2FetchPageSize = 1000000;
+
+
 
 export async function getDhis2Chws(req: Request, res: Response, next: NextFunction) {
     if (!validationResult(req).isEmpty()) {
@@ -25,7 +29,7 @@ export async function getDhis2Chws(req: Request, res: Response, next: NextFuncti
         const enable_strict_SSL_checking = false;
         const { dhisusername, dhispassword } = req.body;
         const link = `https://${DHIS_HOST}/api/options`;
-        const params = `.json?paging=false&filter=optionSet.id:eq:uOKgQa2W8tn&fields=id,code,name,optionSet&order=created:desc`;
+        const params = `.json?paging=false&pageSize=${dhis2FetchPageSize}&filter=optionSet.id:eq:uOKgQa2W8tn&fields=id,code,name,optionSet&order=created:desc`;
         request({
             url: link + params,
             method: 'GET',
@@ -42,7 +46,6 @@ export async function getDhis2Chws(req: Request, res: Response, next: NextFuncti
     }
 
 }
-
 export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: NextFunction) {
 
     var outPutInfo: any = {};
@@ -189,7 +192,6 @@ export async function fetchChwsDataFromDhis2(req: Request, res: Response, next: 
     // request(dhis2Sync.headerOptions(), async (err: any, res: any, body: any) => {});
 
 }
-
 export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, next: NextFunction) {
 
     var outPutInfo: any = {};
@@ -206,6 +208,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
         startKey: [date_to_milisecond(req.body.start_date, true)],
         endKey: [date_to_milisecond(req.body.end_date, false)],
     };
+
 
     try {
         https.get(CouchDbFetchDataOptions(params), async function (res) {
@@ -330,9 +333,7 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                             if (!row.doc.geolocation.hasOwnProperty('code')) _sync.geolocation = getJsonFieldsAsKeyValue('', row.doc.geolocation);
                                             await _repoChwsData.save(_sync);
 
-
                                             // #############################################################
-
 
                                             if (["pregnancy_family_planning", "fp_follow_up_renewal", "pcime_c_asc"].includes(row.doc.form)) {
                                                 _syncDrug.activity_type = "distributed";
@@ -374,15 +375,12 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
                                                     if (row.doc.fields.fp_method == 'oral_combination_pill') _syncDrug.pills = 1;
                                                     if (row.doc.fields.fp_method == 'injectible') _syncDrug.sayana = 1;
                                                 }
-
                                             }
-
                                             outPutInfo["Données Total"]["successCount"] += 1;
                                         } catch (err: any) {
                                             outPutInfo["Données Total"]["errorCount"] += 1;
                                             outPutInfo["Données Total"]["errorElements"] += `${_sepation}${err.toString()}`;
                                             outPutInfo["Données Total"]["errorIds"] += `${_sepation}${row.doc._id}`;
-
                                             // outPutInfo["ErrorMsg"] = {}
                                             // outPutInfo["ErrorMsg"]["error"] = err.toString()
                                         }
@@ -433,13 +431,14 @@ export async function fetchChwsDataFromCouchDb(req: Request, resp: Response, nex
         resp.status(err.statusCode).json(outPutInfo);
     }
 }
-
 export async function fetchCouchDbUsersFromCouchDb(req: Request, res: Response, next: NextFunction) {
     // const req_params: ChwUserParams = req.body;  
     const enable_strict_SSL_checking = false;
 
+    const requestUrl = `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/api/v1/users`;
+    
     request({
-        url: `https://${Consts.isProdEnv ? CHT_PROD_HOST : CHT_DEV_HOST}/api/v1/users`,
+        url: requestUrl,
         method: 'GET',
         headers: httpHeaders(),
         strictSSL: enable_strict_SSL_checking,
@@ -450,30 +449,37 @@ export async function fetchCouchDbUsersFromCouchDb(req: Request, res: Response, 
             const _repo = await getCouchDbUsersSyncRepository();
             for (let i = 0; i < users.length; i++) {
                 const user = users[i];
-                if (user.contact?._id && user.place?._id) {
-                    const _sync = new CouchDbUsers();
-                    _sync.id = user.id;
-                    _sync.rev = user.rev;
-                    _sync.username = user.username;
-                    _sync.fullname = user.contact.name;
-                    _sync.code = user.contact.external_id;
-                    _sync.type = user.type;
-                    _sync.contact = user.contact._id;
-                    _sync.role = user.contact.role;
-                    _sync.place = user.place._id;
-                    await _repo.save(_sync);
+
+                if (notEmpty(user.contact) && notEmpty(user.place)) {
+                    const userPlace = Array.isArray(user.place) ? user.place[0] : user.place;
+                    // if(isArrayData && user.place.length > 1) return res.status(201).json({ status: 201, message: 'user.place.length gretter than 1. Contact admin' });
+                    if (user.contact._id && userPlace._id) {
+                        const _sync = new CouchDbUsers();
+                        _sync.id = user.id;
+                        _sync.rev = user.rev;
+                        _sync.username = user.username;
+                        _sync.fullname = user.contact.name;
+                        _sync.code = user.contact.external_id;
+                        _sync.type = user.type;
+                        _sync.contact = user.contact._id;
+                        _sync.role = user.contact.role;
+                        _sync.place = userPlace._id;
+                        await _repo.save(_sync);
+                    }
                 }
             }
+            
             const couchUsers = await _repo.find();
-            if (couchUsers.length <= 0) return res.status(201).json({ status: 201, data: "Pas d'utilisateur couchDb trouvé" });
-            return res.status(200).json({ status: 200, data: couchUsers });
+            
+            if (couchUsers.length > 0) return res.status(200).json({ status: 200, data: couchUsers });
+            return res.status(201).json({ status: 201, data: "Pas d'utilisateur couchDb trouvé" });
+            
         } catch (err: any) {
             return res.status(500).json({ status: 500, data: err.toString() });
         }
 
     });
 }
-
 export async function getChtUsersFromDb(req: Request, res: Response, next: NextFunction) {
     try {
         const _repo = await getCouchDbUsersSyncRepository();
@@ -484,7 +490,6 @@ export async function getChtUsersFromDb(req: Request, res: Response, next: NextF
         return res.status(500).json({ status: 500, data: err.toString() });
     }
 }
-
 export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, next: NextFunction) {
     var outPutInfo: any = {};
     if (!validationResult(req).isEmpty()) {
@@ -795,7 +800,6 @@ export async function fetchOrgUnitsFromCouchDb(req: Request, resp: Response, nex
         resp.status(err.statusCode).json(outPutInfo);
     }
 }
-
 export async function insertOrUpdateDataToDhis2(req: Request, res: Response, next: NextFunction) {
     const { dhisusername, dhispassword, chwsDataToDhis2 } = req.body;
     const chwsData = chwsDataToDhis2 as DataIndicators;
@@ -813,7 +817,7 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
             const fields = "event,eventDate,dataValues[dataElement, value]";
             const headers = httpHeaders(dhisusername, dhispassword);
             const link = `https://${DHIS_HOST}/api/events`;
-            const params = `.json?paging=false&program=${program}&orgUnit=${sit}&filter=${data_filter}&fields=${fields}&order=created:desc`;
+            const params = `.json?paging=false&pageSize=${dhis2FetchPageSize}&program=${program}&orgUnit=${sit}&filter=${data_filter}&fields=${fields}&order=created:desc`;
             const enable_strict_SSL_checking = false;
 
             await request({
@@ -860,7 +864,76 @@ export async function insertOrUpdateDataToDhis2(req: Request, res: Response, nex
         return res.status(201).json({ status: 201, data: err.toString(), chw: '' });
     }
 }
+export async function insertOrUpdateRecapActivityDataToDhis2(req: Request, res: Response, next: NextFunction) {
+    const { dhisusername, dhispassword, recapDataToDhis2 } = req.body;
+    const jsonData = recapDataToDhis2 as RecapActivity;
 
+    try {
+        if (notEmpty(jsonData)) {
+
+            const jobDataId = getValue(jsonData["dataValues"], "VlI0nWrGuHB");  // data_id
+
+            const date = getValue(jsonData["dataValues"], "RlquY86kI66");  // reported_date
+            const srce = getValue(jsonData["dataValues"], "waNsMdOeCw6");  // data_source
+
+            const dist = getValue(jsonData["dataValues"], "JC752xYegbJ");  // district
+            const chw = getValue(jsonData["dataValues"], "JkMyqI3e6or");  // code_asc
+            const sit = jsonData['orgUnit'];
+            const program = jsonData['program'];
+            // const data_filter = "JC752xYegbJ:EQ:" + dist + ",JkMyqI3e6or:like:" + chw + ",RlquY86kI66:EQ:" + date + ",waNsMdOeCw6:like:" + srce;
+
+            const data_filter = `VlI0nWrGuHB:like:${jobDataId},JC752xYegbJ:EQ:${dist},JkMyqI3e6or:like:${chw},RlquY86kI66:EQ:${date},waNsMdOeCw6:like:${srce}`;
+
+            const fields = "event,eventDate,dataValues[dataElement, value]";
+            const headers = httpHeaders(dhisusername, dhispassword);
+            const link = `https://${DHIS_HOST}/api/events`;
+            const params = `.json?paging=false&pageSize=${dhis2FetchPageSize}&program=${program}&orgUnit=${sit}&filter=${data_filter}&fields=${fields}&order=created:desc`;
+            const enable_strict_SSL_checking = false;
+
+            await request({
+                url: link + params,
+                method: 'GET',
+                headers: headers,
+                strictSSL: enable_strict_SSL_checking,
+            }, async function (err: any, response1: any, body: any) {
+                if (err) return res.status(201).json({ status: 201, data: err.toString() });
+                try {
+                    const jsonBody = JSON.parse(body);
+                    if (jsonBody && jsonBody.hasOwnProperty('events')) {
+                        var reqData: Dhis2DataFormat[] = jsonBody["events"] as Dhis2DataFormat[];
+                        const dataId = reqData.length == 1 ? reqData[0].event : '';
+
+                        await request({
+                            url: reqData.length == 1 ? `${link}/${dataId}` : link,
+                            cache: 'no-cache',
+                            mode: "cors",
+                            credentials: "include",
+                            referrerPolicy: 'no-referrer',
+                            method: reqData.length == 1 ? 'PUT' : 'POST',
+                            body: JSON.stringify(jsonData),
+                            headers: headers,
+                            strictSSL: enable_strict_SSL_checking,
+                        }, async function (err: any, response2: any, body: any) {
+                            if (err) return res.status(201).json({ status: 201, data: err.toString() });
+                            if (response2.statusCode != 200) return res.status(201).json({ status: 201, data: `Error Found, retry!` })
+                            return res.status(200).json({ status: 200, data: reqData.length == 1 ? `Updated` : `Created` })
+                        });
+
+                    } else {
+                        return res.status(201).json({ status: 201, data: 'Connection Error! Retry' });
+                    }
+                } catch (error) {
+                    logNginx(error)
+                }
+            });
+        } else {
+            return res.status(201).json({ status: 201, data: 'No Data Available!' });
+        }
+    } catch (err: any) {
+        console.log(err);
+        return res.status(201).json({ status: 201, data: err.toString() });
+    }
+}
 export function matchDhis2Data(datas: DataIndicators) {
 
     var dataValues = [

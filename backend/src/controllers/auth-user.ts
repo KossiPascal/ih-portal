@@ -86,22 +86,21 @@ export class AuthUserController {
             }
         }
 
-        if (users && users.length <= 0) {
+        if (users.length == 0) {
             const user = new User();
-            if (user) {
-                const { salt, hashedPassword } = hashPassword('admin');
-                user.id = 'Wy9bzA7a5kF';
-                user.username = 'admin';
-                user.fullname = 'Admin';
-                user.password = hashedPassword;
-                user.salt = salt;
-                user.roles = ['1', '2', '3', '4', '5'];
-                user.meeting_report = [];
-                user.isActive = true;
-                user.mustLogin = true;
-                const finalUser = await UpdateUserData(user);
-                await userRepo.update('zearydbk253', finalUser);
-            }
+            const { salt, hashedPassword } = hashPassword('admin@@');
+            // user.id = 'Wy9bzA7a5kF';
+            user.id = 'u78ddMEVqAy';
+            user.username = 'admin';
+            user.fullname = 'Admin';
+            user.password = hashedPassword;
+            user.salt = salt;
+            user.roles = ['1', '2', '3', '4', '5'];
+            user.meeting_report = [];
+            user.isActive = true;
+            user.mustLogin = true;
+            const finalUser = await UpdateUserData(user);
+            await userRepo.save(finalUser);
         }
     }
 

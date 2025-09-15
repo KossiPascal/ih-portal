@@ -6,6 +6,7 @@ import { AuthService } from "./auth.service";
 import { IndexDbService } from "./index-db/index-db.service";
 import { ChwsUpdateDrugInfo, DataIndicators, MeetingReport, Person, Team } from "@ih-app/models/DataAggragate";
 import { AppStorageService } from "./local-storage.service";
+import { RecapActivity } from "../models/Interfaces";
 
 @Injectable({
   providedIn: "root",
@@ -203,6 +204,11 @@ export class SyncService {
     return this.http.post(`${backenUrl()}/sync/ih_cht_data_per_chw`, fparams, CustomHttpHeaders(this.store));
   }
 
+  recapActivityDataPerChw(params: any): any {
+    const fparams = this.ApiParams(params);
+    return this.http.post(`${backenUrl()}/sync/recap_activity_data_per_chw`, fparams, CustomHttpHeaders(this.store));
+  }
+
   ihDrugDataPerChw(params: any): any {
     const fparams = this.ApiParams(params);
     return this.http.post(`${backenUrl()}/sync/ih_drug_data_per_chw`, fparams, CustomHttpHeaders(this.store));
@@ -219,9 +225,15 @@ export class SyncService {
   }
 
   insertOrUpdateDhis2Data(chwsDataToDhis2: DataIndicators): any {
-    const fparams = this.ApiParams({ chwsDataToDhis2: chwsDataToDhis2});
+    const fparams = this.ApiParams({ chwsDataToDhis2 });
     return this.http.post(`${backenUrl()}/sync/dhis2/insert_or_update`, fparams, CustomHttpHeaders(this.store));
   }
+  
+  insertOrUpdateRecapActivityDataToDhis2(recapDataToDhis2: RecapActivity): any {
+    const fparams = this.ApiParams({ recapDataToDhis2});
+    return this.http.post(`${backenUrl()}/sync/dhis2/insert_or_update_recap_activities`, fparams, CustomHttpHeaders(this.store));
+  }
+  
 
   syncGeojsonData(): any {
     const fparams = this.ApiParams();

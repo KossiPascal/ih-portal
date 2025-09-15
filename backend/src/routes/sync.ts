@@ -1,6 +1,6 @@
-import { getChwsDataWithParams, getDataInformations, deleteChwsData, updateDrugPerChw, updateDrugYearCmmPerChw, fetchIhChtDataPerChw, fetchIhDrugDataPerChw, fetchIhDrugDataPerSelected, SaveOrUpdateMeetingPerson, SaveOrUpdateMeetingTeam, FetchMeetingPersons, FetchMeetingTeams, SaveOrUpdateMeetingReports, FetchMeetingReports, DeleteMeetingReport, DeleteMeetingPerson, DeleteMeetingTeams, getPatientDataInfos, fetchIhDrugDataWithMultiChwsSelected } from "../controllers/dataFromDB";
+import { getChwsDataWithParams, getDataInformations, deleteChwsData, updateDrugPerChw, updateDrugYearCmmPerChw, fetchIhChtDataPerChw, fetchIhDrugDataPerChw, fetchIhDrugDataPerSelected, SaveOrUpdateMeetingPerson, SaveOrUpdateMeetingTeam, FetchMeetingPersons, FetchMeetingTeams, SaveOrUpdateMeetingReports, FetchMeetingReports, DeleteMeetingReport, DeleteMeetingPerson, DeleteMeetingTeams, getPatientDataInfos, fetchIhDrugDataWithMultiChwsSelected, fetchRecapActivityPerChw } from "../controllers/dataFromDB";
 import { getChws, getDistricts, getFamilies, getPatients, getSites, getZones } from "../controllers/orgUnitsFromDB ";
-import { fetchChwsDataFromCouchDb, fetchChwsDataFromDhis2, fetchCouchDbUsersFromCouchDb, fetchOrgUnitsFromCouchDb, getChtUsersFromDb, getDhis2Chws, insertOrUpdateDataToDhis2 } from "../controllers/fetchFormCloud";
+import { fetchChwsDataFromCouchDb, fetchChwsDataFromDhis2, fetchCouchDbUsersFromCouchDb, fetchOrgUnitsFromCouchDb, getChtUsersFromDb, getDhis2Chws, insertOrUpdateDataToDhis2, insertOrUpdateRecapActivityDataToDhis2 } from "../controllers/fetchFormCloud";
 import { Middelware } from "../middleware/auth";
 import { Request, Response } from "express";
 import { DataIndicators } from "../entity/DataAggragate";
@@ -74,6 +74,16 @@ syncRouter.post(
 );
 
 syncRouter.post(
+  '/recap_activity_data_per_chw',
+  Middelware.authMiddleware,
+  fetchRecapActivityPerChw
+);
+
+
+
+
+
+syncRouter.post(
   '/ih_drug_data_per_chw',
   Middelware.authMiddleware,
   fetchIhDrugDataPerChw
@@ -145,7 +155,6 @@ syncRouter.post(
 syncRouter.post('/save-couchdb-users', Middelware.authMiddleware, fetchCouchDbUsersFromCouchDb);
 syncRouter.post('/get-cht-users', Middelware.authMiddleware, getChtUsersFromDb);
 
-
 syncRouter.post('/dhis2/chws', Middelware.authMiddleware, getDhis2Chws);
 syncRouter.post('/app/chws', Middelware.authMiddleware, getChws);
 syncRouter.post('/districts', Middelware.authMiddleware, getDistricts);
@@ -155,6 +164,7 @@ syncRouter.post('/families', Middelware.authMiddleware, getFamilies);
 syncRouter.post('/patients', Middelware.authMiddleware, getPatients);
 
 syncRouter.post('/dhis2/insert_or_update', Middelware.authMiddleware, insertOrUpdateDataToDhis2);
+syncRouter.post('/dhis2/insert_or_update_recap_activities', Middelware.authMiddleware, insertOrUpdateRecapActivityDataToDhis2);
 
 
 syncRouter.post('/geojson', Middelware.authMiddleware, async (req: Request, res: Response) => {

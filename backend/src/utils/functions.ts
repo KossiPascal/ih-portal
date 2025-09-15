@@ -1,7 +1,7 @@
 import path from "path";
 import https from "https";
 import http from "http";
-import { NextFunction, Request, Response } from "express";
+import { Request } from "express";
 import { CouchDbFetchData, Dhis2Sync, MailConfig } from "./appInterface";
 import { getSiteSyncRepository, Sites, getChwsSyncRepository, Chws, Patients } from "../entity/Sync";
 import { Consts } from "./constantes";
@@ -184,8 +184,8 @@ export function onProcess() {
 export function ServerStart(serverNumber:number, data: {
     isSecure: boolean, credential?: {
         key: string;
-        ca: string;
         cert: string;
+        ca?: string;
     }, app: any, access_ports: boolean, port: any, hostnames: any[],useLocalhost: boolean
 }) {
     const server = data.isSecure == true ? https.createServer(data.credential!, data.app) : http.createServer(data.app);
@@ -353,7 +353,7 @@ export class Dhis2SyncConfig {
     constructor(param: Dhis2Sync) {
         const host: string = param.host[param.host.length - 1] == '/' ? param.host.slice(0, -1) : param.host;
         const cibleName: string = param.cibleName.replace('/', '').replace('.json', '');
-        var link: string = `/api/${cibleName}.json?paging=false`;
+        var link: string = `/api/${cibleName}.json?paging=false&pageSize=${param.pageSize??1000000}`;
         if (param.program != null && param.program != '') link += `&program=${param.program}`;
         if (notEmpty(param.orgUnit)) link += `&orgUnit=${param.orgUnit}`;
         if (notEmpty(param.filter)) link += `&filter=${param.filter?.join('&filter=')}`;

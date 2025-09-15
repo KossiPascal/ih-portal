@@ -10,6 +10,8 @@ import { ActivatedRoute } from '@angular/router'
 import { DataIndicators } from '@ih-app/models/DataAggragate';
 import { startEnd21and20Date, isDayInDate, daysDiff } from '@ih-src/app/shared/dates-utils';
 import { Roles } from '@ih-src/app/models/Roles';
+import { RecapActivity } from '@ih-src/app/models/Interfaces';
+
 
 @Component({
   selector: 'sync-to-dhis2',
@@ -20,19 +22,26 @@ import { Roles } from '@ih-src/app/models/Roles';
 export class SyncToDhis2Component implements OnInit {
   thinkmdToDhis2Form!: FormGroup;
   ihChtToDhis2Form!: FormGroup;
+  recapActivityToDhis2Form!: FormGroup;
+
   tab1_messages: DataFromPython | null = null;
   tab1_messages_error: string | null = null;
   tab3_messages: { chw: Chws, data: DataIndicators | any }[] = [];
   tab3_error_messages: string = '';
+  tab5_error_messages: string = '';
   tab3_no_data_found: boolean = false;
+  tab5_no_data_found: boolean = false;
   tab4_messages: DataFromPython | null = null;
+  tab5_messages: RecapActivity[] = [];
   tab4_messages_error: string | null = null;
   dates: moment.Moment[] = [];
   initDate!: { start_date: string, end_date: string };
 
+
   loading1: boolean = false;
   loading3: boolean = false;
   loading4: boolean = false;
+  loading5: boolean = false;
 
   start_date_error: boolean = false;
   end_date_error: boolean = false;
@@ -63,6 +72,14 @@ export class SyncToDhis2Component implements OnInit {
     Deleted: 0
   }
 
+  Tab5Dhis2Import: { ErrorCount: number, ErrorMsg: string, Created: number, Updated: number, Deleted: number } = {
+    ErrorCount: 0,
+    ErrorMsg: '',
+    Created: 0,
+    Updated: 0,
+    Deleted: 0
+  }
+
   constructor(private auth: AuthService, private route: ActivatedRoute, private sync: SyncService) {
   }
 
@@ -74,6 +91,8 @@ export class SyncToDhis2Component implements OnInit {
     this.initAllData();
     this.thinkmdToDhis2Form = this.createThinkmdFormGroup();
     this.ihChtToDhis2Form = this.createIhChtFormGroup();
+    this.recapActivityToDhis2Form = this.createRecapActivityFormGroup();
+
   }
 
   generateCount(data: any): any {
@@ -81,6 +100,8 @@ export class SyncToDhis2Component implements OnInit {
     const ct = dt.tonoudayo + dt.dhis2;
     return !isNaN(ct) ? ct : data;
   }
+
+
 
   createDhis2ChwsDataFormGroup(): FormGroup {
     return new FormGroup({
@@ -103,14 +124,6 @@ export class SyncToDhis2Component implements OnInit {
     });
   }
 
-  getSiteById(siteId: string): Sites | null {
-    for (let d = 0; d < this.Sites$.length; d++) {
-      const site = this.Sites$[d];
-      if (siteId == site.id) return site;
-    }
-    return null;
-  }
-
   createIhChtFormGroup(): FormGroup {
     return new FormGroup({
       start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
@@ -119,6 +132,24 @@ export class SyncToDhis2Component implements OnInit {
       sites: new FormControl("", [Validators.required]),
       InsertIntoDhis2: new FormControl(false, []),
     });
+  }
+
+  createRecapActivityFormGroup(): FormGroup {
+    return new FormGroup({
+      start_date: new FormControl(this.initDate.start_date, [Validators.required, Validators.minLength(7)]),
+      end_date: new FormControl(this.initDate.end_date, [Validators.required, Validators.minLength(7)]),
+      districts: new FormControl("", [Validators.required]),
+      sites: new FormControl("", [Validators.required]),
+      InsertIntoDhis2: new FormControl(false, []),
+    });
+  }
+
+  getSiteById(siteId: string): Sites | null {
+    for (let d = 0; d < this.Sites$.length; d++) {
+      const site = this.Sites$[d];
+      if (siteId == site.id) return site;
+    }
+    return null;
   }
 
   capitaliseDataGiven(str: any, inputSeparator?: string, outPutSeparator?: string): string {
@@ -133,11 +164,14 @@ export class SyncToDhis2Component implements OnInit {
       this.LoadingMsg = 'Chargement des Sites ...';
       this.sync.getSitesList().subscribe(async (_s$: { status: number, data: Sites[] }) => {
         if (_s$.status == 200) this.Sites$ = _s$.data;
-        this.genarateSites(this.ihChtToDhis2Form)
+        this.genarateSites(this.ihChtToDhis2Form);
+        this.genarateSites(this.recapActivityToDhis2Form);
+        
         this.LoadingMsg = 'Chargement des ASC ...';
         this.sync.getChwsList().subscribe(async (_c$: { status: number, data: Chws[] }) => {
           if (_c$.status == 200) this.Chws$ = _c$.data;
           this.genarateChws(this.ihChtToDhis2Form);
+          this.genarateChws(this.recapActivityToDhis2Form);
           for (let i = 0; i < this.Chws$.length; i++) {
             const ch = this.Chws$[i];
 
@@ -183,7 +217,6 @@ export class SyncToDhis2Component implements OnInit {
     for (let i = 0; i < this.Chws$.length; i++) {
       const ch = this.Chws$[i];
       if (nameOrId == ch.name) return ch.external_id;
-
     }
     return nameOrId;
   }
@@ -203,16 +236,17 @@ export class SyncToDhis2Component implements OnInit {
   }
 
 
-  ParamsToFilter() {
+  ParamsToFilter(cibleForm: FormGroup) {
     return {
-      start_date: this.ihChtToDhis2Form.value.start_date,
-      end_date: this.ihChtToDhis2Form.value.end_date,
+      start_date: cibleForm.value.start_date,
+      end_date: cibleForm.value.end_date,
       sources: ['Tonoudayo'],
-      districts: returnDataAsArray(this.ihChtToDhis2Form.value.districts),
-      sites: returnDataAsArray(this.ihChtToDhis2Form.value.sites),
-      InsertIntoDhis2: this.ihChtToDhis2Form.value.InsertIntoDhis2,
+      districts: returnDataAsArray(cibleForm.value.districts),
+      sites: returnDataAsArray(cibleForm.value.sites),
+      InsertIntoDhis2: cibleForm.value.InsertIntoDhis2,
     }
   }
+
 
   isValidParams(fForm: FormGroup, type: string): boolean {
     if (fForm != undefined) {
@@ -317,7 +351,7 @@ export class SyncToDhis2Component implements OnInit {
       this.tab3_error_messages = '';
       this.tab3_no_data_found = false;
       this.Tab3Dhis2Import = { ErrorCount: 0, ErrorMsg: '', Created: 0, Updated: 0, Deleted: 0 };
-      this.sync.ihChtDataPerChw(this.ParamsToFilter()).subscribe((_resp: { status: number, data: { chw: Chws, data: DataIndicators }[] | any }) => {
+      this.sync.ihChtDataPerChw(this.ParamsToFilter(this.ihChtToDhis2Form)).subscribe((_resp: { status: number, data: { chw: Chws, data: DataIndicators }[] | any }) => {
         // this.loading3 = false;
         if (_resp.status == 200) {
           var respData = _resp.data as { chw: Chws, data: DataIndicators }[];
@@ -355,7 +389,6 @@ export class SyncToDhis2Component implements OnInit {
             this.tab3_no_data_found = true;
             this.tab3_error_messages = _resp.data.toString();
           }
-
         } else {
           this.loading3 = false;
           this.tab3_no_data_found = true;
@@ -366,6 +399,86 @@ export class SyncToDhis2Component implements OnInit {
       });
     }
   }
+
+
+
+  flushRecapActivityDataToDhis2(): void {
+    if (this.isValidParams(this.recapActivityToDhis2Form, 'cht')) {
+      this.start_date_error = false;
+      this.end_date_error = false;
+      this.loading5 = true;
+      this.tab5_messages = [];
+      this.tab5_error_messages = '';
+      this.tab5_no_data_found = false;
+      this.Tab5Dhis2Import = { ErrorCount: 0, ErrorMsg: '', Created: 0, Updated: 0, Deleted: 0 };
+      this.sync.recapActivityDataPerChw(this.ParamsToFilter(this.recapActivityToDhis2Form)).subscribe((res: { status: number, data: RecapActivity[] | string }) => {
+        // this.loading5 = false;
+        const recapData = (res.data ?? []) as RecapActivity[];
+
+
+        const test:any = {}
+
+        for (const rps of recapData) {
+          for (const dv of rps.dataValues) {
+            if(dv.dataElement == 'plW6bCSnXKU'){
+              test[dv.value] = rps
+            }
+          }
+        }
+
+        console.log(test)
+
+
+        if (res.status == 200) {
+          const dataLen = recapData.length;
+          try {
+            if (this.recapActivityToDhis2Form.value.InsertIntoDhis2 == true && dataLen > 0) {
+              var s1 = 0;
+              var s2 = 0;
+              for (const recap of recapData) {
+                s1++;
+                this.sync.insertOrUpdateRecapActivityDataToDhis2(recap).subscribe((_dhisResp: { status: number, data: any }) => {
+                  s2++;
+                  console.log(_dhisResp)
+                  
+                  if (_dhisResp.status == 200) {
+                    if (_dhisResp.data == 'Created') this.Tab5Dhis2Import.Created! += 1;
+                    if (_dhisResp.data == 'Updated') this.Tab5Dhis2Import.Updated! += 1;
+                    if (_dhisResp.data == 'Deleted') this.Tab5Dhis2Import.Deleted! += 1;
+                  } else {
+                    if (_dhisResp.data == 'ErrorCount') this.Tab5Dhis2Import.ErrorCount! += 1;
+                    if (_dhisResp.data == 'ErrorMsg') this.Tab5Dhis2Import.ErrorMsg! += '\n\n' + _dhisResp.data;
+                  }
+
+                  if (s1 == s2) {
+                    this.loading5 = false;
+                    this.tab5_messages = recapData;
+                    this.tab5_no_data_found = dataLen <= 0;
+                  }
+                }, (err: any) => { this.loading5 = false; this.tab5_error_messages = err.toString(); console.log(err.error) });
+              }
+            } else {
+              this.loading5 = false;
+              this.tab5_messages = recapData;
+              this.tab5_no_data_found = dataLen <= 0;
+            }
+          } catch (error) {
+            this.loading5 = false;
+            this.tab5_no_data_found = true;
+            this.tab5_error_messages = recapData.toString();
+          }
+        } else {
+          this.loading5 = false;
+          this.tab5_no_data_found = true;
+          this.tab5_error_messages = recapData.toString();
+        }
+      }, (err: any) => {
+        this.tab5_no_data_found = false; this.loading5 = false; this.tab5_error_messages = err.toString()
+      });
+    }
+  }
+
+
 
   capitaliseData(str: any, inputSeparator: string = ' ', outPutSeparator: string = ' '): string {
     return capitaliseDataGiven(str, inputSeparator, outPutSeparator)
